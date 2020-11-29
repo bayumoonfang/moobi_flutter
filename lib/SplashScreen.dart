@@ -6,6 +6,8 @@ import 'dart:async';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:moobi_flutter/helper/page_route.dart';
+import 'package:moobi_flutter/page_home.dart';
 
 class SplashScreen extends StatefulWidget {
   @override
@@ -21,13 +23,17 @@ class _SplashScreenState extends State<SplashScreen> {
     return Timer(duration,(){
       Navigator.of(context).pushReplacement(
           MaterialPageRoute(builder: (_) {
-            //return Home();
-            //return DokterSearch();
+            Navigator.push(context, ExitPage(page: Home()));
           }),
       );
     });
   }
-
+  @override
+  void initState() {
+    super.initState();
+    startSplash();
+  }
+  
   @override
   Widget build(BuildContext context) {
     return Scaffold(

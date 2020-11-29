@@ -4,6 +4,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:hexcolor/hexcolor.dart';
 import 'package:moobi_flutter/helper/page_route.dart';
+import 'package:moobi_flutter/page_login.dart';
 import 'package:moobi_flutter/page_register.dart';
 
 class Index extends StatefulWidget {
@@ -87,7 +88,7 @@ class _IndexState extends State<Index> {
                                     ),
                                   ),
                                   onPressed: () {
-
+                                    Navigator.push(context, ExitPage(page: Login()));
                                   }
                               )
                           )),

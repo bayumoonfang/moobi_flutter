@@ -4,6 +4,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:hexcolor/hexcolor.dart';
+import 'package:moobi_flutter/page_index.dart';
 import 'package:moobi_flutter/page_successregister.dart';
 import 'package:toast/toast.dart';
 import 'dart:async';
@@ -37,7 +38,7 @@ class _RegisterState extends State<Register> {
 
 
   Future<bool> _onWillPop() async {
-    Navigator.pop(context);
+    Navigator.push(context, EnterPage(page: Index()));
   }
 
 
@@ -63,6 +64,7 @@ class _RegisterState extends State<Register> {
             "idtoko": _idtoko.text.toString()
           });
           Map showdata = jsonDecode(response.body);
+          getMessage = showdata["message"].toString();
           setState(() {
             getMessage = showdata["message"].toString();
               if (getMessage == '0') {
@@ -133,6 +135,7 @@ class _RegisterState extends State<Register> {
                         Padding(padding: const EdgeInsets.only(left: 15,top: 10,right: 90),
                           child: TextFormField(
                             controller: _email,
+                            keyboardType: TextInputType.emailAddress,
                             validator: (val) => val.isEmpty || !val.contains("@")
                                 ? "enter a valid eamil"
                                 : null,
