@@ -10,6 +10,7 @@ import 'package:moobi_flutter/helper/check_connection.dart';
 import 'package:moobi_flutter/helper/page_route.dart';
 import 'package:moobi_flutter/helper/session.dart';
 import 'package:moobi_flutter/page_login.dart';
+import 'package:moobi_flutter/page_produk.dart';
 import 'package:toast/toast.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
@@ -162,8 +163,150 @@ class _HomeState extends State<Home> {
               child:
               Padding(
                 padding: const EdgeInsets.only(left: 10,right: 10,top: 10),
-              child :
-              Column(
+                child :
+                    Column(
+                      children: [
+                        ListTile(
+                            leading: FaIcon(FontAwesomeIcons.shoppingBasket,size: 20,color: Colors.black,),
+                            title: Align(
+                              alignment: Alignment.centerLeft,
+                              child: Column(
+                                children: [
+                                 Align(alignment: Alignment.centerLeft,child: Opacity(opacity: 0.7, child:
+                                 Text("Penjualan", style: TextStyle(fontFamily: 'VarelaRound',
+                                     fontSize: 13),textAlign: TextAlign.left,),),),
+                                  Align(alignment: Alignment.centerLeft,child:Text("Nov-2020", style: TextStyle(fontFamily: 'VarelaRound',
+                                      fontSize: 14, fontWeight: FontWeight.bold),textAlign: TextAlign.left,),),
+                                ],
+                              ),
+                            ),
+                          trailing: Text("20.000", style: TextStyle(fontFamily: 'VarelaRound',
+                              fontSize: 14, fontWeight: FontWeight.bold)),
+                        ),
+                        Divider(height: 5,),
+                        Wrap (
+                          spacing: 8,
+                          children: [
+                            InkWell(
+                              child :
+                              Padding(
+                                  padding: const EdgeInsets.only(top: 10),
+                                  child :
+                                  Card(
+                                      elevation: 1,
+                                      child:
+                                      Padding(
+                                        padding: const EdgeInsets.all(18),
+                                        child:
+                                        Column(
+                                          children: [
+                                            FaIcon(FontAwesomeIcons.cubes,size: 36,),
+                                            Padding(padding: const EdgeInsets.only(top:15),),
+                                            Opacity(opacity: 0.9,child: Text("Produk Saya",style: TextStyle(fontFamily: "VarelaRound",fontSize: 13),),)
+                                          ],
+                                        ),
+                                      )
+                                  )
+                              ), onTap: (){
+                              Navigator.push(context, ExitPage(page: Produk()));
+                            },),
+
+                            InkWell(
+                              child :
+                              Padding(
+                                  padding: const EdgeInsets.only(top: 10),
+                                  child :
+                                  Card(
+                                      elevation: 1,
+                                      child:
+                                      Padding(
+                                        padding: const EdgeInsets.only(left: 33,top: 18,bottom: 18,right: 33),
+                                        child:
+                                        Column(
+                                          children: [
+                                            FaIcon(FontAwesomeIcons.listAlt,size: 36,),
+                                            Padding(padding: const EdgeInsets.only(top:15),),
+                                            Opacity(opacity: 0.9,child: Text("Kategori",style: TextStyle(fontFamily: "VarelaRound",fontSize: 13),),)
+                                          ],
+                                        ),
+                                      )
+                                  )
+                              ), onTap: (){},),
+
+                            InkWell(
+                              child :
+                              Padding(
+                                  padding: const EdgeInsets.only(top: 10),
+                                  child :
+                                  Card(
+                                      elevation: 1,
+                                      child:
+                                      Padding(
+                                        padding: const EdgeInsets.only(left: 35,top: 18,bottom: 18,right: 35),
+                                        child:
+                                        Column(
+                                          children: [
+                                            FaIcon(FontAwesomeIcons.box,size: 36,),
+                                            Padding(padding: const EdgeInsets.only(top:15),),
+                                            Opacity(opacity: 0.9,child: Text("Stock",style: TextStyle(fontFamily: "VarelaRound",fontSize: 13),),)
+                                          ],
+                                        ),
+                                      )
+                                  )
+                              ), onTap: (){},),
+
+                            InkWell(
+                              child :
+                              Padding(
+                                  padding: const EdgeInsets.only(top: 10),
+                                  child :
+                                  Card(
+                                      elevation: 1,
+                                      child:
+                                      Padding(
+                                        padding: const EdgeInsets.only(left: 33,top: 18,bottom: 18,right: 33),
+                                        child:
+                                        Column(
+                                          children: [
+                                            FaIcon(FontAwesomeIcons.store,size: 36,),
+                                            Padding(padding: const EdgeInsets.only(top:15),),
+                                            Opacity(opacity: 0.9,child: Text("Outlet",style: TextStyle(fontFamily: "VarelaRound",fontSize: 13),),)
+                                          ],
+                                        ),
+                                      )
+                                  )
+                              ), onTap: (){},),
+
+                            InkWell(
+                              child :
+                              Padding(
+                                  padding: const EdgeInsets.only(top: 10),
+                                  child :
+                                  Card(
+                                      elevation: 1,
+                                      child:
+                                      Padding(
+                                        padding: const EdgeInsets.only(left: 30,top: 18,bottom: 18,right: 30),
+                                        child:
+                                        Column(
+                                          children: [
+                                            FaIcon(FontAwesomeIcons.users,size: 36,),
+                                            Padding(padding: const EdgeInsets.only(top:15),),
+                                            Opacity(opacity: 0.9,child: Text("Customer",style: TextStyle(fontFamily: "VarelaRound",fontSize: 13),),)
+                                          ],
+                                        ),
+                                      )
+                                  )
+                              ), onTap: (){},),
+
+
+
+                          ],
+                        )
+                      ],
+                    )
+
+           /*   Column(
                 children: [
                   InkWell(
                   child :
@@ -206,7 +349,10 @@ class _HomeState extends State<Home> {
                   ),
                   Divider(height: 5,),
                 ],
-              )),
+              )*/
+
+
+              ),
             ),
             bottomSheet: Row(
               mainAxisAlignment: MainAxisAlignment.center,

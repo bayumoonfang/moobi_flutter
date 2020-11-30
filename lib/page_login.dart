@@ -104,6 +104,7 @@ class _LoginState extends State<Login> {
                   Padding(padding: const EdgeInsets.only(left: 35,top: 10,right: 35),
                     child: TextFormField(
                       controller: _username,
+                      keyboardType: TextInputType.emailAddress,
                       style: TextStyle(fontFamily: "VarelaRound",fontSize: 15),
                       decoration: new InputDecoration(
                         contentPadding: const EdgeInsets.only(top: 1,left: 10,bottom: 1),
