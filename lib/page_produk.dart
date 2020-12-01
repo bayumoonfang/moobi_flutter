@@ -1,8 +1,11 @@
 
 
+import 'package:badges/badges.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:hexcolor/hexcolor.dart';
 import 'package:http/http.dart' as http;
 import 'package:moobi_flutter/helper/check_connection.dart';
 import 'package:moobi_flutter/helper/page_route.dart';
@@ -43,15 +46,27 @@ class _ProdukState extends State<Produk> {
       if (internet != null && internet) {
         // Internet Present Case
       } else {
-        showToast("Koneksi terputus..", gravity: Toast.CENTER, duration: Toast.LENGTH_LONG);
+        showToast("Koneksi terputus..", gravity: Toast.CENTER,
+            duration: Toast.LENGTH_LONG);
       }
     });
   }
 
+  String getBranchVal = '';
+  _getBranch() async {
+    final response = await http.get(
+        "https://duakata-dev.com/moobi/m-moobi/api_model.php?act=userdetail&id="+getUsername);
+    Map data = jsonDecode(response.body);
+    setState(() {
+      getBranchVal = data["c"].toString();
+    });
+  }
 
+
+  String filter = "";
   Future<List> getData() async {
     http.Response response = await http.get(
-        Uri.encodeFull("https://duakata-dev.com/moobi/m-moobi/api_model.php?act=getdata_produk&id=TI"),
+        Uri.encodeFull("https://duakata-dev.com/moobi/m-moobi/api_model.php?act=getdata_produk&id="+getBranchVal+"&filter="+filter),
         headers: {"Accept":"application/json"}
     );
     setState((){
@@ -59,16 +74,11 @@ class _ProdukState extends State<Produk> {
     });
   }
 
-  Future<void> _getData() async {
-    setState(() {
-      getFilter = '';
-      getData();
-    });
-  }
 
   _prepare() async {
       await _connect();
       await _session();
+      await _getBranch();
   }
 
 
@@ -78,7 +88,49 @@ class _ProdukState extends State<Produk> {
     _prepare();
   }
 
-
+  void _filterMe() {
+    showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            content: Container(
+              height: 100,
+              child:
+              Column(
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: <Widget>[
+                      Text(
+                        "Regional",
+                        textAlign: TextAlign.left,
+                        style: TextStyle(
+                            fontFamily: 'VarelaRound',
+                            fontSize: 14),
+                      ),
+                      Text("ssssss",
+                          style: TextStyle(
+                              fontFamily: 'VarelaRound',
+                              fontWeight: FontWeight.bold,
+                              fontSize: 14)),
+                    ],
+                  )
+                ],
+              ),
+            )
+           /* actions: [
+              new FlatButton(
+                  onPressed: () {
+                    _doDelete(valme);
+                  },
+                  child:
+                  Text("Iya", style: TextStyle(fontFamily: 'VarelaRound',
+                      fontWeight: FontWeight.bold,
+                      fontSize: 18)))
+            ],*/
+          );
+        });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -100,15 +152,70 @@ class _ProdukState extends State<Produk> {
                       fontFamily: 'VarelaRound',
                       fontSize: 16),
                 ),
+                actions: [
+                  Padding(padding: const EdgeInsets.only(top:0,right: 18), child:
+                  Builder(
+                    builder: (context) => IconButton(
+                      icon: new FaIcon(FontAwesomeIcons.sortAmountDown,size: 18,),
+                      color: Colors.black,
+                      onPressed: ()  {
+                        _filterMe();
+                      }
+                    ),
+                  )),
+
+                ],
               ),
               body: Container(
                 child: Column(
                   children: [
-                        Padding(padding: const EdgeInsets.only(top: 10),),
+                    Padding(padding: const EdgeInsets.only(left: 15,top: 10,right: 15),
+                      child: Container(
+                        height: 40,
+                        child: TextFormField(
+                          onChanged: (text) {
+                              setState(() {
+                                  filter = text;
+                              });
+                          },
+                          keyboardType: TextInputType.emailAddress,
+                          validator: (val) => val.isEmpty || !val.contains("@")
+                              ? "enter a valid email"
+                              : null,
+                          style: TextStyle(fontFamily: "VarelaRound",fontSize: 14),
+                          decoration: new InputDecoration(
+                            contentPadding: const EdgeInsets.all(10),
+                            prefixIcon: Padding(
+                              padding: const EdgeInsets.only(bottom: 4),
+                              child: Icon(Icons.search,size: 18,),
+                            ),
+                            focusedBorder: OutlineInputBorder(
+                              borderSide: BorderSide(color: HexColor("#DDDDDD"), width: 1.0,),
+                              borderRadius: BorderRadius.circular(2.0),
+                            ),
+                            enabledBorder: OutlineInputBorder(
+                              borderSide: BorderSide(color: HexColor("#DDDDDD"), width: 1.0),
+                            ),
+                            hintText: 'Cari Produk...',
+                          ),
+                        ),
+                      )
+                    ),
+                    Padding(padding: const EdgeInsets.only(top: 10),),
                         Expanded(child: _dataField())
                   ],
                 ),
               ),
+              floatingActionButton: Padding(
+                padding: const EdgeInsets.only(right : 10),
+                child: FloatingActionButton(
+                  onPressed: (){
+
+                  },
+                  child: FaIcon(FontAwesomeIcons.plus),
+                ),
+              )
+              //floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
             ),
         );
   }
@@ -126,28 +233,31 @@ class _ProdukState extends State<Produk> {
                     );
                   } else {
                             return data.isEmpty ?
-                            Center(
-                                child: new Column(
+                            Container(
+                              height: double.infinity, width : double.infinity,
+                                child: new
+                                Center(
+                                  child :
+                                Column(
                                   mainAxisAlignment: MainAxisAlignment.center,
                                   crossAxisAlignment: CrossAxisAlignment.center,
                                   children: <Widget>[
                                     new Text(
                                       "Data tidak ditemukan",
                                       style: new TextStyle(
-                                          fontFamily: 'VarelaRound', fontSize: 20),
+                                          fontFamily: 'VarelaRound', fontSize: 18),
                                     ),
                                     new Text(
-                                      "Silahkan lakukan input data..",
+                                      "Silahkan lakukan input data",
                                       style: new TextStyle(
-                                          fontFamily: 'VarelaRound', fontSize: 16),
+                                          fontFamily: 'VarelaRound', fontSize: 12),
                                     ),
                                   ],
-                                ))
+                                )))
                                 :
-                                RefreshIndicator(
-                                    onRefresh: _getData,
-                                    child: new ListView.builder(
+                               new ListView.builder(
                                         itemCount: data == null ? 0 : data.length,
+                                        padding: const EdgeInsets.only(top: 2,bottom: 80),
                                         itemBuilder: (context, i) {
                                               return Column(
                                                   children: <Widget>[
@@ -155,54 +265,80 @@ class _ProdukState extends State<Produk> {
                                                           onTap: () {},
                                                           child: ListTile(
                                                             leading:
+                                                    data[i]["e"] != 0 ?
+                                                            Badge(
+                                                              position: BadgePosition.topEnd(top: 0, end: 0 ),
+                                                              child:
+                                                              CircleAvatar(
+                                                                backgroundImage:
+                                                                data[i]["d"] == '' ?
+                                                                CachedNetworkImageProvider("https://duakata-dev.com/moobi/m-moobi/photo/nomage.jpg")
+                                                                    :
+                                                                CachedNetworkImageProvider("https://duakata-dev.com/moobi/m-moobi/photo/"+data[i]["d"],
+                                                                ),
+                                                                backgroundColor: Colors.red,
+                                                                radius: 23,
+                                                              ),
+                                                              badgeContent: Text(data[i]["e"].toString(),style: TextStyle(color: Colors.white,
+                                                              fontSize: 11),),
+                                                              toAnimate: false,
+                                                            )
+                                                        :
                                                             CircleAvatar(
-                                                              backgroundImage:
-                                                              data[i]["e"] == '' ? AssetImage("assets/mira-ico.png") :
-                                                              CachedNetworkImageProvider("https://duakata-dev.com/moobi/m-moobi/photo/"+data[i]["d"],
-                                                              ),
-                                                              backgroundColor: Colors.white,
-                                                              radius: 28,
+                                                            backgroundImage:
+                                                            data[i]["d"] == '' ?
+                                                            CachedNetworkImageProvider("https://duakata-dev.com/moobi/m-moobi/photo/nomage.jpg")
+                                                                :
+                                                            CachedNetworkImageProvider("https://duakata-dev.com/moobi/m-moobi/photo/"+data[i]["d"],
                                                             ),
-                                                            title: Align(
-                                                              alignment: Alignment.centerLeft,
-                                                              child: Text(
-                                                                data[i]["a"],
-                                                                style: TextStyle(
-                                                                    fontSize: 17,
-                                                                    fontFamily: 'VarelaRound'),
-                                                              ),
+                                                            backgroundColor: Colors.red,
+                                                            radius: 23,
                                                             ),
-                                                            subtitle: Column(
-                                                              children: [
-                                                                Padding(
-                                                                    padding:
-                                                                    const EdgeInsets.all(
-                                                                        2.0)
+
+                                                            title: Align(alignment: Alignment.centerLeft,
+                                                              child: Text(data[i]["a"],
+                                                                  style: TextStyle(fontFamily: "VarelaRound",
+                                                                      fontSize: 13,fontWeight: FontWeight.bold)),),
+                                                            subtitle: Align(alignment: Alignment.centerLeft,
+                                                              child: Text(data[i]["b"],
+                                                                  style: TextStyle(fontFamily: "VarelaRound",
+                                                                    fontSize: 11,)),
+                                                            ),
+                                                              trailing:
+                                                              data[i]["e"] != 0 ?
+                                                              Container(
+                                                                width: 120,
+                                                                child: Row(
+                                                                  mainAxisAlignment: MainAxisAlignment.end,
+                                                                  crossAxisAlignment: CrossAxisAlignment.end,
+                                                                  children: [
+                                                                    Text("Rp "+
+                                                                        NumberFormat.currency(
+                                                                            locale: 'id', decimalDigits: 0, symbol: '').format(
+                                                                            data[i]["c"]), style: new TextStyle(
+                                                                        decoration: TextDecoration.lineThrough,
+                                                                        fontFamily: 'VarelaRound',fontSize: 12),),
+                                                                    Padding(padding: const EdgeInsets.only(left: 5),child:
+                                                                    Text("Rp "+
+                                                                        NumberFormat.currency(
+                                                                            locale: 'id', decimalDigits: 0, symbol: '').format(
+                                                                            data[i]["c"] - double.parse(data[i]["f"])), style: new TextStyle(
+                                                                        fontFamily: 'VarelaRound',fontSize: 12,fontWeight: FontWeight.bold),),)
+                                                                  ],
                                                                 ),
-                                                                Align(
-                                                                  alignment:
-                                                                  Alignment.bottomLeft,
-                                                                  child: Text(
-                                                                      data[i]["b"],
-                                                                      style: TextStyle(
-                                                                          fontFamily:
-                                                                          'VarelaRound')),
-                                                                ),
-                                          Padding(
-                                          padding: const EdgeInsets.only(top:5),
-                                          child : Text("Rp "+
-                                              NumberFormat.currency(locale: 'id', decimalDigits: 0, symbol: '').format(data[i]["i"]),
-                                            style: new TextStyle(decoration: TextDecoration.lineThrough,fontFamily:
-                                            'VarelaRound'),),)
-                                                              ],
-                                                            ),
+                                                              )
+                                                                  :
+                                                              Text("Rp "+
+                                                                  NumberFormat.currency(
+                                                                      locale: 'id', decimalDigits: 0, symbol: '').format(
+                                                                      data[i]["c"]), style: new TextStyle(
+                                                                  fontFamily: 'VarelaRound',fontSize: 12,fontWeight: FontWeight.bold),)
                                                           ),
-                                                        )
+                                                        ),
                                                   ],
                                               );
                                         },
-                                    ),
-                                );
+                                    );
                   }
               },
         );
