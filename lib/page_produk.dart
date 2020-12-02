@@ -6,15 +6,18 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:hexcolor/hexcolor.dart';
-import 'package:http/http.dart' as http;
+
 import 'package:moobi_flutter/helper/check_connection.dart';
 import 'package:moobi_flutter/helper/page_route.dart';
 import 'package:moobi_flutter/helper/session.dart';
+import 'package:moobi_flutter/page_detailproduk.dart';
 import 'package:moobi_flutter/page_home.dart';
 import 'package:moobi_flutter/page_login.dart';
 import 'dart:async';
 import 'dart:convert';
+import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
+import 'package:responsive_container/responsive_container.dart';
 import 'package:toast/toast.dart';
 
 
@@ -64,9 +67,11 @@ class _ProdukState extends State<Produk> {
 
 
   String filter = "";
+  String sortby = '0';
   Future<List> getData() async {
     http.Response response = await http.get(
-        Uri.encodeFull("https://duakata-dev.com/moobi/m-moobi/api_model.php?act=getdata_produk&id="+getBranchVal+"&filter="+filter),
+        Uri.encodeFull("https://duakata-dev.com/moobi/m-moobi/api_model.php?act=getdata_produk&id="+getBranchVal+"&filter="+filter
+            +"&sort="+sortby),
         headers: {"Accept":"application/json"}
     );
     setState((){
@@ -93,31 +98,69 @@ class _ProdukState extends State<Produk> {
         context: context,
         builder: (BuildContext context) {
           return AlertDialog(
-            content: Container(
-              height: 100,
+            content:
+            Container(
+              height: 125,
               child:
+              SingleChildScrollView(
+                child :
               Column(
                 children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: <Widget>[
-                      Text(
-                        "Regional",
+                  InkWell(
+                    onTap: (){
+                        setState(() {
+                          sortby = '1';
+                          Navigator.pop(context);
+                        });
+                    },
+                    child: Align(alignment: Alignment.centerLeft,
+                    child:    Text(
+                      "Harga Terendah",
+                      textAlign: TextAlign.left,
+                      style: TextStyle(
+                          fontFamily: 'VarelaRound',
+                          fontSize: 15),
+                    ),),
+                  ),
+                  Padding(padding: const EdgeInsets.only(top:15,bottom: 15,left: 4,right: 4),
+                  child: Divider(height: 5,),),
+                  InkWell(
+                    onTap: (){
+                      setState(() {
+                        sortby = '2';
+                        Navigator.pop(context);
+                      });
+                    },
+                    child: Align(alignment: Alignment.centerLeft,
+                      child:    Text(
+                        "Harga Tertinggi",
                         textAlign: TextAlign.left,
                         style: TextStyle(
                             fontFamily: 'VarelaRound',
-                            fontSize: 14),
-                      ),
-                      Text("ssssss",
-                          style: TextStyle(
-                              fontFamily: 'VarelaRound',
-                              fontWeight: FontWeight.bold,
-                              fontSize: 14)),
-                    ],
+                            fontSize: 15),
+                      ),),
+                  ),
+                  Padding(padding: const EdgeInsets.only(top:15,bottom: 15,left: 4,right: 4),
+                    child: Divider(height: 5,),),
+                  InkWell(
+                    onTap: (){
+                      setState(() {
+                        sortby = '3';
+                        Navigator.pop(context);
+                      });
+                    },
+                    child: Align(alignment: Alignment.centerLeft,
+                      child:    Text(
+                        "Produk Diskon",
+                        textAlign: TextAlign.left,
+                        style: TextStyle(
+                            fontFamily: 'VarelaRound',
+                            fontSize: 15),
+                      ),),
                   )
                 ],
               ),
-            )
+            ))
            /* actions: [
               new FlatButton(
                   onPressed: () {
@@ -232,7 +275,7 @@ class _ProdukState extends State<Produk> {
                         )
                     );
                   } else {
-                            return data.isEmpty ?
+                            return data == 0 ?
                             Container(
                               height: double.infinity, width : double.infinity,
                                 child: new
@@ -262,7 +305,9 @@ class _ProdukState extends State<Produk> {
                                               return Column(
                                                   children: <Widget>[
                                                         InkWell(
-                                                          onTap: () {},
+                                                          onTap: () {
+                                                            Navigator.push(context, ExitPage(page: DetailProduk(data[i]["g"])));
+                                                          },
                                                           child: ListTile(
                                                             leading:
                                                     data[i]["e"] != 0 ?
@@ -272,11 +317,13 @@ class _ProdukState extends State<Produk> {
                                                               CircleAvatar(
                                                                 backgroundImage:
                                                                 data[i]["d"] == '' ?
-                                                                CachedNetworkImageProvider("https://duakata-dev.com/moobi/m-moobi/photo/nomage.jpg")
+                                                                CachedNetworkImageProvider(""
+                                                                    "https://duakata-dev.com/moobi/m-moobi/photo/nomage.jpg")
                                                                     :
-                                                                CachedNetworkImageProvider("https://duakata-dev.com/moobi/m-moobi/photo/"+data[i]["d"],
+                                                                CachedNetworkImageProvider(""
+                                                                    "https://duakata-dev.com/moobi/m-moobi/photo/"+data[i]["d"],
                                                                 ),
-                                                                backgroundColor: Colors.red,
+                                                                backgroundColor: Colors.white,
                                                                 radius: 23,
                                                               ),
                                                               badgeContent: Text(data[i]["e"].toString(),style: TextStyle(color: Colors.white,
@@ -291,7 +338,7 @@ class _ProdukState extends State<Produk> {
                                                                 :
                                                             CachedNetworkImageProvider("https://duakata-dev.com/moobi/m-moobi/photo/"+data[i]["d"],
                                                             ),
-                                                            backgroundColor: Colors.red,
+                                                            backgroundColor: Colors.white,
                                                             radius: 23,
                                                             ),
 
@@ -306,8 +353,9 @@ class _ProdukState extends State<Produk> {
                                                             ),
                                                               trailing:
                                                               data[i]["e"] != 0 ?
-                                                              Container(
-                                                                width: 120,
+                                                              ResponsiveContainer(
+                                                                widthPercent: 35,
+                                                                heightPercent: 2,
                                                                 child: Row(
                                                                   mainAxisAlignment: MainAxisAlignment.end,
                                                                   crossAxisAlignment: CrossAxisAlignment.end,

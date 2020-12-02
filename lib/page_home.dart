@@ -185,7 +185,7 @@ class _HomeState extends State<Home> {
                         ),
                         Divider(height: 5,),
                         Wrap (
-                          spacing: 8,
+                          spacing: 4,
                           children: [
                             InkWell(
                               child :
