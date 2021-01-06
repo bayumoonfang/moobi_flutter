@@ -4,7 +4,9 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:hexcolor/hexcolor.dart';
+import 'package:moobi_flutter/helper/api_link.dart';
 import 'package:moobi_flutter/page_index.dart';
+import 'package:moobi_flutter/page_login.dart';
 import 'package:moobi_flutter/page_successregister.dart';
 import 'package:toast/toast.dart';
 import 'dart:async';
@@ -25,10 +27,6 @@ class _RegisterState extends State<Register> {
   final _email = TextEditingController();
   final _password = TextEditingController();
   final _namatoko = TextEditingController();
-  final _alamattoko = TextEditingController();
-  final _kotatoko = TextEditingController();
-  final _telpontoko = TextEditingController();
-  final _idtoko = TextEditingController();
   void showToast(String msg, {int duration, int gravity}) {
     Toast.show(msg, context, duration: duration, gravity: gravity);
   }
@@ -38,30 +36,22 @@ class _RegisterState extends State<Register> {
 
 
   Future<bool> _onWillPop() async {
-    Navigator.push(context, EnterPage(page: Index()));
+    Navigator.push(context, EnterPage(page: Login()));
   }
 
 
   _daftar() async {
-    if (_nama.text == '' || _email.text == '' || _password.text == '' || _namatoko.text == '' || _alamattoko.text == '' || _kotatoko.text == '' ||
-        _telpontoko.text == '' || _idtoko.text == '' ) {
+    if (_nama.text == '' || _email.text == '' || _password.text == '' || _namatoko.text == '') {
       showToast("Form tidak boleh kosong", gravity: Toast.CENTER, duration: Toast.LENGTH_LONG);
       return;
-    } else if(_idtoko.text.length == 1) {
-      showToast("ID minimal 2 karakter", gravity: Toast.CENTER, duration: Toast.LENGTH_LONG);
-      return;
-    } else {
+    }  else {
       final response = await http.post(
-          "https://duakata-dev.com/moobi/m-moobi/api_model.php?act=register",
+          applink+"api_model.php?act=register",
           body: {
             "nama": _nama.text.toString(),
             "email": _email.text.toString(),
             "password": _password.text.toString(),
-            "namatoko": _namatoko.text.toString(),
-            "alamattoko": _alamattoko.text.toString(),
-            "kotatoko": _kotatoko.text.toString(),
-            "telpontoko": _telpontoko.text.toString(),
-            "idtoko": _idtoko.text.toString()
+            "namatoko": _namatoko.text.toString()
           });
           Map showdata = jsonDecode(response.body);
           getMessage = showdata["message"].toString();
@@ -86,23 +76,25 @@ class _RegisterState extends State<Register> {
         return WillPopScope(
           onWillPop: _onWillPop,
             child: Scaffold(
+              backgroundColor: Colors.white,
                 appBar: new AppBar(
-                  backgroundColor: Colors.white,
+                  backgroundColor: HexColor("#602d98"),
                   leading: Builder(
                     builder: (context) => IconButton(
                         icon: new Icon(Icons.arrow_back,size: 20,),
-                        color: Colors.black,
+                        color: Colors.white,
                         onPressed: () => {
-                          Navigator.pop(context)
+                        Navigator.push(context, EnterPage(page: Login()))
                         }),
                   ),
                   title: Text("Daftar Pengguna Baru", style: TextStyle(
                     fontFamily: 'VarelaRound',
-                    color: Colors.black,fontSize: 16
+                    color: Colors.white,fontSize: 16
                   ),),
                 ),
               body: Container(
                     color: Colors.white,
+                    height: double.infinity,
                     child:
                     SingleChildScrollView(child :
                     Column (
@@ -116,7 +108,7 @@ class _RegisterState extends State<Register> {
                             child: Text("Mulai dari identitas singkat kamu ya..",
                               style: TextStyle(fontFamily: "VarelaRound",fontSize: 13)),
                           ),),
-                        Padding(padding: const EdgeInsets.only(left: 15,top: 10,right: 90),
+                        Padding(padding: const EdgeInsets.only(left: 15,top: 10,right: 15),
                           child: TextFormField(
                             controller: _nama,
                             style: TextStyle(fontFamily: "VarelaRound",fontSize: 15),
@@ -132,7 +124,7 @@ class _RegisterState extends State<Register> {
                             ),
                           ),
                         ),
-                        Padding(padding: const EdgeInsets.only(left: 15,top: 10,right: 90),
+                        Padding(padding: const EdgeInsets.only(left: 15,top: 10,right: 15),
                           child: TextFormField(
                             controller: _email,
                             keyboardType: TextInputType.emailAddress,
@@ -152,7 +144,7 @@ class _RegisterState extends State<Register> {
                             ),
                           ),
                         ),
-                        Padding(padding: const EdgeInsets.only(left: 15,top: 10,right: 90),
+                        Padding(padding: const EdgeInsets.only(left: 15,top: 10,right: 15),
                           child: TextFormField(
                             controller: _password,
                             obscureText: true,
@@ -180,7 +172,7 @@ class _RegisterState extends State<Register> {
                                 style: TextStyle(fontFamily: "VarelaRound",fontSize: 13)),
                           ),),
 
-                        Padding(padding: const EdgeInsets.only(left: 15,top: 10,right: 90),
+                        Padding(padding: const EdgeInsets.only(left: 15,top: 10,right: 15),
                           child: TextFormField(
                             controller: _namatoko,
                             style: TextStyle(fontFamily: "VarelaRound",fontSize: 15),
@@ -196,121 +188,42 @@ class _RegisterState extends State<Register> {
                             ),
                           ),
                         ),
-
-
-                        Padding(padding: const EdgeInsets.only(left: 15,top: 10,right: 90),
-                          child: TextFormField(
-                            controller: _alamattoko,
-                            style: TextStyle(fontFamily: "VarelaRound",fontSize: 15),
-                            decoration: new InputDecoration(
-                              contentPadding: const EdgeInsets.only(top: 1,left: 10,bottom: 1),
-                              focusedBorder: OutlineInputBorder(
-                                borderSide: BorderSide(color: HexColor("#DDDDDD"), width: 1.0),
-                              ),
-                              enabledBorder: OutlineInputBorder(
-                                borderSide: BorderSide(color: HexColor("#DDDDDD"), width: 1.0),
-                              ),
-                              hintText: 'Alamat Toko',
-                            ),
-                          ),
-                        ),
-
-
-                        Padding(padding: const EdgeInsets.only(left: 15,top: 10,right: 90),
-                          child: TextFormField(
-                            controller: _kotatoko,
-                            style: TextStyle(fontFamily: "VarelaRound",fontSize: 15),
-                            decoration: new InputDecoration(
-                              contentPadding: const EdgeInsets.only(top: 1,left: 10,bottom: 1),
-                              focusedBorder: OutlineInputBorder(
-                                borderSide: BorderSide(color: HexColor("#DDDDDD"), width: 1.0),
-                              ),
-                              enabledBorder: OutlineInputBorder(
-                                borderSide: BorderSide(color: HexColor("#DDDDDD"), width: 1.0),
-                              ),
-                              hintText: 'Kota',
-                            ),
-                          ),
-                        ),
-
-                        Padding(padding: const EdgeInsets.only(left: 15,top: 10,right: 90),
-                          child: TextFormField(
-                            controller: _telpontoko,
-                            keyboardType: TextInputType.number,
-                            style: TextStyle(fontFamily: "VarelaRound",fontSize: 15),
-                            decoration: new InputDecoration(
-                              contentPadding: const EdgeInsets.only(top: 1,left: 10,bottom: 1),
-                              focusedBorder: OutlineInputBorder(
-                                borderSide: BorderSide(color: HexColor("#DDDDDD"), width: 1.0),
-                              ),
-                              enabledBorder: OutlineInputBorder(
-                                borderSide: BorderSide(color: HexColor("#DDDDDD"), width: 1.0),
-                              ),
-                              hintText: 'Telpon Toko',
-                            ),
-                          ),
-                        ),
-
-
-                        Padding(padding: const EdgeInsets.only(top:50,left: 15),
-                          child: Align(alignment: Alignment.centerLeft,
-                            child: Text("Identitas Toko Kamu", style: TextStyle(fontFamily: "VarelaRound",fontSize: 20,fontWeight: FontWeight.bold),),
-                          ),),
-                        Padding(padding: const EdgeInsets.only(top:5,left: 15),
-                          child: Align(alignment: Alignment.centerLeft,
-                            child: Text("Terakhir nih , kasih tau identitas toko kamu..",
-                                style: TextStyle(fontFamily: "VarelaRound",fontSize: 13)),
-                          ),),
-
-                        Padding(padding: const EdgeInsets.only(left: 15,top: 10,right: 90,bottom: 100),
-                          child: TextFormField(
-                            controller: _idtoko,
-                            maxLength: 2,
-                            textCapitalization: TextCapitalization.characters,
-
-                            style: TextStyle(fontFamily: "VarelaRound",fontSize: 15),
-                            decoration: new InputDecoration(
-                              contentPadding: const EdgeInsets.only(top: 1,left: 10,bottom: 1),
-                              focusedBorder: OutlineInputBorder(
-                                borderSide: BorderSide(color: HexColor("#DDDDDD"), width: 1.0),
-                              ),
-                              enabledBorder: OutlineInputBorder(
-                                borderSide: BorderSide(color: HexColor("#DDDDDD"), width: 1.0),
-                              ),
-                              hintText: 'Contoh : KM, SI, HO',
-                            ),
-                          ),
-                        ),
-
                       ],
                     )),
               ),
-              bottomSheet:Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Expanded (
+              bottomSheet:
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: 20),
+                      child:  Container(
+                          color: Colors.white,
+                          height: 50,
+                          padding: const EdgeInsets.only(left: 25,right: 25),
+                          width: double.infinity,
                           child :
-                              Container(
-                                  height: 50,
-                                  child :
-                                  RaisedButton(
-                                  color: HexColor("#063761"),
-                                  child: Text(
-                                    "Daftar Sekarang",
-                                    style: TextStyle(
-                                        fontFamily: 'VarelaRound',
-                                        fontSize: 14,
-                                        fontWeight: FontWeight.bold,
-                                        color: Colors.white
-                                    ),
-                                  ),
-                                  onPressed: () {
-                                    _daftar();
-                                  }
-                              ))
-                          ),
-                    ]
-                )
+                          RaisedButton(
+                              shape: RoundedRectangleBorder(side: BorderSide(
+                                  color: Colors.black,
+                                  width: 0.1,
+                                  style: BorderStyle.solid
+                              ),
+                                borderRadius: BorderRadius.circular(50.0),
+                              ),
+                              color: HexColor("#602d98"),
+                              child: Text(
+                                "Daftar Sekarang",
+                                style: TextStyle(
+                                    fontFamily: 'VarelaRound',
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.white
+                                ),
+                              ),
+                              onPressed: () {
+                                _daftar();
+                              }
+                          )),
+                    )
+
             ),
         );
   }

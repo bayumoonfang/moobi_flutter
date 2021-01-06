@@ -38,7 +38,7 @@ class _DetailProdukState extends State<DetailProduk> {
   _session() async {
     int value = await Session.getValue();
     getEmail = await Session.getEmail();
-    getUsername = await Session.getUsername();
+    //getUsername = await Session.getUsername();
     if (value != 1) {
       Navigator.push(context, ExitPage(page: Login()));
     }

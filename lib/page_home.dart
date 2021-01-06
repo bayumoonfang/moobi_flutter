@@ -46,7 +46,7 @@ class _HomeState extends State<Home> {
   _session() async {
     int value = await Session.getValue();
     getEmail = await Session.getEmail();
-    getUsername = await Session.getUsername();
+    //getUsername = await Session.getUsername();
     if (value != 1) {
       Navigator.push(context, ExitPage(page: Login()));
     }
@@ -85,8 +85,6 @@ class _HomeState extends State<Home> {
     });
   }
 
-
-
   void _loaddata() async {
     await  _connect();
     await _session();
@@ -110,278 +108,156 @@ class _HomeState extends State<Home> {
           child: Scaffold(
             //backgroundColor: Colors.white,
             appBar: new AppBar(
-              backgroundColor: Colors.white,
-              elevation: 2,
-              leading: Builder(
-                builder: (context) => IconButton(
-                  icon: new Icon(Icons.menu),
-                  color: Colors.black,
-                  onPressed: () => Scaffold.of(context).openDrawer(),
+              backgroundColor: HexColor("#602d98"),
+              automaticallyImplyLeading: false,
+              actions: [
+                Padding(padding: const EdgeInsets.only(top: 19,right: 35), child :
+                FaIcon(FontAwesomeIcons.search, size: 18,)),
+                Padding(padding: const EdgeInsets.only(top: 19,right: 25), child :
+                InkWell(
+                  child : FaIcon(FontAwesomeIcons.heart, size: 18,),
+                  onTap: () {
+                    signOut();
+                  },
+                )
                 ),
-              ),
-              title: new Text(
-                "Moobi : Point Of Sale",
-                style: new TextStyle(
-                    fontFamily: 'VarelaRound', fontSize: 16, color: HexColor("#063761"),fontWeight: FontWeight.bold),
-              ),
-            ),
-            drawer: Drawer(
-              child: ListView(
-                // Important: Remove any padding from the ListView.
-                padding: EdgeInsets.zero,
-                children: <Widget>[
-                  UserAccountsDrawerHeader(
-                    decoration: BoxDecoration(
-                      color: HexColor("#063761"),
-                    ),
-                    accountName: new Text(getNama.toString(),
-                        style: TextStyle(fontSize: 18)),
-                    accountEmail: new Text(getStorename.toString()),
-                    currentAccountPicture: new CircleAvatar(
-                      radius: 150,
-                      backgroundColor: Colors.transparent,
-                      backgroundImage: AssetImage("assets/mira-ico.png"),
-                    ),
-                  ),
-                  ListTile(
-                    leading: Icon(
-                      Icons.exit_to_app,
-                    ),
-                    title:
-                    Text('Logout', style: TextStyle(fontFamily: 'VarelaRound', fontSize: 18)),
-                    onTap: () {
-                      signOut();
-                    },
-                  )
-                ],
-              ),
-            ),
-            body: Container(
-              color: Colors.white,
-              height: double.infinity,
-              width: double.infinity,
-              child:
+              ],
+              title:
               Padding(
-                padding: const EdgeInsets.only(left: 10,right: 10,top: 10),
-                child :
-                    Column(
-                      children: [
-                        ListTile(
-                            leading: FaIcon(FontAwesomeIcons.shoppingBasket,size: 20,color: Colors.black,),
-                            title: Align(
-                              alignment: Alignment.centerLeft,
-                              child: Column(
-                                children: [
-                                 Align(alignment: Alignment.centerLeft,child: Opacity(opacity: 0.7, child:
-                                 Text("Penjualan", style: TextStyle(fontFamily: 'VarelaRound',
-                                     fontSize: 13),textAlign: TextAlign.left,),),),
-                                  Align(alignment: Alignment.centerLeft,child:Text("Nov-2020", style: TextStyle(fontFamily: 'VarelaRound',
-                                      fontSize: 14, fontWeight: FontWeight.bold),textAlign: TextAlign.left,),),
-                                ],
-                              ),
-                            ),
-                          trailing: Text("20.000", style: TextStyle(fontFamily: 'VarelaRound',
-                              fontSize: 14, fontWeight: FontWeight.bold)),
-                        ),
-                        Divider(height: 5,),
-                        Wrap (
-                          spacing: 4,
-                          children: [
-                            InkWell(
-                              child :
-                              Padding(
-                                  padding: const EdgeInsets.only(top: 10),
-                                  child :
-                                  Card(
-                                      elevation: 1,
-                                      child:
-                                      Padding(
-                                        padding: const EdgeInsets.all(18),
-                                        child:
-                                        Column(
-                                          children: [
-                                            FaIcon(FontAwesomeIcons.cubes,size: 36,),
-                                            Padding(padding: const EdgeInsets.only(top:15),),
-                                            Opacity(opacity: 0.9,child: Text("Produk Saya",style: TextStyle(fontFamily: "VarelaRound",fontSize: 13),),)
-                                          ],
-                                        ),
-                                      )
-                                  )
-                              ), onTap: (){
-                              Navigator.push(context, ExitPage(page: Produk()));
-                            },),
-
-                            InkWell(
-                              child :
-                              Padding(
-                                  padding: const EdgeInsets.only(top: 10),
-                                  child :
-                                  Card(
-                                      elevation: 1,
-                                      child:
-                                      Padding(
-                                        padding: const EdgeInsets.only(left: 33,top: 18,bottom: 18,right: 33),
-                                        child:
-                                        Column(
-                                          children: [
-                                            FaIcon(FontAwesomeIcons.listAlt,size: 36,),
-                                            Padding(padding: const EdgeInsets.only(top:15),),
-                                            Opacity(opacity: 0.9,child: Text("Kategori",style: TextStyle(fontFamily: "VarelaRound",fontSize: 13),),)
-                                          ],
-                                        ),
-                                      )
-                                  )
-                              ), onTap: (){},),
-
-                            InkWell(
-                              child :
-                              Padding(
-                                  padding: const EdgeInsets.only(top: 10),
-                                  child :
-                                  Card(
-                                      elevation: 1,
-                                      child:
-                                      Padding(
-                                        padding: const EdgeInsets.only(left: 35,top: 18,bottom: 18,right: 35),
-                                        child:
-                                        Column(
-                                          children: [
-                                            FaIcon(FontAwesomeIcons.box,size: 36,),
-                                            Padding(padding: const EdgeInsets.only(top:15),),
-                                            Opacity(opacity: 0.9,child: Text("Stock",style: TextStyle(fontFamily: "VarelaRound",fontSize: 13),),)
-                                          ],
-                                        ),
-                                      )
-                                  )
-                              ), onTap: (){},),
-
-                            InkWell(
-                              child :
-                              Padding(
-                                  padding: const EdgeInsets.only(top: 10),
-                                  child :
-                                  Card(
-                                      elevation: 1,
-                                      child:
-                                      Padding(
-                                        padding: const EdgeInsets.only(left: 33,top: 18,bottom: 18,right: 33),
-                                        child:
-                                        Column(
-                                          children: [
-                                            FaIcon(FontAwesomeIcons.store,size: 36,),
-                                            Padding(padding: const EdgeInsets.only(top:15),),
-                                            Opacity(opacity: 0.9,child: Text("Outlet",style: TextStyle(fontFamily: "VarelaRound",fontSize: 13),),)
-                                          ],
-                                        ),
-                                      )
-                                  )
-                              ), onTap: (){},),
-
-                            InkWell(
-                              child :
-                              Padding(
-                                  padding: const EdgeInsets.only(top: 10),
-                                  child :
-                                  Card(
-                                      elevation: 1,
-                                      child:
-                                      Padding(
-                                        padding: const EdgeInsets.only(left: 30,top: 18,bottom: 18,right: 30),
-                                        child:
-                                        Column(
-                                          children: [
-                                            FaIcon(FontAwesomeIcons.users,size: 36,),
-                                            Padding(padding: const EdgeInsets.only(top:15),),
-                                            Opacity(opacity: 0.9,child: Text("Customer",style: TextStyle(fontFamily: "VarelaRound",fontSize: 13),),)
-                                          ],
-                                        ),
-                                      )
-                                  )
-                              ), onTap: (){},),
-
-
-
-                          ],
-                        )
-                      ],
-                    )
-
-           /*   Column(
-                children: [
-                  InkWell(
-                  child :
-                      ListTile(
-                            leading: FaIcon(FontAwesomeIcons.cubes,color: HexColor("#063761"),),
-                            title: Text("Product Management",style: TextStyle(fontFamily: 'VarelaRound',),)
-                      ),onTap: (){
-
-                      },
-                  ),
-                  Divider(height: 5,),
-                  InkWell(
-                    child :
-                    ListTile(
-                        leading: FaIcon(FontAwesomeIcons.list,color: HexColor("#063761"),),
-                        title: Text("Product Category",style: TextStyle(fontFamily: 'VarelaRound',),)
-                    ),onTap: (){
-
-                  },
-                  ),
-                  Divider(height: 5,),
-                  InkWell(
-                    child :
-                    ListTile(
-                        leading: FaIcon(FontAwesomeIcons.boxes,color: HexColor("#063761"),),
-                        title: Text("Stock Management",style: TextStyle(fontFamily: 'VarelaRound',),)
-                    ),onTap: (){
-
-                  },
-                  ),
-                  Divider(height: 5,),
-                  InkWell(
-                    child :
-                    ListTile(
-                        leading: FaIcon(FontAwesomeIcons.users,color: HexColor("#063761"),),
-                        title: Text("Customer",style: TextStyle(fontFamily: 'VarelaRound',),)
-                    ),onTap: (){
-
-                  },
-                  ),
-                  Divider(height: 5,),
-                ],
-              )*/
-
-
+                  padding: const EdgeInsets.only(left: 10),
+                  child:   Text("Moobie", style: TextStyle(color: Colors.white,
+                      fontFamily: 'VarelaRound', fontSize: 24,
+                      fontWeight: FontWeight.bold),)
               ),
+              elevation: 0.5,
+              centerTitle: false,
             ),
-            bottomSheet: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Expanded (
-                    child :
-                    Container(
-                        height: 50,
-                        child :
-                        RaisedButton(
-                            color: HexColor("#063761"),
-                            child: Text(
-                              "Mulai Jualan",
-                              style: TextStyle(
-                                  fontFamily: 'VarelaRound',
-                                  fontSize: 14,
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.white
-                              ),
+            body:
+                Stack(
+                  children: [
+                    ClipPath(
+                      clipper: MyClipper(),
+                      child: Container(
+                          width: double.infinity,
+                          height: 220,
+                          color:  HexColor("#602d98"),
+                          child: Stack(
+                            children: [
+                              Column(
+                                children: [
+                                  Padding(
+                                      padding: const EdgeInsets.only(left: 28,top: 15),
+                                      child:  Align(
+                                        alignment: Alignment.bottomLeft,
+                                        child:  Text("Toko Abadi Jaya", style: TextStyle(color: Colors.white,
+                                            fontFamily: 'VarelaRound', fontSize: 12,
+                                            fontWeight: FontWeight.bold),textAlign: TextAlign.left,),
+                                      )
+                                  ),
+                                  Padding(
+                                      padding: const EdgeInsets.only(left: 28,top: 5),
+                                      child:  Align(
+                                        alignment: Alignment.bottomLeft,
+                                        child:  Text("Rp. 26.800.000", style: TextStyle(color: Colors.white,
+                                            fontFamily: 'VarelaRound', fontSize: 22,
+                                            fontWeight: FontWeight.bold),textAlign: TextAlign.left,),
+                                      )
+                                  ),
+                                  Padding(
+                                      padding: const EdgeInsets.only(left: 28,top: 5),
+                                      child:  Align(
+                                          alignment: Alignment.bottomLeft,
+                                          child:  Opacity(
+                                            opacity: 0.7,
+                                            child: Text("December 2021", style: TextStyle(color: Colors.white,
+                                                fontFamily: 'VarelaRound', fontSize: 11,
+                                                fontWeight: FontWeight.bold),textAlign: TextAlign.left,),
+                                          )
+                                      )
+                                  ),
+                                ],
+                              )
+                            ],
+                          )
+                      ),
+                    ),
+                      Padding(
+                        padding: const EdgeInsets.only(top: 105,left: 25,right: 25),
+                        child:
+                      Container(
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(10),
+                          color: Colors.white,
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.grey.withOpacity(0.5),
+                              spreadRadius: 2,
+                              blurRadius: 4,
+                              offset: Offset(0, 3),
                             ),
-                            onPressed: () {
-                              //_daftar();
-                            }
-                        ))
-                ),
-              ]
-          ),
+                          ],
+                        ),
+                        height: 80,
+                        width: double.infinity,
+                        child:
+                            Expanded(
+                              child:
+                                  Padding(
+                                    padding: const EdgeInsets.only(top: 15,left: 15,right: 15),
+                                    child:
+                                    Wrap(
+                                      alignment: WrapAlignment.center,
+                                      spacing: 50,
+                                      children: [
+                                        Column(
+                                          children: [
+                                            FaIcon(FontAwesomeIcons.user),
+                                            Padding(padding: const EdgeInsets.only(top:8),
+                                            child: Text("Profile", style: TextStyle(fontFamily: 'VarelaRound',fontSize: 12)),)
+                                          ],
+                                        ),
+                                        Column(
+                                          children: [
+                                            FaIcon(FontAwesomeIcons.store),
+                                            Padding(padding: const EdgeInsets.only(top:8),
+                                              child: Text("Toko Saya", style: TextStyle(fontFamily: 'VarelaRound',fontSize: 12)),)
+                                          ],
+                                        ),
+                                        Column(
+                                          children: [
+                                            FaIcon(FontAwesomeIcons.warehouse),
+                                            Padding(padding: const EdgeInsets.only(top:8),
+                                              child: Text("Gudang", style: TextStyle(fontFamily: 'VarelaRound',fontSize: 12)),)
+                                          ],
+                                        ),
+                                      ],
+                                    ),
+                                  )
+                            )
+                      ),)
+
+                  ],
+                )
+
           ),
       );
+  }
+}
 
+class MyClipper extends CustomClipper<Path> {
+  @override
+  Path getClip(Size size) {
+    var path = Path();
+    path.lineTo(0, size.height-100);
+    path.quadraticBezierTo(size.width/2, size.height, size.width, size.height-100);
+    path.lineTo(size.width, 0);
+    path.close();
+
+    return path;
+  }
+
+  @override
+  bool shouldReclip(CustomClipper<Path> oldClipper) {
+    return null;
   }
 }

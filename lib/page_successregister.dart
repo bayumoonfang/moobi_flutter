@@ -55,13 +55,13 @@ class _SuksesRegisterState extends State<SuksesRegister> {
                               alignment: Alignment.topCenter,
                                   child :
                                   Text(
-                                    "Sudah mendaftar sebagai pengguna aplikasi moobi , silahkan lakukan LOGIN ke aplikasi dengan menggunakan akun yang kami kirimkan ke email anda.",
+                                    "Sudah mendaftar sebagai pengguna aplikasi moobie.",
                                     style: TextStyle(fontFamily: 'VarelaRound', fontSize: 13,),textAlign: TextAlign.center,
                                   )),
                       ),
             Padding(padding: const EdgeInsets.only(top:10),
                 child: RaisedButton(
-              color:  HexColor("#063761"),
+              color:  HexColor("#602d98"),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(5.0),
                 //side: BorderSide(color: Colors.red, width: 2.0)

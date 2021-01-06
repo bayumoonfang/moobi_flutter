@@ -27,10 +27,7 @@ class _IndexState extends State<Index> {
                   mainAxisAlignment: MainAxisAlignment.center,
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-
-                    Image.asset("assets/c.png",width: 300,),
-
-
+                    Image.asset("assets/logo2.png",width: 300,),
                   ],
                 )
               ),
