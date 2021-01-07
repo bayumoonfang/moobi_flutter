@@ -6,6 +6,10 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:hexcolor/hexcolor.dart';
+import 'package:moobi_flutter/Gudang/page_gudang.dart';
+import 'package:moobi_flutter/Profile/page_profile.dart';
+import 'package:moobi_flutter/Toko/page_toko.dart';
+import 'package:moobi_flutter/helper/api_link.dart';
 import 'package:moobi_flutter/helper/check_connection.dart';
 import 'package:moobi_flutter/helper/page_route.dart';
 import 'package:moobi_flutter/helper/session.dart';
@@ -28,67 +32,48 @@ class _HomeState extends State<Home> {
     Toast.show(msg, context, duration: duration, gravity: gravity);
   }
 
-  int backPressCounter = 0;
-  int backPressTotal = 2;
+
   Future<bool> _onWillPop() async {
-    if (backPressCounter < 2) {
-      showToast("Tap back 2x , untuk keluar aplikasi", gravity: Toast.CENTER, duration: Toast.LENGTH_LONG);
-      backPressCounter++;
-      Future.delayed(Duration(seconds: 1, milliseconds: 300), () {
-        backPressCounter--;
-      });
-      return Future.value(false);
-    } else {
-      return Future.value(true);
-    }
   }
 
   _session() async {
     int value = await Session.getValue();
     getEmail = await Session.getEmail();
-    //getUsername = await Session.getUsername();
     if (value != 1) {
       Navigator.push(context, ExitPage(page: Login()));
     }
   }
-  _connect() async {
-    Checkconnection().check().then((internet){
-      if (internet != null && internet) {
-        // Internet Present Case
-      } else {
-        showToast("Koneksi terputus..", gravity: Toast.CENTER, duration: Toast.LENGTH_LONG);
-      }
-    });
-  }
 
 
-  String getNama,
-      getStorename = '';
+
+
+  String getMoobiIdentity,getStorename = '...';
   _userDetail() async {
     final response = await http.get(
-        "https://duakata-dev.com/moobi/m-moobi/api_model.php?act=userdetail&id="+getUsername.toString());
+         applink+"api_model.php?act=userdetail&id="+getEmail.toString());
     Map data = jsonDecode(response.body);
     setState(() {
-      getNama = data["a"].toString();
+      getMoobiIdentity = data["d"].toString();
       getStorename = data["b"].toString();
     });
   }
 
-  signOut() async {
-    SharedPreferences preferences = await SharedPreferences.getInstance();
+  String getBulan = '...';
+  String getTahun = "...";
+  getDateNow() async {
+    final response = await http.get(
+        applink+"api_model.php?act=getdatenow");
+    Map data2 = jsonDecode(response.body);
     setState(() {
-      preferences.setInt("value", null);
-      preferences.setString("username", null);
-      preferences.setString("email", null);
-      preferences.commit();
-      Navigator.push(context, ExitPage(page: Login()));
+      getBulan = data2["a"].toString();
+      getTahun = data2["b"].toString();
     });
   }
 
   void _loaddata() async {
-    await  _connect();
     await _session();
     await _userDetail();
+    await getDateNow();
   }
 
 
@@ -97,7 +82,6 @@ class _HomeState extends State<Home> {
     super.initState();
     _loaddata();
   }
-
 
 
 
@@ -112,12 +96,12 @@ class _HomeState extends State<Home> {
               automaticallyImplyLeading: false,
               actions: [
                 Padding(padding: const EdgeInsets.only(top: 19,right: 35), child :
-                FaIcon(FontAwesomeIcons.search, size: 18,)),
+                FaIcon(FontAwesomeIcons.solidBell, size: 18,)),
                 Padding(padding: const EdgeInsets.only(top: 19,right: 25), child :
                 InkWell(
-                  child : FaIcon(FontAwesomeIcons.heart, size: 18,),
+                  child : FaIcon(FontAwesomeIcons.cog, size: 18,),
                   onTap: () {
-                    signOut();
+                   // signOut();
                   },
                 )
                 ),
@@ -125,7 +109,7 @@ class _HomeState extends State<Home> {
               title:
               Padding(
                   padding: const EdgeInsets.only(left: 10),
-                  child:   Text("Moobie", style: TextStyle(color: Colors.white,
+                  child:   Text("Mico", style: TextStyle(color: Colors.white,
                       fontFamily: 'VarelaRound', fontSize: 24,
                       fontWeight: FontWeight.bold),)
               ),
@@ -136,10 +120,10 @@ class _HomeState extends State<Home> {
                 Stack(
                   children: [
                     ClipPath(
-                      clipper: MyClipper(),
+                      //clipper: MyClipper(),
                       child: Container(
                           width: double.infinity,
-                          height: 220,
+                          height: 120,
                           color:  HexColor("#602d98"),
                           child: Stack(
                             children: [
@@ -149,7 +133,7 @@ class _HomeState extends State<Home> {
                                       padding: const EdgeInsets.only(left: 28,top: 15),
                                       child:  Align(
                                         alignment: Alignment.bottomLeft,
-                                        child:  Text("Toko Abadi Jaya", style: TextStyle(color: Colors.white,
+                                        child:  Text(getStorename, style: TextStyle(color: Colors.white,
                                             fontFamily: 'VarelaRound', fontSize: 12,
                                             fontWeight: FontWeight.bold),textAlign: TextAlign.left,),
                                       )
@@ -169,7 +153,7 @@ class _HomeState extends State<Home> {
                                           alignment: Alignment.bottomLeft,
                                           child:  Opacity(
                                             opacity: 0.7,
-                                            child: Text("December 2021", style: TextStyle(color: Colors.white,
+                                            child: Text(getBulan.toString()+" "+getTahun.toString(), style: TextStyle(color: Colors.white,
                                                 fontFamily: 'VarelaRound', fontSize: 11,
                                                 fontWeight: FontWeight.bold),textAlign: TextAlign.left,),
                                           )
@@ -182,7 +166,7 @@ class _HomeState extends State<Home> {
                       ),
                     ),
                       Padding(
-                        padding: const EdgeInsets.only(top: 105,left: 25,right: 25),
+                        padding: const EdgeInsets.only(top: 95,left: 25,right: 25),
                         child:
                       Container(
                         decoration: BoxDecoration(
@@ -197,44 +181,312 @@ class _HomeState extends State<Home> {
                             ),
                           ],
                         ),
-                        height: 80,
+                        height: 77,
                         width: double.infinity,
                         child:
                             Expanded(
                               child:
                                   Padding(
-                                    padding: const EdgeInsets.only(top: 15,left: 15,right: 15),
+                                    padding: const EdgeInsets.only(top: 15,left: 15,right: 25),
                                     child:
                                     Wrap(
                                       alignment: WrapAlignment.center,
-                                      spacing: 50,
+                                      spacing: 60,
                                       children: [
+                                        InkWell(
+                                          onTap: () {
+                                            Navigator.push(context, ExitPage(page: Profile()));
+                                          },
+                                          child:
+                                          Column(
+                                            children: [
+                                              FaIcon(FontAwesomeIcons.user,color: HexColor("#4e2986")),
+                                              Padding(padding: const EdgeInsets.only(top:8),
+                                                child: Text("Profile", style: TextStyle(fontFamily: 'VarelaRound',
+                                                    fontSize: 12,color: HexColor("#4e2986"))),)
+                                            ],
+                                          ),
+                                        ),
+                                        InkWell(
+                                          onTap: () {
+                                            Navigator.push(context, ExitPage(page: Toko()));
+                                          },
+                                          child:
                                         Column(
                                           children: [
-                                            FaIcon(FontAwesomeIcons.user),
+                                            FaIcon(FontAwesomeIcons.store,color: HexColor("#4e2986")),
                                             Padding(padding: const EdgeInsets.only(top:8),
-                                            child: Text("Profile", style: TextStyle(fontFamily: 'VarelaRound',fontSize: 12)),)
+                                              child: Text("Toko Saya", style: TextStyle(fontFamily: 'VarelaRound',
+                                                  fontSize: 12,color: HexColor("#4e2986")
+                                                  )),)
                                           ],
-                                        ),
+                                        )),
+                                        InkWell(
+                                          onTap: () {
+                                            Navigator.push(context, ExitPage(page: Gudang()));
+                                          },
+                                          child:
                                         Column(
                                           children: [
-                                            FaIcon(FontAwesomeIcons.store),
+                                            FaIcon(FontAwesomeIcons.warehouse,color: HexColor("#4e2986")),
                                             Padding(padding: const EdgeInsets.only(top:8),
-                                              child: Text("Toko Saya", style: TextStyle(fontFamily: 'VarelaRound',fontSize: 12)),)
+                                              child: Text("Gudang", style: TextStyle(fontFamily: 'VarelaRound',
+                                                  fontSize: 12,color: HexColor("#4e2986"))),)
                                           ],
-                                        ),
-                                        Column(
-                                          children: [
-                                            FaIcon(FontAwesomeIcons.warehouse),
-                                            Padding(padding: const EdgeInsets.only(top:8),
-                                              child: Text("Gudang", style: TextStyle(fontFamily: 'VarelaRound',fontSize: 12)),)
-                                          ],
-                                        ),
+                                        )),
                                       ],
                                     ),
                                   )
                             )
-                      ),)
+                      ),),
+                    Padding(
+                      padding: const EdgeInsets.only(top: 200,left: 25,right: 25),
+                      child: Column(
+                        children: [
+                          getMoobiIdentity == 'Classic' ?
+                          Container(
+                            padding: const EdgeInsets.only(bottom: 30),
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(10),
+                                color: HexColor("#e8fcfb"),
+                              ),
+                              width: double.infinity,
+                              height: 70,
+                              child: ListTile(
+                                title:
+                                Text("Subscribe ke MOOBIE Premier", style: TextStyle(
+                                    fontFamily: 'VarelaRound',fontWeight: FontWeight.bold,
+                                    fontSize: 14,color: HexColor("#025f64"))),
+                                subtitle:
+                                Text("Nikmati fitur lengkapnya", style: TextStyle(fontFamily: 'VarelaRound'
+                                    ,fontSize: 12,color: HexColor("#025f64"))),
+                                trailing: FaIcon(FontAwesomeIcons.angleRight,color: HexColor("#025f64")),
+                              )
+                          )
+                          :
+                          Container(),
+                          getMoobiIdentity == 'Classic' ?
+                          SizedBox(
+                            height: 25,
+                          )
+                          : Container(),
+                          Wrap(
+                            spacing: 30,
+                                runSpacing: 30,
+                                children: [
+                                  InkWell(
+                                    child:Column(
+                                      children: [
+                                        Container(
+                                          height: 55, width: 55,
+                                          decoration: BoxDecoration(
+                                            borderRadius: BorderRadius.circular(50),
+                                            color: HexColor("#f7faff"),
+                                          ),
+                                          child: Center(
+                                            child: FaIcon(FontAwesomeIcons.shoppingBasket, color: HexColor("#1c6bea"), size: 24,),
+                                          )
+                                        ),
+                                        Padding(padding: const EdgeInsets.only(top:8),
+                                          child: Text("Jualan", style: TextStyle(fontFamily: 'VarelaRound',fontSize: 13)),)
+                                      ],
+                                    ),
+                                  ),
+
+                                  InkWell(
+                                    onTap: () {
+                                      Navigator.push(context, ExitPage(page: Produk()));
+                                    },
+                                    child:Column(
+                                      children: [
+                                        Container(
+                                            height: 55, width: 55,
+                                            decoration: BoxDecoration(
+                                              borderRadius: BorderRadius.circular(50),
+                                              color: HexColor("#fff4f0"),
+                                            ),
+                                            child: Center(
+                                              child: FaIcon(FontAwesomeIcons.cubes, color: HexColor("#ff8556"), size: 24,),
+                                            )
+                                        ),
+                                        Padding(padding: const EdgeInsets.only(top:8),
+                                          child: Text("Produk", style: TextStyle(fontFamily: 'VarelaRound',fontSize: 13)),)
+                                      ],
+                                    ),
+                                  ),
+
+                                  InkWell(
+                                    child:Column(
+                                      children: [
+                                        Container(
+                                            height: 55, width: 55,
+                                            decoration: BoxDecoration(
+                                              borderRadius: BorderRadius.circular(50),
+                                              color: HexColor("#f3fcf9"),
+                                            ),
+                                            child: Center(
+                                              child: FaIcon(FontAwesomeIcons.clipboard, color: HexColor("#00c160"), size: 24,),
+                                            )
+                                        ),
+                                        Padding(padding: const EdgeInsets.only(top:8),
+                                          child: Text("Transaksi", style: TextStyle(fontFamily: 'VarelaRound',fontSize: 13)),)
+                                      ],
+                                    ),
+                                  ),
+
+                                  InkWell(
+                                    child:Column(
+                                      children: [
+                                        Container(
+                                            height: 55, width: 55,
+                                            decoration: BoxDecoration(
+                                              borderRadius: BorderRadius.circular(50),
+                                              color: HexColor("#f3effd"),
+                                            ),
+                                            child: Center(
+                                              child: FaIcon(FontAwesomeIcons.moneyCheck, color: HexColor("#6238b6"),
+                                                size: 24,),
+                                            )
+                                        ),
+                                        Padding(padding: const EdgeInsets.only(top:8),
+                                          child: Text("Kas Saya",
+                                              style: TextStyle(fontFamily: 'VarelaRound',fontSize: 13)),)
+                                      ],
+                                    ),
+                                  ),
+  //PREIMUM CONTENT=====================================================
+                                  Opacity(
+                                    opacity: 0.6,
+                                    child : Column(
+                                        children: [
+                                          Container(
+                                              height: 55, width: 55,
+                                              decoration: BoxDecoration(
+                                                borderRadius: BorderRadius.circular(50),
+                                                color: HexColor("#DDDDDD"),
+                                              ),
+                                              child: Center(
+                                                child: FaIcon(FontAwesomeIcons.users, color: Colors.black,
+                                                  size: 24,),
+                                              )
+                                          ),
+                                          Padding(padding: const EdgeInsets.only(top:8),
+                                            child: Text("Customer",
+                                                style: TextStyle(fontFamily: 'VarelaRound',fontSize: 13)),)
+                                        ],
+                                      )),
+
+                                  Opacity(
+                                      opacity: 0.6,
+                                      child : Column(
+                                        children: [
+                                          Container(
+                                              height: 55, width: 55,
+                                              decoration: BoxDecoration(
+                                                borderRadius: BorderRadius.circular(50),
+                                                color: HexColor("#DDDDDD"),
+                                              ),
+                                              child: Center(
+                                                child: FaIcon(FontAwesomeIcons.percent, color: Colors.black,
+                                                  size: 24,),
+                                              )
+                                          ),
+                                          Padding(padding: const EdgeInsets.only(top:8),
+                                            child: Text("Diskon",
+                                                style: TextStyle(fontFamily: 'VarelaRound',fontSize: 13)),)
+                                        ],
+                                      )),
+
+                                  Opacity(
+                                      opacity: 0.6,
+                                      child : Column(
+                                        children: [
+                                          Container(
+                                              height: 55, width: 55,
+                                              decoration: BoxDecoration(
+                                                borderRadius: BorderRadius.circular(50),
+                                                color: HexColor("#DDDDDD"),
+                                              ),
+                                              child: Center(
+                                                child: FaIcon(FontAwesomeIcons.receipt, color: Colors.black,
+                                                  size: 24,),
+                                              )
+                                          ),
+                                          Padding(padding: const EdgeInsets.only(top:8),
+                                            child: Text("Voucher",
+                                                style: TextStyle(fontFamily: 'VarelaRound',fontSize: 13)),)
+                                        ],
+                                      )),
+
+                                  Opacity(
+                                      opacity: 0.6,
+                                      child : Column(
+                                        children: [
+                                          Container(
+                                              height: 55, width: 55,
+                                              decoration: BoxDecoration(
+                                                borderRadius: BorderRadius.circular(50),
+                                                color: HexColor("#DDDDDD"),
+                                              ),
+                                              child: Center(
+                                                child: FaIcon(FontAwesomeIcons.truckLoading, color: Colors.black,
+                                                  size: 24,),
+                                              )
+                                          ),
+                                          Padding(padding: const EdgeInsets.only(top:8),
+                                            child: Text("Pembelian",
+                                                style: TextStyle(fontFamily: 'VarelaRound',fontSize: 13)),)
+                                        ],
+                                      )),
+
+                                  Opacity(
+                                      opacity: 0.6,
+                                      child : Column(
+                                        children: [
+                                          Container(
+                                              height: 55, width: 55,
+                                              decoration: BoxDecoration(
+                                                borderRadius: BorderRadius.circular(50),
+                                                color: HexColor("#DDDDDD"),
+                                              ),
+                                              child: Center(
+                                                child: FaIcon(FontAwesomeIcons.fileInvoice, color: Colors.black,
+                                                  size: 24,),
+                                              )
+                                          ),
+                                          Padding(padding: const EdgeInsets.only(top:8),
+                                            child: Text("Invoiced",
+                                                style: TextStyle(fontFamily: 'VarelaRound',fontSize: 13)),)
+                                        ],
+                                      )),
+
+                                  Opacity(
+                                      opacity: 0.6,
+                                      child : Column(
+                                        children: [
+                                          Container(
+                                              height: 55, width: 55,
+                                              decoration: BoxDecoration(
+                                                borderRadius: BorderRadius.circular(50),
+                                                color: HexColor("#DDDDDD"),
+                                              ),
+                                              child: Center(
+                                                child: FaIcon(FontAwesomeIcons.user, color: Colors.black,
+                                                  size: 24,),
+                                              )
+                                          ),
+                                          Padding(padding: const EdgeInsets.only(top:8),
+                                            child: Text("Vendor",
+                                                style: TextStyle(fontFamily: 'VarelaRound',fontSize: 13)),)
+                                        ],
+                                      )),
+
+                                ],
+                          )
+                        ],
+                      )
+                    ),
+
 
                   ],
                 )

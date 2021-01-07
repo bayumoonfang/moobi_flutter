@@ -6,6 +6,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:hexcolor/hexcolor.dart';
+import 'package:moobi_flutter/helper/api_link.dart';
 
 import 'package:moobi_flutter/helper/check_connection.dart';
 import 'package:moobi_flutter/helper/page_route.dart';
@@ -35,7 +36,7 @@ class _ProdukState extends State<Produk> {
   }
 
 
-  String getEmail,getUsername = '';
+  String getEmail,getUsername = '...';
   _session() async {
     int value = await Session.getValue();
     getEmail = await Session.getEmail();
@@ -58,10 +59,10 @@ class _ProdukState extends State<Produk> {
   String getBranchVal = '';
   _getBranch() async {
     final response = await http.get(
-        "https://duakata-dev.com/moobi/m-moobi/api_model.php?act=userdetail&id="+getUsername);
+        applink+"api_model.php?act=userdetail&id="+getEmail.toString());
     Map data = jsonDecode(response.body);
     setState(() {
-      getBranchVal = data["c"].toString();
+      getBranchVal = data["f"].toString();
     });
   }
 
@@ -70,7 +71,7 @@ class _ProdukState extends State<Produk> {
   String sortby = '0';
   Future<List> getData() async {
     http.Response response = await http.get(
-        Uri.encodeFull("https://duakata-dev.com/moobi/m-moobi/api_model.php?act=getdata_produk&id="+getBranchVal+"&filter="+filter
+        Uri.encodeFull(applink+"api_model.php?act=getdata_produk&id="+getBranchVal+"&filter="+filter
             +"&sort="+sortby),
         headers: {"Accept":"application/json"}
     );

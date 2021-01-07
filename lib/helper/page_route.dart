@@ -14,7 +14,7 @@ class EnterPage extends PageRouteBuilder {
         Animation<double> secondaryAnimation,
         ) =>
     page,
-    transitionDuration : Duration(milliseconds: 150),
+    transitionDuration : Duration(milliseconds: 350),
     transitionsBuilder: (
         BuildContext context,
         Animation<double> animation,
@@ -42,7 +42,7 @@ class ExitPage extends PageRouteBuilder {
         Animation<double> secondaryAnimation,
         ) =>
     page,
-    transitionDuration : Duration(milliseconds: 200),
+    transitionDuration : Duration(milliseconds:300),
     transitionsBuilder: (
         BuildContext context,
         Animation<double> animation,
