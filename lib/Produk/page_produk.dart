@@ -6,12 +6,11 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:hexcolor/hexcolor.dart';
+import 'package:moobi_flutter/Produk/page_produkdetail.dart';
 import 'package:moobi_flutter/helper/api_link.dart';
-
 import 'package:moobi_flutter/helper/check_connection.dart';
 import 'package:moobi_flutter/helper/page_route.dart';
 import 'package:moobi_flutter/helper/session.dart';
-import 'package:moobi_flutter/page_detailproduk.dart';
 import 'package:moobi_flutter/page_home.dart';
 import 'package:moobi_flutter/page_login.dart';
 import 'dart:async';
@@ -31,18 +30,19 @@ class Produk extends StatefulWidget{
 class _ProdukState extends State<Produk> {
   List data;
   String getFilter = '';
+  FocusNode focusNode;
   void showToast(String msg, {int duration, int gravity}) {
     Toast.show(msg, context, duration: duration, gravity: gravity);
   }
+  bool _isvisible = true;
 
 
-  String getEmail,getUsername = '...';
+  String getEmail = '...';
   _session() async {
     int value = await Session.getValue();
     getEmail = await Session.getEmail();
-   // getUsername = await Session.getUsername();
     if (value != 1) {
-      Navigator.push(context, ExitPage(page: Login()));
+      Navigator.pushReplacement(context, ExitPage(page: Login()));
     }
   }
   _connect() async {
@@ -62,7 +62,7 @@ class _ProdukState extends State<Produk> {
         applink+"api_model.php?act=userdetail&id="+getEmail.toString());
     Map data = jsonDecode(response.body);
     setState(() {
-      getBranchVal = data["f"].toString();
+      getBranchVal = data["c"].toString();
     });
   }
 
@@ -85,6 +85,20 @@ class _ProdukState extends State<Produk> {
       await _connect();
       await _session();
       await _getBranch();
+  }
+
+  startSCreen() async {
+    var duration = const Duration(seconds: 1);
+    return Timer(duration, () {
+      setState(() {
+        _isvisible = true;
+      });
+    });
+  }
+
+  void cekStatus() {
+    showToast("Koneksi terputus..", gravity: Toast.CENTER,
+        duration: Toast.LENGTH_LONG);
   }
 
 
@@ -111,6 +125,8 @@ class _ProdukState extends State<Produk> {
                     onTap: (){
                         setState(() {
                           sortby = '1';
+                          _isvisible = false;
+                          startSCreen();
                           Navigator.pop(context);
                         });
                     },
@@ -129,6 +145,8 @@ class _ProdukState extends State<Produk> {
                     onTap: (){
                       setState(() {
                         sortby = '2';
+                        _isvisible = false;
+                        startSCreen();
                         Navigator.pop(context);
                       });
                     },
@@ -147,6 +165,8 @@ class _ProdukState extends State<Produk> {
                     onTap: (){
                       setState(() {
                         sortby = '3';
+                        _isvisible = false;
+                        startSCreen();
                         Navigator.pop(context);
                       });
                     },
@@ -162,16 +182,6 @@ class _ProdukState extends State<Produk> {
                 ],
               ),
             ))
-           /* actions: [
-              new FlatButton(
-                  onPressed: () {
-                    _doDelete(valme);
-                  },
-                  child:
-                  Text("Iya", style: TextStyle(fontFamily: 'VarelaRound',
-                      fontWeight: FontWeight.bold,
-                      fontSize: 18)))
-            ],*/
           );
         });
   }
@@ -181,18 +191,18 @@ class _ProdukState extends State<Produk> {
         return WillPopScope(
             child: Scaffold(
               appBar: AppBar(
-                backgroundColor: Colors.white,
+                backgroundColor: HexColor("#602d98"),
                 leading: Builder(
                   builder: (context) => IconButton(
                     icon: new Icon(Icons.arrow_back),
-                    color: Colors.black,
+                    color: Colors.white,
                     onPressed: () => Navigator.push(context, EnterPage(page: Home())),
                   ),
                 ),
                 title: Text(
                   "Produk Saya",
                   style: TextStyle(
-                      color: Colors.black,
+                      color: Colors.white,
                       fontFamily: 'VarelaRound',
                       fontSize: 16),
                 ),
@@ -201,7 +211,7 @@ class _ProdukState extends State<Produk> {
                   Builder(
                     builder: (context) => IconButton(
                       icon: new FaIcon(FontAwesomeIcons.sortAmountDown,size: 18,),
-                      color: Colors.black,
+                      color: Colors.white,
                       onPressed: ()  {
                         _filterMe();
                       }
@@ -215,30 +225,33 @@ class _ProdukState extends State<Produk> {
                   children: [
                     Padding(padding: const EdgeInsets.only(left: 15,top: 10,right: 15),
                       child: Container(
-                        height: 40,
+                        height: 50,
                         child: TextFormField(
+                          enableInteractiveSelection: false,
                           onChanged: (text) {
                               setState(() {
                                   filter = text;
+                                 _isvisible = false;
+                                  startSCreen();
+
                               });
                           },
-                          keyboardType: TextInputType.emailAddress,
-                          validator: (val) => val.isEmpty || !val.contains("@")
-                              ? "enter a valid email"
-                              : null,
                           style: TextStyle(fontFamily: "VarelaRound",fontSize: 14),
                           decoration: new InputDecoration(
                             contentPadding: const EdgeInsets.all(10),
+                            fillColor: HexColor("#f4f4f4"),
+                            filled: true,
                             prefixIcon: Padding(
                               padding: const EdgeInsets.only(bottom: 4),
-                              child: Icon(Icons.search,size: 18,),
+                              child: Icon(Icons.search,size: 18,color: HexColor("#6c767f"),),
                             ),
                             focusedBorder: OutlineInputBorder(
-                              borderSide: BorderSide(color: HexColor("#DDDDDD"), width: 1.0,),
-                              borderRadius: BorderRadius.circular(2.0),
+                              borderSide: BorderSide(color: Colors.white, width: 1.0,),
+                              borderRadius: BorderRadius.circular(5.0),
                             ),
                             enabledBorder: OutlineInputBorder(
-                              borderSide: BorderSide(color: HexColor("#DDDDDD"), width: 1.0),
+                              borderSide: BorderSide(color: HexColor("#f4f4f4"), width: 1.0),
+                              borderRadius: BorderRadius.circular(5.0),
                             ),
                             hintText: 'Cari Produk...',
                           ),
@@ -246,7 +259,12 @@ class _ProdukState extends State<Produk> {
                       )
                     ),
                     Padding(padding: const EdgeInsets.only(top: 10),),
-                        Expanded(child: _dataField())
+                        Visibility(
+                          visible: _isvisible,
+                          child :
+                            Expanded(child: _dataField())
+                        )
+                        //
                   ],
                 ),
               ),
@@ -307,41 +325,46 @@ class _ProdukState extends State<Produk> {
                                                   children: <Widget>[
                                                         InkWell(
                                                           onTap: () {
-                                                            Navigator.push(context, ExitPage(page: DetailProduk(data[i]["g"])));
+                                                            Navigator.push(context, ExitPage(page: ProdukDetail(data[i]["i"].toString())));
                                                           },
                                                           child: ListTile(
                                                             leading:
-                                                    data[i]["e"] != 0 ?
-                                                            Badge(
-                                                              position: BadgePosition.topEnd(top: 0, end: 0 ),
-                                                              child:
-                                                              CircleAvatar(
-                                                                backgroundImage:
-                                                                data[i]["d"] == '' ?
-                                                                CachedNetworkImageProvider(""
-                                                                    "https://duakata-dev.com/moobi/m-moobi/photo/nomage.jpg")
-                                                                    :
-                                                                CachedNetworkImageProvider(""
-                                                                    "https://duakata-dev.com/moobi/m-moobi/photo/"+data[i]["d"],
-                                                                ),
-                                                                backgroundColor: Colors.white,
-                                                                radius: 23,
-                                                              ),
-                                                              badgeContent: Text(data[i]["e"].toString(),style: TextStyle(color: Colors.white,
-                                                              fontSize: 11),),
-                                                              toAnimate: false,
-                                                            )
+                                                         data[i]["e"] != 0 ?
+                                                           Badge(
+                                                             position: BadgePosition.topEnd(top: 0, end: 0 ),
+                                                             child: CircleAvatar(
+                                                               radius: 30,
+                                                               backgroundColor: HexColor("#602d98"),
+                                                               child: CircleAvatar(
+                                                                 backgroundColor: Colors.white,
+                                                                 radius: 27,
+                                                                 backgroundImage:
+                                                                 data[i]["d"] == '' ?
+                                                                 CachedNetworkImageProvider(applink+"photo/nomage.jpg")
+                                                                     :
+                                                                 CachedNetworkImageProvider(applink+"photo/"+data[i]["d"],
+                                                                 ),
+                                                               ),
+                                                             ),
+                                                             badgeContent: Text(data[i]["e"].toString(),style: TextStyle(color: Colors.white,
+                                                                 fontSize: 11),),
+                                                             toAnimate: false,
+                                                           )
                                                         :
-                                                            CircleAvatar(
-                                                            backgroundImage:
-                                                            data[i]["d"] == '' ?
-                                                            CachedNetworkImageProvider("https://duakata-dev.com/moobi/m-moobi/photo/nomage.jpg")
-                                                                :
-                                                            CachedNetworkImageProvider("https://duakata-dev.com/moobi/m-moobi/photo/"+data[i]["d"],
-                                                            ),
-                                                            backgroundColor: Colors.white,
-                                                            radius: 23,
-                                                            ),
+                                                           CircleAvatar(
+                                                               radius: 30,
+                                                               backgroundColor: HexColor("#602d98"),
+                                                               child: CircleAvatar(
+                                                                 backgroundColor: Colors.white,
+                                                               radius: 27,
+                                                               backgroundImage:
+                                                               data[i]["d"] == '' ?
+                                                                 CachedNetworkImageProvider(applink+"photo/nomage.jpg")
+                                                                   :
+                                                                 CachedNetworkImageProvider(applink+"photo/"+data[i]["d"],
+                                                                 ),
+                                                               ),
+                                                           ),
 
                                                             title: Align(alignment: Alignment.centerLeft,
                                                               child: Text(data[i]["a"],
