@@ -10,7 +10,9 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:hexcolor/hexcolor.dart';
 import 'package:intl/intl.dart';
 import 'package:moobi_flutter/Produk/page_produkdetailimage.dart';
+import 'package:moobi_flutter/Produk/page_produkpenjualanpro.dart';
 import 'package:moobi_flutter/Produk/page_produkstok.dart';
+import 'package:moobi_flutter/Produk/page_produktransaksipro.dart';
 import 'package:moobi_flutter/helper/api_link.dart';
 import 'package:moobi_flutter/helper/check_connection.dart';
 import 'package:moobi_flutter/helper/page_route.dart';
@@ -245,8 +247,20 @@ class _ProdukDetailState extends State<ProdukDetail> {
                             child: Text("Produk Terjual",style: TextStyle(fontWeight: FontWeight.bold
                                 , fontFamily: 'VarelaRound',fontSize: 13)),),
                         ),
-                        trailing: Text(getCountJual.toString()+" "+getSatuan.toString(),style: TextStyle(fontWeight: FontWeight.bold
-                            , fontFamily: 'VarelaRound',fontSize: 15))
+                        trailing: Container(
+                          width: 90,
+                          child: Row(
+                              mainAxisAlignment: MainAxisAlignment.end,
+                              children: [
+                                    Text(getCountJual.toString(),style: TextStyle(fontWeight: FontWeight.bold
+                                        , fontFamily: 'VarelaRound',fontSize: 22)),
+                                    Padding(padding: const EdgeInsets.only(left:5),child:
+                                    Text(getSatuan.toString(),style: TextStyle(fontWeight: FontWeight.bold
+                                        , fontFamily: 'VarelaRound',fontSize: 12)),
+                                )
+                              ],
+                            ),
+                          )
                     ),),
                   Padding(padding: const EdgeInsets.only(top :0),
                     child: Container(
@@ -370,7 +384,7 @@ class _ProdukDetailState extends State<ProdukDetail> {
                     ),),
 
 
-                  Padding(padding: const EdgeInsets.only(top: 20,left: 10,right: 25),
+                  Padding(padding: const EdgeInsets.only(top: 10,left: 10,right: 25),
                     child: Column(
                       children: [
 
@@ -378,7 +392,8 @@ class _ProdukDetailState extends State<ProdukDetail> {
                             child: InkWell(
                               child: ListTile(
                                 onTap: (){
-                                  Navigator.push(context, ExitPage(page: ProdukStok(getItemNumb.toString())));
+                                  Navigator.push(context, ExitPage(page: ProdukStok(getItemNumb.toString(),
+                                      getName.toString())));
                                 },
                                 title: Text("Stok Produk",style: TextStyle(
                                     color: Colors.black, fontFamily: 'VarelaRound',fontSize: 15,
@@ -392,7 +407,9 @@ class _ProdukDetailState extends State<ProdukDetail> {
                         Padding(padding: const EdgeInsets.only(top: 5),
                             child: InkWell(
                               child: ListTile(
-                                onTap: (){},
+                                onTap: (){
+                                  Navigator.push(context, ExitPage(page: ProdukTransaksi(getItemNumb.toString())));
+                                },
                                 title: Text("Transaksi Produk",style: TextStyle(
                                     color: Colors.black, fontFamily: 'VarelaRound',fontSize: 15,
                                     fontWeight: FontWeight.bold)),
@@ -406,7 +423,9 @@ class _ProdukDetailState extends State<ProdukDetail> {
                         Padding(padding: const EdgeInsets.only(top: 5),
                             child: InkWell(
                               child: ListTile(
-                                onTap: (){},
+                                onTap: (){
+                                  Navigator.push(context, ExitPage(page: ProdukPenjualan(getItemNumb.toString())));
+                                },
                                 title: Text("Transaksi Penjualan",style: TextStyle(
                                     color: Colors.black, fontFamily: 'VarelaRound',fontSize: 15,
                                     fontWeight: FontWeight.bold)),

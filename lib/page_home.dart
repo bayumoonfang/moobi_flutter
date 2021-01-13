@@ -119,9 +119,7 @@ class _HomeState extends State<Home> {
             body:
                 Stack(
                   children: [
-                    ClipPath(
-                      //clipper: MyClipper(),
-                      child: Container(
+                    Container(
                           width: double.infinity,
                           height: 120,
                           color:  HexColor("#602d98"),
@@ -163,7 +161,6 @@ class _HomeState extends State<Home> {
                               )
                             ],
                           )
-                      ),
                     ),
                       Padding(
                         padding: const EdgeInsets.only(top: 95,left: 25,right: 25),
@@ -184,8 +181,6 @@ class _HomeState extends State<Home> {
                         height: 77,
                         width: double.infinity,
                         child:
-                            Expanded(
-                              child:
                                   Padding(
                                     padding: const EdgeInsets.only(top: 15,left: 15,right: 25),
                                     child:
@@ -237,7 +232,7 @@ class _HomeState extends State<Home> {
                                       ],
                                     ),
                                   )
-                            )
+
                       ),),
                     Padding(
                       padding: const EdgeInsets.only(top: 200,left: 25,right: 25),
@@ -496,6 +491,7 @@ class _HomeState extends State<Home> {
   }
 }
 
+/*
 class MyClipper extends CustomClipper<Path> {
   @override
   Path getClip(Size size) {
@@ -512,4 +508,4 @@ class MyClipper extends CustomClipper<Path> {
   bool shouldReclip(CustomClipper<Path> oldClipper) {
     return null;
   }
-}
+}*/

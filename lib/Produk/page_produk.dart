@@ -186,9 +186,15 @@ class _ProdukState extends State<Produk> {
         });
   }
 
+  Future<bool> _onWillPop() async {
+    Navigator.pushReplacement(context, EnterPage(page: Home()));
+  }
+
+
   @override
   Widget build(BuildContext context) {
         return WillPopScope(
+          onWillPop: _onWillPop,
             child: Scaffold(
               appBar: AppBar(
                 backgroundColor: HexColor("#602d98"),
@@ -196,7 +202,7 @@ class _ProdukState extends State<Produk> {
                   builder: (context) => IconButton(
                     icon: new Icon(Icons.arrow_back),
                     color: Colors.white,
-                    onPressed: () => Navigator.push(context, EnterPage(page: Home())),
+                    onPressed: () => Navigator.pushReplacement(context, EnterPage(page: Home())),
                   ),
                 ),
                 title: Text(
@@ -233,7 +239,6 @@ class _ProdukState extends State<Produk> {
                                   filter = text;
                                  _isvisible = false;
                                   startSCreen();
-
                               });
                           },
                           style: TextStyle(fontFamily: "VarelaRound",fontSize: 14),
