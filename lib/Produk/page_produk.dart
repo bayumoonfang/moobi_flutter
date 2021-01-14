@@ -96,11 +96,6 @@ class _ProdukState extends State<Produk> {
     });
   }
 
-  void cekStatus() {
-    showToast("Koneksi terputus..", gravity: Toast.CENTER,
-        duration: Toast.LENGTH_LONG);
-  }
-
 
   @override
   void initState() {

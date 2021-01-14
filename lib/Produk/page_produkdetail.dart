@@ -119,9 +119,6 @@ class _ProdukDetailState extends State<ProdukDetail> {
         });
   }
 
-
-
-
   _prepare() async {
     await _connect();
     await _session();
@@ -165,7 +162,6 @@ class _ProdukDetailState extends State<ProdukDetail> {
               InkWell(
                 child: FaIcon(FontAwesomeIcons.percent,color: Colors.white,size: 18,),
               ),)
-
             ],
             title: Text(
               "Detail Produk",

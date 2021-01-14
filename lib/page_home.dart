@@ -7,9 +7,11 @@ import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:hexcolor/hexcolor.dart';
 import 'package:moobi_flutter/Gudang/page_gudang.dart';
+import 'package:moobi_flutter/Kategori/page_kategori.dart';
 import 'package:moobi_flutter/Produk/page_produk.dart';
 import 'package:moobi_flutter/Profile/page_profile.dart';
 import 'package:moobi_flutter/Toko/page_toko.dart';
+import 'package:moobi_flutter/Laporan/page_laporanhome.dart';
 import 'package:moobi_flutter/helper/api_link.dart';
 import 'package:moobi_flutter/helper/check_connection.dart';
 import 'package:moobi_flutter/helper/page_route.dart';
@@ -310,7 +312,33 @@ class _HomeState extends State<Home> {
                                     ),
                                   ),
 
+
                                   InkWell(
+                                    onTap: () {
+                                      Navigator.pushReplacement(context, ExitPage(page: Kategori()));
+                                    },
+                                    child:Column(
+                                      children: [
+                                        Container(
+                                            height: 55, width: 55,
+                                            decoration: BoxDecoration(
+                                              borderRadius: BorderRadius.circular(50),
+                                              color: HexColor("#eaf9ff"),
+                                            ),
+                                            child: Center(
+                                              child: FaIcon(FontAwesomeIcons.list, color: HexColor("#3ac2ff"), size: 24,),
+                                            )
+                                        ),
+                                        Padding(padding: const EdgeInsets.only(top:8),
+                                          child: Text("Kategori", style: TextStyle(fontFamily: 'VarelaRound',fontSize: 13)),)
+                                      ],
+                                    ),
+                                  ),
+
+
+
+                                  InkWell(
+                                    onTap: (){Navigator.pushReplacement(context, ExitPage(page: LaporanHome()));},
                                     child:Column(
                                       children: [
                                         Container(
@@ -324,7 +352,7 @@ class _HomeState extends State<Home> {
                                             )
                                         ),
                                         Padding(padding: const EdgeInsets.only(top:8),
-                                          child: Text("Transaksi", style: TextStyle(fontFamily: 'VarelaRound',fontSize: 13)),)
+                                          child: Text("Laporan", style: TextStyle(fontFamily: 'VarelaRound',fontSize: 13)),)
                                       ],
                                     ),
                                   ),
