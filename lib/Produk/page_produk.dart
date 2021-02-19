@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:hexcolor/hexcolor.dart';
 import 'package:moobi_flutter/Produk/page_produkdetail.dart';
+import 'package:moobi_flutter/Produk/page_produkinsert.dart';
 import 'package:moobi_flutter/helper/api_link.dart';
 import 'package:moobi_flutter/helper/check_connection.dart';
 import 'package:moobi_flutter/helper/page_route.dart';
@@ -182,7 +183,8 @@ class _ProdukState extends State<Produk> {
   }
 
   Future<bool> _onWillPop() async {
-    Navigator.pushReplacement(context, EnterPage(page: Home()));
+    //Navigator.pushReplacement(context, EnterPage(page: Home()));
+    Navigator.pop(context);
   }
 
 
@@ -272,7 +274,7 @@ class _ProdukState extends State<Produk> {
                 padding: const EdgeInsets.only(right : 10),
                 child: FloatingActionButton(
                   onPressed: (){
-
+                      Navigator.push(context, ExitPage(page: ProdukInsert()));
                   },
                   child: FaIcon(FontAwesomeIcons.plus),
                 ),

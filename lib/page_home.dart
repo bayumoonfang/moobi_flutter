@@ -292,7 +292,7 @@ class _HomeState extends State<Home> {
 
                                   InkWell(
                                     onTap: () {
-                                      Navigator.pushReplacement(context, ExitPage(page: Produk()));
+                                      Navigator.push(context, ExitPage(page: Produk()));
                                     },
                                     child:Column(
                                       children: [
