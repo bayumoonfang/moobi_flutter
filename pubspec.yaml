@@ -52,7 +52,6 @@ dependencies:
   rflutter_alert: ^1.1.0
   animated_dialog_box: ^0.0.2
 
-
 dev_dependencies:
   flutter_test:
     sdk: flutter

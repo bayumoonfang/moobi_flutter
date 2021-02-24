@@ -40,9 +40,11 @@ class _ProdukInsertState extends State<ProdukInsert> {
   FocusNode focusHarga;
   final _namaproduk = TextEditingController();
   final _hargaproduk = TextEditingController();
+  final _stockawalproduk = TextEditingController();
   void showToast(String msg, {int duration, int gravity}) {
     Toast.show(msg, context, duration: duration, gravity: gravity);
   }
+
 
   String getEmail = '...';
   _session() async {
@@ -128,8 +130,8 @@ class _ProdukInsertState extends State<ProdukInsert> {
   }
 
 
-  doSimpan() {
-     /* http.post(applink+"api_model.php?act=add_produk", body: {
+  doSimpan() async {
+    final response = await http.post(applink+"api_model.php?act=add_produk", body: {
       "produk_nama": _namaproduk.text,
       "produk_satuan" : selectedSatuan,
       "produk_harga" : _hargaproduk.text,
@@ -137,42 +139,57 @@ class _ProdukInsertState extends State<ProdukInsert> {
       "produk_kategori" : selectedCategory,
       "produk_image": Baseq,
       "produk_branch" : getBranchVal,
-      "image_nama" : namaFileq
-    });*/
-    Navigator.pop(context);  // pop current page
-    Navigator.pushNamed(context, "ProdukInsert");
-    showToast("Produk berhasil diinput", gravity: Toast.BOTTOM,
-        duration: Toast.LENGTH_LONG);
-    return false;
+      "image_nama" : namaFileq,
+       "produk_stockawal" : _stockawalproduk.text
+    });
+    Map data = jsonDecode(response.body);
+    setState(() {
+      if (data["message"].toString() == '0') {
+        showToast("Nama Produk sudah ada", gravity: Toast.BOTTOM,
+            duration: Toast.LENGTH_LONG);
+        return false;
+      } else {
+        _namaproduk.clear();
+        _hargaproduk.clear();
+        _stockawalproduk.clear();
+        namaFileq = "";
+        Base64 = "";
+        Baseq = "";
+        Navigator.pop(context);
+        showToast("Produk berhasil diinput", gravity: Toast.BOTTOM,
+            duration: Toast.LENGTH_LONG);
+        return false;
+      }
+    });
   }
 
   alertSimpan() {
     if (selectedCategory == null && selectedSatuan == null && selectedType == null) {
-      showToast("Form tidak boleh kosong ", gravity: Toast.CENTER,
+      showToast("Form tidak boleh kosong ", gravity: Toast.BOTTOM,
           duration: Toast.LENGTH_LONG);
       return false;
     }
 
-    if (_namaproduk.text == "" || _hargaproduk.text == "") {
-      showToast("Form tidak boleh kosong ", gravity: Toast.CENTER,
+    if (_namaproduk.text == "" || _hargaproduk.text == "" || _stockawalproduk.text == "") {
+      showToast("Form tidak boleh kosong ", gravity: Toast.BOTTOM,
           duration: Toast.LENGTH_LONG);
       return false;
     }
 
     if (selectedCategory == "" || selectedCategory == null) {
-      showToast("Kategori tidak boleh kosong", gravity: Toast.CENTER,
+      showToast("Kategori tidak boleh kosong", gravity: Toast.BOTTOM,
           duration: Toast.LENGTH_LONG);
        return false;
     }
 
     if (selectedSatuan == "" || selectedSatuan == null) {
-      showToast("Satuan tidak boleh kosong", gravity: Toast.CENTER,
+      showToast("Satuan tidak boleh kosong", gravity: Toast.BOTTOM,
           duration: Toast.LENGTH_LONG);
       return false;
     }
 
     if (selectedType == "" || selectedSatuan == null) {
-      showToast("Type tidak boleh kosong", gravity: Toast.CENTER,
+      showToast("Type tidak boleh kosong", gravity: Toast.BOTTOM,
           duration: Toast.LENGTH_LONG);
       return false;
     }
@@ -423,6 +440,42 @@ class _ProdukInsertState extends State<ProdukInsert> {
                           },
                         ),
                       )
+                    ],
+                  )
+              ),
+
+
+              Padding(padding: const EdgeInsets.only(left: 15,top: 10,right: 15),
+                  child: Column(
+                    children: [
+                      Align(alignment: Alignment.centerLeft,child: Padding(
+                        padding: const EdgeInsets.only(left: 0,top: 15),
+                        child: Text("Stock Awal Produk",style: TextStyle(fontWeight: FontWeight.bold,fontFamily: "VarelaRound",
+                            fontSize: 12,color: HexColor("#0074D9")),),
+                      ),),
+                      Align(alignment: Alignment.centerLeft,child: Padding(
+                        padding: const EdgeInsets.only(left: 0),
+                        child: TextFormField(
+                          controller: _stockawalproduk,
+                          keyboardType: TextInputType.number,
+                          decoration: InputDecoration(
+                            contentPadding: const EdgeInsets.only(top:2),
+                            hintText: 'Contoh : 1, 50, 100, dst',
+                            labelText: '',
+                            floatingLabelBehavior: FloatingLabelBehavior.always,
+                            hintStyle: TextStyle(fontFamily: "VarelaRound", color: HexColor("#c4c4c4")),
+                            enabledBorder: UnderlineInputBorder(
+                              borderSide: BorderSide(color: HexColor("#DDDDDD")),
+                            ),
+                            focusedBorder: UnderlineInputBorder(
+                              borderSide: BorderSide(color: HexColor("#8c8989")),
+                            ),
+                            border: UnderlineInputBorder(
+                              borderSide: BorderSide(color: HexColor("#DDDDDD")),
+                            ),
+                          ),
+                        ),
+                      ),),
                     ],
                   )
               ),

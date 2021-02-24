@@ -344,7 +344,7 @@ class _ProdukState extends State<Produk> {
                                                                  data[i]["d"] == '' ?
                                                                  CachedNetworkImageProvider(applink+"photo/nomage.jpg")
                                                                      :
-                                                                 CachedNetworkImageProvider(applink+"photo/"+data[i]["d"],
+                                                                 CachedNetworkImageProvider(applink+"photo/"+getBranchVal+"/"+data[i]["d"],
                                                                  ),
                                                                ),
                                                              ),
@@ -363,7 +363,7 @@ class _ProdukState extends State<Produk> {
                                                                data[i]["d"] == '' ?
                                                                  CachedNetworkImageProvider(applink+"photo/nomage.jpg")
                                                                    :
-                                                                 CachedNetworkImageProvider(applink+"photo/"+data[i]["d"],
+                                                                 CachedNetworkImageProvider(applink+"photo/"+getBranchVal+"/"+data[i]["d"],
                                                                  ),
                                                                ),
                                                            ),

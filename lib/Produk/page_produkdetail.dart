@@ -13,6 +13,7 @@ import 'package:moobi_flutter/Produk/page_produkdetailimage.dart';
 import 'package:moobi_flutter/Produk/page_produkpenjualanpro.dart';
 import 'package:moobi_flutter/Produk/page_produkstok.dart';
 import 'package:moobi_flutter/Produk/page_produktransaksipro.dart';
+import 'package:moobi_flutter/Produk/produk_edit.dart';
 import 'package:moobi_flutter/helper/api_link.dart';
 import 'package:moobi_flutter/helper/check_connection.dart';
 import 'package:moobi_flutter/helper/page_route.dart';
@@ -33,6 +34,10 @@ class ProdukDetail extends StatefulWidget {
 
 class _ProdukDetailState extends State<ProdukDetail> {
   List data;
+  List data2;
+  List data3;
+
+  final _produksetdiskon = TextEditingController();
   void showToast(String msg, {int duration, int gravity}) {
     Toast.show(msg, context, duration: duration, gravity: gravity);
   }
@@ -69,7 +74,7 @@ class _ProdukDetailState extends State<ProdukDetail> {
     Map data = jsonDecode(response.body);
     setState(() {
       getCountJual = data["a"].toString();
-      getSatuan = data["b"].toString();
+
     });
   }
 
@@ -90,13 +95,14 @@ class _ProdukDetailState extends State<ProdukDetail> {
     setState(() {
       getName = data["a"].toString();
       getPhoto = data["g"].toString();
-      getDiscount = data["b"].toString();
-      getDiscountVal = data["k"].toString();
+      //getDiscount = data["b"].toString();
+      //getDiscountVal = data["k"].toString();
       getHarga = data["d"].toString();
       getItemNumb = data["l"].toString();
       getKategori = data["i"].toString();
       getStatusProduk = data["f"].toString();
       getDateCreated = data["h"].toString();
+      getSatuan = data["c"].toString();
     });
   }
 
@@ -111,12 +117,34 @@ class _ProdukDetailState extends State<ProdukDetail> {
     });
   }
 
+  Future<List> getDataItemDiskon() async {
+    http.Response response = await http.get(
+        Uri.encodeFull(applink+"api_model.php?act=getdata_diskonproduk&id="+widget.idItem),
+        headers: {"Accept":"application/json"}
+    );
+    setState((){
+      data2 = json.decode(response.body);
+    });
+  }
+
+  Future<List> getDataItemHarga() async {
+    http.Response response = await http.get(
+        Uri.encodeFull(applink+"api_model.php?act=getdata_hargaproduk&id="+widget.idItem),
+        headers: {"Accept":"application/json"}
+    );
+    setState((){
+      data3 = json.decode(response.body);
+    });
+  }
+
   void _nonaktifproduk() {
     var url = applink+"api_model.php?act=action_nonaktifproduk";
     http.post(url,
         body: {
           "id": widget.idItem
         });
+    showToast("Status produk berhasil dirubah", gravity: Toast.BOTTOM,
+        duration: Toast.LENGTH_LONG);
   }
 
   _prepare() async {
@@ -126,6 +154,104 @@ class _ProdukDetailState extends State<ProdukDetail> {
     await _getCountTerjual();
     await _getDetail();
   }
+
+
+  doSimpandiskon() async {
+    if (_produksetdiskon.text == '') {
+      showToast("Diskon tidak boleh kosong", gravity: Toast.BOTTOM,
+          duration: Toast.LENGTH_LONG);
+      return false;
+    } else {
+      final response = await http.post(applink+"api_model.php?act=set_diskonproduk", body: {
+        "diskon_val": _produksetdiskon.text,
+        "produk_id" : widget.idItem
+      });
+      Map dataqq = jsonDecode(response.body);
+      setState(() {
+        if (dataqq['message'] == '0') {
+          showToast("Diskon tidak boleh kurang dari 0", gravity: Toast.BOTTOM,
+              duration: Toast.LENGTH_LONG);
+          return false;
+        } else {
+          _produksetdiskon.clear();
+          Navigator.pop(context);
+          showToast("Diskon berhasil dirubah", gravity: Toast.BOTTOM,
+              duration: Toast.LENGTH_LONG);
+          return false;
+        }
+      });
+    }
+  }
+
+  dialogDiskon() {
+    showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            content: Container(
+              height: 80,
+              child: Column(
+                children: [
+                  Align(
+                    alignment: Alignment.centerLeft,
+                    child: Text(
+                        "Setting Diskon",
+                        style: TextStyle(fontFamily: 'VarelaRound', fontSize: 16,fontWeight: FontWeight.bold)),
+                  ),
+                  Padding(padding: const EdgeInsets.only(top: 10),
+                    child: TextFormField(
+                      controller: _produksetdiskon,
+                      style: TextStyle(fontFamily: "VarelaRound",fontSize: 15),
+                      keyboardType: TextInputType.number,
+                      decoration: new InputDecoration(
+                        contentPadding: const EdgeInsets.only(top: 1,left: 10,bottom: 1),
+                        focusedBorder: OutlineInputBorder(
+                          borderSide: BorderSide(color: HexColor("#DDDDDD"), width: 1.0),
+                        ),
+                        enabledBorder: OutlineInputBorder(
+                          borderSide: BorderSide(color: HexColor("#DDDDDD"), width: 1.0),
+                        ),
+                        hintText: 'Contoh : 5, 25, dll',
+                        floatingLabelBehavior: FloatingLabelBehavior.always,
+                        hintStyle: TextStyle(fontFamily: "VarelaRound", color: HexColor("#c4c4c4")),
+                      ),
+                    ),
+                  ),
+                ],
+              )
+            ),
+            actions: [
+              Padding(padding: const EdgeInsets.only(left:10,right:2),
+                  child: Container(
+                      width: 80,
+                      child: new RaisedButton(
+                        //color: HexColor("#fb3464"),
+                          onPressed: () {
+                            Navigator.pop(context);
+                          },
+                          child:
+                          Text("Cancel", style: TextStyle(fontFamily: 'VarelaRound',
+                              fontSize: 14)))
+                  )
+              ),
+              Padding(padding: const EdgeInsets.only(left:10,right: 15),
+                  child: Container(
+                      width: 80,
+                      child: new RaisedButton(
+                          color: HexColor("#fb3464"),
+                          onPressed: () {
+                            doSimpandiskon();
+                          },
+                          child:
+                          Text("Simpan", style: TextStyle(fontFamily: 'VarelaRound',
+                              fontSize: 14)))
+                  )
+              )
+            ],
+          );
+        });
+  }
+
 
 
   @override
@@ -154,13 +280,14 @@ class _ProdukDetailState extends State<ProdukDetail> {
                   }),
             ),
             actions: [
-              Padding(padding: const EdgeInsets.only(top: 20,right: 25),child:
+              Padding(padding: const EdgeInsets.only(top: 18,right: 45),child:
               InkWell(
-                child: FaIcon(FontAwesomeIcons.pencilAlt,color: Colors.white,size: 18,),
+                child: FaIcon(FontAwesomeIcons.trashAlt,color: Colors.white,size: 18,),
               ),),
-              Padding(padding: const EdgeInsets.only(top: 20,right: 20),child:
+              Padding(padding: const EdgeInsets.only(top: 20,right: 30),child:
               InkWell(
-                child: FaIcon(FontAwesomeIcons.percent,color: Colors.white,size: 18,),
+                onTap: (){dialogDiskon();},
+                child: FaIcon(FontAwesomeIcons.percent,color: Colors.white,size: 16,),
               ),)
             ],
             title: Text(
@@ -193,7 +320,7 @@ class _ProdukDetailState extends State<ProdukDetail> {
                             getPhoto == '' ?
                             CachedNetworkImageProvider(applink+"photo/nomage.jpg")
                                 :
-                            CachedNetworkImageProvider(applink+"photo/"+getPhoto,
+                            CachedNetworkImageProvider(applink+"photo/"+getBranch+"/"+getPhoto,
                             ),
                           ),
                         ),
@@ -203,33 +330,66 @@ class _ProdukDetailState extends State<ProdukDetail> {
                         child: Text(getName.toString(),style: TextStyle(
                             fontFamily: 'VarelaRound', fontSize: 18,
                             fontWeight: FontWeight.bold)),),
-                      subtitle: Align(
-                        alignment: Alignment.centerLeft,
-                        child:
-                          getDiscount != '0' ?
-                          Row(
-                            children: [
-                              Text("Rp "+
-                                  NumberFormat.currency(
-                                      locale: 'id', decimalDigits: 0, symbol: '').format(
-                                      double.parse(getHarga)), style: new TextStyle(
-                                  decoration: TextDecoration.lineThrough,
-                                  fontFamily: 'VarelaRound',fontSize: 12),),
-                              Padding(padding: const EdgeInsets.only(left: 5),child:
-                              Text("Rp "+
-                                  NumberFormat.currency(
-                                      locale: 'id', decimalDigits: 0, symbol: '').format(
-                                      double.parse(getHarga)- double.parse(getDiscountVal)), style: new TextStyle(
-                                      fontFamily: 'VarelaRound',fontSize: 12, color: Colors.black,
-                                      fontWeight: FontWeight.bold),),)
-                            ],
-                          )
-                              :
-                          Text("Rp "+
-                              NumberFormat.currency(
-                                  locale: 'id', decimalDigits: 0, symbol: '').format(
-                                  double.parse(getHarga)), style: new TextStyle(
-                              fontFamily: 'VarelaRound',fontSize: 12,fontWeight: FontWeight.bold),))
+                      subtitle:
+                      Container (
+                        height: 30,
+                        width: 100,
+                        child :
+                      FutureBuilder(
+                          future: getDataItemHarga(),
+                          builder: (context, snapshot) {
+                            return ListView.builder(
+                                itemCount: 1,
+                                itemBuilder: (context, i) {
+                                  if (data3 == null) {
+                                    return Container(
+                                        width: 10,
+                                        height: 10
+                                    );
+                                  } else {
+                                    return  Container(
+                                        width: 100,
+                                        height: 25,
+                                        child: data3[i]["a"].toString() != '0' ?
+                                        Align (
+                                            alignment: Alignment.centerLeft,
+                                            child :
+                                            Row(
+                                              children: [
+                                                Text("Rp "+
+                                                    NumberFormat.currency(
+                                                        locale: 'id', decimalDigits: 0, symbol: '').format(
+                                                        double.parse(data3[i]["b"].toString())), style: new TextStyle(
+                                                    decoration: TextDecoration.lineThrough,
+                                                    fontFamily: 'VarelaRound',fontSize: 13),),
+                                                Padding(padding: const EdgeInsets.only(left: 5),child:
+                                                Text("Rp "+
+                                                    NumberFormat.currency(
+                                                        locale: 'id', decimalDigits: 0, symbol: '').format(
+                                                        double.parse(data3[i]["b"].toString())- double.parse(data3[i]["c"].toString())), style: new TextStyle(
+                                                    fontFamily: 'VarelaRound',fontSize: 13, color: Colors.black,
+                                                    fontWeight: FontWeight.bold),),)
+                                              ],
+                                            ))
+                                            :
+                                    Padding (
+                                      padding : const EdgeInsets.only(top: 5)
+                                        ,child :Text("Rp "+
+                                          NumberFormat.currency(
+                                              locale: 'id', decimalDigits: 0, symbol: '').format(
+                                              double.parse(data3[i]["b"].toString())), style: new TextStyle(
+                                          fontFamily: 'VarelaRound',fontSize: 13,fontWeight: FontWeight.bold),)
+                                    )
+
+                                    );
+                                  }
+                                }
+                            );
+                          },
+                      ))
+
+
+
                     ),
                   ),
                   Padding(padding: const EdgeInsets.only(left: 15,right: 15,top: 10),
@@ -248,7 +408,8 @@ class _ProdukDetailState extends State<ProdukDetail> {
                           child: Row(
                               mainAxisAlignment: MainAxisAlignment.end,
                               children: [
-                                    Text(getCountJual.toString(),style: TextStyle(fontWeight: FontWeight.bold
+                                    Text(getCountJual.toString() == "null" ? "0" : getCountJual.toString()
+                                        ,style: TextStyle(fontWeight: FontWeight.bold
                                         , fontFamily: 'VarelaRound',fontSize: 22)),
                                     Padding(padding: const EdgeInsets.only(left:5),child:
                                     Text(getSatuan.toString(),style: TextStyle(fontWeight: FontWeight.bold
@@ -271,6 +432,7 @@ class _ProdukDetailState extends State<ProdukDetail> {
                         Align(alignment: Alignment.centerLeft,child: Text("Informasi Produk",style: TextStyle(
                             color: Colors.black, fontFamily: 'VarelaRound',fontSize: 15,
                             fontWeight: FontWeight.bold)),),
+
                         Padding(padding: const EdgeInsets.only(top: 10,right: 25),
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment
@@ -302,10 +464,35 @@ class _ProdukDetailState extends State<ProdukDetail> {
                                     fontFamily: 'VarelaRound',
                                     fontSize: 13),
                               ),
-                              Text(getDiscount.toString()+"%",
-                                  style: TextStyle(
-                                      fontFamily: 'VarelaRound',
-                                      fontSize: 14)),
+                                  Container (
+                                    width: 50,
+                                    height: 13,
+                                    child :
+                                  FutureBuilder(
+                                  future : getDataItemDiskon(),
+                                  builder :  (context, snapshot) {
+                                      return ListView.builder(
+                                          itemCount: 1,
+                                          itemBuilder: (context, i) {
+                                            if (data2 == null) {
+                                              return Container(
+                                                  width: 10,
+                                                  height: 10
+                                              );
+                                            } else {
+                                            return Align(alignment: Alignment.centerRight,
+                                            child: Text(data2[i]["a"].toString()+" %",
+                                                style: TextStyle(
+                                                    fontFamily: 'VarelaRound',
+                                                    fontSize: 14)
+                                            ));
+                                              }
+                                          }
+                                      );
+                                  })),
+
+
+
                             ],
                           ),),
 
@@ -369,8 +556,6 @@ class _ProdukDetailState extends State<ProdukDetail> {
 
                       ],
                     ),),
-
-
 
                   Padding(padding: const EdgeInsets.only(top :20),
                     child: Container(
@@ -508,7 +693,7 @@ class _ProdukDetailState extends State<ProdukDetail> {
                       child: RaisedButton(
                         elevation: 0,
                         onPressed: (){
-                          //signOut();
+                          Navigator.pushReplacement(context, ExitPage(page: ProdukEdit(widget.idItem)));
                         },
                         color: HexColor("#dbd0ea"),
                         shape: RoundedRectangleBorder(side: BorderSide(
