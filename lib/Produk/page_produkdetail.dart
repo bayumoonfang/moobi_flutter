@@ -13,7 +13,7 @@ import 'package:moobi_flutter/Produk/page_produkdetailimage.dart';
 import 'package:moobi_flutter/Produk/page_produkpenjualanpro.dart';
 import 'package:moobi_flutter/Produk/page_produkstok.dart';
 import 'package:moobi_flutter/Produk/page_produktransaksipro.dart';
-import 'package:moobi_flutter/Produk/produk_edit.dart';
+import 'package:moobi_flutter/Produk/page_produkedit.dart';
 import 'package:moobi_flutter/helper/api_link.dart';
 import 'package:moobi_flutter/helper/check_connection.dart';
 import 'package:moobi_flutter/helper/page_route.dart';
@@ -156,6 +156,61 @@ class _ProdukDetailState extends State<ProdukDetail> {
   }
 
 
+
+
+  alertHapus() {
+    showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            content: Text(
+                "Apakah anda yakin menghapus data ini, semua data transaksi akan hilang  ? ",
+                style: TextStyle(fontFamily: 'VarelaRound', fontSize: 14)),
+            actions: [
+              Padding(padding: const EdgeInsets.only(left:10,right: 5),
+                  child: Container(
+                      width: 80,
+                      child: new RaisedButton(
+                        //color: HexColor("#fb3464"),
+                          onPressed: () {
+                            Navigator.pop(context);
+                          },
+                          child:
+                          Text("Cancel", style: TextStyle(fontFamily: 'VarelaRound',
+                              fontSize: 14)))
+                  )
+              ),
+              Padding(padding: const EdgeInsets.only(left:10,right: 5),
+                  child: Container(
+                      width: 80,
+                      child: new RaisedButton(
+                          color: HexColor("#fb3464"),
+                          onPressed: () {
+                            doHapus();
+                          },
+                          child:
+                          Text("Hapus", style: TextStyle(fontFamily: 'VarelaRound',
+                              fontSize: 14)))
+                  )
+              )
+            ],
+          );
+        });
+  }
+
+
+  doHapus() async {
+      http.post(applink+"api_model.php?act=hapus_produk", body: {
+        "produk_id" : widget.idItem
+      });
+      Navigator.pop(context);
+      Navigator.pop(context);
+      showToast("Produk berhasil dihapus", gravity: Toast.BOTTOM,
+          duration: Toast.LENGTH_LONG);
+      return false;
+  }
+
+
   doSimpandiskon() async {
     if (_produksetdiskon.text == '') {
       showToast("Diskon tidak boleh kosong", gravity: Toast.BOTTOM,
@@ -282,6 +337,7 @@ class _ProdukDetailState extends State<ProdukDetail> {
             actions: [
               Padding(padding: const EdgeInsets.only(top: 18,right: 45),child:
               InkWell(
+                onTap: (){alertHapus();},
                 child: FaIcon(FontAwesomeIcons.trashAlt,color: Colors.white,size: 18,),
               ),),
               Padding(padding: const EdgeInsets.only(top: 20,right: 30),child:

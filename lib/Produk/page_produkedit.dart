@@ -31,12 +31,17 @@ class _ProdukEdit extends State<ProdukEdit> {
   List _listType = ["Product", "Service"];
   List itemList = List();
   List categoryList = List();
+
+  bool showsave = false;
+
   final _namaproduk = TextEditingController();
   final _hargaproduk = TextEditingController();
   final _stockawalproduk = TextEditingController();
   void showToast(String msg, {int duration, int gravity}) {
     Toast.show(msg, context, duration: duration, gravity: gravity);
   }
+
+
 
   String getEmail = '...';
   _session() async {
@@ -104,6 +109,9 @@ class _ProdukEdit extends State<ProdukEdit> {
     await  _getDetail();
     await getAllItem();
     await getAllCategory();
+    setState(() {
+      showsave = true;
+    });
   }
 
 
@@ -137,7 +145,6 @@ class _ProdukEdit extends State<ProdukEdit> {
   void initState() {
     super.initState();
     _prepare();
-
   }
 
 
@@ -151,11 +158,12 @@ class _ProdukEdit extends State<ProdukEdit> {
   doSimpan() async {
     final response = await http.post(applink+"api_model.php?act=edit_produk", body: {
       "produk_nama": _namaproduk.text,
-      "produk_satuan" : selectedSatuan,
+      "produk_satuan" : selectedSatuan.toString(),
       "produk_harga" : _hargaproduk.text,
-      "produk_type" : selectedType,
-      "produk_kategori" : selectedCategory,
-      "produk_branch" : getBranchVal
+      "produk_type" : selectedType.toString(),
+      "produk_kategori" : selectedCategory.toString(),
+      "produk_branch" : getBranchVal,
+      "produk_iditem" : widget.idItem
     });
     Map data = jsonDecode(response.body);
     setState(() {
@@ -164,10 +172,8 @@ class _ProdukEdit extends State<ProdukEdit> {
             duration: Toast.LENGTH_LONG);
         return false;
       } else {
-        _namaproduk.clear();
-        _hargaproduk.clear();
         Navigator.pop(context);
-        showToast("Produk berhasil diinput", gravity: Toast.BOTTOM,
+        showToast("Produk berhasil diedit", gravity: Toast.BOTTOM,
             duration: Toast.LENGTH_LONG);
         return false;
       }
@@ -249,17 +255,20 @@ class _ProdukEdit extends State<ProdukEdit> {
                     fontSize: 16),
               ),
               actions: [
-                InkWell(
-                  onTap: () {
-                    alertSimpan();
-                  },
-                  child: Padding(
-                    padding: const EdgeInsets.only(right: 27,top : 14),
-                    child: FaIcon(
-                        FontAwesomeIcons.check
+                  Visibility(
+                    child: InkWell(
+                      onTap: () {
+                        alertSimpan();
+                      },
+                      child: Padding(
+                        padding: const EdgeInsets.only(right: 27,top : 14),
+                        child: FaIcon(
+                            FontAwesomeIcons.check
+                        ),
+                      ),
                     ),
-                  ),
-                )
+                    visible: showsave,
+                  )
               ],
             ),
           body: Container(

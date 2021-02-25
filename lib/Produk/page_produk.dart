@@ -6,11 +6,12 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:hexcolor/hexcolor.dart';
+import 'package:moobi_flutter/Helper/page_route.dart';
 import 'package:moobi_flutter/Produk/page_produkdetail.dart';
+import 'package:moobi_flutter/Produk/page_produkhome.dart';
 import 'package:moobi_flutter/Produk/page_produkinsert.dart';
 import 'package:moobi_flutter/helper/api_link.dart';
 import 'package:moobi_flutter/helper/check_connection.dart';
-import 'package:moobi_flutter/helper/page_route.dart';
 import 'package:moobi_flutter/helper/session.dart';
 import 'package:moobi_flutter/page_home.dart';
 import 'package:moobi_flutter/page_login.dart';
@@ -188,6 +189,58 @@ class _ProdukState extends State<Produk> {
   }
 
 
+
+  alertHapus(String IDProduk) {
+    showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            content: Text(
+                "Apakah anda yakin menghapus data ini, semua data transaksi akan hilang  ?",
+                style: TextStyle(fontFamily: 'VarelaRound', fontSize: 14)),
+            actions: [
+              Padding(padding: const EdgeInsets.only(left:10,right: 5),
+                  child: Container(
+                      width: 80,
+                      child: new RaisedButton(
+                        //color: HexColor("#fb3464"),
+                          onPressed: () {
+                            Navigator.pop(context);
+                          },
+                          child:
+                          Text("Cancel", style: TextStyle(fontFamily: 'VarelaRound',
+                              fontSize: 14)))
+                  )
+              ),
+              Padding(padding: const EdgeInsets.only(left:10,right: 5),
+                  child: Container(
+                      width: 80,
+                      child: new RaisedButton(
+                          color: HexColor("#fb3464"),
+                          onPressed: () {
+                            doHapus(IDProduk);
+                          },
+                          child:
+                          Text("Hapus", style: TextStyle(fontFamily: 'VarelaRound',
+                              fontSize: 14)))
+                  )
+              )
+            ],
+          );
+        });
+  }
+
+
+  doHapus(String IDq) {
+    http.post(applink+"api_model.php?act=hapus_produkhome", body: {
+      "produk_id" : IDq
+    });
+    Navigator.pop(context);
+    showToast("Produk berhasil dihapus", gravity: Toast.BOTTOM,
+        duration: Toast.LENGTH_LONG);
+    return false;
+  }
+
   @override
   Widget build(BuildContext context) {
         return WillPopScope(
@@ -199,7 +252,7 @@ class _ProdukState extends State<Produk> {
                   builder: (context) => IconButton(
                     icon: new Icon(Icons.arrow_back),
                     color: Colors.white,
-                    onPressed: () => Navigator.pushReplacement(context, EnterPage(page: Home())),
+                    onPressed: () => Navigator.pop(context),
                   ),
                 ),
                 title: Text(
@@ -326,6 +379,7 @@ class _ProdukState extends State<Produk> {
                                               return Column(
                                                   children: <Widget>[
                                                         InkWell(
+                                                          onLongPress: (){alertHapus(data[i]["i"].toString());},
                                                           onTap: () {
                                                             Navigator.push(context, ExitPage(page: ProdukDetail(data[i]["i"].toString())));
                                                           },

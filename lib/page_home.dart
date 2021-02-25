@@ -9,6 +9,7 @@ import 'package:hexcolor/hexcolor.dart';
 import 'package:moobi_flutter/Gudang/page_gudang.dart';
 import 'package:moobi_flutter/Kategori/page_kategori.dart';
 import 'package:moobi_flutter/Produk/page_produk.dart';
+import 'package:moobi_flutter/Produk/page_produkhome.dart';
 import 'package:moobi_flutter/Profile/page_profile.dart';
 import 'package:moobi_flutter/Toko/page_toko.dart';
 import 'package:moobi_flutter/Laporan/page_laporanhome.dart';
@@ -292,7 +293,7 @@ class _HomeState extends State<Home> {
 
                                   InkWell(
                                     onTap: () {
-                                      Navigator.push(context, ExitPage(page: Produk()));
+                                      Navigator.push(context, ExitPage(page: ProdukHome()));
                                     },
                                     child:Column(
                                       children: [
