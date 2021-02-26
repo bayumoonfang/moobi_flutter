@@ -2,12 +2,14 @@
 
 
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:hexcolor/hexcolor.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
 import 'package:moobi_flutter/Produk/page_produkdetailimage.dart';
 import 'package:moobi_flutter/Produk/page_produkpenjualanpro.dart';
@@ -36,11 +38,14 @@ class _ProdukDetailState extends State<ProdukDetail> {
   List data;
   List data2;
   List data3;
-
+  File galleryFile;
+  String Base64;
   final _produksetdiskon = TextEditingController();
   void showToast(String msg, {int duration, int gravity}) {
     Toast.show(msg, context, duration: duration, gravity: gravity);
   }
+
+  bool isVisible = false;
 
 
   String getEmail = '...';
@@ -153,6 +158,9 @@ class _ProdukDetailState extends State<ProdukDetail> {
     await _getBranch();
     await _getCountTerjual();
     await _getDetail();
+    setState(() {
+      isVisible = true;
+    });
   }
 
 
@@ -163,39 +171,40 @@ class _ProdukDetailState extends State<ProdukDetail> {
         context: context,
         builder: (BuildContext context) {
           return AlertDialog(
-            content: Text(
-                "Apakah anda yakin menghapus data ini, semua data transaksi akan hilang  ? ",
-                style: TextStyle(fontFamily: 'VarelaRound', fontSize: 14)),
-            actions: [
-              Padding(padding: const EdgeInsets.only(left:10,right: 5),
-                  child: Container(
-                      width: 80,
-                      child: new RaisedButton(
-                        //color: HexColor("#fb3464"),
-                          onPressed: () {
-                            Navigator.pop(context);
-                          },
-                          child:
-                          Text("Cancel", style: TextStyle(fontFamily: 'VarelaRound',
-                              fontSize: 14)))
-                  )
-              ),
-              Padding(padding: const EdgeInsets.only(left:10,right: 5),
-                  child: Container(
-                      width: 80,
-                      child: new RaisedButton(
-                          color: HexColor("#fb3464"),
+            //title: Text(),
+            content: Container(
+                width: double.infinity,
+                height: 178,
+                child: Column(
+                  children: [
+                    Align(alignment: Alignment.center, child:
+                    Text("Konfirmasi", style: TextStyle(fontFamily: 'VarelaRound', fontSize: 20,
+                        fontWeight: FontWeight.bold)),),
+                    Padding(padding: const EdgeInsets.only(top: 15), child:
+                    Align(alignment: Alignment.center, child: FaIcon(FontAwesomeIcons.trash,
+                      color: Colors.redAccent,size: 35,)),),
+                    Padding(padding: const EdgeInsets.only(top: 15), child:
+                    Align(alignment: Alignment.center, child:
+                    Text("Apakah anda yakin menghapus data ini ? ",
+                        style: TextStyle(fontFamily: 'VarelaRound', fontSize: 12)),)),
+                    Padding(padding: const EdgeInsets.only(top: 25), child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      children: <Widget>[
+                        Expanded(child: OutlineButton(
+                          onPressed: () {Navigator.pop(context);}, child: Text("Tidak"),)),
+                        Expanded(child: OutlineButton(
+                          borderSide: BorderSide(width: 1.0, color: Colors.redAccent),
                           onPressed: () {
                             doHapus();
-                          },
-                          child:
-                          Text("Hapus", style: TextStyle(fontFamily: 'VarelaRound',
-                              fontSize: 14)))
-                  )
-              )
-            ],
+                            Navigator.pop(context);
+                          }, child: Text("Hapus", style: TextStyle(color: Colors.red),),)),
+                      ],),)
+                  ],
+                )
+            ),
           );
         });
+
   }
 
 
@@ -243,68 +252,59 @@ class _ProdukDetailState extends State<ProdukDetail> {
         context: context,
         builder: (BuildContext context) {
           return AlertDialog(
+            //title: Text(),
             content: Container(
-              height: 80,
-              child: Column(
-                children: [
-                  Align(
-                    alignment: Alignment.centerLeft,
-                    child: Text(
-                        "Setting Diskon",
-                        style: TextStyle(fontFamily: 'VarelaRound', fontSize: 16,fontWeight: FontWeight.bold)),
-                  ),
-                  Padding(padding: const EdgeInsets.only(top: 10),
-                    child: TextFormField(
-                      controller: _produksetdiskon,
-                      style: TextStyle(fontFamily: "VarelaRound",fontSize: 15),
-                      keyboardType: TextInputType.number,
-                      decoration: new InputDecoration(
-                        contentPadding: const EdgeInsets.only(top: 1,left: 10,bottom: 1),
-                        focusedBorder: OutlineInputBorder(
-                          borderSide: BorderSide(color: HexColor("#DDDDDD"), width: 1.0),
+                width: double.infinity,
+                height: 188,
+                child: Column(
+                  children: [
+                    Align(alignment: Alignment.center, child:
+                    Text("Setting", style: TextStyle(fontFamily: 'VarelaRound', fontSize: 20,
+                        fontWeight: FontWeight.bold)),),
+                    Padding(padding: const EdgeInsets.only(top: 15), child:
+                    Align(alignment: Alignment.center, child:
+                    Text("Masukkan diskon untuk produk ini ",
+                        style: TextStyle(fontFamily: 'VarelaRound', fontSize: 12))
+                    ),),
+                    Padding(padding: const EdgeInsets.only(top: 15), child:
+                    Align(alignment: Alignment.center, child:
+                    TextFormField(
+                        controller: _produksetdiskon,
+                        style: TextStyle(fontFamily: "VarelaRound",fontSize: 15),
+                        keyboardType: TextInputType.number,
+                        decoration: new InputDecoration(
+                          contentPadding: const EdgeInsets.only(top: 1,left: 10,bottom: 1),
+                          focusedBorder: OutlineInputBorder(
+                            borderSide: BorderSide(color: HexColor("#DDDDDD"), width: 1.0),
+                          ),
+                          enabledBorder: OutlineInputBorder(
+                            borderSide: BorderSide(color: HexColor("#DDDDDD"), width: 1.0),
+                          ),
+                          hintText: 'Contoh : 5, 25, dll',
+                          floatingLabelBehavior: FloatingLabelBehavior.always,
+                          hintStyle: TextStyle(fontFamily: "VarelaRound", color: HexColor("#c4c4c4")),
                         ),
-                        enabledBorder: OutlineInputBorder(
-                          borderSide: BorderSide(color: HexColor("#DDDDDD"), width: 1.0),
-                        ),
-                        hintText: 'Contoh : 5, 25, dll',
-                        floatingLabelBehavior: FloatingLabelBehavior.always,
-                        hintStyle: TextStyle(fontFamily: "VarelaRound", color: HexColor("#c4c4c4")),
                       ),
-                    ),
-                  ),
-                ],
-              )
-            ),
-            actions: [
-              Padding(padding: const EdgeInsets.only(left:10,right:2),
-                  child: Container(
-                      width: 80,
-                      child: new RaisedButton(
-                        //color: HexColor("#fb3464"),
-                          onPressed: () {
-                            Navigator.pop(context);
-                          },
-                          child:
-                          Text("Cancel", style: TextStyle(fontFamily: 'VarelaRound',
-                              fontSize: 14)))
-                  )
-              ),
-              Padding(padding: const EdgeInsets.only(left:10,right: 15),
-                  child: Container(
-                      width: 80,
-                      child: new RaisedButton(
-                          color: HexColor("#fb3464"),
+                    )),
+                    Padding(padding: const EdgeInsets.only(top: 25), child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      children: <Widget>[
+                        Expanded(child: OutlineButton(
+                          onPressed: () {Navigator.pop(context);}, child: Text("Tutup"),)),
+                        Expanded(child: OutlineButton(
+                          borderSide: BorderSide(width: 1.0, color: Colors.redAccent),
                           onPressed: () {
                             doSimpandiskon();
-                          },
-                          child:
-                          Text("Simpan", style: TextStyle(fontFamily: 'VarelaRound',
-                              fontSize: 14)))
-                  )
-              )
-            ],
+                            //Navigator.pop(context);
+                          }, child: Text("Simpan", style: TextStyle(color: Colors.red),),)),
+                      ],),)
+                  ],
+                )
+            ),
           );
         });
+
+
   }
 
 
@@ -318,6 +318,90 @@ class _ProdukDetailState extends State<ProdukDetail> {
   Future<bool> _onWillPop() async {
     Navigator.pop(context);
   }
+
+  imageSelectorGallery() async {
+    galleryFile = await ImagePicker.pickImage(
+      source: ImageSource.gallery,
+    );
+    String fileName = galleryFile.path.split('/').last;
+    Base64 = base64Encode((galleryFile.readAsBytesSync()));
+    http.post(applink+"api_model.php?act=edit_produkphoto", body: {
+      "produk_image": Base64,
+      "produk_id": widget.idItem
+    });
+    showToast("Photo produk berhasil dirubah.. Silahkan refresh halaman ini", gravity: Toast.BOTTOM, duration: Toast.LENGTH_LONG);
+    return false;
+  }
+
+  void _imgDialog() {
+    showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+              content:
+              Container(
+                  height: 70,
+                  child:
+                  SingleChildScrollView(
+                    child :
+                    Column(
+                      children: [
+                        isVisible == true ?
+                        getPhoto != '' ?
+                        InkWell(
+                          onTap: (){
+                            Navigator.push(context, ExitPage(page: ProdukDetailImage(getPhoto.toString(), getBranch.toString())));
+                            //Navigator.pop(context);
+                          },
+                          child: Align(alignment: Alignment.centerLeft,
+                            child:    Text(
+                              "Lihat Photo",
+                              textAlign: TextAlign.left,
+                              style: TextStyle(
+                                  fontFamily: 'VarelaRound',
+                                  fontSize: 15),
+                            ),),
+                        )
+                        :
+                            Container(width: 5,height: 5,)
+                        :
+                        Align(alignment: Alignment.centerLeft,
+                          child:    Text(
+                            "Lihat Photo",
+                            textAlign: TextAlign.left,
+                            style: TextStyle(
+                                fontFamily: 'VarelaRound',
+                                color: Colors.grey,
+                                fontSize: 15),
+                          ),),
+                        Padding(padding: const EdgeInsets.only(top:15,bottom: 15,left: 4,right: 4),
+                          child: Divider(height: 5,),),
+                        InkWell(
+                          onTap: (){
+                            setState(() {
+                              FocusScope.of(context).requestFocus(FocusNode());
+                              imageSelectorGallery();
+                              Navigator.pop(context);
+                            });
+                          },
+                          child: Align(alignment: Alignment.centerLeft,
+                            child:    Text(
+                              "Ganti Photo",
+                              textAlign: TextAlign.left,
+                              style: TextStyle(
+                                  fontFamily: 'VarelaRound',
+                                  fontSize: 15),
+                            ),),
+                        ),
+
+                      ],
+                    ),
+                  ))
+          );
+        });
+  }
+
+
 
   @override
   Widget build(BuildContext context) {
@@ -363,9 +447,7 @@ class _ProdukDetailState extends State<ProdukDetail> {
                   Padding(padding: const EdgeInsets.only(top: 20),
                     child: ListTile(
                       leading:  InkWell(
-                        onTap: () {
-                          Navigator.push(context, ExitPage(page: ProdukDetailImage(getPhoto.toString())));
-                        },
+                        onLongPress: (){_imgDialog();},
                         child: CircleAvatar(
                           radius: 30,
                           backgroundColor: HexColor("#602d98"),

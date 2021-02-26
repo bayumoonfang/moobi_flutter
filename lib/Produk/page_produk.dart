@@ -191,41 +191,41 @@ class _ProdukState extends State<Produk> {
 
 
   alertHapus(String IDProduk) {
+
     showDialog(
         context: context,
         builder: (BuildContext context) {
           return AlertDialog(
-            content: Text(
-                "Apakah anda yakin menghapus data ini, semua data transaksi akan hilang  ?",
-                style: TextStyle(fontFamily: 'VarelaRound', fontSize: 14)),
-            actions: [
-              Padding(padding: const EdgeInsets.only(left:10,right: 5),
-                  child: Container(
-                      width: 80,
-                      child: new RaisedButton(
-                        //color: HexColor("#fb3464"),
-                          onPressed: () {
-                            Navigator.pop(context);
-                          },
-                          child:
-                          Text("Cancel", style: TextStyle(fontFamily: 'VarelaRound',
-                              fontSize: 14)))
-                  )
-              ),
-              Padding(padding: const EdgeInsets.only(left:10,right: 5),
-                  child: Container(
-                      width: 80,
-                      child: new RaisedButton(
-                          color: HexColor("#fb3464"),
+            //title: Text(),
+            content: Container(
+                width: double.infinity,
+                height: 178,
+                child: Column(
+                  children: [
+                    Align(alignment: Alignment.center, child:
+                    Text("Konfirmasi", style: TextStyle(fontFamily: 'VarelaRound', fontSize: 20,
+                        fontWeight: FontWeight.bold)),),
+                    Padding(padding: const EdgeInsets.only(top: 15), child:
+                    Align(alignment: Alignment.center, child: FaIcon(FontAwesomeIcons.trash,
+                      color: Colors.redAccent,size: 35,)),),
+                    Padding(padding: const EdgeInsets.only(top: 15), child:
+                    Align(alignment: Alignment.center, child:
+                    Text("Apakah anda yakin menghapus data ini ? ",
+                        style: TextStyle(fontFamily: 'VarelaRound', fontSize: 12)),)),
+                    Padding(padding: const EdgeInsets.only(top: 25), child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      children: <Widget>[
+                        Expanded(child: OutlineButton(
+                          onPressed: () {Navigator.pop(context);}, child: Text("Tidak"),)),
+                        Expanded(child: OutlineButton(
+                          borderSide: BorderSide(width: 1.0, color: Colors.redAccent),
                           onPressed: () {
                             doHapus(IDProduk);
-                          },
-                          child:
-                          Text("Hapus", style: TextStyle(fontFamily: 'VarelaRound',
-                              fontSize: 14)))
-                  )
-              )
-            ],
+                          }, child: Text("Hapus", style: TextStyle(color: Colors.red),),)),
+                      ],),)
+                  ],
+                )
+            ),
           );
         });
   }
@@ -269,6 +269,7 @@ class _ProdukState extends State<Produk> {
                       icon: new FaIcon(FontAwesomeIcons.sortAmountDown,size: 18,),
                       color: Colors.white,
                       onPressed: ()  {
+                        FocusScope.of(context).requestFocus(FocusNode());
                         _filterMe();
                       }
                     ),

@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:hexcolor/hexcolor.dart';
 import 'package:moobi_flutter/Gudang/page_gudang.dart';
+import 'package:moobi_flutter/Jualan/page_jualan.dart';
 import 'package:moobi_flutter/Kategori/page_kategori.dart';
 import 'package:moobi_flutter/Produk/page_produk.dart';
 import 'package:moobi_flutter/Produk/page_produkhome.dart';
@@ -273,6 +274,7 @@ class _HomeState extends State<Home> {
                                 runSpacing: 30,
                                 children: [
                                   InkWell(
+                                    onTap: (){Navigator.pushReplacement(context, ExitPage(page: Jualan()));},
                                     child:Column(
                                       children: [
                                         Container(
@@ -313,7 +315,7 @@ class _HomeState extends State<Home> {
                                     ),
                                   ),
 
-
+/*
                                   InkWell(
                                     onTap: () {
                                       Navigator.pushReplacement(context, ExitPage(page: Kategori()));
@@ -334,9 +336,7 @@ class _HomeState extends State<Home> {
                                           child: Text("Kategori", style: TextStyle(fontFamily: 'VarelaRound',fontSize: 13)),)
                                       ],
                                     ),
-                                  ),
-
-
+                                  ),*/
 
                                   InkWell(
                                     onTap: (){Navigator.pushReplacement(context, ExitPage(page: LaporanHome()));},

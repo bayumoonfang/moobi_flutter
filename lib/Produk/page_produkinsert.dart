@@ -199,37 +199,37 @@ class _ProdukInsertState extends State<ProdukInsert> {
         context: context,
         builder: (BuildContext context) {
           return AlertDialog(
-            content: Text(
-                "Apakah anda yakin data sudah benar dan menyimpan data ini  ?",
-                style: TextStyle(fontFamily: 'VarelaRound', fontSize: 14)),
-            actions: [
-              Padding(padding: const EdgeInsets.only(left:10,right: 5),
-                  child: Container(
-                      width: 80,
-                      child: new RaisedButton(
-                          //color: HexColor("#fb3464"),
+            //title: Text(),
+            content: Container(
+                width: double.infinity,
+                height: 178,
+                child: Column(
+                  children: [
+                    Align(alignment: Alignment.center, child:
+                    Text("Konfirmasi", style: TextStyle(fontFamily: 'VarelaRound', fontSize: 20,
+                        fontWeight: FontWeight.bold)),),
+                    Padding(padding: const EdgeInsets.only(top: 15), child:
+                    Align(alignment: Alignment.center, child: FaIcon(FontAwesomeIcons.save,
+                      color: Colors.redAccent,size: 35,)),),
+                    Padding(padding: const EdgeInsets.only(top: 15), child:
+                    Align(alignment: Alignment.center, child:
+                    Text("Apakah anda yakin menyimpan data ini ? ",
+                        style: TextStyle(fontFamily: 'VarelaRound', fontSize: 12)),)),
+                    Padding(padding: const EdgeInsets.only(top: 25), child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      children: <Widget>[
+                        Expanded(child: OutlineButton(
+                          onPressed: () {Navigator.pop(context);}, child: Text("Tidak"),)),
+                        Expanded(child: OutlineButton(
+                          borderSide: BorderSide(width: 1.0, color: Colors.redAccent),
                           onPressed: () {
+                           doSimpan();
                             Navigator.pop(context);
-                          },
-                          child:
-                          Text("Cancel", style: TextStyle(fontFamily: 'VarelaRound',
-                              fontSize: 14)))
-                  )
-              ),
-                  Padding(padding: const EdgeInsets.only(left:10,right: 5),
-                  child: Container(
-                    width: 80,
-                    child: new RaisedButton(
-                      color: HexColor("#fb3464"),
-                        onPressed: () {
-                          doSimpan();
-                        },
-                        child:
-                        Text("Simpan", style: TextStyle(fontFamily: 'VarelaRound',
-                            fontSize: 14)))
-                    )
-                  )
-            ],
+                          }, child: Text("Simpan", style: TextStyle(color: Colors.red),),)),
+                      ],),)
+                  ],
+                )
+            ),
           );
         });
   }
@@ -266,6 +266,7 @@ class _ProdukInsertState extends State<ProdukInsert> {
             actions: [
               InkWell(
                 onTap: () {
+                  FocusScope.of(context).requestFocus(FocusNode());
                   alertSimpan();
                 },
                 child: Padding(
@@ -293,6 +294,7 @@ class _ProdukInsertState extends State<ProdukInsert> {
                       Align(alignment: Alignment.centerLeft,child: Padding(
                         padding: const EdgeInsets.only(left: 0),
                         child: TextFormField(
+                          textCapitalization: TextCapitalization.sentences,
                           controller: _namaproduk,
                             decoration: InputDecoration(
                             contentPadding: const EdgeInsets.only(top:2),
