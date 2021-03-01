@@ -328,6 +328,7 @@ class _ProdukState extends State<Produk> {
                 padding: const EdgeInsets.only(right : 10),
                 child: FloatingActionButton(
                   onPressed: (){
+                    FocusScope.of(context).requestFocus(FocusNode());
                       Navigator.push(context, ExitPage(page: ProdukInsert()));
                   },
                   child: FaIcon(FontAwesomeIcons.plus),
@@ -435,7 +436,7 @@ class _ProdukState extends State<Produk> {
                                                               trailing:
                                                               data[i]["e"] != 0 ?
                                                               ResponsiveContainer(
-                                                                widthPercent: 35,
+                                                                widthPercent: 43,
                                                                 heightPercent: 2,
                                                                 child: Row(
                                                                   mainAxisAlignment: MainAxisAlignment.end,

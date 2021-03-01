@@ -124,10 +124,10 @@ class JualanState extends State<Jualan> {
                       filled: true,
                       contentPadding: const EdgeInsets.only(top: 1,left: 15,bottom: 1),
                       focusedBorder: OutlineInputBorder(
-                        borderSide: BorderSide(color: HexColor("#DDDDDD"), width: 1.0),
+                        borderSide: BorderSide(color: Colors.white, width: 1.0),
                       ),
                       enabledBorder: OutlineInputBorder(
-                        borderSide: BorderSide(color: HexColor("#DDDDDD"), width: 1.0),
+                        borderSide: BorderSide(color: Colors.white, width: 1.0),
                       ),
                       hintText: 'Cari Produk...',
                     ),
@@ -189,18 +189,19 @@ class JualanState extends State<Jualan> {
             ],
           ),
         ),
-          floatingActionButton: Padding(
-            padding: const EdgeInsets.only(right : 10),
+        floatingActionButton: Container(
+          height: 70,
+          width: 70,
+          child: FittedBox(
             child: Badge(
-              badgeContent: Padding(padding: const EdgeInsets.all(2), child: Text("3",style: TextStyle(color: Colors.white,fontSize: 18),),),
-              child: FloatingActionButton(
-                onPressed: (){
-                  //Navigator.push(context, ExitPage(page: ProdukInsert()));
-                },
+              badgeContent: Text("3",style: TextStyle(color: Colors.white),),
+              position: BadgePosition(end: 0,top: 0),
+              child: FloatingActionButton(onPressed: () {},
                 child: FaIcon(FontAwesomeIcons.shoppingBasket),
               ),
             )
-          )
+          ),
+        ),
       ),
     );
 
@@ -253,83 +254,85 @@ class JualanState extends State<Jualan> {
                     child: ListTile(
                         leading:
                         data[i]["e"] != 0 ?
-                        Badge(
-                          position: BadgePosition.topEnd(top: 0, end: 0 ),
-                          child: CircleAvatar(
-                            radius: 30,
-                            backgroundColor: HexColor("#602d98"),
-                            child: CircleAvatar(
-                              backgroundColor: Colors.white,
-                              radius: 27,
-                              backgroundImage:
-                              data[i]["d"] == '' ?
-                              CachedNetworkImageProvider(applink+"photo/nomage.jpg")
-                                  :
-                              CachedNetworkImageProvider(applink+"photo/"+getBranchVal+"/"+data[i]["d"],
-                              ),
-                            ),
-                          ),
-                          badgeContent: Text(data[i]["e"].toString(),style: TextStyle(color: Colors.white,
-                              fontSize: 11),),
-                          toAnimate: false,
-                        )
+                           Badge(
+                             badgeContent: Text("3",style: TextStyle(color: Colors.white),),
+                             child:  Container(
+                                 width: 70,
+                                 height: 95,
+                                 child: ClipRRect(
+                                   borderRadius: BorderRadius.circular(6.0),
+                                   child : CachedNetworkImage(
+                                     fit: BoxFit.cover,
+                                     imageUrl:
+                                     data[i]["d"] == '' ?
+                                      applink+"photo/nomage.jpg"
+                                      :
+                                      applink+"photo/"+getBranchVal+"/"+data[i]["d"],
+                                     progressIndicatorBuilder: (context, url, downloadProgress) =>
+                                         CircularProgressIndicator(value: downloadProgress.progress),
+                                     errorWidget: (context, url, error) => Icon(Icons.error),
+                                   ),
+                                 ))
+                           )
+
                             :
-                        CircleAvatar(
-                          radius: 30,
-                          backgroundColor: HexColor("#602d98"),
-                          child: CircleAvatar(
-                            backgroundColor: Colors.white,
-                            radius: 27,
-                            backgroundImage:
-                            data[i]["d"] == '' ?
-                            CachedNetworkImageProvider(applink+"photo/nomage.jpg")
-                                :
-                            CachedNetworkImageProvider(applink+"photo/"+getBranchVal+"/"+data[i]["d"],
-                            ),
-                          ),
-                        ),
+                        Container(
+                            width: 70,
+                            height: 95,
+                            child: ClipRRect(
+                              borderRadius: BorderRadius.circular(6.0),
+                              child : CachedNetworkImage(
+                                fit: BoxFit.cover,
+                                imageUrl:
+                                data[i]["d"] == '' ?
+                                applink+"photo/nomage.jpg"
+                                    :
+                                applink+"photo/"+getBranchVal+"/"+data[i]["d"],
+                                progressIndicatorBuilder: (context, url, downloadProgress) =>
+                                    CircularProgressIndicator(value: downloadProgress.progress),
+                                errorWidget: (context, url, error) => Icon(Icons.error),
+                              ),
+                            )),
 
                         title: Align(alignment: Alignment.centerLeft,
                           child: Text(data[i]["a"],
                               style: TextStyle(fontFamily: "VarelaRound",
                                   fontSize: 13,fontWeight: FontWeight.bold)),),
                         subtitle: Align(alignment: Alignment.centerLeft,
-                          child: Text(data[i]["b"],
-                              style: TextStyle(fontFamily: "VarelaRound",
-                                fontSize: 11,)),
+                          child:
+                          data[i]["e"] != 0 ?
+                          ResponsiveContainer(
+                            widthPercent: 45,
+                            heightPercent: 2,
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.start,
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text("Rp "+
+                                    NumberFormat.currency(
+                                        locale: 'id', decimalDigits: 0, symbol: '').format(
+                                        data[i]["c"]), style: new TextStyle(
+                                    decoration: TextDecoration.lineThrough,
+                                    fontFamily: 'VarelaRound',fontSize: 12),),
+                                Padding(padding: const EdgeInsets.only(left: 5),child:
+                                Text("Rp "+
+                                    NumberFormat.currency(
+                                        locale: 'id', decimalDigits: 0, symbol: '').format(
+                                        data[i]["c"] - double.parse(data[i]["f"])), style: new TextStyle(
+                                    fontFamily: 'VarelaRound',fontSize: 12),),)
+                              ],
+                            ),
+                          )
+                              :
+                          Text("Rp "+
+                              NumberFormat.currency(
+                                  locale: 'id', decimalDigits: 0, symbol: '').format(
+                                  data[i]["c"]), style: new TextStyle(
+                              fontFamily: 'VarelaRound',fontSize: 12),)
                         ),
-                        trailing:
-                        data[i]["e"] != 0 ?
-                        ResponsiveContainer(
-                          widthPercent: 35,
-                          heightPercent: 2,
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.end,
-                            crossAxisAlignment: CrossAxisAlignment.end,
-                            children: [
-                              Text("Rp "+
-                                  NumberFormat.currency(
-                                      locale: 'id', decimalDigits: 0, symbol: '').format(
-                                      data[i]["c"]), style: new TextStyle(
-                                  decoration: TextDecoration.lineThrough,
-                                  fontFamily: 'VarelaRound',fontSize: 12),),
-                              Padding(padding: const EdgeInsets.only(left: 5),child:
-                              Text("Rp "+
-                                  NumberFormat.currency(
-                                      locale: 'id', decimalDigits: 0, symbol: '').format(
-                                      data[i]["c"] - double.parse(data[i]["f"])), style: new TextStyle(
-                                  fontFamily: 'VarelaRound',fontSize: 12,fontWeight: FontWeight.bold),),)
-                            ],
-                          ),
-                        )
-                            :
-                        Text("Rp "+
-                            NumberFormat.currency(
-                                locale: 'id', decimalDigits: 0, symbol: '').format(
-                                data[i]["c"]), style: new TextStyle(
-                            fontFamily: 'VarelaRound',fontSize: 12,fontWeight: FontWeight.bold),)
                     ),
                   ),
+                  Padding(padding: const EdgeInsets.only(top :10 ))
                 ],
               );
             },

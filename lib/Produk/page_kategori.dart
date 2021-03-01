@@ -250,6 +250,7 @@ class _ProdukKategoriState extends State<ProdukKategori> {
                                             fontFamily: 'VarelaRound', fontSize: 15),),
                                         trailing: InkWell(
                                           onTap: (){
+                                            FocusScope.of(context).requestFocus(FocusNode());
                                             _showDelete(data[i]["a"].toString());
                                           },
                                           child: FaIcon(FontAwesomeIcons.trash,size: 18,color: Colors.redAccent,),
@@ -274,6 +275,7 @@ class _ProdukKategoriState extends State<ProdukKategori> {
             padding: const EdgeInsets.only(right : 10),
             child: FloatingActionButton(
               onPressed: (){
+                FocusScope.of(context).requestFocus(FocusNode());
                 Navigator.push(context, ExitPage(page: ProdukKategoriInsert()));
               },
               child: FaIcon(FontAwesomeIcons.plus),

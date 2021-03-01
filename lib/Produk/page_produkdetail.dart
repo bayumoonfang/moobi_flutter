@@ -164,6 +164,61 @@ class _ProdukDetailState extends State<ProdukDetail> {
   }
 
 
+  void doHapusImage() {
+    var url = applink+"api_model.php?act=hapus_photoproduk";
+    http.post(url,
+        body: {
+          "produk_id" : widget.idItem
+        });
+    showToast("Photo produk berhasil dihapus.. Silahkan refresh halaman ini", gravity: Toast.BOTTOM, duration: Toast.LENGTH_LONG);
+    return;
+  }
+
+
+
+
+  alertHapusImage() {
+    showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            //title: Text(),
+            content: Container(
+                width: double.infinity,
+                height: 178,
+                child: Column(
+                  children: [
+                    Align(alignment: Alignment.center, child:
+                    Text("Konfirmasi", style: TextStyle(fontFamily: 'VarelaRound', fontSize: 20,
+                        fontWeight: FontWeight.bold)),),
+                    Padding(padding: const EdgeInsets.only(top: 15), child:
+                    Align(alignment: Alignment.center, child: FaIcon(FontAwesomeIcons.trash,
+                      color: Colors.redAccent,size: 35,)),),
+                    Padding(padding: const EdgeInsets.only(top: 15), child:
+                    Align(alignment: Alignment.center, child:
+                    Text("Apakah anda yakin menghapus gambar ini ? ",
+                        style: TextStyle(fontFamily: 'VarelaRound', fontSize: 12)),)),
+                    Padding(padding: const EdgeInsets.only(top: 25), child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      children: <Widget>[
+                        Expanded(child: OutlineButton(
+                          onPressed: () {Navigator.pop(context);}, child: Text("Tidak"),)),
+                        Expanded(child: OutlineButton(
+                          borderSide: BorderSide(width: 1.0, color: Colors.redAccent),
+                          onPressed: () {
+                            doHapusImage();
+                            Navigator.pop(context);
+                          }, child: Text("Hapus", style: TextStyle(color: Colors.red),),)),
+                      ],),)
+                  ],
+                )
+            ),
+          );
+        });
+
+  }
+
+
 
 
   alertHapus() {
@@ -340,7 +395,7 @@ class _ProdukDetailState extends State<ProdukDetail> {
           return AlertDialog(
               content:
               Container(
-                  height: 70,
+                  height: 120,
                   child:
                   SingleChildScrollView(
                     child :
@@ -348,51 +403,105 @@ class _ProdukDetailState extends State<ProdukDetail> {
                       children: [
                         isVisible == true ?
                         getPhoto != '' ?
-                        InkWell(
-                          onTap: (){
-                            Navigator.push(context, ExitPage(page: ProdukDetailImage(getPhoto.toString(), getBranch.toString())));
-                            //Navigator.pop(context);
-                          },
-                          child: Align(alignment: Alignment.centerLeft,
-                            child:    Text(
-                              "Lihat Photo",
-                              textAlign: TextAlign.left,
-                              style: TextStyle(
-                                  fontFamily: 'VarelaRound',
-                                  fontSize: 15),
-                            ),),
+                        Column(
+                          children: [
+                            InkWell(
+                              onTap: (){
+                                Navigator.push(context, ExitPage(page: ProdukDetailImage(getPhoto.toString(), getBranch.toString())));
+                              },
+                              child: Align(alignment: Alignment.centerLeft,
+                                child:    Text(
+                                  "Lihat Photo",
+                                  textAlign: TextAlign.left,
+                                  style: TextStyle(
+                                      fontFamily: 'VarelaRound',
+                                      fontSize: 15),
+                                ),),
+                            ),
+                            Padding(padding: const EdgeInsets.only(top:15,bottom: 15,left: 4,right: 4),
+                              child: Divider(height: 5,),),
+                            InkWell(
+                              onTap: (){
+                                alertHapusImage();
+                                Navigator.pop(context);
+                              },
+                              child: Align(alignment: Alignment.centerLeft,
+                                child:    Text(
+                                  "Hapus Photo",
+                                  textAlign: TextAlign.left,
+                                  style: TextStyle(
+                                      fontFamily: 'VarelaRound',
+                                      fontSize: 15),
+                                ),),
+                            ),
+                            Padding(padding: const EdgeInsets.only(top:15,bottom: 15,left: 4,right: 4),
+                              child: Divider(height: 5,),),
+                            InkWell(
+                                onTap: (){
+                                  setState(() {
+                                    FocusScope.of(context).requestFocus(FocusNode());
+                                    imageSelectorGallery();
+                                    Navigator.pop(context);
+                                  });
+                                },
+                              child: Align(alignment: Alignment.centerLeft,
+                                child:    Text(
+                                  "Ganti Photo",
+                                  textAlign: TextAlign.left,
+                                  style: TextStyle(
+                                      fontFamily: 'VarelaRound',
+                                      fontSize: 15),
+                                ),),
+                            )
+                          ],
                         )
                         :
-                            Container(width: 5,height: 5,)
+                            Column(
+                              children: [
+                                Align(alignment: Alignment.centerLeft,
+                                  child:    Text(
+                                    "Hapus Photo",
+                                    textAlign: TextAlign.left,
+                                    style: TextStyle(
+                                        fontFamily: 'VarelaRound',
+                                        color: Colors.grey,
+                                        fontSize: 15),
+                                  ),),
+                                Padding(padding: const EdgeInsets.only(top:15,bottom: 15,left: 4,right: 4),
+                                  child: Divider(height: 5,),),
+                                Align(alignment: Alignment.centerLeft,
+                                  child:    Text(
+                                    "Lihat Photo",
+                                    textAlign: TextAlign.left,
+                                    style: TextStyle(
+                                        fontFamily: 'VarelaRound',
+                                        color: Colors.grey,
+                                        fontSize: 15),
+                                  ),),
+                                Padding(padding: const EdgeInsets.only(top:15,bottom: 15,left: 4,right: 4),
+                                  child: Divider(height: 5,),),
+                                InkWell(
+                                  onTap: (){
+                                    setState(() {
+                                      FocusScope.of(context).requestFocus(FocusNode());
+                                      imageSelectorGallery();
+                                      Navigator.pop(context);
+                                    });
+                                  },
+                                  child: Align(alignment: Alignment.centerLeft,
+                                    child:    Text(
+                                      "Ganti Photo",
+                                      textAlign: TextAlign.left,
+                                      style: TextStyle(
+                                          fontFamily: 'VarelaRound',
+                                          fontSize: 15),
+                                    ),),
+                                ),
+                              ],
+                            )
                         :
-                        Align(alignment: Alignment.centerLeft,
-                          child:    Text(
-                            "Lihat Photo",
-                            textAlign: TextAlign.left,
-                            style: TextStyle(
-                                fontFamily: 'VarelaRound',
-                                color: Colors.grey,
-                                fontSize: 15),
-                          ),),
-                        Padding(padding: const EdgeInsets.only(top:15,bottom: 15,left: 4,right: 4),
-                          child: Divider(height: 5,),),
-                        InkWell(
-                          onTap: (){
-                            setState(() {
-                              FocusScope.of(context).requestFocus(FocusNode());
-                              imageSelectorGallery();
-                              Navigator.pop(context);
-                            });
-                          },
-                          child: Align(alignment: Alignment.centerLeft,
-                            child:    Text(
-                              "Ganti Photo",
-                              textAlign: TextAlign.left,
-                              style: TextStyle(
-                                  fontFamily: 'VarelaRound',
-                                  fontSize: 15),
-                            ),),
-                        ),
+                            Container(width: 0,height: 0,),
+
 
                       ],
                     ),

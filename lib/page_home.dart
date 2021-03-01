@@ -113,11 +113,11 @@ class _HomeState extends State<Home> {
               title:
               Padding(
                   padding: const EdgeInsets.only(left: 10),
-                  child:   Text("Mico", style: TextStyle(color: Colors.white,
+                  child:   Text("Moobi", style: TextStyle(color: Colors.white,
                       fontFamily: 'VarelaRound', fontSize: 24,
                       fontWeight: FontWeight.bold),)
               ),
-              elevation: 0.5,
+              elevation: 0,
               centerTitle: false,
             ),
             body:
@@ -274,7 +274,7 @@ class _HomeState extends State<Home> {
                                 runSpacing: 30,
                                 children: [
                                   InkWell(
-                                    onTap: (){Navigator.pushReplacement(context, ExitPage(page: Jualan()));},
+                                    onTap: (){Navigator.push(context, ExitPage(page: Jualan()));},
                                     child:Column(
                                       children: [
                                         Container(

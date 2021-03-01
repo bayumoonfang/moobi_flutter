@@ -78,7 +78,7 @@ class _ProdukSatuanInsertState extends State<ProdukSatuanInsert> {
     FocusScope.of(context).requestFocus(FocusNode());
     final response = await http.post(applink+"api_model.php?act=add_satuan", body: {
       "satuan_deskripsi": _deskripsisatuan.text,
-      "satuan" : _satuan,
+      "satuan" : _satuan.text,
       "satuan_branch" : getBranchVal
     });
     Map data = jsonDecode(response.body);
