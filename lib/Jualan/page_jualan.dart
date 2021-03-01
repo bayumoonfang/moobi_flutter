@@ -29,13 +29,19 @@ class Jualan extends StatefulWidget{
 
 class JualanState extends State<Jualan> {
   List data;
-
+  List data2;
+  FocusNode myFocusNode;
   void showToast(String msg, {int duration, int gravity}) {
     Toast.show(msg, context, duration: duration, gravity: gravity);
   }
   bool _isvisible = true;
-
-
+  bool isSemua = true;
+  bool isTerjual = false;
+  bool isDiskon = false;
+  bool isTerlaris = false;
+  bool isTermurah = false;
+  bool isTermahal = false;
+  TextEditingController _produkdibeli = TextEditingController();
   String getEmail = '...';
   _session() async {
     int value = await Session.getValue();
@@ -66,18 +72,31 @@ class JualanState extends State<Jualan> {
   }
 
 
-  String filter = "";
+  String filter = "Semua";
+  String filterq = "";
   String sortby = '0';
   Future<List> getData() async {
     http.Response response = await http.get(
-        Uri.encodeFull(applink+"api_model.php?act=getdata_produk&id="+getBranchVal+"&filter="+filter
-            +"&sort="+sortby),
+        Uri.encodeFull(applink+"api_model.php?act=getdata_produk_jual&id="+getBranchVal+"&filter="+filter
+            +"&sort="+sortby+"&filterq="+filterq),
         headers: {"Accept":"application/json"}
     );
     setState((){
       data = json.decode(response.body);
     });
   }
+
+  Future<List> getDataKategori() async {
+    http.Response response = await http.get(
+        Uri.encodeFull(applink+"api_model.php?act=getdata_kategori&branch="+getBranchVal+"&filter="),
+        headers: {"Accept":"application/json"}
+    );
+    setState((){
+      data2 = json.decode(response.body);
+    });
+  }
+
+
 
   _prepare() async {
     await _connect();
@@ -99,7 +118,72 @@ class JualanState extends State<Jualan> {
   void initState() {
     super.initState();
     _prepare();
+    _produkdibeli.text = "1";
   }
+
+
+  dialogAdd(String valNama) {
+    showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            //title: Text(),
+            content: Container(
+                width: double.infinity,
+                height: 188,
+                child: Column(
+                  children: [
+                    Align(alignment: Alignment.center, child:
+                    Text("Jumlah Dibeli", style: TextStyle(fontFamily: 'VarelaRound', fontSize: 20,
+                        fontWeight: FontWeight.bold)),),
+                    Padding(padding: const EdgeInsets.only(top: 15), child:
+                    Align(alignment: Alignment.center, child:
+                    Text(valNama,
+                        style: TextStyle(fontFamily: 'VarelaRound', fontSize: 12))
+                    ),),
+                    Padding(padding: const EdgeInsets.only(top: 15), child:
+                    Align(alignment: Alignment.center, child:
+                    TextFormField(
+                      autofocus: true,
+                      focusNode: myFocusNode,
+                      controller: _produkdibeli,
+                      style: TextStyle(fontFamily: "VarelaRound",fontSize: 15),
+                      keyboardType: TextInputType.number,
+                      decoration: new InputDecoration(
+                        contentPadding: const EdgeInsets.only(top: 1,left: 10,bottom: 1),
+                        focusedBorder: OutlineInputBorder(
+                          borderSide: BorderSide(color: HexColor("#DDDDDD"), width: 1.0),
+                        ),
+                        enabledBorder: OutlineInputBorder(
+                          borderSide: BorderSide(color: HexColor("#DDDDDD"), width: 1.0),
+                        ),
+                        hintText: 'Contoh : 5, 25, dll',
+                        floatingLabelBehavior: FloatingLabelBehavior.always,
+                        hintStyle: TextStyle(fontFamily: "VarelaRound", color: HexColor("#c4c4c4")),
+                      ),
+                    ),
+                    )),
+                    Padding(padding: const EdgeInsets.only(top: 25), child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      children: <Widget>[
+                        Expanded(child: OutlineButton(
+                          onPressed: () {Navigator.pop(context);}, child: Text("Tutup"),)),
+                        Expanded(child: OutlineButton(
+                          borderSide: BorderSide(width: 1.0, color: Colors.redAccent),
+                          onPressed: () {
+                            //doSimpandiskon();
+                            //Navigator.pop(context);
+                          }, child: Text("Add to Chart", style: TextStyle(color: Colors.red),),)),
+                      ],),)
+                  ],
+                )
+            ),
+          );
+        });
+
+
+  }
+
 
 
   @override
@@ -107,6 +191,7 @@ class JualanState extends State<Jualan> {
     return WillPopScope(
       child: Scaffold(
         appBar: new AppBar(
+          elevation: 0.5,
           backgroundColor: Colors.white,
           leadingWidth: 38, // <-- Use this
           centerTitle: false,
@@ -116,7 +201,14 @@ class JualanState extends State<Jualan> {
                 child: Container(
                   height: 40,
                   child: TextFormField(
-
+                    enableInteractiveSelection: false,
+                    onChanged: (text) {
+                      setState(() {
+                        filterq = text;
+                        _isvisible = false;
+                        startSCreen();
+                      });
+                    },
                     //controller: _nama,
                     style: TextStyle(fontFamily: "VarelaRound",fontSize: 15),
                     decoration: new InputDecoration(
@@ -176,9 +268,201 @@ class JualanState extends State<Jualan> {
           ],
         ),
         body: Container(
+          color: Colors.white,
           child: Column(
             children: [
+              Container(
+                height: 50,
+                width: double.infinity,
+                child: SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  child: Row(
+                    children: [
+                      Padding(padding: const EdgeInsets.only(left: 10),
+                        child: Container(
+                          height: 30,
+                          child: RaisedButton(
+                            elevation: 0,
+                            child: Text("Semua",style: TextStyle(fontSize: 12,fontWeight: FontWeight.bold,fontFamily: 'VarelaRound',
+                                color: isSemua == true ? Colors.white : Colors.black
+                            ),),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(18.0),
+                              side: BorderSide(color: isSemua == true ? HexColor("#602d98") : Colors.black,width: 0.8),
+                            ),
+                            color: isSemua == true ? HexColor("#602d98") : Colors.white ,
+                            onPressed: (){
+                              setState(() {
+                                _isvisible = false;
+                                isDiskon = false;
+                                isTerjual = false;
+                                isTerlaris = false;
+                                isTermurah = false;
+                                isTermahal = false;
+                                isSemua = true;
+                                filter = "Semua";
+                                startSCreen();
+                              });
+                            },
+                          ),
+                        ),),
 
+                      Padding(padding: const EdgeInsets.only(left: 10),
+                        child: Container(
+                          height: 30,
+                          child: RaisedButton(
+                            elevation: 0,
+                            child: Text("Terjual Teakhir",style: TextStyle(fontSize: 12,fontWeight: FontWeight.bold,fontFamily: 'VarelaRound',
+                                color: isTerjual == true ? Colors.white : Colors.black
+                            ),),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(18.0),
+                              side: BorderSide(color: isTerjual == true ? HexColor("#602d98") : Colors.black,width: 0.5),
+                            ),
+                            color: isTerjual == true ? HexColor("#602d98") : Colors.white ,
+                            onPressed: (){
+                              setState(() {
+                                _isvisible = false;
+                                isDiskon = false;
+                                isTerjual = true;
+                                isTerlaris = false;
+                                isTermurah = false;
+                                isTermahal = false;
+                                isSemua = false;
+                                filter = "Terjual";
+                                startSCreen();
+                              });
+                            },
+                          ),
+                        ),),
+
+                      Padding(padding: const EdgeInsets.only(left: 10),
+                        child: Container(
+                          height: 30,
+                          child: RaisedButton(
+                            elevation: 0,
+                            child: Text("Diskon",style: TextStyle(fontSize: 12,fontWeight: FontWeight.bold,fontFamily: 'VarelaRound',
+                                color: isDiskon == true ? Colors.white : Colors.black
+                            ),),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(18.0),
+                              side: BorderSide(color: isDiskon == true ? HexColor("#602d98") : Colors.black,width: 0.5),
+                            ),
+                            color: isDiskon == true ? HexColor("#602d98") : Colors.white ,
+                            onPressed: (){
+                              setState(() {
+                                _isvisible = false;
+                                isDiskon = true;
+                                isTerjual = false;
+                                isTerlaris = false;
+                                isTermurah = false;
+                                isTermahal = false;
+                                isSemua = false;
+                                filter = "Diskon";
+                                startSCreen();
+                              });
+                            },
+                          ),
+                        ),),
+
+
+                      Padding(padding: const EdgeInsets.only(left: 10),
+                        child: Container(
+                          height: 30,
+                          child: RaisedButton(
+                            elevation: 0,
+                            child: Text("Terlaris",style: TextStyle(fontSize: 12,fontWeight: FontWeight.bold,fontFamily: 'VarelaRound',
+                                color: isTerlaris == true ? Colors.white : Colors.black
+                            ),),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(18.0),
+                              side: BorderSide(color: isTerlaris == true ? HexColor("#602d98") : Colors.black,width: 0.5),
+                            ),
+                            color: isTerlaris == true ? HexColor("#602d98") : Colors.white ,
+                            onPressed: (){
+                              setState(() {
+                                _isvisible = false;
+                                isDiskon = false;
+                                isTerjual = false;
+                                isSemua = false;
+                                isTerlaris = true;
+                                isTermurah = false;
+                                isTermahal = false;
+                                filter = "Terlaris";
+                                startSCreen();
+                              });
+                            },
+                          ),
+                        ),),
+
+
+                      Padding(padding: const EdgeInsets.only(left: 10),
+                        child: Container(
+                          height: 30,
+                          child: RaisedButton(
+                            elevation: 0,
+                            child: Text("Termurah",style: TextStyle(fontSize: 12,fontWeight: FontWeight.bold,fontFamily: 'VarelaRound',
+                                color: isTermurah == true ? Colors.white : Colors.black
+                            ),),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(18.0),
+                              side: BorderSide(color: isTermurah == true ? HexColor("#602d98") : Colors.black,width: 0.5),
+                            ),
+                            color: isTermurah == true ? HexColor("#602d98") : Colors.white ,
+                            onPressed: (){
+                              setState(() {
+                                _isvisible = false;
+                                isDiskon = false;
+                                isTerjual = false;
+                                isSemua = false;
+                                isTerlaris = false;
+                                isTermurah = true;
+                                isTermahal = false;
+                                filter = "Termurah";
+                                startSCreen();
+                              });
+                            },
+                          ),
+                        ),),
+
+
+                      Padding(padding: const EdgeInsets.only(left: 10,right: 10),
+                        child: Container(
+                          height: 30,
+                          child: RaisedButton(
+                            elevation: 0,
+                            child: Text("Termahal",style: TextStyle(fontSize: 12,fontWeight: FontWeight.bold,fontFamily: 'VarelaRound',
+                                color: isTermahal == true ? Colors.white : Colors.black
+                            ),),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(18.0),
+                              side: BorderSide(color: isTermahal == true ? HexColor("#602d98") : Colors.black,width: 0.5),
+                            ),
+                            color: isTermahal == true ? HexColor("#602d98") : Colors.white ,
+                            onPressed: (){
+                              setState(() {
+                                _isvisible = false;
+                                isDiskon = false;
+                                isTerjual = false;
+                                isSemua = false;
+                                isTerlaris = false;
+                                isTermurah = false;
+                                isTermahal = true;
+                                filter = "Termahal";
+                                startSCreen();
+                              });
+                            },
+                          ),
+                        ),),
+
+
+
+                    ],
+                  ),
+                )
+              ),
+              Padding(padding: const EdgeInsets.only(left: 15,right: 15),
+              child: Divider(height: 4,),),
               Padding(padding: const EdgeInsets.only(top: 10),),
               Visibility(
                   visible: _isvisible,
@@ -251,14 +535,19 @@ class JualanState extends State<Jualan> {
               return Column(
                 children: <Widget>[
                   InkWell(
+                    onTap: () {
+                      FocusScope.of(context).requestFocus(FocusNode());
+                      dialogAdd(data[i]["a"]);
+                      myFocusNode.requestFocus();
+                    },
                     child: ListTile(
                         leading:
                         data[i]["e"] != 0 ?
                            Badge(
-                             badgeContent: Text("3",style: TextStyle(color: Colors.white),),
-                             child:  Container(
-                                 width: 70,
-                                 height: 95,
+                             badgeContent: Text(data[i]["e"].toString(),style: TextStyle(color: Colors.white,fontSize: 12),),
+                             child:  SizedBox(
+                                 width: 60,
+                                 height: 100,
                                  child: ClipRRect(
                                    borderRadius: BorderRadius.circular(6.0),
                                    child : CachedNetworkImage(
@@ -276,9 +565,9 @@ class JualanState extends State<Jualan> {
                            )
 
                             :
-                        Container(
-                            width: 70,
-                            height: 95,
+                        SizedBox(
+                            width: 60,
+                            height: 100,
                             child: ClipRRect(
                               borderRadius: BorderRadius.circular(6.0),
                               child : CachedNetworkImage(
@@ -293,7 +582,6 @@ class JualanState extends State<Jualan> {
                                 errorWidget: (context, url, error) => Icon(Icons.error),
                               ),
                             )),
-
                         title: Align(alignment: Alignment.centerLeft,
                           child: Text(data[i]["a"],
                               style: TextStyle(fontFamily: "VarelaRound",
