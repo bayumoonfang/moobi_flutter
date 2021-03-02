@@ -14,6 +14,7 @@ import 'package:intl/intl.dart';
 import 'package:moobi_flutter/Helper/check_connection.dart';
 import 'package:moobi_flutter/Helper/page_route.dart';
 import 'package:moobi_flutter/Helper/session.dart';
+import 'package:moobi_flutter/Jualan/page_checkout.dart';
 import 'package:moobi_flutter/page_login.dart';
 import 'package:responsive_container/responsive_container.dart';
 import 'package:toast/toast.dart';
@@ -30,10 +31,13 @@ class Jualan extends StatefulWidget{
 class JualanState extends State<Jualan> {
   List data;
   List data2;
+  List data3;
   FocusNode myFocusNode;
   void showToast(String msg, {int duration, int gravity}) {
     Toast.show(msg, context, duration: duration, gravity: gravity);
   }
+
+
   bool _isvisible = true;
   bool isSemua = true;
   bool isTerjual = false;
@@ -62,12 +66,14 @@ class JualanState extends State<Jualan> {
   }
 
   String getBranchVal = '';
+  String getNamaUser = '';
   _getBranch() async {
     final response = await http.get(
         applink+"api_model.php?act=userdetail&id="+getEmail.toString());
     Map data = jsonDecode(response.body);
     setState(() {
       getBranchVal = data["c"].toString();
+      getNamaUser = data["j"].toString();
     });
   }
 
@@ -86,9 +92,9 @@ class JualanState extends State<Jualan> {
     });
   }
 
-  Future<List> getDataKategori() async {
+  Future<List> getDataOrderPending() async {
     http.Response response = await http.get(
-        Uri.encodeFull(applink+"api_model.php?act=getdata_kategori&branch="+getBranchVal+"&filter="),
+        Uri.encodeFull(applink+"api_model.php?act=getdata_countorderpending&branch="+getBranchVal+"&namauser="+getNamaUser),
         headers: {"Accept":"application/json"}
     );
     setState((){
@@ -96,7 +102,15 @@ class JualanState extends State<Jualan> {
     });
   }
 
-
+  Future<List> getDataKategori() async {
+    http.Response response = await http.get(
+        Uri.encodeFull(applink+"api_model.php?act=getdata_kategori&branch="+getBranchVal+"&filter="),
+        headers: {"Accept":"application/json"}
+    );
+    setState((){
+      data3 = json.decode(response.body);
+    });
+  }
 
   _prepare() async {
     await _connect();
@@ -113,72 +127,203 @@ class JualanState extends State<Jualan> {
     });
   }
 
+  void doFavorite() {
+    setState(() {
+      _isvisible = false;
+      isDiskon = false;
+      isTerjual = false;
+      isSemua = false;
+      isTerlaris = false;
+      isTermurah = false;
+      isTermahal = false;
+      filter = "Terlaris";
+      startSCreen();
+    });
+  }
+
 
   @override
   void initState() {
     super.initState();
     _prepare();
-    _produkdibeli.text = "1";
   }
 
 
-  dialogAdd(String valNama) {
+  int valJumlahq = 0;
+  TextEditingController _transcomment = TextEditingController();
+
+
+  void _kurangqty() {
+    setState(() {
+      valJumlahq -= 1;
+    });
+  }
+
+
+  void _tambahqty() {
+    setState(() {
+      valJumlahq += 1;
+    });
+  }
+
+  addKeranjang(String valProduk) {
+    http.post(applink+"api_model.php?act=add_keranjang", body: {
+      "produk_id": valProduk,
+      "emailuser" : getEmail,
+      "produk_branch" : getBranchVal
+    });
+  }
+
+  addKeranjangqty(String valIDq) {
+    http.post(applink+"api_model.php?act=add_keranjangqty", body: {
+      "produk_id": valIDq,
+      "emailuser" : getEmail,
+      "produk_branch" : getBranchVal,
+      "produk_qty" : _produkdibeli.text,
+    });
+    Navigator.pop(context);
+    setState(() {
+      _produkdibeli.text = "";
+    });
+  }
+
+
+  void _filterMe() {
     showDialog(
         context: context,
         builder: (BuildContext context) {
           return AlertDialog(
-            //title: Text(),
-            content: Container(
-                width: double.infinity,
-                height: 188,
-                child: Column(
-                  children: [
-                    Align(alignment: Alignment.center, child:
-                    Text("Jumlah Dibeli", style: TextStyle(fontFamily: 'VarelaRound', fontSize: 20,
-                        fontWeight: FontWeight.bold)),),
-                    Padding(padding: const EdgeInsets.only(top: 15), child:
-                    Align(alignment: Alignment.center, child:
-                    Text(valNama,
-                        style: TextStyle(fontFamily: 'VarelaRound', fontSize: 12))
-                    ),),
-                    Padding(padding: const EdgeInsets.only(top: 15), child:
-                    Align(alignment: Alignment.center, child:
-                    TextFormField(
-                      autofocus: true,
-                      focusNode: myFocusNode,
-                      controller: _produkdibeli,
-                      style: TextStyle(fontFamily: "VarelaRound",fontSize: 15),
-                      keyboardType: TextInputType.number,
-                      decoration: new InputDecoration(
-                        contentPadding: const EdgeInsets.only(top: 1,left: 10,bottom: 1),
-                        focusedBorder: OutlineInputBorder(
-                          borderSide: BorderSide(color: HexColor("#DDDDDD"), width: 1.0),
-                        ),
-                        enabledBorder: OutlineInputBorder(
-                          borderSide: BorderSide(color: HexColor("#DDDDDD"), width: 1.0),
-                        ),
-                        hintText: 'Contoh : 5, 25, dll',
-                        floatingLabelBehavior: FloatingLabelBehavior.always,
-                        hintStyle: TextStyle(fontFamily: "VarelaRound", color: HexColor("#c4c4c4")),
-                      ),
-                    ),
-                    )),
-                    Padding(padding: const EdgeInsets.only(top: 25), child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                      children: <Widget>[
-                        Expanded(child: OutlineButton(
-                          onPressed: () {Navigator.pop(context);}, child: Text("Tutup"),)),
-                        Expanded(child: OutlineButton(
-                          borderSide: BorderSide(width: 1.0, color: Colors.redAccent),
-                          onPressed: () {
-                            //doSimpandiskon();
-                            //Navigator.pop(context);
-                          }, child: Text("Add to Chart", style: TextStyle(color: Colors.red),),)),
-                      ],),)
-                  ],
-                )
-            ),
+              content:
+              SingleChildScrollView(
+                child :
+                    Container(
+                      height: 200,
+                      width: 100,
+                           child:  FutureBuilder(
+                             future: getDataKategori(),
+                             builder: (context, snapshot) {
+                               return ListView.builder(
+                                   itemCount: data3 == null ? 0 : data3.length,
+                                   itemBuilder: (context, i) {
+                                     return Column(
+                                       children: [
+                                         InkWell(
+                                           onTap: (){
+                                             setState(() {
+                                               _isvisible = false;
+                                               isDiskon = false;
+                                               isTerjual = false;
+                                               isTerlaris = false;
+                                               isTermurah = false;
+                                               isTermahal = false;
+                                               isSemua = false;
+                                               filter = data3[i]["b"].toString();
+                                               startSCreen();
+                                               Navigator.pop(context);
+                                             });
+                                           },
+                                           child: Align(alignment: Alignment.centerLeft,
+                                             child:    Text(
+                                               data3[i]["b"],
+                                               textAlign: TextAlign.left,
+                                               style: TextStyle(
+                                                   fontFamily: 'VarelaRound',
+                                                   fontSize: 15),
+                                             ),),
+                                         ),
+                                         Padding(padding: const EdgeInsets.only(top:15,bottom: 15,left: 4,right: 4),
+                                           child: Divider(height: 5,),),
+                                       ],
+                                     );
+                                   }
+                               );
+                             },
+                           ),
+                         )
+              )
           );
+        });
+  }
+
+
+
+  dialogAdd(String valNama, String valID) {
+    showDialog(
+        context: context,
+        builder: (BuildContext context) {
+            int valJumlahq2 = 1;
+            return StatefulBuilder(
+                builder: (context, setState) {
+                 return AlertDialog(
+                    //title: Text(),
+                    content: ResponsiveContainer(
+                        widthPercent: 100,
+                        heightPercent: 35,
+                        child: Column(
+                          children: [
+                            Padding(padding: const EdgeInsets.only(top: 8), child:
+                            Align(alignment: Alignment.center, child: Text(valNama,
+                                style: TextStyle(fontFamily: 'VarelaRound', fontSize: 16, fontWeight: FontWeight.bold))
+                            ),),
+                            Padding(padding: const EdgeInsets.only(top: 25,bottom: 15),
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                children: [
+                                  FlatButton(child: Text("-",style: TextStyle(fontSize: 48,fontWeight: FontWeight.bold),),
+                                    onPressed: (){
+                                      setState(() {
+                                        valJumlahq2 -= 1;
+                                      });
+                                    },),
+                                  Text("$valJumlahq2",style: TextStyle(fontSize: 52,fontWeight: FontWeight.bold),),
+                                  FlatButton(child: Text("+",style: TextStyle(fontSize: 46,fontWeight: FontWeight.bold),),
+                                    onPressed: (){
+                                      setState(() {
+                                        valJumlahq2 += 1;
+                                      });
+                                    },),
+                                ],
+                              ),),
+
+
+                            Padding(padding: const EdgeInsets.only(top: 15), child:
+                            Align(alignment: Alignment.center, child:
+                            TextFormField(
+                              controller: _transcomment,
+                              style: TextStyle(fontFamily: "VarelaRound",fontSize: 15),
+                              keyboardType: TextInputType.text,
+                              decoration: new InputDecoration(
+                                contentPadding: const EdgeInsets.only(top: 1,left: 10,bottom: 1),
+                                focusedBorder: OutlineInputBorder(
+                                  borderSide: BorderSide(color: HexColor("#DDDDDD"), width: 1.0),
+                                ),
+                                enabledBorder: OutlineInputBorder(
+                                  borderSide: BorderSide(color: HexColor("#DDDDDD"), width: 1.0),
+                                ),
+                                hintText: 'Note. Contoh : Pedas, Tidak Pedas',
+                                floatingLabelBehavior: FloatingLabelBehavior.always,
+                                hintStyle: TextStyle(fontFamily: "VarelaRound", color: HexColor("#c4c4c4")),
+                              ),
+                            ),
+                            )),
+                            Padding(padding: const EdgeInsets.only(top: 20), child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                              children: <Widget>[
+                                Expanded(child: OutlineButton(
+                                  onPressed: () {Navigator.pop(context);}, child: Text("Tutup"),)),
+                                Expanded(child: OutlineButton(
+                                  borderSide: BorderSide(width: 1.0, color: Colors.redAccent),
+                                  onPressed: () {
+                                    addKeranjangqty(valID);
+
+                                  }, child: Text("Add to Chart", style: TextStyle(color: Colors.red),),)),
+                              ],),)
+                          ],
+                        )
+                    ),
+                  );
+                },
+            );
         });
 
 
@@ -240,8 +385,9 @@ class JualanState extends State<Jualan> {
           ),
           actions: [
             InkWell(
+              hoverColor: Colors.transparent,
               onTap: () {
-                //_showAlert();
+                doFavorite();
               },
               child: Padding(
                 padding: const EdgeInsets.only(right: 25,top : 16),
@@ -253,8 +399,9 @@ class JualanState extends State<Jualan> {
               ),
             ),
             InkWell(
+              hoverColor: Colors.transparent,
               onTap: () {
-                //_showAlert();
+                _filterMe();
               },
               child: Padding(
                 padding: const EdgeInsets.only(right: 27,top : 16),
@@ -366,35 +513,6 @@ class JualanState extends State<Jualan> {
                         ),),
 
 
-                      Padding(padding: const EdgeInsets.only(left: 10),
-                        child: Container(
-                          height: 30,
-                          child: RaisedButton(
-                            elevation: 0,
-                            child: Text("Terlaris",style: TextStyle(fontSize: 12,fontWeight: FontWeight.bold,fontFamily: 'VarelaRound',
-                                color: isTerlaris == true ? Colors.white : Colors.black
-                            ),),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(18.0),
-                              side: BorderSide(color: isTerlaris == true ? HexColor("#602d98") : Colors.black,width: 0.5),
-                            ),
-                            color: isTerlaris == true ? HexColor("#602d98") : Colors.white ,
-                            onPressed: (){
-                              setState(() {
-                                _isvisible = false;
-                                isDiskon = false;
-                                isTerjual = false;
-                                isSemua = false;
-                                isTerlaris = true;
-                                isTermurah = false;
-                                isTermahal = false;
-                                filter = "Terlaris";
-                                startSCreen();
-                              });
-                            },
-                          ),
-                        ),),
-
 
                       Padding(padding: const EdgeInsets.only(left: 10),
                         child: Container(
@@ -473,19 +591,40 @@ class JualanState extends State<Jualan> {
             ],
           ),
         ),
-        floatingActionButton: Container(
-          height: 70,
-          width: 70,
-          child: FittedBox(
-            child: Badge(
-              badgeContent: Text("3",style: TextStyle(color: Colors.white),),
-              position: BadgePosition(end: 0,top: 0),
-              child: FloatingActionButton(onPressed: () {},
-                child: FaIcon(FontAwesomeIcons.shoppingBasket),
-              ),
-            )
-          ),
-        ),
+        floatingActionButton:
+             Container(
+                height: 70,
+                width: 70,
+               child: FutureBuilder(
+                  future: getDataOrderPending(),
+                  builder: (context, snapshot) {
+                      return ListView.builder(
+                      itemCount: data2 == null ? 0 : data2.length,
+                      itemBuilder: (context, i) {
+                      return  FittedBox(
+                            child: Badge(
+                              badgeContent: Text(
+                                  data2[i]["a"].toString() == "null" ? "0" : data2[i]["a"].toString()
+                                ,style: TextStyle(color: Colors.white),),
+                              position: BadgePosition(end: 0,top: 0),
+                              child: FloatingActionButton(
+                                onPressed: () {
+                                data2[i]["a"].toString() == "null" ?
+                                FocusScope.of(context).requestFocus(FocusNode())
+                                    :
+                                  Navigator.push(context, ExitPage(page: Checkout()));
+                              },
+                                child: FaIcon(FontAwesomeIcons.shoppingBasket),
+                              ),
+                            )
+                        );
+                      });
+                  }
+               ),
+
+              )
+
+
       ),
     );
 
@@ -536,10 +675,14 @@ class JualanState extends State<Jualan> {
                 children: <Widget>[
                   InkWell(
                     onTap: () {
-                      FocusScope.of(context).requestFocus(FocusNode());
-                      dialogAdd(data[i]["a"]);
-                      myFocusNode.requestFocus();
+                        addKeranjang(data[i]["i"].toString());
                     },
+                    onLongPress: (){
+                      FocusScope.of(context).requestFocus(FocusNode());
+                      dialogAdd(data[i]["a"], data[i]["i"].toString());
+                      //myFocusNode.requestFocus();
+                    }
+                    ,
                     child: ListTile(
                         leading:
                         data[i]["e"] != 0 ?

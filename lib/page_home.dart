@@ -12,6 +12,7 @@ import 'package:moobi_flutter/Kategori/page_kategori.dart';
 import 'package:moobi_flutter/Produk/page_produk.dart';
 import 'package:moobi_flutter/Produk/page_produkhome.dart';
 import 'package:moobi_flutter/Profile/page_profile.dart';
+import 'package:moobi_flutter/Setting/page_settinghome.dart';
 import 'package:moobi_flutter/Toko/page_toko.dart';
 import 'package:moobi_flutter/Laporan/page_laporanhome.dart';
 import 'package:moobi_flutter/helper/api_link.dart';
@@ -103,9 +104,10 @@ class _HomeState extends State<Home> {
                 FaIcon(FontAwesomeIcons.solidBell, size: 18,)),
                 Padding(padding: const EdgeInsets.only(top: 19,right: 25), child :
                 InkWell(
+                  hoverColor: Colors.transparent,
                   child : FaIcon(FontAwesomeIcons.cog, size: 18,),
                   onTap: () {
-                   // signOut();
+                    Navigator.push(context, ExitPage(page: SettingHome()));
                   },
                 )
                 ),
