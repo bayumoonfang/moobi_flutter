@@ -151,20 +151,31 @@ class JualanState extends State<Jualan> {
 
   int valJumlahq = 0;
   TextEditingController _transcomment = TextEditingController();
-
-
   void _kurangqty() {
     setState(() {
       valJumlahq -= 1;
     });
   }
 
-
   void _tambahqty() {
     setState(() {
       valJumlahq += 1;
     });
   }
+
+
+  addKeranjang2(String valProduk) {
+    http.post(applink+"api_model.php?act=add_keranjang2", body: {
+      "produk_id": valProduk,
+      "emailuser" : getEmail,
+      "produk_branch" : getBranchVal,
+      "trans_comment" : _transcomment.text,
+      "trans_jumlah" : valJumlahq.toString()
+    });
+    Navigator.pop(context);
+  }
+
+
 
   addKeranjang(String valProduk) {
     http.post(applink+"api_model.php?act=add_keranjang", body: {
@@ -174,18 +185,6 @@ class JualanState extends State<Jualan> {
     });
   }
 
-  addKeranjangqty(String valIDq) {
-    http.post(applink+"api_model.php?act=add_keranjangqty", body: {
-      "produk_id": valIDq,
-      "emailuser" : getEmail,
-      "produk_branch" : getBranchVal,
-      "produk_qty" : _produkdibeli.text,
-    });
-    Navigator.pop(context);
-    setState(() {
-      _produkdibeli.text = "";
-    });
-  }
 
 
   void _filterMe() {
@@ -272,6 +271,7 @@ class JualanState extends State<Jualan> {
                                   FlatButton(child: Text("-",style: TextStyle(fontSize: 48,fontWeight: FontWeight.bold),),
                                     onPressed: (){
                                       setState(() {
+                                        _kurangqty();
                                         valJumlahq2 -= 1;
                                       });
                                     },),
@@ -279,6 +279,7 @@ class JualanState extends State<Jualan> {
                                   FlatButton(child: Text("+",style: TextStyle(fontSize: 46,fontWeight: FontWeight.bold),),
                                     onPressed: (){
                                       setState(() {
+                                        _tambahqty();
                                         valJumlahq2 += 1;
                                       });
                                     },),
@@ -292,6 +293,7 @@ class JualanState extends State<Jualan> {
                               controller: _transcomment,
                               style: TextStyle(fontFamily: "VarelaRound",fontSize: 15),
                               keyboardType: TextInputType.text,
+                              textCapitalization: TextCapitalization.sentences,
                               decoration: new InputDecoration(
                                 contentPadding: const EdgeInsets.only(top: 1,left: 10,bottom: 1),
                                 focusedBorder: OutlineInputBorder(
@@ -314,8 +316,7 @@ class JualanState extends State<Jualan> {
                                 Expanded(child: OutlineButton(
                                   borderSide: BorderSide(width: 1.0, color: Colors.redAccent),
                                   onPressed: () {
-                                    addKeranjangqty(valID);
-
+                                    addKeranjang2(valID);
                                   }, child: Text("Add to Chart", style: TextStyle(color: Colors.red),),)),
                               ],),)
                           ],
@@ -678,6 +679,10 @@ class JualanState extends State<Jualan> {
                         addKeranjang(data[i]["i"].toString());
                     },
                     onLongPress: (){
+                      setState(() {
+                        valJumlahq = 0;
+                        _transcomment.text = "";
+                      });
                       FocusScope.of(context).requestFocus(FocusNode());
                       dialogAdd(data[i]["a"], data[i]["i"].toString());
                       //myFocusNode.requestFocus();
