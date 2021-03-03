@@ -149,7 +149,7 @@ class JualanState extends State<Jualan> {
   }
 
 
-  int valJumlahq = 0;
+  int valJumlahq = 1;
   TextEditingController _transcomment = TextEditingController();
   void _kurangqty() {
     setState(() {
