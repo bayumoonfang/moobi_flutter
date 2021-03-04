@@ -326,8 +326,6 @@ class JualanState extends State<Jualan> {
                 },
             );
         });
-
-
   }
 
 
@@ -680,7 +678,7 @@ class JualanState extends State<Jualan> {
                     },
                     onLongPress: (){
                       setState(() {
-                        valJumlahq = 0;
+                        valJumlahq = 1;
                         _transcomment.text = "";
                       });
                       FocusScope.of(context).requestFocus(FocusNode());
