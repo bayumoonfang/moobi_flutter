@@ -762,25 +762,6 @@ class _ProdukDetailState extends State<ProdukDetail> {
                             ],
                           ),),
 
-                        Padding(padding: const EdgeInsets.only(top: 10,right: 25),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment
-                                .spaceBetween,
-                            children: [
-                              Text(
-                                "Kategori",
-                                textAlign: TextAlign.left,
-                                style: TextStyle(
-                                    fontFamily: 'VarelaRound',
-                                    fontSize: 13),
-                              ),
-                              Text(getKategori.toString(),
-                                  style: TextStyle(
-                                      fontFamily: 'VarelaRound',
-                                      fontSize: 14)),
-                            ],
-                          ),),
-
 
                         Padding(padding: const EdgeInsets.only(top: 10,right: 25),
                           child: Row(

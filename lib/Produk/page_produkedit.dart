@@ -379,37 +379,7 @@ class _ProdukEdit extends State<ProdukEdit> {
                             )
                         ),
 
-                        Padding(padding: const EdgeInsets.only(left: 15,top: 10,right: 15),
-                            child: Column(
-                              children: [
-                                Align(alignment: Alignment.centerLeft,child: Padding(
-                                  padding: const EdgeInsets.only(left: 0,top: 15),
-                                  child: Text("Type",style: TextStyle(fontWeight: FontWeight.bold,fontFamily: "VarelaRound",
-                                      fontSize: 12,color: HexColor("#0074D9")),),
-                                ),),
-                                Padding(
-                                  padding: const EdgeInsets.only(top:10),
-                                  child: DropdownButton(
-                                    isExpanded: true,
-                                    hint: Text(getType),
-                                    value: selectedType,
-                                    items: _listType.map((value){
-                                      return DropdownMenuItem(
-                                          value: value,
-                                          child: Text(value)
-                                      );
-                                    }).toList(),
-                                    onChanged: (value) {
-                                      setState(() {
-                                        FocusScope.of(context).requestFocus(FocusNode());
-                                        selectedType = value;
-                                      });
-                                    },
-                                  ),
-                                )
-                              ],
-                            )
-                        ),
+
 
                         Padding(padding: const EdgeInsets.only(left: 15,top: 10,right: 15),
                             child: Column(

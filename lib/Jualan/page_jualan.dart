@@ -164,27 +164,58 @@ class JualanState extends State<Jualan> {
   }
 
 
-  addKeranjang2(String valProduk) {
-    http.post(applink+"api_model.php?act=add_keranjang2", body: {
+  addKeranjang2(String valProduk) async {
+    final response = await http.post(applink+"api_model.php?act=add_keranjang2", body: {
       "produk_id": valProduk,
       "emailuser" : getEmail,
       "produk_branch" : getBranchVal,
       "trans_comment" : _transcomment.text,
       "trans_jumlah" : valJumlahq.toString()
     });
+    Map data = jsonDecode(response.body);
+    setState(() {
+      if (data["message"].toString() == '0') {
+        showToast("Mohon maaf produk tidak aktif", gravity: Toast.BOTTOM,
+            duration: Toast.LENGTH_LONG);
+        return false;
+      } else if (data["message"].toString() == '1') {
+        showToast("Mohon maaf stock habis", gravity: Toast.BOTTOM,
+            duration: Toast.LENGTH_LONG);
+        return false;
+      } else if (data["message"].toString() == '2') {
+        showToast("Mohon maaf stock tidak mencukupi", gravity: Toast.BOTTOM,
+            duration: Toast.LENGTH_LONG);
+        return false;
+      }
+    });
+
     Navigator.pop(context);
   }
 
 
-
-  addKeranjang(String valProduk) {
-    http.post(applink+"api_model.php?act=add_keranjang", body: {
+  addKeranjang(String valProduk) async {
+    final response = await http.post(applink+"api_model.php?act=add_keranjang", body: {
       "produk_id": valProduk,
       "emailuser" : getEmail,
       "produk_branch" : getBranchVal
     });
+    Map data = jsonDecode(response.body);
+    setState(() {
+      if (data["message"].toString() == '0') {
+        showToast("Mohon maaf produk tidak aktif", gravity: Toast.BOTTOM,
+            duration: Toast.LENGTH_LONG);
+        return false;
+      } else if (data["message"].toString() == '1') {
+        showToast("Mohon maaf stock habis", gravity: Toast.BOTTOM,
+            duration: Toast.LENGTH_LONG);
+        return false;
+      } else if (data["message"].toString() == '2') {
+        showToast("Mohon maaf stock tidak mencukupi", gravity: Toast.BOTTOM,
+            duration: Toast.LENGTH_LONG);
+        return false;
+      }
+    });
   }
-
 
 
   void _filterMe() {

@@ -27,6 +27,7 @@ class Checkout extends StatefulWidget{
 
 class CheckoutState extends State<Checkout> {
   List data;
+  List data2;
   bool _isvisible = true;
   bool isSemua = true;
   bool isTerjual = false;
@@ -34,6 +35,7 @@ class CheckoutState extends State<Checkout> {
   bool isTerlaris = false;
   bool isTermurah = false;
   bool isTermahal = false;
+  TextEditingController _transcomment = TextEditingController();
   void showToast(String msg, {int duration, int gravity}) {
     Toast.show(msg, context, duration: duration, gravity: gravity);
   }
@@ -71,17 +73,19 @@ class CheckoutState extends State<Checkout> {
   }
 
 
-  String valgetTotal = '0';
-  _getTotal() async {
-    final response = await http.get(
-        applink+"api_model.php?act=getdata_charttotal&branch="+getBranchVal+"&operator="+getNamaUser);
-    Map data = jsonDecode(response.body);
+
+  int valJumlahq = 0;
+  void _kurangqty() {
     setState(() {
-      valgetTotal = data["a"].toString();
+      valJumlahq -= 1;
     });
   }
 
-
+  void _tambahqty() {
+    setState(() {
+      valJumlahq += 1;
+    });
+  }
 
   @override
   void initState() {
@@ -103,11 +107,23 @@ class CheckoutState extends State<Checkout> {
     });
   }
 
+
+  Future<List> getDataTotal() async {
+    http.Response response = await http.get(
+        Uri.encodeFull(applink+"api_model.php?act=getdata_charttotal&branch="+getBranchVal+"&operator="+getNamaUser),
+        headers: {"Accept":"application/json"}
+    );
+    setState((){
+      data2 = json.decode(response.body);
+    });
+  }
+
+
   _prepare() async {
     await _connect();
     await _session();
     await _getBranch();
-    await _getTotal();
+    //await _getTotal();
   }
 
   startSCreen() async {
@@ -127,7 +143,30 @@ class CheckoutState extends State<Checkout> {
   }
 
 
-  dialogAdd(String valID, String valNama, String valComment, int valQty) {
+  doEditOrder(String idOrder) async {
+    final response = await http.post(applink+"api_model.php?act=edit_orderpending", body: {
+      "order_id": idOrder,
+      "order_comment" : _transcomment.text,
+      "order_qty" : valJumlahq.toString()
+    });
+    Map data = jsonDecode(response.body);
+    setState(() {
+    if (data["message"].toString() == '0') {
+        showToast("Mohon maaf stock habis", gravity: Toast.BOTTOM,
+            duration: Toast.LENGTH_LONG);
+        return false;
+      } else if (data["message"].toString() == '2') {
+        showToast("Mohon maaf stock tidak mencukupi", gravity: Toast.BOTTOM,
+            duration: Toast.LENGTH_LONG);
+        return false;
+      }
+    });
+    Navigator.pop(context);
+  }
+
+
+
+  dialogAdd(String valID, String valNama, int valQty) {
     showDialog(
         context: context,
         builder: (BuildContext context) {
@@ -152,7 +191,7 @@ class CheckoutState extends State<Checkout> {
                               FlatButton(child: Text("-",style: TextStyle(fontSize: 48,fontWeight: FontWeight.bold),),
                                 onPressed: (){
                                   setState(() {
-                                   // _kurangqty();
+                                    _kurangqty();
                                     valJumlahq2 -= 1;
                                   });
                                 },),
@@ -160,18 +199,16 @@ class CheckoutState extends State<Checkout> {
                               FlatButton(child: Text("+",style: TextStyle(fontSize: 46,fontWeight: FontWeight.bold),),
                                 onPressed: (){
                                   setState(() {
-                                   // _tambahqty();
+                                    _tambahqty();
                                     valJumlahq2 += 1;
                                   });
                                 },),
                             ],
                           ),),
-
-
                         Padding(padding: const EdgeInsets.only(top: 15), child:
                         Align(alignment: Alignment.center, child:
                         TextFormField(
-                         // controller: _transcomment,
+                          controller: _transcomment,
                           style: TextStyle(fontFamily: "VarelaRound",fontSize: 15),
                           keyboardType: TextInputType.text,
                           textCapitalization: TextCapitalization.sentences,
@@ -199,8 +236,9 @@ class CheckoutState extends State<Checkout> {
                             Expanded(child: OutlineButton(
                               borderSide: BorderSide(width: 1.0, color: Colors.redAccent),
                               onPressed: () {
-                                //addKeranjang2(valID);
-                              }, child: Text("Add to Chart", style: TextStyle(color: Colors.red),),)),
+                                FocusScope.of(context).requestFocus(FocusNode());
+                                doEditOrder(valID);
+                              }, child: Text("Edit Order", style: TextStyle(color: Colors.red),),)),
                           ],),)
                       ],
                     )
@@ -221,17 +259,32 @@ class CheckoutState extends State<Checkout> {
             centerTitle: true,
             elevation: 0.5,
             backgroundColor: Colors.white,
-            title:Opacity(
-              child: Text( "Rp. "+
-                  NumberFormat.currency(
-                      locale: 'id', decimalDigits: 0, symbol: '').format(
-                      int.parse(valgetTotal)),
-                style: TextStyle(
-                    color: Colors.black,
-                    fontWeight: FontWeight.bold,
-                    fontSize: 16),
-              ),
-              opacity:0.7 ,
+            title: Container(
+              padding: const EdgeInsets.only(top: 2),
+              height: 78,
+              width: 100,
+              child: FutureBuilder(
+                future: getDataTotal(),
+                builder: (context, snapshot) {
+                  return ListView.builder(
+                    itemCount: (data2 == null ? 0 : data2.length),
+                    itemBuilder: (context, i) {
+                      return Opacity(
+                          child: Text( "Rp. "+
+                              NumberFormat.currency(
+                                  locale: 'id', decimalDigits: 0, symbol: '').format(
+                                  int.parse(data2[i]['a'].toString())),
+                            style: TextStyle(
+                                color: Colors.black,
+                                fontWeight: FontWeight.bold,
+                                fontSize: 16),
+                          ),
+                          opacity:0.7 ,
+                        );
+                    },
+                  );
+                },
+              )
             ),
             leading: Container(
               padding: const EdgeInsets.only(left: 7),
@@ -359,7 +412,13 @@ class CheckoutState extends State<Checkout> {
                 children: <Widget>[
                   InkWell(
                     onTap: (){
-                      dialogAdd(data[i]["m"].toString(), data[i]["a"], data[i]["n"], data[i]["j"]);
+                      if (data[i]["n"].toString() == "null") {
+                        _transcomment.text = "";
+                      } else {
+                        _transcomment.text = data[i]["n"].toString();
+                      }
+                      valJumlahq = data[i]["j"];
+                      dialogAdd(data[i]["m"].toString(), data[i]["a"], data[i]["j"]);
                     },
                     child: ListTile(
                       leading:

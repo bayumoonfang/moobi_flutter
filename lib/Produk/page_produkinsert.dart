@@ -135,7 +135,6 @@ class _ProdukInsertState extends State<ProdukInsert> {
       "produk_nama": _namaproduk.text,
       "produk_satuan" : selectedSatuan,
       "produk_harga" : _hargaproduk.text,
-      "produk_type" : selectedType,
       "produk_kategori" : selectedCategory,
       "produk_image": Baseq,
       "produk_branch" : getBranchVal,
@@ -164,7 +163,7 @@ class _ProdukInsertState extends State<ProdukInsert> {
   }
 
   alertSimpan() {
-    if (selectedCategory == null && selectedSatuan == null && selectedType == null) {
+    if (selectedCategory == null && selectedSatuan == null) {
       showToast("Form tidak boleh kosong ", gravity: Toast.BOTTOM,
           duration: Toast.LENGTH_LONG);
       return false;
@@ -188,11 +187,6 @@ class _ProdukInsertState extends State<ProdukInsert> {
       return false;
     }
 
-    if (selectedType == "" || selectedSatuan == null) {
-      showToast("Type tidak boleh kosong", gravity: Toast.BOTTOM,
-          duration: Toast.LENGTH_LONG);
-      return false;
-    }
 
 
     showDialog(
@@ -382,37 +376,7 @@ class _ProdukInsertState extends State<ProdukInsert> {
                     ],
                   )
               ),
-              Padding(padding: const EdgeInsets.only(left: 15,top: 10,right: 15),
-                  child: Column(
-                    children: [
-                      Align(alignment: Alignment.centerLeft,child: Padding(
-                        padding: const EdgeInsets.only(left: 0,top: 15),
-                        child: Text("Type",style: TextStyle(fontWeight: FontWeight.bold,fontFamily: "VarelaRound",
-                            fontSize: 12,color: HexColor("#0074D9")),),
-                      ),),
-                      Padding(
-                        padding: const EdgeInsets.only(top:10),
-                        child: DropdownButton(
-                          isExpanded: true,
-                          hint: Text("Pilih Type"),
-                          value: selectedType,
-                          items: _listType.map((value){
-                            return DropdownMenuItem(
-                                value: value,
-                                child: Text(value)
-                            );
-                          }).toList(),
-                          onChanged: (value) {
-                            setState(() {
-                              FocusScope.of(context).requestFocus(FocusNode());
-                              selectedType = value;
-                            });
-                          },
-                        ),
-                      )
-                    ],
-                  )
-              ),
+
 
               Padding(padding: const EdgeInsets.only(left: 15,top: 10,right: 15),
                   child: Column(
