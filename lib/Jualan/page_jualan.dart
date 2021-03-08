@@ -202,7 +202,7 @@ class JualanState extends State<Jualan> {
     Map data = jsonDecode(response.body);
     setState(() {
       if (data["message"].toString() == '0') {
-        showToast("Mohon maaf produk tidak aktif", gravity: Toast.BOTTOM,
+        showToast("Stock tidak bisa digunakan", gravity: Toast.BOTTOM,
             duration: Toast.LENGTH_LONG);
         return false;
       } else if (data["message"].toString() == '1') {
