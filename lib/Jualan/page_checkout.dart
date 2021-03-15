@@ -28,6 +28,7 @@ class Checkout extends StatefulWidget{
 class CheckoutState extends State<Checkout> {
   List data;
   List data2;
+  List data3;
   bool _isvisible = true;
   bool isSemua = true;
   bool isTerjual = false;
@@ -35,6 +36,9 @@ class CheckoutState extends State<Checkout> {
   bool isTerlaris = false;
   bool isTermurah = false;
   bool isTermahal = false;
+  bool isArrowDown = true;
+  bool isArrowUp = false;
+  bool isContentDetail = false;
   TextEditingController _transcomment = TextEditingController();
   void showToast(String msg, {int duration, int gravity}) {
     Toast.show(msg, context, duration: duration, gravity: gravity);
@@ -72,6 +76,39 @@ class CheckoutState extends State<Checkout> {
     });
   }
 
+
+
+  String valServCharge = '0';
+  _getServCharge() async {
+    final response = await http.get(
+        applink+"api_model.php?act=getdata_servcharge&branch="+getBranchVal+"&operator="+getNamaUser);
+    Map data = jsonDecode(response.body);
+    setState(() {
+      valServCharge = data["a"].toString();
+    });
+  }
+
+
+  String valSubTotal = '0';
+  _getSubTotal() async {
+    final response = await http.get(
+        applink+"api_model.php?act=getdata_subtotal&branch="+getBranchVal+"&operator="+getNamaUser);
+    Map data = jsonDecode(response.body);
+    setState(() {
+      valSubTotal = data["a"].toString();
+    });
+  }
+
+
+  Future<List> _getTax() async {
+    http.Response response = await http.get(
+        Uri.encodeFull(applink+"api_model.php?act=getdata_tax&branch="+getBranchVal+"&operator="+getNamaUser),
+        headers: {"Accept":"application/json"}
+    );
+    setState((){
+      data3 = json.decode(response.body);
+    });
+  }
 
 
   int valJumlahq = 0;
@@ -123,8 +160,12 @@ class CheckoutState extends State<Checkout> {
     await _connect();
     await _session();
     await _getBranch();
+    await _getServCharge();
+    await _getSubTotal();
     //await _getTotal();
   }
+
+
 
   startSCreen() async {
     var duration = const Duration(seconds: 1);
@@ -160,8 +201,8 @@ class CheckoutState extends State<Checkout> {
             duration: Toast.LENGTH_LONG);
         return false;
       }
+
     });
-    Navigator.pop(context);
   }
 
 
@@ -238,6 +279,7 @@ class CheckoutState extends State<Checkout> {
                               onPressed: () {
                                 FocusScope.of(context).requestFocus(FocusNode());
                                 doEditOrder(valID);
+                                Navigator.pop(context);
                               }, child: Text("Edit Order", style: TextStyle(color: Colors.red),),)),
                           ],),)
                       ],
@@ -270,7 +312,12 @@ class CheckoutState extends State<Checkout> {
                     itemCount: (data2 == null ? 0 : data2.length),
                     itemBuilder: (context, i) {
                       return Opacity(
-                          child: Text( "Rp. "+
+                          child:
+                          data2[i]['a'] == null ?
+                              Text("0")
+                          :
+
+                          Text( "Rp. "+
                               NumberFormat.currency(
                                   locale: 'id', decimalDigits: 0, symbol: '').format(
                                   int.parse(data2[i]['a'].toString())),
@@ -356,8 +403,130 @@ class CheckoutState extends State<Checkout> {
                 Visibility(
                     visible: _isvisible,
                     child :
-                    Expanded(child: _dataField())
-                )
+       SingleChildScrollView(
+         child: Container(child: _dataField(),
+             height: MediaQuery.of(context).copyWith().size.height /2.2),
+       )
+                ),
+                Padding(padding: const EdgeInsets.only(left:15,top: 5,right: 18 ),
+                  child: Divider(height: 5,),
+                ),
+                Visibility(visible: isArrowDown, child: InkWell(
+                  onTap: (){
+                    setState(() {
+                      isArrowDown = false;
+                      isArrowUp = true;
+                      isContentDetail = true;
+                    });
+                  },
+                    child: Container(
+                      width: double.infinity,
+                      height: 60,
+                      child: Center(
+                        child: IconButton(
+                          tooltip: "Show all",
+                          icon: FaIcon(FontAwesomeIcons.arrowCircleDown,size: 30,),
+                        ),
+                      ),
+                    )
+                ),),
+                Visibility(visible: isArrowUp, child:
+                InkWell(
+                    onTap: (){
+                      setState(() {
+                        isArrowDown = true;
+                        isArrowUp = false;
+                        isContentDetail = false;
+                      });
+                    },
+                  child :
+                Container(
+                  width: double.infinity,
+                  height: 60,
+                  child: Center(
+                    child: IconButton(
+                      tooltip: "Hide All",
+                      icon: FaIcon(FontAwesomeIcons.arrowAltCircleUp,size: 30,),
+                    ),
+                  ),
+                ))),
+              Visibility(visible: isContentDetail,
+                  child: Padding(padding: const EdgeInsets.only(left:15,top: 15, right: 13 ),
+              child: Column(
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment
+                        .spaceBetween,
+                    children: [
+                      Text("Sub Total :",style: TextStyle(fontSize: 13,
+                          fontFamily: 'VarelaRound',
+                          color: Colors.black)),
+                      Text("Rp. "+
+                          NumberFormat.currency(
+                              locale: 'id', decimalDigits: 0, symbol: '').format(
+                              int.parse(valSubTotal.toString())),style: TextStyle(fontSize: 13,
+                          fontWeight: FontWeight.bold,fontFamily: 'VarelaRound',
+                          color: Colors.black)),
+                    ],
+                  ),
+                  Padding(padding: const EdgeInsets.only(top: 10),
+                      child : Row(
+                        mainAxisAlignment: MainAxisAlignment
+                            .spaceBetween,
+                        children: [
+                          Text("Service Charge :",style: TextStyle(fontSize: 13,
+                              fontFamily: 'VarelaRound',
+                              color: Colors.black)),
+                          Text("Rp. "+
+                              NumberFormat.currency(
+                                  locale: 'id', decimalDigits: 0, symbol: '').format(
+                                  int.parse(valServCharge.toString())),style: TextStyle(fontSize: 13,
+                              fontWeight: FontWeight.bold,fontFamily: 'VarelaRound',
+                              color: Colors.black)),
+                        ],
+                      )),
+                  Padding(padding: const EdgeInsets.only(top: 10),
+                      child : Row(
+                        mainAxisAlignment: MainAxisAlignment
+                            .spaceBetween,
+                        children: [
+                          Text("PPN (Tax)  :",style: TextStyle(fontSize: 13,
+                              fontFamily: 'VarelaRound',
+                              color: Colors.black)),
+                          Container(
+                            height: 16,
+                            width: MediaQuery.of(context).copyWith().size.width /4,
+                            child: FutureBuilder(
+                              future: _getTax(),
+                              builder: (context, snapshot){
+                                return ListView.builder(
+                                  itemCount: data3 == null ? 0 : data3.length,
+                                  itemBuilder: (context, i) {
+                                    return
+                                  Align(
+                                    alignment: Alignment.centerRight,
+                                    child:     Text(
+                                        data3[i]["a"] == null ?
+                                        "Rp. 0"
+                                            :
+                                        "Rp. "+
+                                            NumberFormat.currency(
+                                                locale: 'id', decimalDigits: 0, symbol: '').format(
+                                                int.parse(data3[i]["a"].toString())),style: TextStyle(fontSize: 13,
+                                        fontWeight: FontWeight.bold,fontFamily: 'VarelaRound',
+                                        color: Colors.black)
+                                    )
+                                  );
+                                  },
+                                );
+                              },
+                            ),
+                          )
+                        ],
+                      ))
+                ],
+              )
+          ))
                 //
               ],
             ),
@@ -439,10 +608,25 @@ class CheckoutState extends State<Checkout> {
                               errorWidget: (context, url, error) => Icon(Icons.error),
                             ),
                           )),
-                      title: Align(alignment: Alignment.centerLeft,
-                        child: Text(data[i]["a"],
+                      title: data[i]["n"] != "" ?
+                        Column(
+                          children: [
+                            Align(alignment: Alignment.centerLeft,
+                              child: Text(data[i]["a"],
+                                  style: TextStyle(fontFamily: "VarelaRound",
+                                      fontSize: 13,fontWeight: FontWeight.bold)),),
+                      Padding(padding: const EdgeInsets.only(top: 5,bottom: 5),child:
+                      Align(alignment: Alignment.centerLeft,
+                        child: Text(":: "+data[i]["n"],
                             style: TextStyle(fontFamily: "VarelaRound",
-                                fontSize: 13,fontWeight: FontWeight.bold)),),
+                                fontSize: 12,)),),)
+                          ],
+                        )
+                        :
+                        Align(alignment: Alignment.centerLeft,
+                        child: Text(data[i]["a"],
+                        style: TextStyle(fontFamily: "VarelaRound",
+                        fontSize: 13,fontWeight: FontWeight.bold)),),
                       subtitle: Align(alignment: Alignment.centerLeft,
                           child:
                           Text(data[i]["j"].toString() + " x"+" Rp. "+
