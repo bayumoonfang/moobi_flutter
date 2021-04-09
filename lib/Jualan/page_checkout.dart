@@ -29,6 +29,9 @@ class CheckoutState extends State<Checkout> {
   List data;
   List data2;
   List data3;
+  List dataSubTotal;
+  List dataServCharge;
+  List dataPPN;
   bool _isvisible = true;
   bool isSemua = true;
   bool isTerjual = false;
@@ -156,6 +159,39 @@ class CheckoutState extends State<Checkout> {
   }
 
 
+  Future<List> getDataSubTotal() async {
+    http.Response response = await http.get(
+        Uri.encodeFull(applink+"api_model.php?act=getdata_subtotal2&branch="+getBranchVal+"&operator="+getNamaUser),
+        headers: {"Accept":"application/json"}
+    );
+    setState((){
+      dataSubTotal = json.decode(response.body);
+    });
+  }
+
+
+  Future<List> getDataServchargeTotal() async {
+    http.Response response = await http.get(
+        Uri.encodeFull(applink+"api_model.php?act=getdata_servchargetotal&branch="+getBranchVal+"&operator="+getNamaUser),
+        headers: {"Accept":"application/json"}
+    );
+    setState((){
+      dataServCharge = json.decode(response.body);
+    });
+  }
+
+
+  Future<List> getDataPPNTotal() async {
+    http.Response response = await http.get(
+        Uri.encodeFull(applink+"api_model.php?act=getdata_ppntotal&branch="+getBranchVal+"&operator="+getNamaUser),
+        headers: {"Accept":"application/json"}
+    );
+    setState((){
+      dataPPN = json.decode(response.body);
+    });
+  }
+
+
   _prepare() async {
     await _connect();
     await _session();
@@ -207,6 +243,95 @@ class CheckoutState extends State<Checkout> {
 
 
 
+  TambahBiayaAdd() {
+    showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return StatefulBuilder(
+            builder: (context, setState) {
+              return AlertDialog(
+                //title: Text(),
+                content: ResponsiveContainer(
+                    widthPercent: 100,
+                    heightPercent: 29,
+                    child: Column(
+                      children: [
+                        Padding(padding: const EdgeInsets.only(top: 8), child:
+                        Align(alignment: Alignment.center, child: Text("Tambah Biaya",
+                            style: TextStyle(fontFamily: 'VarelaRound', fontSize: 16, fontWeight: FontWeight.bold))
+                        ),),
+                        Padding(padding: const EdgeInsets.only(top: 15), child:
+                        Align(alignment: Alignment.center, child:
+                        TextFormField(
+                          controller: _transcomment,
+                          style: TextStyle(fontFamily: "VarelaRound",fontSize: 15),
+                          keyboardType: TextInputType.text,
+                          textCapitalization: TextCapitalization.sentences,
+                          decoration: new InputDecoration(
+                            contentPadding: const EdgeInsets.only(top: 1,left: 10,bottom: 1),
+                            focusedBorder: OutlineInputBorder(
+                              borderSide: BorderSide(color: HexColor("#DDDDDD"), width: 1.0),
+                            ),
+                            enabledBorder: OutlineInputBorder(
+                              borderSide: BorderSide(color: HexColor("#DDDDDD"), width: 1.0),
+                            ),
+                            hintText: 'Nama Biaya. Contoh : Ongkir, dll',
+                            floatingLabelBehavior: FloatingLabelBehavior.always,
+                            hintStyle: TextStyle(fontFamily: "VarelaRound", color: HexColor("#c4c4c4")),
+                          ),
+                        ),
+                        )),
+                        Padding(padding: const EdgeInsets.only(top: 15), child:
+                        Align(alignment: Alignment.center, child:
+                        TextFormField(
+                          controller: _transcomment,
+                          style: TextStyle(fontFamily: "VarelaRound",fontSize: 15),
+                          keyboardType: TextInputType.text,
+                          textCapitalization: TextCapitalization.sentences,
+                          decoration: new InputDecoration(
+                            contentPadding: const EdgeInsets.only(top: 1,left: 10,bottom: 1),
+                            focusedBorder: OutlineInputBorder(
+                              borderSide: BorderSide(color: HexColor("#DDDDDD"), width: 1.0),
+                            ),
+                            enabledBorder: OutlineInputBorder(
+                              borderSide: BorderSide(color: HexColor("#DDDDDD"), width: 1.0),
+                            ),
+                            hintText: 'Biaya. Contoh : 12000, 15000',
+                            floatingLabelBehavior: FloatingLabelBehavior.always,
+                            hintStyle: TextStyle(fontFamily: "VarelaRound", color: HexColor("#c4c4c4")),
+                          ),
+                        ),
+                        )),
+                        Padding(padding: const EdgeInsets.only(top: 20), child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                          children: <Widget>[
+                            Expanded(child: OutlineButton(
+                              onPressed: () {
+                                Navigator.pop(context);
+                              }, child: Text("Keluar"),)),
+                            Expanded(child: OutlineButton(
+                              borderSide: BorderSide(width: 1.0, color: Colors.redAccent),
+                              onPressed: () {
+                                FocusScope.of(context).requestFocus(FocusNode());
+
+                                Navigator.pop(context);
+                              }, child: Text("Tambah", style: TextStyle(color: Colors.red),),)),
+                          ],),)
+                      ],
+                    )
+                ),
+              );
+            },
+          );
+        });
+
+
+  }
+
+
+
+
+
   dialogAdd(String valID, String valNama, int valQty) {
     showDialog(
         context: context,
@@ -218,7 +343,7 @@ class CheckoutState extends State<Checkout> {
                 //title: Text(),
                 content: ResponsiveContainer(
                     widthPercent: 100,
-                    heightPercent: 32,
+                    heightPercent: 34,
                     child: Column(
                       children: [
                         Padding(padding: const EdgeInsets.only(top: 8), child:
@@ -389,7 +514,7 @@ class CheckoutState extends State<Checkout> {
                                 ),),
                                 //color: isSemua == true ? HexColor("#602d98") : Colors.white ,
                                 onPressed: (){
-
+                                  TambahBiayaAdd();
                                 },
                               ),
                             ),),
@@ -405,7 +530,7 @@ class CheckoutState extends State<Checkout> {
                     child :
        SingleChildScrollView(
          child: Container(child: _dataField(),
-             height: MediaQuery.of(context).copyWith().size.height /2.2),
+             height: MediaQuery.of(context).copyWith().size.height /2.8),
        )
                 ),
                 Padding(padding: const EdgeInsets.only(left:15,top: 5,right: 18 ),
@@ -461,12 +586,30 @@ class CheckoutState extends State<Checkout> {
                       Text("Sub Total :",style: TextStyle(fontSize: 13,
                           fontFamily: 'VarelaRound',
                           color: Colors.black)),
-                      Text("Rp. "+
-                          NumberFormat.currency(
-                              locale: 'id', decimalDigits: 0, symbol: '').format(
-                              int.parse(valSubTotal.toString())),style: TextStyle(fontSize: 13,
-                          fontWeight: FontWeight.bold,fontFamily: 'VarelaRound',
-                          color: Colors.black)),
+                          Container(
+                            height: 13,
+                            width: 150,
+                            alignment: Alignment.centerRight,
+                            child: FutureBuilder(
+                              future: getDataSubTotal(),
+                              builder: (context, snapshot) {
+                                return ListView.builder(
+                                  itemCount: dataSubTotal == null ? 0 : dataSubTotal.length,
+                                  itemBuilder: (context, i) {
+                                      return Align(
+                                        alignment: Alignment.centerRight,
+                                        child: Text("Rp. "+
+                                            NumberFormat.currency(
+                                                locale: 'id', decimalDigits: 0, symbol: '').format(
+                                                int.parse(dataSubTotal[i]["a"].toString())),style: TextStyle(fontSize: 13,
+                                            fontWeight: FontWeight.bold,fontFamily: 'VarelaRound',
+                                            color: Colors.black)),
+                                      );
+                                  },
+                                );
+                              },
+                            ),
+                          )
                     ],
                   ),
                   Padding(padding: const EdgeInsets.only(top: 10),
@@ -477,12 +620,30 @@ class CheckoutState extends State<Checkout> {
                           Text("Service Charge :",style: TextStyle(fontSize: 13,
                               fontFamily: 'VarelaRound',
                               color: Colors.black)),
-                          Text("Rp. "+
-                              NumberFormat.currency(
-                                  locale: 'id', decimalDigits: 0, symbol: '').format(
-                                  int.parse(valServCharge.toString())),style: TextStyle(fontSize: 13,
-                              fontWeight: FontWeight.bold,fontFamily: 'VarelaRound',
-                              color: Colors.black)),
+                          Container(
+                            height: 13,
+                            width: 150,
+                            alignment: Alignment.centerRight,
+                            child: FutureBuilder(
+                              future: getDataServchargeTotal(),
+                              builder: (context, snapshot) {
+                                return ListView.builder(
+                                  itemCount: dataServCharge == null ? 0 : dataServCharge.length,
+                                  itemBuilder: (context, i) {
+                                    return Align(
+                                      alignment: Alignment.centerRight,
+                                      child: Text("Rp. "+
+                                          NumberFormat.currency(
+                                              locale: 'id', decimalDigits: 0, symbol: '').format(
+                                              int.parse(dataServCharge[i]["a"].toString())),style: TextStyle(fontSize: 13,
+                                          fontWeight: FontWeight.bold,fontFamily: 'VarelaRound',
+                                          color: Colors.black)),
+                                    );
+                                  },
+                                );
+                              },
+                            ),
+                          )
                         ],
                       )),
                   Padding(padding: const EdgeInsets.only(top: 10),
@@ -494,29 +655,24 @@ class CheckoutState extends State<Checkout> {
                               fontFamily: 'VarelaRound',
                               color: Colors.black)),
                           Container(
-                            height: 16,
-                            width: MediaQuery.of(context).copyWith().size.width /4,
+                            height: 13,
+                            width: 150,
+                            alignment: Alignment.centerRight,
                             child: FutureBuilder(
-                              future: _getTax(),
-                              builder: (context, snapshot){
+                              future: getDataPPNTotal(),
+                              builder: (context, snapshot) {
                                 return ListView.builder(
-                                  itemCount: data3 == null ? 0 : data3.length,
+                                  itemCount: dataPPN == null ? 0 : dataPPN.length,
                                   itemBuilder: (context, i) {
-                                    return
-                                  Align(
-                                    alignment: Alignment.centerRight,
-                                    child:     Text(
-                                        data3[i]["a"] == null ?
-                                        "Rp. 0"
-                                            :
-                                        "Rp. "+
-                                            NumberFormat.currency(
-                                                locale: 'id', decimalDigits: 0, symbol: '').format(
-                                                int.parse(data3[i]["a"].toString())),style: TextStyle(fontSize: 13,
-                                        fontWeight: FontWeight.bold,fontFamily: 'VarelaRound',
-                                        color: Colors.black)
-                                    )
-                                  );
+                                    return Align(
+                                      alignment: Alignment.centerRight,
+                                      child: Text("Rp. "+
+                                          NumberFormat.currency(
+                                              locale: 'id', decimalDigits: 0, symbol: '').format(
+                                              int.parse(dataPPN[i]["a"].toString())),style: TextStyle(fontSize: 13,
+                                          fontWeight: FontWeight.bold,fontFamily: 'VarelaRound',
+                                          color: Colors.black)),
+                                    );
                                   },
                                 );
                               },
