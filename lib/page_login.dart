@@ -4,6 +4,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 import 'package:hexcolor/hexcolor.dart';
 import 'package:moobi_flutter/helper/api_link.dart';
 import 'package:moobi_flutter/helper/check_connection.dart';
@@ -27,13 +28,31 @@ class Login extends StatefulWidget {
 class _LoginState extends State<Login> {
     final _username = TextEditingController();
     final _password = TextEditingController();
+    GoogleSignIn _googleSignIn = GoogleSignIn(scopes: ['email']);
     String _email = '';
+    String authEmail = '';
     void showToast(String msg, {int duration, int gravity}) {
       Toast.show(msg, context, duration: duration, gravity: gravity);
     }
 
   Future<bool> _onWillPop() async {
   }
+
+  _loginGoogle() async {
+      try {
+          await _googleSignIn.signIn();
+          setState(() {
+            authEmail = _googleSignIn.currentUser.email;
+            if (authEmail != '') {
+              savePref(1, authEmail.toString());
+              Navigator.pushReplacement(context, EnterPage(page: Home()));
+            }
+          });
+      }
+      catch(err) {
+        print(err);
+      }
+}
 
     _connect() async {
       Checkconnection().check().then((internet){
@@ -58,7 +77,7 @@ class _LoginState extends State<Login> {
           int getValue = data["value"];
           if (getValue == 1) {
             savePref(getValue, _username.text);
-            Navigator.push(context, EnterPage(page: Home()));
+            Navigator.pushReplacement(context, EnterPage(page: Home()));
           } else {
             showToast("Email atau Password salah", gravity: Toast.CENTER, duration: Toast.LENGTH_LONG);
             return;
@@ -198,6 +217,38 @@ class _LoginState extends State<Login> {
                                 )
                           )
                         ),
+
+                  Padding(padding: const EdgeInsets.only(left: 35,right: 35,top: 30),child:
+                  Container(
+                      height: 50,
+                      width: double.infinity,
+                      child :
+                      RaisedButton(
+                          shape: RoundedRectangleBorder(side: BorderSide(
+                              color: Colors.black,
+                              width: 0.1,
+                              style: BorderStyle.solid
+                          ),
+                            borderRadius: BorderRadius.circular(50.0),
+                          ),
+                          color: HexColor("#602d98"),
+                          child: Text(
+                            "Sign In Google",
+                            style: TextStyle(
+                                fontFamily: 'VarelaRound',
+                                fontSize: 14,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.white
+                            ),
+                          ),
+                          onPressed: () {
+                            _loginGoogle();
+                          }
+                      )
+                  )
+                  ),
+
+
                   Center(
                     child:
                     Padding(padding: const EdgeInsets.only(left: 35,right: 35,top: 30),child:

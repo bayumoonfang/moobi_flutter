@@ -1,0 +1,56 @@
+{
+  "project_info": {
+    "project_number": "365045941934",
+    "firebase_url": "https://duakataapi-1548570152943.firebaseio.com",
+    "project_id": "duakataapi-1548570152943",
+    "storage_bucket": "duakataapi-1548570152943.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:365045941934:android:27ec556045c6ee393c8f3f",
+        "android_client_info": {
+          "package_name": "com.example.moobi_flutter"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "365045941934-4f93ln9ppl3tl798c46131r3ckv31voc.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.moobi_flutter",
+            "certificate_hash": "2312a06043c02a7bf8df60d920255fab618370ef"
+          }
+        },
+        {
+          "client_id": "365045941934-t5d23u5jru73vha57hicf6t1cv3sk8mp.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBffaLE8njtlxvRdN9KZzw6F_jmVIapX7E"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "365045941934-t5d23u5jru73vha57hicf6t1cv3sk8mp.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "365045941934-0okk2iong9mq1k5gs1e99totkkqug12u.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.moobiFlutter",
+                "app_store_id": "123456789"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
