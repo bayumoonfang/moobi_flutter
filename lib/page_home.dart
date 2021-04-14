@@ -7,7 +7,9 @@ import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:hexcolor/hexcolor.dart';
+import 'package:intl/intl.dart';
 import 'package:moobi_flutter/Gudang/page_gudang.dart';
+import 'package:moobi_flutter/Helper/color_based.dart';
 import 'package:moobi_flutter/Jualan/page_jualan.dart';
 import 'package:moobi_flutter/Kategori/page_kategori.dart';
 import 'package:moobi_flutter/Produk/page_produk.dart';
@@ -34,6 +36,7 @@ class Home extends StatefulWidget {
 
 class _HomeState extends State<Home> {
   String getUsername, getEmail = "";
+  List data;
   GoogleSignIn _googleSignIn = GoogleSignIn(scopes: ['email']);
   void showToast(String msg, {int duration, int gravity}) {
     Toast.show(msg, context, duration: duration, gravity: gravity);
@@ -54,7 +57,9 @@ class _HomeState extends State<Home> {
 
 
 
-  String getMoobiIdentity,getStorename = '...';
+  String getMoobiIdentity = '...';
+  String getStorename = '...';
+  String getBranch = '...';
   _userDetail() async {
     final response = await http.get(
          applink+"api_model.php?act=userdetail&id="+getEmail.toString());
@@ -62,6 +67,7 @@ class _HomeState extends State<Home> {
     setState(() {
       getMoobiIdentity = data["d"].toString();
       getStorename = data["b"].toString();
+      getBranch = data["c"].toString();
     });
   }
 
@@ -90,7 +96,15 @@ class _HomeState extends State<Home> {
     _loaddata();
   }
 
-
+  Future<List> getDataTotal() async {
+    http.Response response = await http.get(
+        Uri.encodeFull(applink+"api_model.php?act=getdata_monthsalestotal&branch="+getBranch),
+        headers: {"Accept":"application/json"}
+    );
+    setState((){
+      data = json.decode(response.body);
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -99,7 +113,7 @@ class _HomeState extends State<Home> {
           child: Scaffold(
             //backgroundColor: Colors.white,
             appBar: new AppBar(
-              backgroundColor: HexColor("#602d98"),
+              backgroundColor: HexColor(main_color),
               automaticallyImplyLeading: false,
               actions: [
                 Padding(padding: const EdgeInsets.only(top: 19,right: 35), child :
@@ -148,9 +162,42 @@ class _HomeState extends State<Home> {
                                       padding: const EdgeInsets.only(left: 28,top: 5),
                                       child:  Align(
                                         alignment: Alignment.bottomLeft,
-                                        child:  Text("Rp. 26.800.000", style: TextStyle(color: Colors.white,
-                                            fontFamily: 'VarelaRound', fontSize: 22,
-                                            fontWeight: FontWeight.bold),textAlign: TextAlign.left,),
+                                        child:  Container(
+                                            padding: const EdgeInsets.only(top: 2),
+                                            height: 33,
+                                            width: double.infinity,
+                                            child: FutureBuilder(
+                                              future: getDataTotal(),
+                                              builder: (context, snapshot) {
+                                                return ListView.builder(
+                                                  itemCount: (data == null ? 0 : data.length),
+                                                  itemBuilder: (context, i) {
+                                                    return
+                                                      data[i]['a'] == null ?
+                                                      Text("Rp. 0",
+                                                        style: TextStyle(
+                                                            color: Colors.white,
+                                                            fontFamily: 'VarelaRound',
+                                                            fontWeight: FontWeight.bold,
+                                                            fontSize: 22),)
+                                                          :
+                                                      Text( "Rp. "+
+                                                          NumberFormat.currency(
+                                                              locale: 'id', decimalDigits: 0, symbol: '').format(
+                                                              int.parse(
+                                                                  data[i]['a'] == null ? "0" :
+                                                                  data[i]['a'].toString())),
+                                                        style: TextStyle(
+                                                            color: Colors.white,
+                                                            fontFamily: 'VarelaRound',
+                                                            fontWeight: FontWeight.bold,
+                                                            fontSize: 22),
+                                                    );
+                                                  },
+                                                );
+                                              },
+                                            )
+                                        ),
                                       )
                                   ),
                                   Padding(
@@ -203,10 +250,10 @@ class _HomeState extends State<Home> {
                                           child:
                                           Column(
                                             children: [
-                                              FaIcon(FontAwesomeIcons.user,color: HexColor("#4e2986")),
+                                              FaIcon(FontAwesomeIcons.user,color: HexColor(second_color)),
                                               Padding(padding: const EdgeInsets.only(top:8),
                                                 child: Text("Profile", style: TextStyle(fontFamily: 'VarelaRound',
-                                                    fontSize: 12,color: HexColor("#4e2986"))),)
+                                                    fontSize: 12,color: HexColor(second_color))),)
                                             ],
                                           ),
                                         ),
@@ -217,10 +264,10 @@ class _HomeState extends State<Home> {
                                           child:
                                         Column(
                                           children: [
-                                            FaIcon(FontAwesomeIcons.store,color: HexColor("#4e2986")),
+                                            FaIcon(FontAwesomeIcons.store,color: HexColor(second_color)),
                                             Padding(padding: const EdgeInsets.only(top:8),
                                               child: Text("Toko Saya", style: TextStyle(fontFamily: 'VarelaRound',
-                                                  fontSize: 12,color: HexColor("#4e2986")
+                                                  fontSize: 12,color: HexColor(second_color)
                                                   )),)
                                           ],
                                         )),
@@ -231,10 +278,10 @@ class _HomeState extends State<Home> {
                                           child:
                                         Column(
                                           children: [
-                                            FaIcon(FontAwesomeIcons.warehouse,color: HexColor("#4e2986")),
+                                            FaIcon(FontAwesomeIcons.warehouse,color: HexColor(second_color)),
                                             Padding(padding: const EdgeInsets.only(top:8),
                                               child: Text("Gudang", style: TextStyle(fontFamily: 'VarelaRound',
-                                                  fontSize: 12,color: HexColor("#4e2986"))),)
+                                                  fontSize: 12,color: HexColor(second_color))),)
                                           ],
                                         )),
                                       ],

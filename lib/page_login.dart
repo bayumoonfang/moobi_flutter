@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:hexcolor/hexcolor.dart';
+import 'package:moobi_flutter/Helper/color_based.dart';
 import 'package:moobi_flutter/helper/api_link.dart';
 import 'package:moobi_flutter/helper/check_connection.dart';
 import 'package:moobi_flutter/helper/page_route.dart';
@@ -44,8 +45,7 @@ class _LoginState extends State<Login> {
           setState(() {
             authEmail = _googleSignIn.currentUser.email;
             if (authEmail != '') {
-              savePref(1, authEmail.toString());
-              Navigator.pushReplacement(context, EnterPage(page: Home()));
+              _actloginGoogle(authEmail.toString());
             }
           });
       }
@@ -53,6 +53,26 @@ class _LoginState extends State<Login> {
         print(err);
       }
 }
+
+
+    _actloginGoogle(String parEmail) async {
+      final response = await http.post(applink+"api_model.php?act=login_google",
+          body: {"email": parEmail});
+      Map data = jsonDecode(response.body);
+      setState(() {
+        if (data["message"].toString() == '1') {
+          savePref(1, parEmail);
+          Navigator.pushReplacement(context, EnterPage(page: Home()));
+          _googleSignIn.signOut();
+        } else {
+          _googleSignIn.signOut();
+          showToast("Email tidak terdaftar", gravity: Toast.CENTER, duration: Toast.LENGTH_LONG);
+          return;
+        }
+      });
+    }
+
+
 
     _connect() async {
       Checkconnection().check().then((internet){
@@ -201,7 +221,7 @@ class _LoginState extends State<Login> {
                           ),
                             borderRadius: BorderRadius.circular(50.0),
                           ),
-                                    color: HexColor("#602d98"),
+                                    color: HexColor(main_color),
                                     child: Text(
                                       "Sign In",
                                       style: TextStyle(
@@ -218,6 +238,9 @@ class _LoginState extends State<Login> {
                           )
                         ),
 
+
+
+
                   Padding(padding: const EdgeInsets.only(left: 35,right: 35,top: 30),child:
                   Container(
                       height: 50,
@@ -231,15 +254,21 @@ class _LoginState extends State<Login> {
                           ),
                             borderRadius: BorderRadius.circular(50.0),
                           ),
-                          color: HexColor("#602d98"),
-                          child: Text(
-                            "Sign In Google",
-                            style: TextStyle(
-                                fontFamily: 'VarelaRound',
-                                fontSize: 14,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.white
-                            ),
+                          color: Colors.white,
+                          child:
+                          Wrap(
+                            crossAxisAlignment: WrapCrossAlignment.center,
+                            children: [
+                             Image.asset("assets/logo_google.png",height: 30,width: 30,),// <-- Use 'Image.asset(...)' here
+                              SizedBox(width: 18),
+                              Text('Sign in with Google',
+                                style: TextStyle(
+                                    fontFamily: 'VarelaRound',
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.black
+                                )),
+                            ],
                           ),
                           onPressed: () {
                             _loginGoogle();

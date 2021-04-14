@@ -5,7 +5,13 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 import 'package:hexcolor/hexcolor.dart';
+import 'package:moobi_flutter/Helper/check_connection.dart';
+import 'package:moobi_flutter/Helper/color_based.dart';
+import 'package:moobi_flutter/Profile/page_profile_changename.dart';
+import 'package:moobi_flutter/Profile/page_subscibe.dart';
+import 'package:moobi_flutter/Profile/page_ubahsandi.dart';
 import 'package:moobi_flutter/helper/api_link.dart';
 import 'package:moobi_flutter/helper/page_route.dart';
 import 'package:moobi_flutter/helper/session.dart';
@@ -13,6 +19,8 @@ import 'package:moobi_flutter/page_login.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+
+import 'package:toast/toast.dart';
 class Profile extends StatefulWidget {
   @override
   _ProfileState createState() => _ProfileState();
@@ -20,11 +28,30 @@ class Profile extends StatefulWidget {
 
 
 class _ProfileState extends State<Profile> {
+  GoogleSignIn googleSignIn = GoogleSignIn(scopes: ['email']);
   Future<bool> _onWillPop() async {
     Navigator.pop(context);
   }
+  void showToast(String msg, {int duration, int gravity}) {
+    Toast.show(msg, context, duration: duration, gravity: gravity);
+  }
+
+
+  _connect() async {
+    Checkconnection().check().then((internet){
+      if (internet != null && internet) {} else {
+        showToast("Koneksi terputus..", gravity: Toast.CENTER,
+            duration: Toast.LENGTH_LONG);
+        return ;
+      }
+    });
+  }
+
+
+
 
   signOut() async {
+    await googleSignIn.signOut();
     SharedPreferences preferences = await SharedPreferences.getInstance();
     setState(() {
       preferences.setInt("value", null);
@@ -55,7 +82,12 @@ class _ProfileState extends State<Profile> {
 
   _userDetail() async {
     final response = await http.get(
-        applink+"api_model.php?act=userdetail&id="+getEmail.toString());
+        applink+"api_model.php?act=userdetail&id="+getEmail.toString()).timeout(Duration(seconds: 10),
+        onTimeout: (){
+          showToast("Koneksi timeout , mohon periksa jaringan anda..", gravity: Toast.BOTTOM,
+              duration: Toast.LENGTH_LONG);
+          return;
+        });
     Map data = jsonDecode(response.body);
     setState(() {
       getNama = data["j"].toString();
@@ -68,6 +100,7 @@ class _ProfileState extends State<Profile> {
 
 
   loadData() async {
+    await _connect();
     await _session();
     await _userDetail();
   }
@@ -86,7 +119,7 @@ class _ProfileState extends State<Profile> {
           onWillPop: _onWillPop,
           child: Scaffold(
             appBar: new AppBar(
-              backgroundColor: HexColor("#602d98"),
+              backgroundColor: HexColor(main_color),
               title: Text(
                 "Profile Saya",
                 style: TextStyle(
@@ -137,7 +170,7 @@ class _ProfileState extends State<Profile> {
                       child: ListTile(
                         leading: Opacity(
                           opacity: 0.6,
-                          child: FaIcon(FontAwesomeIcons.checkDouble),
+                          child: FaIcon(FontAwesomeIcons.checkDouble,size: 20,),
                         ),
                           title: Opacity(
                             opacity: 0.6,
@@ -148,11 +181,31 @@ class _ProfileState extends State<Profile> {
                           ),
                         trailing: Container(
                           height: 30,
-                          child: RaisedButton(
+                          child:
+
+                          getRole.toString() == 'Trial' ?
+                          RaisedButton(
+                            onPressed: (){
+                              Navigator.push(context, ExitPage(page: Subscribe()));
+                            },
+                            color: HexColor(main_color),
+                            shape: RoundedRectangleBorder(side: BorderSide(
+                                color: Colors.black,
+                                width: 0.1,
+                                style: BorderStyle.solid
+                            ),
+                              borderRadius: BorderRadius.circular(50.0),
+                            ),
+                            child: Text("Subscribe",style: TextStyle(
+                                  color: Colors.white, fontFamily: 'VarelaRound',fontSize: 13)),
+                          )
+
+                          : getRole.toString() == 'Classic' ?
+                          RaisedButton(
                             onPressed: (){
 
                             },
-                            color: HexColor("#602d98"),
+                            color: HexColor(main_color),
                             shape: RoundedRectangleBorder(side: BorderSide(
                                 color: Colors.black,
                                 width: 0.1,
@@ -161,8 +214,22 @@ class _ProfileState extends State<Profile> {
                               borderRadius: BorderRadius.circular(50.0),
                             ),
                             child: Text("Upgrade",style: TextStyle(
-                                  color: Colors.white, fontFamily: 'VarelaRound',fontSize: 13)),
-                          ),
+                                color: Colors.white, fontFamily: 'VarelaRound',fontSize: 13)),
+                          )
+                              :
+                          RaisedButton(
+                            color: HexColor(main_color),
+                            shape: RoundedRectangleBorder(side: BorderSide(
+                                color: Colors.black,
+                                width: 0.1,
+                                style: BorderStyle.solid
+                            ),
+                              borderRadius: BorderRadius.circular(50.0),
+                            ),
+                            child: Text("Subscribed",style: TextStyle(
+                                color: Colors.white, fontFamily: 'VarelaRound',fontSize: 13)),
+                          )
+
                         )
                       ),),
                     Padding(padding: const EdgeInsets.only(top :0),
@@ -237,12 +304,14 @@ class _ProfileState extends State<Profile> {
                           Padding(padding: const EdgeInsets.only(top: 10),
                             child: InkWell(
                               child: ListTile(
-                                onTap: (){},
-                                leading: FaIcon(FontAwesomeIcons.user,color: HexColor("#594d75"),),
-                                title: Text("Ubah Profile",style: TextStyle(
+                                onTap: (){
+                                  Navigator.pushReplacement(context, ExitPage(page: ProfileUbahNama(getEmail, getNama.toString())));
+                                },
+                                leading: FaIcon(FontAwesomeIcons.user,color: HexColor(third_color),),
+                                title: Text("Ubah Nama",style: TextStyle(
                                     color: Colors.black, fontFamily: 'VarelaRound',fontSize: 16,
                                     fontWeight: FontWeight.bold)),
-                                trailing: FaIcon(FontAwesomeIcons.angleRight,color: HexColor("#594d75"),),
+                                trailing: FaIcon(FontAwesomeIcons.angleRight,color: HexColor(third_color),),
                               ),
                             )
                           ),
@@ -251,12 +320,14 @@ class _ProfileState extends State<Profile> {
                           Padding(padding: const EdgeInsets.only(top: 10),
                               child: InkWell(
                                 child: ListTile(
-                                  onTap: (){},
-                                  leading: FaIcon(FontAwesomeIcons.lock,color: HexColor("#594d75"),),
+                                  onTap: (){
+                                    Navigator.pushReplacement(context, ExitPage(page: ProfileUbahSandi(getEmail, getNama.toString())));
+                                  },
+                                  leading: FaIcon(FontAwesomeIcons.lock,color: HexColor(third_color),),
                                   title: Text("Ubah Sandi Akun",style: TextStyle(
                                       color: Colors.black, fontFamily: 'VarelaRound',fontSize: 16,
                                       fontWeight: FontWeight.bold)),
-                                  trailing: FaIcon(FontAwesomeIcons.angleRight,color: HexColor("#594d75"),),
+                                  trailing: FaIcon(FontAwesomeIcons.angleRight,color: HexColor(third_color),),
                                 ),
                               )
                           ),
@@ -276,7 +347,7 @@ class _ProfileState extends State<Profile> {
                           children: [
                             Padding(padding: const EdgeInsets.only(left: 25),child:   Align(
                             alignment: Alignment.centerLeft,
-                            child: Text("Version 2.1"),),),
+                            child: Text("Version 2.5"),),),
                             Container(
                               padding: const EdgeInsets.only(top:20,left: 25,right: 25),
                               child: Container(
@@ -286,7 +357,7 @@ class _ProfileState extends State<Profile> {
                                   onPressed: (){
                                     signOut();
                                   },
-                                  color: HexColor("#602d98"),
+                                  color: HexColor(main_color),
                                   shape: RoundedRectangleBorder(side: BorderSide(
                                       color: Colors.black,
                                       width: 0.1,

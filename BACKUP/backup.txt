@@ -24,3 +24,25 @@
                   ),
                 )
               ),
+
+
+
+
+
+
+                 final response = await http.post(
+                        applink+"api_model.php?act=register",
+                        body: {
+                          "nama": widget.parUsername.toString(),
+                          "email": widget.parEmail.toString(),
+                          "password": _password.text.toString(),
+                          "namatoko": _namatoko.text.toString()
+                        }).timeout(Duration(seconds: 20),
+                        onTimeout: (){
+                          setState(() {
+                            _isPressed = false;
+                          });
+                          showToast("Koneksi timeout , mohon periksa jaringan anda..", gravity: Toast.CENTER,
+                              duration: Toast.LENGTH_LONG);
+                          return;
+                        });

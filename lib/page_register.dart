@@ -3,10 +3,13 @@
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 import 'package:hexcolor/hexcolor.dart';
+import 'package:moobi_flutter/Helper/color_based.dart';
 import 'package:moobi_flutter/helper/api_link.dart';
 import 'package:moobi_flutter/page_index.dart';
 import 'package:moobi_flutter/page_login.dart';
+import 'package:moobi_flutter/page_registergoogle.dart';
 import 'package:moobi_flutter/page_successregister.dart';
 import 'package:toast/toast.dart';
 import 'dart:async';
@@ -27,6 +30,9 @@ class _RegisterState extends State<Register> {
   final _email = TextEditingController();
   final _password = TextEditingController();
   final _namatoko = TextEditingController();
+  GoogleSignIn _googleSignIn =  GoogleSignIn(scopes: ['email']);
+  String authEmail = '';
+  String autUsername = '';
   void showToast(String msg, {int duration, int gravity}) {
     Toast.show(msg, context, duration: duration, gravity: gravity);
   }
@@ -39,6 +45,44 @@ class _RegisterState extends State<Register> {
     Navigator.push(context, EnterPage(page: Login()));
   }
 
+  _daftargoogle() async {
+    try {
+      await _googleSignIn.signIn();
+      setState(() {
+        authEmail = _googleSignIn.currentUser.email;
+        autUsername = _googleSignIn.currentUser.displayName;
+        if (authEmail != '') {
+          _cekRegister(authEmail);
+        } else {
+          showToast("Register Gagal", gravity: Toast.CENTER, duration: Toast.LENGTH_LONG);
+          return;
+        }
+      });
+    }
+    catch(err) {
+      print(err);
+    }
+  }
+
+
+  _cekRegister(String emailGoogle) async{
+    final response = await http.post(
+        applink+"api_model.php?act=cekregister",
+        body: {
+          "email": emailGoogle.toString()
+        });
+    Map showdata = jsonDecode(response.body);
+    setState(() {
+      if (showdata["message"].toString() == '1') {
+        _googleSignIn.signOut();
+        showToast("Mohon maaf email sudah terdaftar", gravity: Toast.CENTER, duration: Toast.LENGTH_LONG);
+        return;
+      } else {
+        Navigator.pushReplacement(context, EnterPage(page: RegisterGoogle(authEmail,autUsername)));
+        _googleSignIn.signOut();
+      }
+    });
+  }
 
   _daftar() async {
     if (_nama.text == '' || _email.text == '' || _password.text == '' || _namatoko.text == '') {
@@ -78,7 +122,7 @@ class _RegisterState extends State<Register> {
             child: Scaffold(
               backgroundColor: Colors.white,
                 appBar: new AppBar(
-                  backgroundColor: HexColor("#602d98"),
+                  backgroundColor: HexColor(main_color),
                   leading: Builder(
                     builder: (context) => IconButton(
                         icon: new Icon(Icons.arrow_back,size: 20,),
@@ -192,13 +236,21 @@ class _RegisterState extends State<Register> {
                     )),
               ),
               bottomSheet:
+              Container(
+                color: Colors.white,
+                height: 160,
+                width: double.infinity,
+                child:
+                Column(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
                     Padding(
-                      padding: const EdgeInsets.only(bottom: 20),
+                      padding: const EdgeInsets.only(bottom: 10),
                       child:  Container(
                           color: Colors.white,
                           height: 50,
                           padding: const EdgeInsets.only(left: 25,right: 25),
-                          width: double.infinity,
+                          width: 250,
                           child :
                           RaisedButton(
                               shape: RoundedRectangleBorder(side: BorderSide(
@@ -208,12 +260,12 @@ class _RegisterState extends State<Register> {
                               ),
                                 borderRadius: BorderRadius.circular(50.0),
                               ),
-                              color: HexColor("#602d98"),
+                              color: HexColor(main_color),
                               child: Text(
                                 "Daftar Sekarang",
                                 style: TextStyle(
                                     fontFamily: 'VarelaRound',
-                                    fontSize: 14,
+                                    fontSize: 12,
                                     fontWeight: FontWeight.bold,
                                     color: Colors.white
                                 ),
@@ -222,7 +274,46 @@ class _RegisterState extends State<Register> {
                                 _daftar();
                               }
                           )),
-                    )
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: 10),
+                      child:  Container(
+                          color: Colors.white,
+                          height: 50,
+                          padding: const EdgeInsets.only(left: 25,right: 25),
+                          width: 250,
+                          child :
+                          RaisedButton(
+                              shape: RoundedRectangleBorder(side: BorderSide(
+                                  color: Colors.black,
+                                  width: 0.1,
+                                  style: BorderStyle.solid
+                              ),
+                                borderRadius: BorderRadius.circular(50.0),
+                              ),
+                              color: Colors.white,
+                              child:        Wrap(
+                                crossAxisAlignment: WrapCrossAlignment.center,
+                                children: [
+                                  Image.asset("assets/logo_google.png",height: 30,width: 30,),// <-- Use 'Image.asset(...)' here
+                                  SizedBox(width: 14),
+                                  Text('Daftar Dengan Google',
+                                      style: TextStyle(
+                                          fontFamily: 'VarelaRound',
+                                          fontSize: 12,
+                                          fontWeight: FontWeight.bold,
+                                          color: Colors.black
+                                      )),
+                                ],
+                              ),
+                              onPressed: () {
+                                _daftargoogle();
+                              }
+                          )),
+                    ),
+                  ],
+                ),
+              )
 
             ),
         );
