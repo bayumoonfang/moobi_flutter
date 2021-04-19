@@ -12,7 +12,9 @@ import 'package:moobi_flutter/Helper/check_connection.dart';
 import 'package:moobi_flutter/Helper/color_based.dart';
 import 'package:moobi_flutter/Helper/page_route.dart';
 import 'package:moobi_flutter/Helper/session.dart';
+import 'package:moobi_flutter/Profile/page_paymentmethodreg.dart';
 import 'package:moobi_flutter/Profile/page_profile.dart';
+import 'package:moobi_flutter/Profile/page_subscribeverification.dart';
 import 'package:moobi_flutter/page_login.dart';
 import 'package:responsive_container/responsive_container.dart';
 import 'package:steps/steps.dart';
@@ -66,66 +68,9 @@ class SubscribeState extends State<Subscribe> {
     _prepare();
   }
 
-  doSimpan() async {
-    final response = await http.post(applink+"api_model.php?act=edit_namapengguna", body: {
-      "valNama_edit": valNama.text,
-      "valEmail_edit" : getEmail.toString()
-    });
-    Map data = jsonDecode(response.body);
-    setState(() {
-      if (data["message"].toString() == '1') {
-        showToast("Nama berhasil diganti", gravity: Toast.BOTTOM,
-            duration: Toast.LENGTH_LONG);
-        Navigator.pop(context);
-        return false;
-      }
-    });
-  }
 
 
-  alertSimpan() {
-    if (valNama.text == "" ) {
-      showToast("Form tidak boleh kosong ", gravity: Toast.BOTTOM,
-          duration: Toast.LENGTH_LONG);
-      return false;
-    }
-    showDialog(
-        context: context,
-        builder: (BuildContext context) {
-          return AlertDialog(
-            //title: Text(),
-            content: Container(
-                width: double.infinity,
-                height: 178,
-                child: Column(
-                  children: [
-                    Align(alignment: Alignment.center, child:
-                    Text("Konfirmasi", style: TextStyle(fontFamily: 'VarelaRound', fontSize: 20,
-                        fontWeight: FontWeight.bold)),),
-                    Padding(padding: const EdgeInsets.only(top: 15), child:
-                    Align(alignment: Alignment.center, child: FaIcon(FontAwesomeIcons.save,
-                      color: Colors.redAccent,size: 35,)),),
-                    Padding(padding: const EdgeInsets.only(top: 15), child:
-                    Align(alignment: Alignment.center, child:
-                    Text("Apakah anda yakin menyimpan data ini ? ",
-                        style: TextStyle(fontFamily: 'VarelaRound', fontSize: 12)),)),
-                    Padding(padding: const EdgeInsets.only(top: 25), child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                      children: <Widget>[
-                        Expanded(child: OutlineButton(
-                          onPressed: () {Navigator.pop(context);}, child: Text("Tidak"),)),
-                        Expanded(child: OutlineButton(
-                          borderSide: BorderSide(width: 1.0, color: Colors.redAccent),
-                          onPressed: () {
-                            doSimpan();
-                          }, child: Text("Simpan", style: TextStyle(color: Colors.red),),)),
-                      ],),)
-                  ],
-                )
-            ),
-          );
-        });
-  }
+
 
 
   @override
@@ -221,7 +166,7 @@ class SubscribeState extends State<Subscribe> {
                           child:
                           ResponsiveContainer(
                             widthPercent: 100,
-                            heightPercent: 85,
+                            heightPercent: 70,
                                 child:        Steps(
                                   direction: Axis.vertical,
                                   size: 10.0,
@@ -241,8 +186,43 @@ class SubscribeState extends State<Subscribe> {
                                             style: TextStyle(fontSize: 22.0),
                                           ),
                                           Text(
-                                            'Lakukan pembayaran untuk memulai subscribe aplikasi moobie. Anda dapat melakukan pembayaran ke beberapa rekening atau layanan ',
-                                            style: TextStyle(fontSize: 12.0),
+                                            'Lakukan pembayaran untuk memulai subscribe aplikasi moobie. Anda dapat melakukan pembayaran ke beberapa rekening atau payment gateway kami. ',
+                                            style: TextStyle(fontSize: 12.5,height: 1.4),
+                                          ),
+                                          RaisedButton(
+                                            shape: RoundedRectangleBorder(side: BorderSide(
+                                                color: HexColor(fourth_color),
+                                                width: 0.1,
+                                                style: BorderStyle.solid
+                                            ),
+                                              borderRadius: BorderRadius.circular(5),
+                                            ),
+                                            child: Text("List Rekening dan Payment Gateway",
+                                              style: TextStyle(color: HexColor("#4c4851"),fontSize: 13),),
+                                            onPressed: (){
+                                              Navigator.push(context, ExitPage(page: PaymentMethodRegistration()));
+                                            },
+                                            color: HexColor(fourth_color),
+                                          )
+                                        ],
+                                      ),
+                                    },
+
+                                    {
+                                      'color': Colors.white,
+                                      'background': HexColor(main_color),
+                                      'label': '2',
+                                      'content': Column(
+                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        children: <Widget>[
+                                          Text(
+                                            'Verifikasi',
+                                            style: TextStyle(fontSize: 22.0),
+                                          ),
+                                          Text(
+                                            'Lakukan verifikasi pembayaran subscribed anda dengan mengisi beberapa form yang telah disediakan , '
+                                                'mohon untuk mengisi dengan data yang valid agar tidak terjadi kesalahan verifikasi data dari kami',
+                                            style: TextStyle(fontSize: 12.5,height: 1.4),
                                           ),
                                         ],
                                       ),
@@ -250,22 +230,24 @@ class SubscribeState extends State<Subscribe> {
 
                                     {
                                       'color': Colors.white,
-                                      'background': Colors.lightBlue.shade200,
-                                      'label': '1',
+                                      'background': HexColor(main_color),
+                                      'label': '3',
                                       'content': Column(
                                         crossAxisAlignment: CrossAxisAlignment.start,
                                         children: <Widget>[
                                           Text(
-                                            'Laborum exercitation',
+                                            'Selesai',
                                             style: TextStyle(fontSize: 22.0),
                                           ),
                                           Text(
-                                            'Qui et consectetur esse duis excepteur magna consectetur.',
-                                            style: TextStyle(fontSize: 12.0),
+                                            'Setelah proses selesai , tunggu untuk kami memverifikasi data dan pembayaran anda. Max 1x24 jam akun anda sudah berubah menjadi akun subscribed.  ',
+                                            style: TextStyle(fontSize: 12.5,height: 1.4),
                                           ),
                                         ],
                                       ),
                                     },
+
+
 
                                   ],
 
@@ -282,6 +264,30 @@ class SubscribeState extends State<Subscribe> {
                 ),
               ],
             ),
+          ),
+        ),
+        bottomSheet: Container(
+          width: double.infinity,
+          height: 55,
+          color: Colors.white,
+          child: Expanded(
+            child: Padding(
+              padding: const EdgeInsets.only(left: 35,right: 35,top: 5,bottom: 5),
+              child: RaisedButton(
+                shape: RoundedRectangleBorder(side: BorderSide(
+                    color: Colors.white,
+                    width: 0.1,
+                    style: BorderStyle.solid
+                ),
+                  borderRadius: BorderRadius.circular(5),
+                ),
+                child: Text("Verifikasi",style: TextStyle(color: Colors.white),),
+                color: HexColor(main_color),
+                onPressed: (){
+                  Navigator.push(context, ExitPage(page: SubscribeVerification()));
+                },
+              ),
+            )
           ),
         ),
       ),

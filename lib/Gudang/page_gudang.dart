@@ -41,7 +41,7 @@ class _GudangState extends State<Gudang> {
     int value = await Session.getValue();
     getEmail = await Session.getEmail();
     if (value != 1) {
-      Navigator.push(context, ExitPage(page: Login()));
+      Navigator.pushReplacement(context, ExitPage(page: Login()));
     }
   }
 
