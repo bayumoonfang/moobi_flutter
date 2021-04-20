@@ -1,0 +1,1 @@
+String hargaAplikasi = "20000";

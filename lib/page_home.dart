@@ -2,6 +2,7 @@
 
 
 
+import 'package:badges/badges.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
@@ -12,12 +13,14 @@ import 'package:moobi_flutter/Gudang/page_gudang.dart';
 import 'package:moobi_flutter/Helper/color_based.dart';
 import 'package:moobi_flutter/Jualan/page_jualan.dart';
 import 'package:moobi_flutter/Kategori/page_kategori.dart';
+import 'package:moobi_flutter/Notification/page_notification.dart';
 import 'package:moobi_flutter/Produk/page_produk.dart';
 import 'package:moobi_flutter/Produk/page_produkhome.dart';
 import 'package:moobi_flutter/Profile/page_profile.dart';
 import 'package:moobi_flutter/Setting/page_settinghome.dart';
 import 'package:moobi_flutter/Toko/page_toko.dart';
 import 'package:moobi_flutter/Laporan/page_laporanhome.dart';
+
 import 'package:moobi_flutter/helper/api_link.dart';
 import 'package:moobi_flutter/helper/check_connection.dart';
 import 'package:moobi_flutter/helper/page_route.dart';
@@ -37,6 +40,7 @@ class Home extends StatefulWidget {
 class _HomeState extends State<Home> {
   String getUsername, getEmail = "";
   List data;
+  List data2;
   GoogleSignIn _googleSignIn = GoogleSignIn(scopes: ['email']);
   void showToast(String msg, {int duration, int gravity}) {
     Toast.show(msg, context, duration: duration, gravity: gravity);
@@ -60,6 +64,7 @@ class _HomeState extends State<Home> {
   String getMoobiIdentity = '...';
   String getStorename = '...';
   String getBranch = '...';
+  String getUserID = '...';
   _userDetail() async {
     final response = await http.get(
          applink+"api_model.php?act=userdetail&id="+getEmail.toString());
@@ -68,6 +73,7 @@ class _HomeState extends State<Home> {
       getMoobiIdentity = data["d"].toString();
       getStorename = data["b"].toString();
       getBranch = data["c"].toString();
+      getUserID = data["m"].toString();
     });
   }
 
@@ -106,6 +112,20 @@ class _HomeState extends State<Home> {
     });
   }
 
+
+
+  Future<List> getDataTotalNotif() async {
+    http.Response response = await http.get(
+        Uri.encodeFull(applink+"api_model.php?act=getdata_totalnotif&userid="+getUserID.toString()),
+        headers: {"Accept":"application/json"}
+    );
+    setState((){
+      data2 = json.decode(response.body);
+    });
+  }
+
+
+
   @override
   Widget build(BuildContext context) {
       return WillPopScope(
@@ -116,12 +136,42 @@ class _HomeState extends State<Home> {
               backgroundColor: HexColor(main_color),
               automaticallyImplyLeading: false,
               actions: [
-                Padding(padding: const EdgeInsets.only(top: 19,right: 35), child :
-                FaIcon(FontAwesomeIcons.solidBell, size: 18,)),
+
+                Container(
+                  padding: const EdgeInsets.only(top: 19,right: 35),
+                  height: 33,
+                  width: 58,
+                  child: FutureBuilder(
+                    future: getDataTotalNotif(),
+                    builder: (context, snapshot) {
+                      return ListView.builder(
+                        itemCount: data2 == null ? 0 : data2.length,
+                        itemBuilder: (context, i) {
+                          return data2[i]["a"] == "0" ?
+                          FaIcon(FontAwesomeIcons.solidBell, size: 20,)
+                              :
+                       InkWell(
+                         onTap: (){
+                           Navigator.push(context, ExitPage(page: NotificationPage()));
+                         },
+                         child: Badge(
+                           badgeContent: Text(data2[i]["a"].toString(),
+                             style: TextStyle(color: Colors.white,fontSize: 12),),
+                           child: FaIcon(FontAwesomeIcons.solidBell, size: 20,),
+                         )
+                       );
+
+
+                        },
+                      );
+                    },
+                  ),
+                ),
+
                 Padding(padding: const EdgeInsets.only(top: 19,right: 25), child :
                 InkWell(
                   hoverColor: Colors.transparent,
-                  child : FaIcon(FontAwesomeIcons.cog, size: 18,),
+                  child : FaIcon(FontAwesomeIcons.cog, size: 20,),
                   onTap: () {
                     Navigator.push(context, ExitPage(page: SettingHome()));
                   },

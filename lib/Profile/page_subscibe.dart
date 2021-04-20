@@ -94,9 +94,11 @@ class SubscribeState extends State<Subscribe> {
                 }),
           ),
         ),
-        body: Container(
+        body:
+        SingleChildScrollView(
+          child :
+        Container(
           padding: const EdgeInsets.only(left: 5,right: 5),
-          child: SingleChildScrollView(
             child: Column(
               children: [
                 Padding(padding: const EdgeInsets.only(left: 15,top: 10,right: 15),
@@ -270,7 +272,7 @@ class SubscribeState extends State<Subscribe> {
           width: double.infinity,
           height: 55,
           color: Colors.white,
-          child: Expanded(
+          child: SizedBox.expand(
             child: Padding(
               padding: const EdgeInsets.only(left: 35,right: 35,top: 5,bottom: 5),
               child: RaisedButton(
