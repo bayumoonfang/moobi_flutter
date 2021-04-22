@@ -77,6 +77,14 @@ flutter:
     - family: VarelaRound
       fonts:
         - asset: fonts/varelaround.ttf
+    - family: OpenSans
+      fonts:
+        - asset: fonts/opensansregular.ttf
+    - family: Lato
+      fonts:
+        - asset: fonts/latoreguler.ttf
+
+
 
   # To add assets to your application, add an assets section, like this:
   # assets:
