@@ -9,6 +9,7 @@ import 'package:moobi_flutter/Helper/check_connection.dart';
 import 'package:moobi_flutter/Helper/color_based.dart';
 import 'package:moobi_flutter/Helper/page_route.dart';
 import 'package:moobi_flutter/Helper/session.dart';
+import 'package:moobi_flutter/Notification/page_detailnotification.dart';
 import 'package:moobi_flutter/page_login.dart';
 import 'package:toast/toast.dart';
 import 'package:http/http.dart' as http;
@@ -305,6 +306,14 @@ class NotificationPageState extends State<NotificationPage> {
                   return Column(
                     children: [
                        InkWell(
+                         onTap: (){
+                           data[i]["g"].toString() == 'Promo'  ?
+                           Navigator.push(context, ExitPage(page: DetailNotification(data[i]["a"].toString(), data[i]["c"])))
+                               : data[i]["g"].toString() == 'Info' ?
+                           Navigator.push(context, ExitPage(page: DetailNotification(data[i]["a"].toString(), data[i]["c"])))
+                               :
+                           Navigator.push(context, ExitPage(page: Login()));
+                         },
                          child: ListTile(
                            title: Align(alignment: Alignment.centerLeft,
                              child: Row(
