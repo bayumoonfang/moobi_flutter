@@ -10,6 +10,7 @@ import 'package:moobi_flutter/Helper/color_based.dart';
 import 'package:moobi_flutter/Helper/page_route.dart';
 import 'package:moobi_flutter/Helper/session.dart';
 import 'package:moobi_flutter/Notification/page_detailnotification.dart';
+import 'package:moobi_flutter/Notification/page_detailnotificationtransaksi.dart';
 import 'package:moobi_flutter/page_login.dart';
 import 'package:toast/toast.dart';
 import 'package:http/http.dart' as http;
@@ -312,7 +313,7 @@ class NotificationPageState extends State<NotificationPage> {
                                : data[i]["g"].toString() == 'Info' ?
                            Navigator.push(context, ExitPage(page: DetailNotification(data[i]["a"].toString(), data[i]["c"])))
                                :
-                           Navigator.push(context, ExitPage(page: Login()));
+                           Navigator.push(context, ExitPage(page: DetailNotifikasiTransaksi(data[i]["a"].toString(), data[i]["c"])));
                          },
                          child: ListTile(
                            title: Align(alignment: Alignment.centerLeft,
