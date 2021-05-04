@@ -4,6 +4,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:hexcolor/hexcolor.dart';
+import 'package:intl/intl.dart';
 import 'package:moobi_flutter/Helper/check_connection.dart';
 import 'package:moobi_flutter/Helper/color_based.dart';
 import 'package:moobi_flutter/Helper/page_route.dart';
@@ -56,19 +57,20 @@ class DetailNotifikasiTransaksiState extends State<DetailNotifikasiTransaksi> {
     final response = await http.get(applink+"api_model.php?act=getdetail_notifikasi&id="+widget.idNotif);
     Map data = jsonDecode(response.body);
     setState(() {
-      noNoTrans = data["a"].toString();
+      noNoTrans = data["d"].toString();
       getTanggal = data["b"].toString();
     });
   }
 
 
   String getIsi = "...";
+  String getAmount = "...";
   _getDetailInvoice() async {
     final response = await http.get(applink+"api_model.php?act=getdetail_notifikasitransaksi&id="+noNoTrans.toString());
-    Map data = jsonDecode(response.body);
+    Map data2 = jsonDecode(response.body);
     setState(() {
-      getTanggal = data["b"].toString();
-      getIsi = data["c"].toString();
+      getAmount = data2["b"].toString();
+      getIsi = data2["c"].toString();
     });
   }
 
@@ -88,6 +90,7 @@ class DetailNotifikasiTransaksiState extends State<DetailNotifikasiTransaksi> {
     await _session();
     await _getDetail();
     _nonaktifproduk();
+    await _getDetailInvoice();
   }
 
 
@@ -101,22 +104,44 @@ class DetailNotifikasiTransaksiState extends State<DetailNotifikasiTransaksi> {
   @override
   Widget build(BuildContext context) {
     return WillPopScope(
+      onWillPop: _onWillPop,
       child: Scaffold(
         appBar: new AppBar(
-          backgroundColor: HexColor(main_color),
-          title: Text(
-            getType.toString()+" Moobie",
-            overflow: TextOverflow.ellipsis,
-            style: TextStyle(
-                color: Colors.white, fontFamily: 'VarelaRound', fontSize: 16),
-          ),
+          centerTitle: true,
+          elevation: 0,
+          backgroundColor: HexColor("#f8f8f8"),
+          title: Image.asset("assets/logo2.png",width: 100,),
           leading: Builder(
             builder: (context) => IconButton(
                 icon: new Icon(Icons.arrow_back),
-                color: Colors.white,
+                color: HexColor("#6c767f"),
                 onPressed: () => {
                   Navigator.pop(context)
                 }),
+          ),
+        ),
+        body: Container(
+          color: Colors.white,
+          child: Container(
+            width: double.infinity,
+            color: HexColor("#f8f8f8"),
+            child: Center(
+              child: Padding(
+                padding: const EdgeInsets.only(top: 40),
+                child: Column(
+                  children: [
+               Text( "Rp. "+
+                NumberFormat.currency(
+                    locale: 'id', decimalDigits: 0, symbol: '').format(
+                    int.parse(getAmount.toString())),
+                  style: TextStyle(fontFamily: "VarelaRound",
+                  fontWeight: FontWeight.bold,
+                  fontSize: 32,color: HexColor("#72bd00"))),
+                    Text(getAmount.toString())
+                  ],
+                ),
+              )
+            ),
           ),
         ),
       ),

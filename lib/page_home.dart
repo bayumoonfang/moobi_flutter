@@ -148,7 +148,12 @@ class _HomeState extends State<Home> {
                         itemCount: data2 == null ? 0 : data2.length,
                         itemBuilder: (context, i) {
                           return data2[i]["a"] == "0" ?
-                          FaIcon(FontAwesomeIcons.solidBell, size: 20,)
+                          InkWell(
+                              onTap: (){
+                                Navigator.push(context, ExitPage(page: NotificationPage()));
+                              },
+                              child:
+                              FaIcon(FontAwesomeIcons.solidBell, size: 20,))
                               :
                        InkWell(
                          onTap: (){
