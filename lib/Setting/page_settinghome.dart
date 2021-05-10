@@ -7,6 +7,7 @@ import 'package:hexcolor/hexcolor.dart';
 import 'package:moobi_flutter/Helper/page_route.dart';
 import 'package:moobi_flutter/Setting/page_ppn.dart';
 import 'package:moobi_flutter/Setting/page_servcharge.dart';
+import 'package:moobi_flutter/Setting/page_toko.dart';
 
 class SettingHome extends StatefulWidget{
   @override
@@ -47,6 +48,20 @@ class SettingHomeState extends State<SettingHome> {
             padding: const EdgeInsets.only(top: 10,left: 5,right: 15),
             child: Column(
               children: [
+                InkWell(
+                  child: ListTile(
+                    onTap: (){Navigator.push(context, ExitPage(page: Toko()));},
+                    title: Text("Toko Saya",style: TextStyle(
+                        color: Colors.black, fontFamily: 'VarelaRound',fontSize: 15,
+                        fontWeight: FontWeight.bold)),
+                    subtitle: Text("Lihat detail toko kamu",style: TextStyle(
+                        color: Colors.black, fontFamily: 'VarelaRound',fontSize: 12)),
+                    trailing: FaIcon(FontAwesomeIcons.angleRight,color: HexColor("#594d75"),size: 15,),
+                  ),
+                ),
+                Padding(padding: const EdgeInsets.only(top: 5,left: 15),
+                  child: Divider(height: 3,),),
+
                 InkWell(
                   child: ListTile(
                     onTap: (){Navigator.push(context, ExitPage(page: SettingPPN()));},

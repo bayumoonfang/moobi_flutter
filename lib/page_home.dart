@@ -18,7 +18,7 @@ import 'package:moobi_flutter/Produk/page_produk.dart';
 import 'package:moobi_flutter/Produk/page_produkhome.dart';
 import 'package:moobi_flutter/Profile/page_profile.dart';
 import 'package:moobi_flutter/Setting/page_settinghome.dart';
-import 'package:moobi_flutter/Toko/page_toko.dart';
+import 'package:moobi_flutter/Setting/page_toko.dart';
 import 'package:moobi_flutter/Laporan/page_laporanhome.dart';
 
 import 'package:moobi_flutter/helper/api_link.dart';
@@ -321,11 +321,12 @@ class _HomeState extends State<Home> {
                                           children: [
                                             FaIcon(FontAwesomeIcons.store,color: HexColor(second_color)),
                                             Padding(padding: const EdgeInsets.only(top:8),
-                                              child: Text("Toko Saya", style: TextStyle(fontFamily: 'VarelaRound',
+                                              child: Text("Outlet Saya", style: TextStyle(fontFamily: 'VarelaRound',
                                                   fontSize: 12,color: HexColor(second_color)
                                                   )),)
                                           ],
                                         )),
+
                                         InkWell(
                                           onTap: () {
                                             Navigator.push(context, ExitPage(page: Gudang()));
@@ -344,6 +345,7 @@ class _HomeState extends State<Home> {
                                   )
 
                       ),),
+
                     Padding(
                       padding: const EdgeInsets.only(top: 200,left: 25,right: 25),
                       child: Column(

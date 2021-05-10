@@ -29,7 +29,7 @@ class ProfileUbahSandi extends StatefulWidget {
 class ProfileUbahSandiState extends State<ProfileUbahSandi> {
   TextEditingController valPassword = TextEditingController();
   Future<bool> _onWillPop() async {
-    Navigator.pushReplacement(context, ExitPage(page: Profile()));
+    Navigator.pushReplacement(context, EnterPage(page: Profile()));
   }
   void showToast(String msg, {int duration, int gravity}) {
     Toast.show(msg, context, duration: duration, gravity: gravity);
@@ -147,7 +147,7 @@ class ProfileUbahSandiState extends State<ProfileUbahSandi> {
                 icon: new Icon(Icons.arrow_back),
                 color: Colors.white,
                 onPressed: () => {
-                  Navigator.pushReplacement(context, ExitPage(page: Profile()))
+                  Navigator.pushReplacement(context, EnterPage(page: Profile()))
                 }),
           ),
           actions: [

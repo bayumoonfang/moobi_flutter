@@ -29,7 +29,7 @@ class ProfileUbahNama extends StatefulWidget {
 class ProfileUbahNamaState extends State<ProfileUbahNama> {
   TextEditingController valNama = TextEditingController();
   Future<bool> _onWillPop() async {
-    Navigator.pushReplacement(context, ExitPage(page: Profile()));
+    Navigator.pushReplacement(context, EnterPage(page: Profile()));
   }
   void showToast(String msg, {int duration, int gravity}) {
     Toast.show(msg, context, duration: duration, gravity: gravity);
@@ -51,15 +51,24 @@ class ProfileUbahNamaState extends State<ProfileUbahNama> {
     });
   }
 
-
+  _userDetail() async {
+    final response = await http.get(
+        applink+"api_model.php?act=userdetail&id="+getEmail.toString()).timeout(Duration(seconds: 10),
+        onTimeout: (){
+          showToast("Koneksi timeout , mohon periksa jaringan anda..", gravity: Toast.BOTTOM,
+              duration: Toast.LENGTH_LONG);
+          return;
+        });
+    Map data = jsonDecode(response.body);
+    setState(() {
+      //getNama = data["j"].toString();
+    });
+  }
 
   _prepare() async {
     await _connect();
     await _session();
-    setState(() {
-      valNama.text = widget.varNama;
-    });
-
+    await _userDetail();
   }
 
 
@@ -149,7 +158,7 @@ class ProfileUbahNamaState extends State<ProfileUbahNama> {
                 icon: new Icon(Icons.arrow_back),
                 color: Colors.white,
                 onPressed: () => {
-                Navigator.pushReplacement(context, ExitPage(page: Profile()))
+                Navigator.pushReplacement(context, EnterPage(page: Profile()))
                 }),
           ),
           actions: [

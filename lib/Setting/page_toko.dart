@@ -4,6 +4,7 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:hexcolor/hexcolor.dart';
+import 'package:moobi_flutter/Setting/page_ubahketerangantoko.dart';
 import 'package:moobi_flutter/helper/api_link.dart';
 import 'package:moobi_flutter/helper/page_route.dart';
 import 'package:moobi_flutter/helper/session.dart';
@@ -43,12 +44,13 @@ class _TokoState extends State<Toko> {
     });
   }
 
-  String getStorename = "...";
-  String getStoreAddress = "...";
-  String getIDToko = "...";
-  String getPhoneToko = "...";
-  String getCityToko = "...";
-  String getStatusToko = '...';
+  String getStorename = "-";
+  String getStoreAddress = "-";
+  String getIDToko = "-";
+  String getPhoneToko = "-";
+  String getCityToko = "-";
+  String getStatusToko = '-';
+  String getWebsiteToko = '-';
   _userDetail() async {
     final response = await http.get(
         applink+"api_model.php?act=userdetail&id="+getEmail.toString());
@@ -60,6 +62,7 @@ class _TokoState extends State<Toko> {
       getPhoneToko = data["h"].toString();
       getCityToko = data["g"].toString();
       getStatusToko = data["i"].toString();
+      getWebsiteToko = data["o"].toString();
     });
   }
 
@@ -168,6 +171,67 @@ class _TokoState extends State<Toko> {
                                 .spaceBetween,
                             children: [
                               Text(
+                                "Email",
+                                textAlign: TextAlign.left,
+                                style: TextStyle(
+                                    fontFamily: 'VarelaRound',
+                                    fontSize: 14),
+                              ),
+                              Text(getEmail.toString(),
+                                  style: TextStyle(
+                                      fontFamily: 'VarelaRound',
+                                      fontSize: 14)),
+                            ],
+                          ),),
+
+
+                        Padding(padding: const EdgeInsets.only(top: 10,right: 25),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment
+                                .spaceBetween,
+                            children: [
+                              Text(
+                                "Phone",
+                                textAlign: TextAlign.left,
+                                style: TextStyle(
+                                    fontFamily: 'VarelaRound',
+                                    fontSize: 14),
+                              ),
+                              Text(getPhoneToko.toString(),
+                                  style: TextStyle(
+                                      fontFamily: 'VarelaRound',
+                                      fontSize: 14)),
+                            ],
+                          ),),
+
+
+
+                        Padding(padding: const EdgeInsets.only(top: 10,right: 25),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment
+                                .spaceBetween,
+                            children: [
+                              Text(
+                                "Website",
+                                textAlign: TextAlign.left,
+                                style: TextStyle(
+                                    fontFamily: 'VarelaRound',
+                                    fontSize: 14),
+                              ),
+                              Text(getWebsiteToko.toString(),
+                                  style: TextStyle(
+                                      fontFamily: 'VarelaRound',
+                                      fontSize: 14)),
+                            ],
+                          ),),
+
+
+                        Padding(padding: const EdgeInsets.only(top: 10,right: 25),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment
+                                .spaceBetween,
+                            children: [
+                              Text(
                                 "Kota",
                                 textAlign: TextAlign.left,
                                 style: TextStyle(
@@ -181,24 +245,7 @@ class _TokoState extends State<Toko> {
                             ],
                           ),),
 
-                        Padding(padding: const EdgeInsets.only(top: 10,right: 25),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment
-                                .spaceBetween,
-                            children: [
-                              Text(
-                                "Telpon Toko",
-                                textAlign: TextAlign.left,
-                                style: TextStyle(
-                                    fontFamily: 'VarelaRound',
-                                    fontSize: 14),
-                              ),
-                              Text(getPhoneToko.toString(),
-                                  style: TextStyle(
-                                      fontFamily: 'VarelaRound',
-                                      fontSize: 14)),
-                            ],
-                          ),),
+
                         Padding(padding: const EdgeInsets.only(top: 10,right: 25),
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment
@@ -239,7 +286,9 @@ class _TokoState extends State<Toko> {
                         Padding(padding: const EdgeInsets.only(top: 10),
                             child: InkWell(
                               child: ListTile(
-                                onTap: (){},
+                                onTap: (){
+                                  Navigator.pushReplacement(context, ExitPage(page: UbahKeteranganToko(getIDToko.toString())));
+                                },
                                 leading: FaIcon(FontAwesomeIcons.edit,color: HexColor("#594d75"),),
                                 title: Text("Ubah Keterangan Toko",style: TextStyle(
                                     color: Colors.black, fontFamily: 'VarelaRound',fontSize: 16,
