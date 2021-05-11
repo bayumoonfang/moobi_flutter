@@ -4,7 +4,7 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:hexcolor/hexcolor.dart';
-import 'package:moobi_flutter/Setting/page_ubahketerangantoko.dart';
+import 'package:moobi_flutter/Setting/page_editlegalentites.dart';
 import 'package:moobi_flutter/helper/api_link.dart';
 import 'package:moobi_flutter/helper/page_route.dart';
 import 'package:moobi_flutter/helper/session.dart';
@@ -88,7 +88,7 @@ class _TokoState extends State<Toko> {
         appBar: new AppBar(
           backgroundColor: HexColor("#602d98"),
           title: Text(
-            "Detail Toko",
+            "Legal Entities",
             style: TextStyle(
                 color: Colors.white, fontFamily: 'VarelaRound', fontSize: 16),
           ),
@@ -112,7 +112,7 @@ class _TokoState extends State<Toko> {
                   Align(
                       alignment: Alignment.centerLeft,
                       child: Padding(padding: const EdgeInsets.only(top: 35,left: 15),
-                          child: Text("Toko", style: TextStyle(fontSize: 24,fontWeight: FontWeight.bold)))),
+                          child: Text("Legal Entities", style: TextStyle(fontSize: 24,fontWeight: FontWeight.bold)))),
 
                   Padding(padding: const EdgeInsets.only(top: 20),
                     child: ListTile(
@@ -126,9 +126,12 @@ class _TokoState extends State<Toko> {
                       title: Align(
                         alignment: Alignment.centerLeft,
                         child: Text(getStorename.toString(),style: TextStyle(fontFamily: 'VarelaRound',)),),
-                      subtitle: Align(
-                        alignment: Alignment.centerLeft,
-                        child: Text(getStoreAddress.toString(),style: TextStyle(fontFamily: 'VarelaRound')),),
+                      subtitle: Padding(
+                        padding: const EdgeInsets.only(top:5),
+                        child: Align(
+                          alignment: Alignment.centerLeft,
+                          child: Text(getStoreAddress.toString(),style: TextStyle(fontFamily: 'VarelaRound',height: 1.6)),),
+                      )
                     ),
                   ),
 
@@ -279,7 +282,7 @@ class _TokoState extends State<Toko> {
                   Padding(padding: const EdgeInsets.only(top: 20,left: 25,right: 25),
                     child: Column(
                       children: [
-                        Align(alignment: Alignment.centerLeft,child: Text("Toko Saya",style: TextStyle(
+                        Align(alignment: Alignment.centerLeft,child: Text("Legal Entities Saya",style: TextStyle(
                             color: Colors.black, fontFamily: 'VarelaRound',fontSize: 16,
                             fontWeight: FontWeight.bold)),),
 
@@ -290,7 +293,7 @@ class _TokoState extends State<Toko> {
                                   Navigator.pushReplacement(context, ExitPage(page: UbahKeteranganToko(getIDToko.toString())));
                                 },
                                 leading: FaIcon(FontAwesomeIcons.edit,color: HexColor("#594d75"),),
-                                title: Text("Ubah Keterangan Toko",style: TextStyle(
+                                title: Text("Ubah Keterangan",style: TextStyle(
                                     color: Colors.black, fontFamily: 'VarelaRound',fontSize: 16,
                                     fontWeight: FontWeight.bold)),
                                 trailing: FaIcon(FontAwesomeIcons.angleRight,color: HexColor("#594d75"),),

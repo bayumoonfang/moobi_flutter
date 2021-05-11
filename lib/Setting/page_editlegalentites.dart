@@ -10,7 +10,7 @@ import 'package:moobi_flutter/Helper/color_based.dart';
 import 'package:moobi_flutter/Helper/page_route.dart';
 import 'package:moobi_flutter/Helper/session.dart';
 import 'package:moobi_flutter/Setting/page_settinghome.dart';
-import 'package:moobi_flutter/Setting/page_toko.dart';
+import 'package:moobi_flutter/Setting/page_legalentites.dart';
 import 'package:moobi_flutter/page_login.dart';
 import 'package:toast/toast.dart';
 import 'package:http/http.dart' as http;
@@ -108,7 +108,7 @@ class UbahKeteranganTokoState extends State<UbahKeteranganToko> {
     Map data = jsonDecode(response.body);
     setState(() {
       if (data["message"].toString() == '1') {
-        showToast("Nama berhasil diganti", gravity: Toast.BOTTOM,
+        showToast("Legal Entities berhasil diubah ", gravity: Toast.BOTTOM,
             duration: Toast.LENGTH_LONG);
         Navigator.pop(context);
         return false;
@@ -170,7 +170,7 @@ class UbahKeteranganTokoState extends State<UbahKeteranganToko> {
         appBar: new AppBar(
           backgroundColor: HexColor(main_color),
           title: Text(
-            "Ubah Info Toko",
+            "Edit Legal Entities",
             style: TextStyle(
                 color: Colors.white, fontFamily: 'VarelaRound', fontSize: 16),
           ),
@@ -207,7 +207,7 @@ class UbahKeteranganTokoState extends State<UbahKeteranganToko> {
                       children: [
                         Align(alignment: Alignment.centerLeft,child: Padding(
                           padding: const EdgeInsets.only(left: 0,top: 15),
-                          child: Text("Alamat Toko",style: TextStyle(fontWeight: FontWeight.bold,fontFamily: "VarelaRound",
+                          child: Text("Alamat",style: TextStyle(fontWeight: FontWeight.bold,fontFamily: "VarelaRound",
                               fontSize: 12,color: HexColor("#0074D9")),),
                         ),),
                         Align(alignment: Alignment.centerLeft,child: Padding(
@@ -218,7 +218,7 @@ class UbahKeteranganTokoState extends State<UbahKeteranganToko> {
                             textCapitalization: TextCapitalization.sentences,
                             decoration: InputDecoration(
                               contentPadding: const EdgeInsets.only(top:2),
-                              hintText: 'Alamat toko...',
+                              hintText: 'Alamat...',
                               labelText: '',
                               floatingLabelBehavior: FloatingLabelBehavior.always,
                               hintStyle: TextStyle(fontFamily: "VarelaRound", color: HexColor("#c4c4c4")),
@@ -237,7 +237,7 @@ class UbahKeteranganTokoState extends State<UbahKeteranganToko> {
 
                         Align(alignment: Alignment.centerLeft,child: Padding(
                           padding: const EdgeInsets.only(left: 0,top: 25),
-                          child: Text("Telpon Toko",style: TextStyle(fontWeight: FontWeight.bold,fontFamily: "VarelaRound",
+                          child: Text("Telpon",style: TextStyle(fontWeight: FontWeight.bold,fontFamily: "VarelaRound",
                               fontSize: 12,color: HexColor("#0074D9")),),
                         ),),
                         Align(alignment: Alignment.centerLeft,child: Padding(
@@ -247,7 +247,7 @@ class UbahKeteranganTokoState extends State<UbahKeteranganToko> {
                             textCapitalization: TextCapitalization.sentences,
                             decoration: InputDecoration(
                               contentPadding: const EdgeInsets.only(top:2),
-                              hintText: 'Telpon toko...',
+                              hintText: 'Telpon...',
                               labelText: '',
                               floatingLabelBehavior: FloatingLabelBehavior.always,
                               hintStyle: TextStyle(fontFamily: "VarelaRound", color: HexColor("#c4c4c4")),
@@ -267,7 +267,7 @@ class UbahKeteranganTokoState extends State<UbahKeteranganToko> {
 
                         Align(alignment: Alignment.centerLeft,child: Padding(
                           padding: const EdgeInsets.only(left: 0,top: 25),
-                          child: Text("Website Toko",style: TextStyle(fontWeight: FontWeight.bold,fontFamily: "VarelaRound",
+                          child: Text("Website",style: TextStyle(fontWeight: FontWeight.bold,fontFamily: "VarelaRound",
                               fontSize: 12,color: HexColor("#0074D9")),),
                         ),),
                         Align(alignment: Alignment.centerLeft,child: Padding(
@@ -277,7 +277,7 @@ class UbahKeteranganTokoState extends State<UbahKeteranganToko> {
                             textCapitalization: TextCapitalization.sentences,
                             decoration: InputDecoration(
                               contentPadding: const EdgeInsets.only(top:2),
-                              hintText: 'Website toko...',
+                              hintText: 'Website...',
                               labelText: '',
                               floatingLabelBehavior: FloatingLabelBehavior.always,
                               hintStyle: TextStyle(fontFamily: "VarelaRound", color: HexColor("#c4c4c4")),

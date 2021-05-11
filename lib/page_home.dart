@@ -18,7 +18,7 @@ import 'package:moobi_flutter/Produk/page_produk.dart';
 import 'package:moobi_flutter/Produk/page_produkhome.dart';
 import 'package:moobi_flutter/Profile/page_profile.dart';
 import 'package:moobi_flutter/Setting/page_settinghome.dart';
-import 'package:moobi_flutter/Setting/page_toko.dart';
+import 'package:moobi_flutter/Setting/page_legalentites.dart';
 import 'package:moobi_flutter/Laporan/page_laporanhome.dart';
 
 import 'package:moobi_flutter/helper/api_link.dart';
