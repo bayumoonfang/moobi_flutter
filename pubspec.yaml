@@ -56,6 +56,8 @@ dependencies:
   firebase_auth: ^0.16.0
   steps: ^1.0.1
   clipboard: ^0.1.3
+  modal_bottom_sheet: ^2.0.0
+
 
 dev_dependencies:
   flutter_test:
@@ -83,8 +85,21 @@ flutter:
     - family: Lato
       fonts:
         - asset: fonts/latoreguler.ttf
-
-
+    - family: Monserat
+      fonts:
+        - asset: fonts/monseratreguler.ttf
+    - family: Nexa
+      fonts:
+        - asset: fonts/nexalight.otf
+    - family: Nunito
+      fonts:
+        - asset: fonts/nunitoreguler.ttf
+    - family: ProximaNova
+      fonts:
+        - asset: fonts/proximanovareguler.otf
+    - family: Roboto
+      fonts:
+        - asset: fonts/robotoreguler.ttf
 
   # To add assets to your application, add an assets section, like this:
   # assets:

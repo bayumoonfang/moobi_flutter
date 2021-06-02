@@ -12,7 +12,6 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:hexcolor/hexcolor.dart';
 import 'package:intl/intl.dart';
 import 'package:moobi_flutter/Helper/check_connection.dart';
-import 'package:moobi_flutter/Helper/color_based.dart';
 import 'package:moobi_flutter/Helper/page_route.dart';
 import 'package:moobi_flutter/Helper/session.dart';
 import 'package:moobi_flutter/Jualan/page_checkout.dart';
@@ -40,9 +39,13 @@ class JualanState extends State<Jualan> {
 
 
   bool _isvisible = true;
-
-  TextEditingController _tambahanNama = TextEditingController();
-  TextEditingController _tambahanBiaya = TextEditingController();
+  bool isSemua = true;
+  bool isTerjual = false;
+  bool isDiskon = false;
+  bool isTerlaris = false;
+  bool isTermurah = false;
+  bool isTermahal = false;
+  TextEditingController _produkdibeli = TextEditingController();
   String getEmail = '...';
   _session() async {
     int value = await Session.getValue();
@@ -66,12 +69,7 @@ class JualanState extends State<Jualan> {
   String getNamaUser = '';
   _getBranch() async {
     final response = await http.get(
-        applink+"api_model.php?act=userdetail&id="+getEmail.toString()).timeout(Duration(seconds: 10),
-        onTimeout: () {
-          showToast("Connection Timeout", gravity: Toast.CENTER,
-              duration: Toast.LENGTH_LONG);
-          return;
-        });
+        applink+"api_model.php?act=userdetail&id="+getEmail.toString());
     Map data = jsonDecode(response.body);
     setState(() {
       getBranchVal = data["c"].toString();
@@ -80,12 +78,13 @@ class JualanState extends State<Jualan> {
   }
 
 
-  String filter = "";
+  String filter = "Semua";
+  String filterq = "";
   String sortby = '0';
   Future<List> getData() async {
     http.Response response = await http.get(
-        Uri.encodeFull(applink+"api_model.php?act=getdata_produk&id="+getBranchVal+"&filter="+filter
-            +"&sort="+sortby),
+        Uri.encodeFull(applink+"api_model.php?act=getdata_produk_jual&id="+getBranchVal+"&filter="+filter
+            +"&sort="+sortby+"&filterq="+filterq),
         headers: {"Accept":"application/json"}
     );
     setState((){
@@ -128,6 +127,19 @@ class JualanState extends State<Jualan> {
     });
   }
 
+  void doFavorite() {
+    setState(() {
+      _isvisible = false;
+      isDiskon = false;
+      isTerjual = false;
+      isSemua = false;
+      isTerlaris = false;
+      isTermurah = false;
+      isTermahal = false;
+      filter = "Terlaris";
+      startSCreen();
+    });
+  }
 
 
   @override
@@ -159,12 +171,7 @@ class JualanState extends State<Jualan> {
       "produk_branch" : getBranchVal,
       "trans_comment" : _transcomment.text,
       "trans_jumlah" : valJumlahq.toString()
-    }).timeout(Duration(seconds: 10),
-        onTimeout: () {
-          showToast("Connection Timeout", gravity: Toast.CENTER,
-              duration: Toast.LENGTH_LONG);
-          return;
-        });
+    });
     Map data = jsonDecode(response.body);
     setState(() {
       if (data["message"].toString() == '0') {
@@ -191,12 +198,7 @@ class JualanState extends State<Jualan> {
       "produk_id": valProduk,
       "emailuser" : getEmail,
       "produk_branch" : getBranchVal
-    }).timeout(Duration(seconds: 10),
-        onTimeout: () {
-          showToast("Connection Timeout", gravity: Toast.CENTER,
-              duration: Toast.LENGTH_LONG);
-          return;
-        });
+    });
     Map data = jsonDecode(response.body);
     setState(() {
       if (data["message"].toString() == '0') {
@@ -216,141 +218,59 @@ class JualanState extends State<Jualan> {
   }
 
 
-  addKeranjangLain() async {
-    final response = await http.post(applink+"api_model.php?act=add_keranjanglain", body: {
-      "emailuser" : getEmail,
-      "produk_branch" : getBranchVal,
-      "produk_name" : _tambahanNama.text,
-      "produk_harga" : _tambahanBiaya.text
-    }).timeout(Duration(seconds: 10),
-        onTimeout: () {
-          showToast("Connection Timeout", gravity: Toast.CENTER,
-              duration: Toast.LENGTH_LONG);
-          return;
-        });
-    Map data = jsonDecode(response.body);
-      setState(() {
-        FocusScope.of(context).requestFocus(FocusNode());
-        Navigator.pop(context);
-        _tambahanNama.text = "";
-        _tambahanBiaya.text = "";
-      });
-  }
-
-
-
-  hapus_trans() async {
-    final response = await http.post(applink+"api_model.php?act=hapus_trans", body: {
-      "emailuser" : getEmail,
-      "produk_branch" : getBranchVal
-    }).timeout(Duration(seconds: 10),
-        onTimeout: () {
-          showToast("Connection Timeout", gravity: Toast.CENTER,
-              duration: Toast.LENGTH_LONG);
-          return;
-        });
-    Map data = jsonDecode(response.body);
-  }
-
-
-
   void _filterMe() {
     showDialog(
         context: context,
         builder: (BuildContext context) {
           return AlertDialog(
               content:
-              Container(
-                  height: 125,
-                  child: Scrollbar(
-                    isAlwaysShown: true,
-                      child :
-                  SingleChildScrollView(
-                    child :
-                    Column(
-                      children: [
-
-                        InkWell(
-                          onTap: (){
-                            setState(() {
-                              sortby = '0';
-                              _isvisible = false;
-                              startSCreen();
-                              Navigator.pop(context);
-                            });
-                          },
-                          child: Align(alignment: Alignment.centerLeft,
-                            child:    Text(
-                              "Semua",
-                              textAlign: TextAlign.left,
-                              style: TextStyle(
-                                  fontFamily: 'VarelaRound',
-                                  fontSize: 15),
-                            ),),
-                        ),
-                        Padding(padding: const EdgeInsets.only(top:15,bottom: 15,left: 4,right: 4),
-                          child: Divider(height: 5,),),
-                        InkWell(
-                          onTap: (){
-                            setState(() {
-                              sortby = '1';
-                              _isvisible = false;
-                              startSCreen();
-                              Navigator.pop(context);
-                            });
-                          },
-                          child: Align(alignment: Alignment.centerLeft,
-                            child:    Text(
-                              "Harga Terendah",
-                              textAlign: TextAlign.left,
-                              style: TextStyle(
-                                  fontFamily: 'VarelaRound',
-                                  fontSize: 15),
-                            ),),
-                        ),
-                        Padding(padding: const EdgeInsets.only(top:15,bottom: 15,left: 4,right: 4),
-                          child: Divider(height: 5,),),
-                        InkWell(
-                          onTap: (){
-                            setState(() {
-                              sortby = '2';
-                              _isvisible = false;
-                              startSCreen();
-                              Navigator.pop(context);
-                            });
-                          },
-                          child: Align(alignment: Alignment.centerLeft,
-                            child:    Text(
-                              "Harga Tertinggi",
-                              textAlign: TextAlign.left,
-                              style: TextStyle(
-                                  fontFamily: 'VarelaRound',
-                                  fontSize: 15),
-                            ),),
-                        ),
-                        Padding(padding: const EdgeInsets.only(top:15,bottom: 15,left: 4,right: 4),
-                          child: Divider(height: 5,),),
-                        InkWell(
-                          onTap: (){
-                            setState(() {
-                              sortby = '3';
-                              _isvisible = false;
-                              startSCreen();
-                              Navigator.pop(context);
-                            });
-                          },
-                          child: Align(alignment: Alignment.centerLeft,
-                            child:    Text(
-                              "Produk Diskon",
-                              textAlign: TextAlign.left,
-                              style: TextStyle(
-                                  fontFamily: 'VarelaRound',
-                                  fontSize: 15),
-                            ),),
-                        )
-                      ],
-                    ),
-                  )))
+              SingleChildScrollView(
+                child :
+                    Container(
+                      height: 200,
+                      width: 100,
+                           child:  FutureBuilder(
+                             future: getDataKategori(),
+                             builder: (context, snapshot) {
+                               return ListView.builder(
+                                   itemCount: data3 == null ? 0 : data3.length,
+                                   itemBuilder: (context, i) {
+                                     return Column(
+                                       children: [
+                                         InkWell(
+                                           onTap: (){
+                                             setState(() {
+                                               _isvisible = false;
+                                               isDiskon = false;
+                                               isTerjual = false;
+                                               isTerlaris = false;
+                                               isTermurah = false;
+                                               isTermahal = false;
+                                               isSemua = false;
+                                               filter = data3[i]["b"].toString();
+                                               startSCreen();
+                                               Navigator.pop(context);
+                                             });
+                                           },
+                                           child: Align(alignment: Alignment.centerLeft,
+                                             child:    Text(
+                                               data3[i]["b"],
+                                               textAlign: TextAlign.left,
+                                               style: TextStyle(
+                                                   fontFamily: 'VarelaRound',
+                                                   fontSize: 15),
+                                             ),),
+                                         ),
+                                         Padding(padding: const EdgeInsets.only(top:15,bottom: 15,left: 4,right: 4),
+                                           child: Divider(height: 5,),),
+                                       ],
+                                     );
+                                   }
+                               );
+                             },
+                           ),
+                         )
+              )
           );
         });
   }
@@ -440,91 +360,6 @@ class JualanState extends State<Jualan> {
   }
 
 
-  TambahBiayaAdd() {
-    showDialog(
-        context: context,
-        builder: (BuildContext context) {
-          return StatefulBuilder(
-            builder: (context, setState) {
-              return AlertDialog(
-                //title: Text(),
-                content: ResponsiveContainer(
-                    widthPercent: 100,
-                    heightPercent: 26.5,
-                    child: Column(
-                      children: [
-                        Padding(padding: const EdgeInsets.only(top: 8), child:
-                        Align(alignment: Alignment.center, child: Text("Tambah Biaya Lainnya",
-                            style: TextStyle(fontFamily: 'ProximaNova', fontSize: 16, fontWeight: FontWeight.bold))
-                        ),),
-                        Padding(padding: const EdgeInsets.only(top: 15), child:
-                        Align(alignment: Alignment.center, child:
-                        TextFormField(
-                          controller: _tambahanNama,
-                          style: TextStyle(fontFamily: "ProximaNova",fontSize: 15,fontWeight: FontWeight.bold),
-                          keyboardType: TextInputType.text,
-                          textCapitalization: TextCapitalization.sentences,
-                          decoration: new InputDecoration(
-                            contentPadding: const EdgeInsets.only(top: 1,left: 10,bottom: 1),
-                            focusedBorder: OutlineInputBorder(
-                              borderSide: BorderSide(color: HexColor("#DDDDDD"), width: 1.0),
-                            ),
-                            enabledBorder: OutlineInputBorder(
-                              borderSide: BorderSide(color: HexColor("#DDDDDD"), width: 1.0),
-                            ),
-                            hintText: 'Nama Biaya. Contoh : Ongkir, dll',
-                            floatingLabelBehavior: FloatingLabelBehavior.always,
-                            hintStyle: TextStyle(fontFamily: "ProximaNova", color: HexColor("#c4c4c4"),fontSize: 15),
-                          ),
-                        ),
-                        )),
-                        Padding(padding: const EdgeInsets.only(top: 5), child:
-                        Align(alignment: Alignment.center, child:
-                        TextFormField(
-                          controller: _tambahanBiaya,
-                          style: TextStyle(fontFamily: "ProximaNova",fontSize: 15,fontWeight: FontWeight.bold),
-                          keyboardType: TextInputType.number,
-                          textCapitalization: TextCapitalization.sentences,
-                          decoration: new InputDecoration(
-                            contentPadding: const EdgeInsets.only(top: 1,left: 10,bottom: 1),
-                            focusedBorder: OutlineInputBorder(
-                              borderSide: BorderSide(color: HexColor("#DDDDDD"), width: 1.0),
-                            ),
-                            enabledBorder: OutlineInputBorder(
-                              borderSide: BorderSide(color: HexColor("#DDDDDD"), width: 1.0),
-                            ),
-                            hintText: 'Biaya. Contoh : 12000, 15000',
-                            floatingLabelBehavior: FloatingLabelBehavior.always,
-                            hintStyle: TextStyle(fontFamily: "ProximaNova", color: HexColor("#c4c4c4"), fontSize: 15),
-                          ),
-                        ),
-                        )),
-                        Padding(padding: const EdgeInsets.only(top: 20), child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                          children: <Widget>[
-                            Expanded(child: OutlineButton(
-                              onPressed: () {
-                                Navigator.pop(context);
-                              }, child: Text("Keluar",style: TextStyle(fontFamily: "ProximaNova",fontWeight: FontWeight.bold),),)),
-                            Expanded(child: OutlineButton(
-                              borderSide: BorderSide(width: 1.0, color: Colors.redAccent),
-                              onPressed: () {
-
-                                addKeranjangLain();
-                              }, child: Text("Tambah", style: TextStyle(color: Colors.red,fontFamily: "ProximaNova",fontWeight: FontWeight.bold),),)),
-                          ],),)
-                      ],
-                    )
-                ),
-              );
-            },
-          );
-        });
-
-
-  }
-
-
 
   @override
   Widget build(BuildContext context) {
@@ -535,12 +370,37 @@ class JualanState extends State<Jualan> {
           backgroundColor: Colors.white,
           leadingWidth: 38, // <-- Use this
           centerTitle: false,
-          title: Text(
-            "Transaksi Baru",
-            style: TextStyle(
-                color: Colors.black,
-                fontFamily: 'Nunito',
-                fontSize: 18,fontWeight: FontWeight.bold),
+          title:Align(
+            alignment: Alignment.centerLeft,
+            child: Padding(padding: const EdgeInsets.only(right: 5),
+                child: Container(
+                  height: 40,
+                  child: TextFormField(
+                    enableInteractiveSelection: false,
+                    onChanged: (text) {
+                      setState(() {
+                        filterq = text;
+                        _isvisible = false;
+                        startSCreen();
+                      });
+                    },
+                    //controller: _nama,
+                    style: TextStyle(fontFamily: "VarelaRound",fontSize: 15),
+                    decoration: new InputDecoration(
+                      fillColor: HexColor("#f4f5f7"),
+                      filled: true,
+                      contentPadding: const EdgeInsets.only(top: 1,left: 15,bottom: 1),
+                      focusedBorder: OutlineInputBorder(
+                        borderSide: BorderSide(color: Colors.white, width: 1.0),
+                      ),
+                      enabledBorder: OutlineInputBorder(
+                        borderSide: BorderSide(color: Colors.white, width: 1.0),
+                      ),
+                      hintText: 'Cari Produk...',
+                    ),
+                  ),
+                )
+            ),
           ),
           leading: Container(
             padding: const EdgeInsets.only(left: 7),
@@ -556,16 +416,13 @@ class JualanState extends State<Jualan> {
           actions: [
             InkWell(
               hoverColor: Colors.transparent,
-              splashColor: Colors.transparent,
-              focusColor: Colors.transparent,
-              highlightColor: Colors.transparent,
               onTap: () {
-                TambahBiayaAdd();
+                doFavorite();
               },
               child: Padding(
                 padding: const EdgeInsets.only(right: 25,top : 16),
                 child: FaIcon(
-                    FontAwesomeIcons.plus,
+                    FontAwesomeIcons.solidHeart,
                     color: HexColor("#6b727c"),
                     size: 18,
                 ),
@@ -573,34 +430,13 @@ class JualanState extends State<Jualan> {
             ),
             InkWell(
               hoverColor: Colors.transparent,
-              splashColor: Colors.transparent,
-              focusColor: Colors.transparent,
-              highlightColor: Colors.transparent,
               onTap: () {
                 _filterMe();
               },
               child: Padding(
-                padding: const EdgeInsets.only(right: 25,top : 16),
-                child: FaIcon(
-                  FontAwesomeIcons.sortAmountDown,
-                  color: HexColor("#6b727c"),
-                  size: 18,
-                ),
-              ),
-            ),
-            InkWell(
-              hoverColor: Colors.transparent,
-              splashColor: Colors.transparent,
-              focusColor: Colors.transparent,
-              highlightColor: Colors.transparent,
-
-              onTap: () {
-                hapus_trans();
-              },
-              child: Padding(
                 padding: const EdgeInsets.only(right: 27,top : 16),
                 child: FaIcon(
-                  FontAwesomeIcons.trashAlt,
+                  FontAwesomeIcons.thList,
                   color: HexColor("#6b727c"),
                   size: 18,
                 ),
@@ -612,55 +448,183 @@ class JualanState extends State<Jualan> {
           color: Colors.white,
           child: Column(
             children: [
-              Padding(padding: const EdgeInsets.only(left: 15,top: 10,right: 15),
-                  child: Container(
-                    height: 45,
-                    child: TextFormField(
-                      enableInteractiveSelection: false,
-                      onChanged: (text) {
-                        setState(() {
-                          filter = text;
-                          _isvisible = false;
-                          startSCreen();
-                        });
-                      },
-                      style: TextStyle(fontFamily: "ProximaNova",fontSize: 15),
-                      decoration: new InputDecoration(
-                        contentPadding: const EdgeInsets.all(10),
-                        fillColor: HexColor("#f4f4f4"),
-                        filled: true,
-                        prefixIcon: Padding(
-                          padding: const EdgeInsets.only(bottom: 4),
-                          child: Icon(Icons.search,size: 18,color: HexColor("#6c767f"),),
-                        ),
-                        focusedBorder: OutlineInputBorder(
-                          borderSide: BorderSide(color: Colors.white, width: 1.0,),
-                          borderRadius: BorderRadius.circular(5.0),
-                        ),
-                        enabledBorder: OutlineInputBorder(
-                          borderSide: BorderSide(color: HexColor("#f4f4f4"), width: 1.0),
-                          borderRadius: BorderRadius.circular(5.0),
-                        ),
-                        hintText: 'Cari Produk...',
-                      ),
-                    ),
-                  )
+              Container(
+                height: 50,
+                width: double.infinity,
+                child: SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  child: Row(
+                    children: [
+                      Padding(padding: const EdgeInsets.only(left: 10),
+                        child: Container(
+                          height: 30,
+                          child: RaisedButton(
+                            elevation: 0,
+                            child: Text("Semua",style: TextStyle(fontSize: 12,fontWeight: FontWeight.bold,fontFamily: 'VarelaRound',
+                                color: isSemua == true ? Colors.white : Colors.black
+                            ),),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(18.0),
+                              side: BorderSide(color: isSemua == true ? HexColor("#602d98") : Colors.black,width: 0.8),
+                            ),
+                            color: isSemua == true ? HexColor("#602d98") : Colors.white ,
+                            onPressed: (){
+                              setState(() {
+                                _isvisible = false;
+                                isDiskon = false;
+                                isTerjual = false;
+                                isTerlaris = false;
+                                isTermurah = false;
+                                isTermahal = false;
+                                isSemua = true;
+                                filter = "Semua";
+                                startSCreen();
+                              });
+                            },
+                          ),
+                        ),),
+
+                      Padding(padding: const EdgeInsets.only(left: 10),
+                        child: Container(
+                          height: 30,
+                          child: RaisedButton(
+                            elevation: 0,
+                            child: Text("Terjual Teakhir",style: TextStyle(fontSize: 12,fontWeight: FontWeight.bold,fontFamily: 'VarelaRound',
+                                color: isTerjual == true ? Colors.white : Colors.black
+                            ),),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(18.0),
+                              side: BorderSide(color: isTerjual == true ? HexColor("#602d98") : Colors.black,width: 0.5),
+                            ),
+                            color: isTerjual == true ? HexColor("#602d98") : Colors.white ,
+                            onPressed: (){
+                              setState(() {
+                                _isvisible = false;
+                                isDiskon = false;
+                                isTerjual = true;
+                                isTerlaris = false;
+                                isTermurah = false;
+                                isTermahal = false;
+                                isSemua = false;
+                                filter = "Terjual";
+                                startSCreen();
+                              });
+                            },
+                          ),
+                        ),),
+
+                      Padding(padding: const EdgeInsets.only(left: 10),
+                        child: Container(
+                          height: 30,
+                          child: RaisedButton(
+                            elevation: 0,
+                            child: Text("Diskon",style: TextStyle(fontSize: 12,fontWeight: FontWeight.bold,fontFamily: 'VarelaRound',
+                                color: isDiskon == true ? Colors.white : Colors.black
+                            ),),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(18.0),
+                              side: BorderSide(color: isDiskon == true ? HexColor("#602d98") : Colors.black,width: 0.5),
+                            ),
+                            color: isDiskon == true ? HexColor("#602d98") : Colors.white ,
+                            onPressed: (){
+                              setState(() {
+                                _isvisible = false;
+                                isDiskon = true;
+                                isTerjual = false;
+                                isTerlaris = false;
+                                isTermurah = false;
+                                isTermahal = false;
+                                isSemua = false;
+                                filter = "Diskon";
+                                startSCreen();
+                              });
+                            },
+                          ),
+                        ),),
+
+
+
+                      Padding(padding: const EdgeInsets.only(left: 10),
+                        child: Container(
+                          height: 30,
+                          child: RaisedButton(
+                            elevation: 0,
+                            child: Text("Termurah",style: TextStyle(fontSize: 12,fontWeight: FontWeight.bold,fontFamily: 'VarelaRound',
+                                color: isTermurah == true ? Colors.white : Colors.black
+                            ),),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(18.0),
+                              side: BorderSide(color: isTermurah == true ? HexColor("#602d98") : Colors.black,width: 0.5),
+                            ),
+                            color: isTermurah == true ? HexColor("#602d98") : Colors.white ,
+                            onPressed: (){
+                              setState(() {
+                                _isvisible = false;
+                                isDiskon = false;
+                                isTerjual = false;
+                                isSemua = false;
+                                isTerlaris = false;
+                                isTermurah = true;
+                                isTermahal = false;
+                                filter = "Termurah";
+                                startSCreen();
+                              });
+                            },
+                          ),
+                        ),),
+
+
+                      Padding(padding: const EdgeInsets.only(left: 10,right: 10),
+                        child: Container(
+                          height: 30,
+                          child: RaisedButton(
+                            elevation: 0,
+                            child: Text("Termahal",style: TextStyle(fontSize: 12,fontWeight: FontWeight.bold,fontFamily: 'VarelaRound',
+                                color: isTermahal == true ? Colors.white : Colors.black
+                            ),),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(18.0),
+                              side: BorderSide(color: isTermahal == true ? HexColor("#602d98") : Colors.black,width: 0.5),
+                            ),
+                            color: isTermahal == true ? HexColor("#602d98") : Colors.white ,
+                            onPressed: (){
+                              setState(() {
+                                _isvisible = false;
+                                isDiskon = false;
+                                isTerjual = false;
+                                isSemua = false;
+                                isTerlaris = false;
+                                isTermurah = false;
+                                isTermahal = true;
+                                filter = "Termahal";
+                                startSCreen();
+                              });
+                            },
+                          ),
+                        ),),
+
+
+
+                    ],
+                  ),
+                )
               ),
+              Padding(padding: const EdgeInsets.only(left: 15,right: 15),
+              child: Divider(height: 4,),),
               Padding(padding: const EdgeInsets.only(top: 10),),
               Visibility(
                   visible: _isvisible,
                   child :
                   Expanded(child: _dataField())
-              ),
-              Padding(padding: const EdgeInsets.only(bottom: 10),),
+              )
               //
             ],
           ),
         ),
         floatingActionButton:
              Container(
-                height: 65,
-                width: 65,
+                height: 70,
+                width: 70,
                child: FutureBuilder(
                   future: getDataOrderPending(),
                   builder: (context, snapshot) {
@@ -671,10 +635,9 @@ class JualanState extends State<Jualan> {
                             child: Badge(
                               badgeContent: Text(
                                   data2[i]["a"].toString() == "null" ? "0" : data2[i]["a"].toString()
-                                ,style: TextStyle(color: Colors.white,fontSize: 14),),
+                                ,style: TextStyle(color: Colors.white),),
                               position: BadgePosition(end: 0,top: 0),
                               child: FloatingActionButton(
-                                backgroundColor: HexColor(main_color),
                                 onPressed: () {
                                 data2[i]["a"].toString() == "null" ?
                                 FocusScope.of(context).requestFocus(FocusNode())
@@ -714,7 +677,6 @@ class JualanState extends State<Jualan> {
           return data == 0 ?
           Container(
               height: double.infinity, width : double.infinity,
-
               child: new
               Center(
                   child :
@@ -744,7 +706,6 @@ class JualanState extends State<Jualan> {
                   InkWell(
                     onTap: () {
                         addKeranjang(data[i]["i"].toString());
-                        FocusScope.of(context).requestFocus(FocusNode());
                     },
                     onLongPress: (){
                       setState(() {
