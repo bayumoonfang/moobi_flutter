@@ -66,7 +66,9 @@ class JualanState extends State<Jualan> {
   String getNamaUser = '';
   _getBranch() async {
     final response = await http.get(
-        applink+"api_model.php?act=userdetail&id="+getEmail.toString()).timeout(Duration(seconds: 10),
+        applink+"api_model.php?act=userdetail&id="+getEmail.toString(),
+        headers: {"Accept":"application/json","Content-Type": "application/json"}).
+        timeout(Duration(seconds: 10),
         onTimeout: () {
           showToast("Connection Timeout", gravity: Toast.CENTER,
               duration: Toast.LENGTH_LONG);
@@ -84,9 +86,10 @@ class JualanState extends State<Jualan> {
   String sortby = '0';
   Future<List> getData() async {
     http.Response response = await http.get(
-        Uri.encodeFull(applink+"api_model.php?act=getdata_produk&id="+getBranchVal+"&filter="+filter
+        Uri.encodeFull(applink+"api_model.php?act=getdata_produk&id="+getBranchVal+""
+            "&filter="+filter
             +"&sort="+sortby),
-        headers: {"Accept":"application/json"}
+        headers: {"Accept":"application/json","Content-Type": "application/json"}
     );
     setState((){
       data = json.decode(response.body);
@@ -95,8 +98,9 @@ class JualanState extends State<Jualan> {
 
   Future<List> getDataOrderPending() async {
     http.Response response = await http.get(
-        Uri.encodeFull(applink+"api_model.php?act=getdata_countorderpending&branch="+getBranchVal+"&namauser="+getNamaUser),
-        headers: {"Accept":"application/json"}
+        Uri.encodeFull(applink+"api_model.php?act=getdata_countorderpending&branch="
+            +getBranchVal+"&namauser="+getNamaUser),
+        headers: {"Accept":"application/json","Content-Type": "application/json"}
     );
     setState((){
       data2 = json.decode(response.body);
@@ -105,8 +109,9 @@ class JualanState extends State<Jualan> {
 
   Future<List> getDataKategori() async {
     http.Response response = await http.get(
-        Uri.encodeFull(applink+"api_model.php?act=getdata_kategori&branch="+getBranchVal+"&filter="),
-        headers: {"Accept":"application/json"}
+        Uri.encodeFull(applink+"api_model.php?act=getdata_kategori&branch="
+            +getBranchVal+"&filter="),
+        headers: {"Accept":"application/json","Content-Type": "application/json"}
     );
     setState((){
       data3 = json.decode(response.body);
@@ -153,13 +158,14 @@ class JualanState extends State<Jualan> {
 
 
   addKeranjang2(String valProduk) async {
-    final response = await http.post(applink+"api_model.php?act=add_keranjang2", body: {
-      "produk_id": valProduk,
-      "emailuser" : getEmail,
-      "produk_branch" : getBranchVal,
-      "trans_comment" : _transcomment.text,
-      "trans_jumlah" : valJumlahq.toString()
-    }).timeout(Duration(seconds: 10),
+    final response = await http.post(applink+"api_model.php?act=add_keranjang2",
+        body: {
+            "produk_id": valProduk,
+            "emailuser" : getEmail,
+            "produk_branch" : getBranchVal,
+            "trans_comment" : _transcomment.text,
+            "trans_jumlah" : valJumlahq.toString()
+        }).timeout(Duration(seconds: 10),
         onTimeout: () {
           showToast("Connection Timeout", gravity: Toast.CENTER,
               duration: Toast.LENGTH_LONG);
@@ -217,30 +223,32 @@ class JualanState extends State<Jualan> {
 
 
   addKeranjangLain() async {
-    final response = await http.post(applink+"api_model.php?act=add_keranjanglain", body: {
-      "emailuser" : getEmail,
-      "produk_branch" : getBranchVal,
-      "produk_name" : _tambahanNama.text,
-      "produk_harga" : _tambahanBiaya.text
-    }).timeout(Duration(seconds: 10),
+    final response = await http.post(applink+"api_model.php?act=add_keranjanglain",
+        body: {
+            "emailuser" : getEmail,
+            "produk_branch" : getBranchVal,
+            "produk_name" : _tambahanNama.text,
+            "produk_harga" : _tambahanBiaya.text
+          }).timeout(Duration(seconds: 10),
         onTimeout: () {
           showToast("Connection Timeout", gravity: Toast.CENTER,
               duration: Toast.LENGTH_LONG);
           return;
         });
     Map data = jsonDecode(response.body);
-      setState(() {
-        FocusScope.of(context).requestFocus(FocusNode());
-        Navigator.pop(context);
-        _tambahanNama.text = "";
-        _tambahanBiaya.text = "";
-      });
+    setState(() {
+      FocusScope.of(context).requestFocus(FocusNode());
+      Navigator.pop(context);
+      _tambahanNama.text = "";
+      _tambahanBiaya.text = "";
+    });
   }
 
 
 
   hapus_trans() async {
-    final response = await http.post(applink+"api_model.php?act=hapus_trans", body: {
+    final response = await http.post(applink+"api_model.php?act=hapus_trans",
+        body: {
       "emailuser" : getEmail,
       "produk_branch" : getBranchVal
     }).timeout(Duration(seconds: 10),
@@ -263,94 +271,97 @@ class JualanState extends State<Jualan> {
               Container(
                   height: 125,
                   child: Scrollbar(
-                    isAlwaysShown: true,
+                      isAlwaysShown: true,
                       child :
-                  SingleChildScrollView(
-                    child :
-                    Column(
-                      children: [
+                      SingleChildScrollView(
+                        child :
+                        Column(
+                          children: [
 
-                        InkWell(
-                          onTap: (){
-                            setState(() {
-                              sortby = '0';
-                              _isvisible = false;
-                              startSCreen();
-                              Navigator.pop(context);
-                            });
-                          },
-                          child: Align(alignment: Alignment.centerLeft,
-                            child:    Text(
-                              "Semua",
-                              textAlign: TextAlign.left,
-                              style: TextStyle(
-                                  fontFamily: 'VarelaRound',
-                                  fontSize: 15),
-                            ),),
+                            InkWell(
+                              onTap: (){
+                                setState(() {
+                                  sortby = '0';
+                                  _isvisible = false;
+                                  startSCreen();
+                                  Navigator.pop(context);
+                                });
+                              },
+                              child: Align(alignment: Alignment.centerLeft,
+                                child:    Text(
+                                  "Semua",
+                                  textAlign: TextAlign.left,
+                                  style: TextStyle(
+                                      fontFamily: 'VarelaRound',
+                                      fontSize: 15),
+                                ),),
+                            ),
+                            Padding(padding: const EdgeInsets.only(top:15,
+                                bottom: 15,left: 4,right: 4),
+                              child: Divider(height: 5,),),
+                            InkWell(
+                              onTap: (){
+                                setState(() {
+                                  sortby = '1';
+                                  _isvisible = false;
+                                  startSCreen();
+                                  Navigator.pop(context);
+                                });
+                              },
+                              child: Align(alignment: Alignment.centerLeft,
+                                child:    Text(
+                                  "Harga Terendah",
+                                  textAlign: TextAlign.left,
+                                  style: TextStyle(
+                                      fontFamily: 'VarelaRound',
+                                      fontSize: 15),
+                                ),),
+                            ),
+                            Padding(padding: const EdgeInsets.only(top:15,bottom: 15,
+                                left: 4,right: 4),
+                              child: Divider(height: 5,),),
+                            InkWell(
+                              onTap: (){
+                                setState(() {
+                                  sortby = '2';
+                                  _isvisible = false;
+                                  startSCreen();
+                                  Navigator.pop(context);
+                                });
+                              },
+                              child: Align(alignment: Alignment.centerLeft,
+                                child:    Text(
+                                  "Harga Tertinggi",
+                                  textAlign: TextAlign.left,
+                                  style: TextStyle(
+                                      fontFamily: 'VarelaRound',
+                                      fontSize: 15),
+                                ),),
+                            ),
+                            Padding(padding: const EdgeInsets.only(top:15,bottom: 15,
+                                left: 4,right: 4),
+                              child: Divider(height: 5,),),
+                            InkWell(
+                              onTap: (){
+                                setState(() {
+                                  sortby = '3';
+                                  _isvisible = false;
+                                  startSCreen();
+                                  Navigator.pop(context);
+                                });
+                              },
+                              child: Align(alignment: Alignment.centerLeft,
+                                child:    Text(
+                                  "Produk Diskon",
+                                  textAlign: TextAlign.left,
+                                  style: TextStyle(
+                                      fontFamily: 'VarelaRound',
+                                      fontSize: 15),
+                                ),),
+                            )
+                          ],
                         ),
-                        Padding(padding: const EdgeInsets.only(top:15,bottom: 15,left: 4,right: 4),
-                          child: Divider(height: 5,),),
-                        InkWell(
-                          onTap: (){
-                            setState(() {
-                              sortby = '1';
-                              _isvisible = false;
-                              startSCreen();
-                              Navigator.pop(context);
-                            });
-                          },
-                          child: Align(alignment: Alignment.centerLeft,
-                            child:    Text(
-                              "Harga Terendah",
-                              textAlign: TextAlign.left,
-                              style: TextStyle(
-                                  fontFamily: 'VarelaRound',
-                                  fontSize: 15),
-                            ),),
-                        ),
-                        Padding(padding: const EdgeInsets.only(top:15,bottom: 15,left: 4,right: 4),
-                          child: Divider(height: 5,),),
-                        InkWell(
-                          onTap: (){
-                            setState(() {
-                              sortby = '2';
-                              _isvisible = false;
-                              startSCreen();
-                              Navigator.pop(context);
-                            });
-                          },
-                          child: Align(alignment: Alignment.centerLeft,
-                            child:    Text(
-                              "Harga Tertinggi",
-                              textAlign: TextAlign.left,
-                              style: TextStyle(
-                                  fontFamily: 'VarelaRound',
-                                  fontSize: 15),
-                            ),),
-                        ),
-                        Padding(padding: const EdgeInsets.only(top:15,bottom: 15,left: 4,right: 4),
-                          child: Divider(height: 5,),),
-                        InkWell(
-                          onTap: (){
-                            setState(() {
-                              sortby = '3';
-                              _isvisible = false;
-                              startSCreen();
-                              Navigator.pop(context);
-                            });
-                          },
-                          child: Align(alignment: Alignment.centerLeft,
-                            child:    Text(
-                              "Produk Diskon",
-                              textAlign: TextAlign.left,
-                              style: TextStyle(
-                                  fontFamily: 'VarelaRound',
-                                  fontSize: 15),
-                            ),),
-                        )
-                      ],
-                    ),
-                  )))
+                      )))
           );
         });
   }
@@ -361,81 +372,93 @@ class JualanState extends State<Jualan> {
     showDialog(
         context: context,
         builder: (BuildContext context) {
-            int valJumlahq2 = 1;
-            return StatefulBuilder(
-                builder: (context, setState) {
-                 return AlertDialog(
-                    //title: Text(),
-                    content: ResponsiveContainer(
-                        widthPercent: 100,
-                        heightPercent: 35,
-                        child: Column(
-                          children: [
-                            Padding(padding: const EdgeInsets.only(top: 8), child:
-                            Align(alignment: Alignment.center, child: Text(valNama,
-                                style: TextStyle(fontFamily: 'VarelaRound', fontSize: 16, fontWeight: FontWeight.bold))
-                            ),),
-                            Padding(padding: const EdgeInsets.only(top: 25,bottom: 15),
-                              child: Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                children: [
-                                  FlatButton(child: Text("-",style: TextStyle(fontSize: 48,fontWeight: FontWeight.bold),),
-                                    onPressed: (){
-                                      setState(() {
-                                        _kurangqty();
-                                        valJumlahq2 -= 1;
-                                      });
-                                    },),
-                                  Text("$valJumlahq2",style: TextStyle(fontSize: 52,fontWeight: FontWeight.bold),),
-                                  FlatButton(child: Text("+",style: TextStyle(fontSize: 46,fontWeight: FontWeight.bold),),
-                                    onPressed: (){
-                                      setState(() {
-                                        _tambahqty();
-                                        valJumlahq2 += 1;
-                                      });
-                                    },),
-                                ],
-                              ),),
+          int valJumlahq2 = 1;
+          return StatefulBuilder(
+            builder: (context, setState) {
+              return AlertDialog(
+                //title: Text(),
+                content: ResponsiveContainer(
+                    widthPercent: 100,
+                    heightPercent: 35,
+                    child: Column(
+                      children: [
+                        Padding(padding: const EdgeInsets.only(top: 8), child:
+                        Align(alignment: Alignment.center, child: Text(valNama,
+                            style: TextStyle(fontFamily: 'VarelaRound', fontSize: 16,
+                                fontWeight: FontWeight.bold))
+                        ),),
+                        Padding(padding: const EdgeInsets.only(top: 25,bottom: 15),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              FlatButton(child: Text("-",style: TextStyle(fontSize: 48,
+                                  fontWeight: FontWeight.bold),),
+                                onPressed: (){
+                                  setState(() {
+                                    _kurangqty();
+                                    valJumlahq2 -= 1;
+                                  });
+                                },),
+                              Text("$valJumlahq2",style: TextStyle(fontSize: 52,
+                                  fontWeight: FontWeight.bold),),
+                              FlatButton(child: Text("+",style: TextStyle(fontSize: 46,
+                                  fontWeight: FontWeight.bold),),
+                                onPressed: (){
+                                  setState(() {
+                                    _tambahqty();
+                                    valJumlahq2 += 1;
+                                  });
+                                },),
+                            ],
+                          ),),
 
 
-                            Padding(padding: const EdgeInsets.only(top: 15), child:
-                            Align(alignment: Alignment.center, child:
-                            TextFormField(
-                              controller: _transcomment,
-                              style: TextStyle(fontFamily: "VarelaRound",fontSize: 15),
-                              keyboardType: TextInputType.text,
-                              textCapitalization: TextCapitalization.sentences,
-                              decoration: new InputDecoration(
-                                contentPadding: const EdgeInsets.only(top: 1,left: 10,bottom: 1),
-                                focusedBorder: OutlineInputBorder(
-                                  borderSide: BorderSide(color: HexColor("#DDDDDD"), width: 1.0),
-                                ),
-                                enabledBorder: OutlineInputBorder(
-                                  borderSide: BorderSide(color: HexColor("#DDDDDD"), width: 1.0),
-                                ),
-                                hintText: 'Note. Contoh : Pedas, Tidak Pedas',
-                                floatingLabelBehavior: FloatingLabelBehavior.always,
-                                hintStyle: TextStyle(fontFamily: "VarelaRound", color: HexColor("#c4c4c4")),
-                              ),
+                        Padding(padding: const EdgeInsets.only(top: 15), child:
+                        Align(alignment: Alignment.center, child:
+                        TextFormField(
+                          controller: _transcomment,
+                          style: TextStyle(fontFamily: "VarelaRound",fontSize: 15),
+                          keyboardType: TextInputType.text,
+                          textCapitalization: TextCapitalization.sentences,
+                          decoration: new InputDecoration(
+                            contentPadding: const EdgeInsets.only(top: 1,left: 10,
+                                bottom: 1),
+                            focusedBorder: OutlineInputBorder(
+                              borderSide: BorderSide(color: HexColor("#DDDDDD"),
+                                  width: 1.0),
                             ),
-                            )),
-                            Padding(padding: const EdgeInsets.only(top: 20), child: Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                              children: <Widget>[
-                                Expanded(child: OutlineButton(
-                                  onPressed: () {Navigator.pop(context);}, child: Text("Tutup"),)),
-                                Expanded(child: OutlineButton(
-                                  borderSide: BorderSide(width: 1.0, color: Colors.redAccent),
-                                  onPressed: () {
-                                    addKeranjang2(valID);
-                                  }, child: Text("Add to Chart", style: TextStyle(color: Colors.red),),)),
-                              ],),)
-                          ],
-                        )
-                    ),
-                  );
-                },
-            );
+                            enabledBorder: OutlineInputBorder(
+                              borderSide: BorderSide(color: HexColor("#DDDDDD"),
+                                  width: 1.0),
+                            ),
+                            hintText: 'Note. Contoh : Pedas, Tidak Pedas',
+                            floatingLabelBehavior: FloatingLabelBehavior.always,
+                            hintStyle: TextStyle(fontFamily: "VarelaRound",
+                                color: HexColor("#c4c4c4")),
+                          ),
+                        ),
+                        )),
+                        Padding(padding: const EdgeInsets.only(top: 20),
+                          child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                          children: <Widget>[
+                            Expanded(child: OutlineButton(
+                              onPressed: () {Navigator.pop(context);},
+                              child: Text("Tutup"),)),
+                            Expanded(child: OutlineButton(
+                              borderSide: BorderSide(width: 1.0, color:
+                              Colors.redAccent),
+                              onPressed: () {
+                                addKeranjang2(valID);
+                              }, child: Text("Add to Chart",
+                              style: TextStyle(color: Colors.red),),)),
+                          ],),)
+                      ],
+                    )
+                ),
+              );
+            },
+          );
         });
   }
 
@@ -454,27 +477,34 @@ class JualanState extends State<Jualan> {
                     child: Column(
                       children: [
                         Padding(padding: const EdgeInsets.only(top: 8), child:
-                        Align(alignment: Alignment.center, child: Text("Tambah Biaya Lainnya",
-                            style: TextStyle(fontFamily: 'ProximaNova', fontSize: 16, fontWeight: FontWeight.bold))
+                        Align(alignment: Alignment.center,
+                            child: Text("Tambah Biaya Lainnya",
+                            style: TextStyle(fontFamily: 'ProximaNova',
+                                fontSize: 16, fontWeight: FontWeight.bold))
                         ),),
                         Padding(padding: const EdgeInsets.only(top: 15), child:
                         Align(alignment: Alignment.center, child:
                         TextFormField(
                           controller: _tambahanNama,
-                          style: TextStyle(fontFamily: "ProximaNova",fontSize: 15,fontWeight: FontWeight.bold),
+                          style: TextStyle(fontFamily: "ProximaNova",
+                              fontSize: 15,fontWeight: FontWeight.bold),
                           keyboardType: TextInputType.text,
                           textCapitalization: TextCapitalization.sentences,
                           decoration: new InputDecoration(
-                            contentPadding: const EdgeInsets.only(top: 1,left: 10,bottom: 1),
+                            contentPadding: const EdgeInsets.only(top: 1,left: 10,
+                                bottom: 1),
                             focusedBorder: OutlineInputBorder(
-                              borderSide: BorderSide(color: HexColor("#DDDDDD"), width: 1.0),
+                              borderSide: BorderSide(color: HexColor("#DDDDDD"),
+                                  width: 1.0),
                             ),
                             enabledBorder: OutlineInputBorder(
-                              borderSide: BorderSide(color: HexColor("#DDDDDD"), width: 1.0),
+                              borderSide: BorderSide(color: HexColor("#DDDDDD"),
+                                  width: 1.0),
                             ),
                             hintText: 'Nama Biaya. Contoh : Ongkir, dll',
                             floatingLabelBehavior: FloatingLabelBehavior.always,
-                            hintStyle: TextStyle(fontFamily: "ProximaNova", color: HexColor("#c4c4c4"),fontSize: 15),
+                            hintStyle: TextStyle(fontFamily: "ProximaNova",
+                                color: HexColor("#c4c4c4"),fontSize: 15),
                           ),
                         ),
                         )),
@@ -482,20 +512,25 @@ class JualanState extends State<Jualan> {
                         Align(alignment: Alignment.center, child:
                         TextFormField(
                           controller: _tambahanBiaya,
-                          style: TextStyle(fontFamily: "ProximaNova",fontSize: 15,fontWeight: FontWeight.bold),
+                          style: TextStyle(fontFamily: "ProximaNova",fontSize: 15,
+                              fontWeight: FontWeight.bold),
                           keyboardType: TextInputType.number,
                           textCapitalization: TextCapitalization.sentences,
                           decoration: new InputDecoration(
-                            contentPadding: const EdgeInsets.only(top: 1,left: 10,bottom: 1),
+                            contentPadding: const EdgeInsets.only(top: 1,left: 10,
+                                bottom: 1),
                             focusedBorder: OutlineInputBorder(
-                              borderSide: BorderSide(color: HexColor("#DDDDDD"), width: 1.0),
+                              borderSide: BorderSide(color: HexColor("#DDDDDD"),
+                                  width: 1.0),
                             ),
                             enabledBorder: OutlineInputBorder(
-                              borderSide: BorderSide(color: HexColor("#DDDDDD"), width: 1.0),
+                              borderSide: BorderSide(color: HexColor("#DDDDDD"),
+                                  width: 1.0),
                             ),
                             hintText: 'Biaya. Contoh : 12000, 15000',
                             floatingLabelBehavior: FloatingLabelBehavior.always,
-                            hintStyle: TextStyle(fontFamily: "ProximaNova", color: HexColor("#c4c4c4"), fontSize: 15),
+                            hintStyle: TextStyle(fontFamily: "ProximaNova",
+                                color: HexColor("#c4c4c4"), fontSize: 15),
                           ),
                         ),
                         )),
@@ -505,13 +540,18 @@ class JualanState extends State<Jualan> {
                             Expanded(child: OutlineButton(
                               onPressed: () {
                                 Navigator.pop(context);
-                              }, child: Text("Keluar",style: TextStyle(fontFamily: "ProximaNova",fontWeight: FontWeight.bold),),)),
+                              }, child: Text("Keluar",style: TextStyle(
+                                fontFamily: "ProximaNova",fontWeight:
+                            FontWeight.bold),),)),
                             Expanded(child: OutlineButton(
-                              borderSide: BorderSide(width: 1.0, color: Colors.redAccent),
+                              borderSide: BorderSide(width: 1.0,
+                                  color: Colors.redAccent),
                               onPressed: () {
 
                                 addKeranjangLain();
-                              }, child: Text("Tambah", style: TextStyle(color: Colors.red,fontFamily: "ProximaNova",fontWeight: FontWeight.bold),),)),
+                              }, child: Text("Tambah", style: TextStyle(color:
+                            Colors.red,fontFamily: "ProximaNova",
+                                fontWeight: FontWeight.bold),),)),
                           ],),)
                       ],
                     )
@@ -520,8 +560,6 @@ class JualanState extends State<Jualan> {
             },
           );
         });
-
-
   }
 
 
@@ -530,166 +568,170 @@ class JualanState extends State<Jualan> {
   Widget build(BuildContext context) {
     return WillPopScope(
       child: Scaffold(
-        appBar: new AppBar(
-          elevation: 0.5,
-          backgroundColor: Colors.white,
-          leadingWidth: 38, // <-- Use this
-          centerTitle: false,
-          title: Text(
-            "Transaksi Baru",
-            style: TextStyle(
-                color: Colors.black,
-                fontFamily: 'Nunito',
-                fontSize: 18,fontWeight: FontWeight.bold),
-          ),
-          leading: Container(
-            padding: const EdgeInsets.only(left: 7),
-            child: Builder(
-              builder: (context) => IconButton(
-                  icon: new Icon(Icons.arrow_back),
+          appBar: new AppBar(
+            elevation: 0.5,
+            backgroundColor: Colors.white,
+            leadingWidth: 38, // <-- Use this
+            centerTitle: false,
+            title: Text(
+              "Transaksi Baru",
+              style: TextStyle(
                   color: Colors.black,
-                  onPressed: () => {
-                    Navigator.pop(context)
-                  }),
+                  fontFamily: 'Nunito',
+                  fontSize: 18,fontWeight: FontWeight.bold),
             ),
-          ),
-          actions: [
-            InkWell(
-              hoverColor: Colors.transparent,
-              splashColor: Colors.transparent,
-              focusColor: Colors.transparent,
-              highlightColor: Colors.transparent,
-              onTap: () {
-                TambahBiayaAdd();
-              },
-              child: Padding(
-                padding: const EdgeInsets.only(right: 25,top : 16),
-                child: FaIcon(
+            leading: Container(
+              padding: const EdgeInsets.only(left: 7),
+              child: Builder(
+                builder: (context) => IconButton(
+                    icon: new Icon(Icons.arrow_back),
+                    color: Colors.black,
+                    onPressed: () => {
+                      Navigator.pop(context)
+                    }),
+              ),
+            ),
+            actions: [
+              InkWell(
+                hoverColor: Colors.transparent,
+                splashColor: Colors.transparent,
+                focusColor: Colors.transparent,
+                highlightColor: Colors.transparent,
+                onTap: () {
+                  TambahBiayaAdd();
+                },
+                child: Padding(
+                  padding: const EdgeInsets.only(right: 25,top : 16),
+                  child: FaIcon(
                     FontAwesomeIcons.plus,
                     color: HexColor("#6b727c"),
                     size: 18,
+                  ),
                 ),
               ),
-            ),
-            InkWell(
-              hoverColor: Colors.transparent,
-              splashColor: Colors.transparent,
-              focusColor: Colors.transparent,
-              highlightColor: Colors.transparent,
-              onTap: () {
-                _filterMe();
-              },
-              child: Padding(
-                padding: const EdgeInsets.only(right: 25,top : 16),
-                child: FaIcon(
-                  FontAwesomeIcons.sortAmountDown,
-                  color: HexColor("#6b727c"),
-                  size: 18,
+              InkWell(
+                hoverColor: Colors.transparent,
+                splashColor: Colors.transparent,
+                focusColor: Colors.transparent,
+                highlightColor: Colors.transparent,
+                onTap: () {
+                  _filterMe();
+                },
+                child: Padding(
+                  padding: const EdgeInsets.only(right: 25,top : 16),
+                  child: FaIcon(
+                    FontAwesomeIcons.sortAmountDown,
+                    color: HexColor("#6b727c"),
+                    size: 18,
+                  ),
                 ),
               ),
-            ),
-            InkWell(
-              hoverColor: Colors.transparent,
-              splashColor: Colors.transparent,
-              focusColor: Colors.transparent,
-              highlightColor: Colors.transparent,
-
-              onTap: () {
-                hapus_trans();
-              },
-              child: Padding(
-                padding: const EdgeInsets.only(right: 27,top : 16),
-                child: FaIcon(
-                  FontAwesomeIcons.trashAlt,
-                  color: HexColor("#6b727c"),
-                  size: 18,
+              InkWell(
+                hoverColor: Colors.transparent,
+                splashColor: Colors.transparent,
+                focusColor: Colors.transparent,
+                highlightColor: Colors.transparent,
+                onTap: () {
+                  hapus_trans();
+                },
+                child: Padding(
+                  padding: const EdgeInsets.only(right: 27,top : 16),
+                  child: FaIcon(
+                    FontAwesomeIcons.trashAlt,
+                    color: HexColor("#6b727c"),
+                    size: 18,
+                  ),
                 ),
-              ),
-            )
-          ],
-        ),
-        body: Container(
-          color: Colors.white,
-          child: Column(
-            children: [
-              Padding(padding: const EdgeInsets.only(left: 15,top: 10,right: 15),
-                  child: Container(
-                    height: 45,
-                    child: TextFormField(
-                      enableInteractiveSelection: false,
-                      onChanged: (text) {
-                        setState(() {
-                          filter = text;
-                          _isvisible = false;
-                          startSCreen();
-                        });
-                      },
-                      style: TextStyle(fontFamily: "ProximaNova",fontSize: 15),
-                      decoration: new InputDecoration(
-                        contentPadding: const EdgeInsets.all(10),
-                        fillColor: HexColor("#f4f4f4"),
-                        filled: true,
-                        prefixIcon: Padding(
-                          padding: const EdgeInsets.only(bottom: 4),
-                          child: Icon(Icons.search,size: 18,color: HexColor("#6c767f"),),
-                        ),
-                        focusedBorder: OutlineInputBorder(
-                          borderSide: BorderSide(color: Colors.white, width: 1.0,),
-                          borderRadius: BorderRadius.circular(5.0),
-                        ),
-                        enabledBorder: OutlineInputBorder(
-                          borderSide: BorderSide(color: HexColor("#f4f4f4"), width: 1.0),
-                          borderRadius: BorderRadius.circular(5.0),
-                        ),
-                        hintText: 'Cari Produk...',
-                      ),
-                    ),
-                  )
-              ),
-              Padding(padding: const EdgeInsets.only(top: 10),),
-              Visibility(
-                  visible: _isvisible,
-                  child :
-                  Expanded(child: _dataField())
-              ),
-              Padding(padding: const EdgeInsets.only(bottom: 10),),
-              //
+              )
             ],
           ),
-        ),
-        floatingActionButton:
-             Container(
-                height: 65,
-                width: 65,
-               child: FutureBuilder(
-                  future: getDataOrderPending(),
-                  builder: (context, snapshot) {
-                      return ListView.builder(
+          body: Container(
+            color: Colors.white,
+            child: Column(
+              children: [
+                Padding(padding: const EdgeInsets.only(left: 15,top: 10,
+                    right: 15),
+                    child: Container(
+                      height: 45,
+                      child: TextFormField(
+                        enableInteractiveSelection: false,
+                        onChanged: (text) {
+                          setState(() {
+                            filter = text;
+                            _isvisible = false;
+                            startSCreen();
+                          });
+                        },
+                        style: TextStyle(fontFamily: "ProximaNova",fontSize: 15),
+                        decoration: new InputDecoration(
+                          contentPadding: const EdgeInsets.all(10),
+                          fillColor: HexColor("#f4f4f4"),
+                          filled: true,
+                          prefixIcon: Padding(
+                            padding: const EdgeInsets.only(bottom: 4),
+                            child: Icon(Icons.search,size: 18,
+                              color: HexColor("#6c767f"),),
+                          ),
+                          focusedBorder: OutlineInputBorder(
+                            borderSide: BorderSide(color: Colors.white,
+                              width: 1.0,),
+                            borderRadius: BorderRadius.circular(5.0),
+                          ),
+                          enabledBorder: OutlineInputBorder(
+                            borderSide: BorderSide(color: HexColor("#f4f4f4"),
+                                width: 1.0),
+                            borderRadius: BorderRadius.circular(5.0),
+                          ),
+                          hintText: 'Cari Produk...',
+                        ),
+                      ),
+                    )
+                ),
+                Padding(padding: const EdgeInsets.only(top: 10),),
+                Visibility(
+                    visible: _isvisible,
+                    child :
+                    Expanded(child: _dataField())
+                ),
+                Padding(padding: const EdgeInsets.only(bottom: 10),),
+                //
+              ],
+            ),
+          ),
+          floatingActionButton:
+          Container(
+            height: 65,
+            width: 65,
+            child: FutureBuilder(
+                future: getDataOrderPending(),
+                builder: (context, snapshot) {
+                  return ListView.builder(
                       itemCount: data2 == null ? 0 : data2.length,
                       itemBuilder: (context, i) {
-                      return  FittedBox(
+                        return  FittedBox(
                             child: Badge(
                               badgeContent: Text(
-                                  data2[i]["a"].toString() == "null" ? "0" : data2[i]["a"].toString()
+                                data2[i]["a"].toString() == "null" ? "0" :
+                                data2[i]["a"].toString()
                                 ,style: TextStyle(color: Colors.white,fontSize: 14),),
                               position: BadgePosition(end: 0,top: 0),
                               child: FloatingActionButton(
                                 backgroundColor: HexColor(main_color),
                                 onPressed: () {
-                                data2[i]["a"].toString() == "null" ?
-                                FocusScope.of(context).requestFocus(FocusNode())
-                                    :
+                                  data2[i]["a"].toString() == "null" ?
+                                  FocusScope.of(context).requestFocus(FocusNode())
+                                      :
                                   Navigator.push(context, ExitPage(page: Checkout()));
-                              },
+                                },
                                 child: FaIcon(FontAwesomeIcons.shoppingBasket),
                               ),
                             )
                         );
                       });
-                  }
-               ),
+                }
+            ),
 
-              )
+          )
 
 
       ),
@@ -714,7 +756,6 @@ class JualanState extends State<Jualan> {
           return data == 0 ?
           Container(
               height: double.infinity, width : double.infinity,
-
               child: new
               Center(
                   child :
@@ -743,8 +784,8 @@ class JualanState extends State<Jualan> {
                 children: <Widget>[
                   InkWell(
                     onTap: () {
-                        addKeranjang(data[i]["i"].toString());
-                        FocusScope.of(context).requestFocus(FocusNode());
+                      addKeranjang(data[i]["i"].toString());
+                      FocusScope.of(context).requestFocus(FocusNode());
                     },
                     onLongPress: (){
                       setState(() {
@@ -757,52 +798,58 @@ class JualanState extends State<Jualan> {
                     }
                     ,
                     child: ListTile(
-                        leading:
-                        data[i]["e"] != 0 ?
-                           Badge(
-                             badgeContent: Text(data[i]["e"].toString(),style: TextStyle(color: Colors.white,fontSize: 12),),
-                             child:  SizedBox(
-                                 width: 60,
-                                 height: 100,
-                                 child: ClipRRect(
-                                   borderRadius: BorderRadius.circular(6.0),
-                                   child : CachedNetworkImage(
-                                     fit: BoxFit.cover,
-                                     imageUrl:
-                                     data[i]["d"] == '' ?
-                                      applink+"photo/nomage.jpg"
+                      leading:
+                      data[i]["e"] != 0 ?
+                      Badge(
+                          badgeContent: Text(data[i]["e"].toString(),
+                            style: TextStyle(color: Colors.white,fontSize: 12),),
+                          child:  SizedBox(
+                              width: 60,
+                              height: 100,
+                              child: ClipRRect(
+                                borderRadius: BorderRadius.circular(6.0),
+                                child : CachedNetworkImage(
+                                  fit: BoxFit.cover,
+                                  imageUrl:
+                                  data[i]["d"] == '' ?
+                                  applink+"photo/nomage.jpg"
                                       :
-                                      applink+"photo/"+getBranchVal+"/"+data[i]["d"],
-                                     progressIndicatorBuilder: (context, url, downloadProgress) =>
-                                         CircularProgressIndicator(value: downloadProgress.progress),
-                                     errorWidget: (context, url, error) => Icon(Icons.error),
-                                   ),
-                                 ))
-                           )
+                                  applink+"photo/"+getBranchVal+"/"+data[i]["d"],
+                                  progressIndicatorBuilder: (context, url,
+                                      downloadProgress) =>
+                                      CircularProgressIndicator(value:
+                                      downloadProgress.progress),
+                                  errorWidget: (context, url, error) =>
+                                      Icon(Icons.error),
+                                ),
+                              ))
+                      )
 
-                            :
-                        SizedBox(
-                            width: 60,
-                            height: 100,
-                            child: ClipRRect(
-                              borderRadius: BorderRadius.circular(6.0),
-                              child : CachedNetworkImage(
-                                fit: BoxFit.cover,
-                                imageUrl:
-                                data[i]["d"] == '' ?
-                                applink+"photo/nomage.jpg"
-                                    :
-                                applink+"photo/"+getBranchVal+"/"+data[i]["d"],
-                                progressIndicatorBuilder: (context, url, downloadProgress) =>
-                                    CircularProgressIndicator(value: downloadProgress.progress),
-                                errorWidget: (context, url, error) => Icon(Icons.error),
-                              ),
-                            )),
-                        title: Align(alignment: Alignment.centerLeft,
-                          child: Text(data[i]["a"],
-                              style: TextStyle(fontFamily: "VarelaRound",
-                                  fontSize: 13,fontWeight: FontWeight.bold)),),
-                        subtitle: Align(alignment: Alignment.centerLeft,
+                          :
+                      SizedBox(
+                          width: 60,
+                          height: 100,
+                          child: ClipRRect(
+                            borderRadius: BorderRadius.circular(6.0),
+                            child : CachedNetworkImage(
+                              fit: BoxFit.cover,
+                              imageUrl:
+                              data[i]["d"] == '' ?
+                              applink+"photo/nomage.jpg"
+                                  :
+                              applink+"photo/"+getBranchVal+"/"+data[i]["d"],
+                              progressIndicatorBuilder: (context, url,
+                                  downloadProgress) =>
+                                  CircularProgressIndicator(value:
+                                  downloadProgress.progress),
+                              errorWidget: (context, url, error) => Icon(Icons.error),
+                            ),
+                          )),
+                      title: Align(alignment: Alignment.centerLeft,
+                        child: Text(data[i]["a"],
+                            style: TextStyle(fontFamily: "VarelaRound",
+                                fontSize: 13,fontWeight: FontWeight.bold)),),
+                      subtitle: Align(alignment: Alignment.centerLeft,
                           child:
                           data[i]["e"] != 0 ?
                           ResponsiveContainer(
@@ -814,15 +861,18 @@ class JualanState extends State<Jualan> {
                               children: [
                                 Text("Rp "+
                                     NumberFormat.currency(
-                                        locale: 'id', decimalDigits: 0, symbol: '').format(
+                                        locale: 'id', decimalDigits: 0, symbol: '').
+                                    format(
                                         data[i]["c"]), style: new TextStyle(
                                     decoration: TextDecoration.lineThrough,
                                     fontFamily: 'VarelaRound',fontSize: 12),),
                                 Padding(padding: const EdgeInsets.only(left: 5),child:
                                 Text("Rp "+
                                     NumberFormat.currency(
-                                        locale: 'id', decimalDigits: 0, symbol: '').format(
-                                        data[i]["c"] - double.parse(data[i]["f"])), style: new TextStyle(
+                                        locale: 'id', decimalDigits: 0, symbol: '').
+                                    format(
+                                        data[i]["c"] - double.parse(data[i]["f"])),
+                                  style: new TextStyle(
                                     fontFamily: 'VarelaRound',fontSize: 12),),)
                               ],
                             ),
@@ -833,7 +883,7 @@ class JualanState extends State<Jualan> {
                                   locale: 'id', decimalDigits: 0, symbol: '').format(
                                   data[i]["c"]), style: new TextStyle(
                               fontFamily: 'VarelaRound',fontSize: 12),)
-                        ),
+                      ),
                     ),
                   ),
                   Padding(padding: const EdgeInsets.only(top :10 ))

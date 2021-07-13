@@ -57,7 +57,8 @@ class _LoginState extends State<Login> {
 
     _actloginGoogle(String parEmail) async {
       final response = await http.post(applink+"api_model.php?act=login_google",
-          body: {"email": parEmail});
+          body: {"email": parEmail},
+          headers: {"Accept":"application/json"});
       Map data = jsonDecode(response.body);
       setState(() {
         if (data["message"].toString() == '1') {
@@ -91,7 +92,8 @@ class _LoginState extends State<Login> {
         return;
       } else {
         final response = await http.post(applink+"api_model.php?act=login",
-            body: {"username": _username.text, "password": _password.text});
+            body: {"username": _username.text, "password": _password.text},
+            headers: {"Accept":"application/json"});
         Map data = jsonDecode(response.body);
         setState(() {
           int getValue = data["value"];

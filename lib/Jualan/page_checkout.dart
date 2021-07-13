@@ -429,7 +429,7 @@ class CheckoutState extends State<Checkout> {
             backgroundColor: Colors.white,
             title: Container(
               padding: const EdgeInsets.only(top: 2),
-              height: 78,
+              height: 120,
               width: 100,
               child: FutureBuilder(
                 future: getDataTotal(),
@@ -445,8 +445,8 @@ class CheckoutState extends State<Checkout> {
 
                           Text( "Rp. "+
                               NumberFormat.currency(
-                                  locale: 'id', decimalDigits: 0, symbol: '').format(
-                                  int.parse(data2[i]['a'].toString())),
+                                  locale: 'id', decimalDigits: 0, symbol: '').
+                                  format(int.parse(data2[i]['a'].toString())),
                             style: TextStyle(
                                 color: Colors.black,
                                 fontWeight: FontWeight.bold,
@@ -753,17 +753,7 @@ class CheckoutState extends State<Checkout> {
                           height: 50,
                           child: ClipRRect(
                             borderRadius: BorderRadius.circular(6.0),
-                            child : CachedNetworkImage(
-                              fit: BoxFit.cover,
-                              imageUrl:
-                              data[i]["d"] == '' ?
-                              applink+"photo/nomage.jpg"
-                                  :
-                              applink+"photo/"+getBranchVal+"/"+data[i]["d"],
-                              progressIndicatorBuilder: (context, url, downloadProgress) =>
-                                  CircularProgressIndicator(value: downloadProgress.progress),
-                              errorWidget: (context, url, error) => Icon(Icons.error),
-                            ),
+                            child : Text(data[i]["n"].toString().substring(1,2)),
                           )),
                       title: data[i]["n"] != "" ?
                         Column(
