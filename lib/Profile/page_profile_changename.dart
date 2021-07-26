@@ -8,6 +8,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:hexcolor/hexcolor.dart';
+import 'package:moobi_flutter/Helper/app_helper.dart';
 import 'package:moobi_flutter/Helper/check_connection.dart';
 import 'package:moobi_flutter/Helper/color_based.dart';
 import 'package:moobi_flutter/Helper/page_route.dart';
@@ -19,9 +20,6 @@ import 'package:http/http.dart' as http;
 import 'package:moobi_flutter/Helper/api_link.dart';
 
 class ProfileUbahNama extends StatefulWidget {
-  final String varEmail;
-  final String varNama;
-  const ProfileUbahNama(this.varEmail, this.varNama);
   @override
   ProfileUbahNamaState createState() => ProfileUbahNamaState();
 }
@@ -36,42 +34,26 @@ class ProfileUbahNamaState extends State<ProfileUbahNama> {
   }
 
 
-  String getEmail = '...';
-  _session() async {
-    int value = await Session.getValue();
-    getEmail = await Session.getEmail();
-    if (value != 1) {Navigator.pushReplacement(context, ExitPage(page: Login()));}
-  }
 
-  _connect() async {
-    Checkconnection().check().then((internet){
-      if (internet != null && internet) {} else {
-        showToast("Koneksi terputus..", gravity: Toast.CENTER, duration: Toast.LENGTH_LONG);
-      }
-    });
-  }
-
-  _userDetail() async {
-    final response = await http.get(
-        applink+"api_model.php?act=userdetail&id="+getEmail.toString()).timeout(Duration(seconds: 10),
-        onTimeout: (){
-          showToast("Koneksi timeout , mohon periksa jaringan anda..", gravity: Toast.BOTTOM,
-              duration: Toast.LENGTH_LONG);
-          return;
-        });
-    Map data = jsonDecode(response.body);
-    setState(() {
-      //getNama = data["j"].toString();
+  String getEmail = "...";
+  String getNama = "...";
+  _startingVariable() async {
+    await AppHelper().getConnect().then((value){if(value == 'ConnInterupted'){
+      showToast("Koneksi terputus..", gravity: Toast.CENTER,duration:
+      Toast.LENGTH_LONG);}});
+    await AppHelper().getSession().then((value){if(value[0] != 1) {
+      Navigator.pushReplacement(context, ExitPage(page: Login()));}else{setState(() {getEmail = value[1];});}});
+    await AppHelper().getDetailUser(getEmail.toString()).then((value){
+      setState(() {
+        getNama = value[4];
+      });
     });
   }
 
   _prepare() async {
-    await _connect();
-    await _session();
-    await _userDetail();
+    await _startingVariable();
+    valNama.text = getNama;
   }
-
-
 
   @override
   void initState() {

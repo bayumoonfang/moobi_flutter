@@ -4,6 +4,7 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:hexcolor/hexcolor.dart';
+import 'package:moobi_flutter/Helper/app_helper.dart';
 import 'package:moobi_flutter/Setting/page_editlegalentites.dart';
 import 'package:moobi_flutter/helper/api_link.dart';
 import 'package:moobi_flutter/helper/page_route.dart';
@@ -12,6 +13,8 @@ import 'package:moobi_flutter/page_login.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+
+import 'package:toast/toast.dart';
 class Toko extends StatefulWidget {
   @override
   _TokoState createState() => _TokoState();
@@ -22,26 +25,17 @@ class _TokoState extends State<Toko> {
   Future<bool> _onWillPop() async {
     Navigator.pop(context);
   }
-
-  String getEmail = "...";
-  _session() async {
-    int value = await Session.getValue();
-    getEmail = await Session.getEmail();
-    if (value != 1) {
-      Navigator.pushReplacement(context, ExitPage(page: Login()));
-    }
+  void showToast(String msg, {int duration, int gravity}) {
+    Toast.show(msg, context, duration: duration, gravity: gravity);
   }
 
-
-  signOut() async {
-    SharedPreferences preferences = await SharedPreferences.getInstance();
-    setState(() {
-      preferences.setInt("value", null);
-      preferences.setString("username", null);
-      preferences.setString("email", null);
-      preferences.commit();
-      Navigator.pushReplacement(context, ExitPage(page: Login()));
-    });
+  String getEmail = "...";
+  _startingVariable() async {
+    await AppHelper().getConnect().then((value){if(value == 'ConnInterupted'){
+      showToast("Koneksi terputus..", gravity: Toast.CENTER,duration:
+      Toast.LENGTH_LONG);}});
+    await AppHelper().getSession().then((value){if(value[0] != 1) {
+      Navigator.pushReplacement(context, ExitPage(page: Login()));}else{setState(() {getEmail = value[1];});}});
   }
 
   String getStorename = "-";
@@ -67,7 +61,7 @@ class _TokoState extends State<Toko> {
   }
 
   loadData() async {
-    await _session();
+    await _startingVariable();
     await _userDetail();
   }
 
@@ -88,7 +82,7 @@ class _TokoState extends State<Toko> {
         appBar: new AppBar(
           backgroundColor: HexColor("#602d98"),
           title: Text(
-            "Legal Entities",
+            "Detail Toko",
             style: TextStyle(
                 color: Colors.white, fontFamily: 'VarelaRound', fontSize: 16),
           ),
@@ -112,7 +106,7 @@ class _TokoState extends State<Toko> {
                   Align(
                       alignment: Alignment.centerLeft,
                       child: Padding(padding: const EdgeInsets.only(top: 35,left: 15),
-                          child: Text("Legal Entities", style: TextStyle(fontSize: 24,fontWeight: FontWeight.bold)))),
+                          child: Text("Toko Saya", style: TextStyle(fontSize: 24,fontWeight: FontWeight.bold)))),
 
                   Padding(padding: const EdgeInsets.only(top: 20),
                     child: ListTile(

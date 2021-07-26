@@ -8,6 +8,7 @@ import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:hexcolor/hexcolor.dart';
 import 'package:moobi_flutter/Helper/api_link.dart';
+import 'package:moobi_flutter/Helper/app_helper.dart';
 import 'package:moobi_flutter/Helper/check_connection.dart';
 import 'package:moobi_flutter/Helper/color_based.dart';
 import 'package:moobi_flutter/Helper/page_route.dart';
@@ -34,31 +35,19 @@ class _PaymentMethodRegistrationState extends State<PaymentMethodRegistration>{
     Toast.show(msg, context, duration: duration, gravity: gravity);
   }
 
-  _connect() async {
-    Checkconnection().check().then((internet){
-      if (internet != null && internet) {} else {
-        showToast("Koneksi terputus..", gravity: Toast.CENTER,
-            duration: Toast.LENGTH_LONG);
-      }
-    });
-  }
-  String getEmail = '...';
-  _session() async {
-    int value = await Session.getValue();
-    getEmail = await Session.getEmail();
-    if (value != 1) {
-      Navigator.pushReplacement(context, ExitPage(page: Login()));
-    }
+  String getEmail = "...";
+  String getNama = "...";
+  _startingVariable() async {
+    await AppHelper().getConnect().then((value){if(value == 'ConnInterupted'){
+      showToast("Koneksi terputus..", gravity: Toast.CENTER,duration:
+      Toast.LENGTH_LONG);}});
+    await AppHelper().getSession().then((value){if(value[0] != 1) {
+      Navigator.pushReplacement(context, ExitPage(page: Login()));}else{setState(() {getEmail = value[1];});}});
+    await AppHelper().getDetailUser(getEmail.toString()).then((value){});
   }
 
-  Future<List> getData() async {
-    http.Response response = await http.get(
-        Uri.encodeFull(applink+"api_model.php?act=getdata_paymentgatewayreg"),
-        headers: {"Accept":"application/json"}
-    );
-    setState((){
-      data = json.decode(response.body);
-    });
+  _prepare() async {
+    await _startingVariable();
   }
 
   @override
@@ -67,11 +56,14 @@ class _PaymentMethodRegistrationState extends State<PaymentMethodRegistration>{
     _prepare();
   }
 
-  _prepare() async {
-    await _connect();
-    await _session();
-  }
 
+  Future<List> getData() async {
+          http.Response response = await http.get(
+              Uri.encodeFull(applink+"api_model.php?act=getdata_paymentgatewayreg"),
+              headers: {"Accept":"application/json"}
+          );
+          return json.decode(response.body);
+     }
 
 
   @override
@@ -111,15 +103,12 @@ class _PaymentMethodRegistrationState extends State<PaymentMethodRegistration>{
     return FutureBuilder(
       future : getData(),
       builder: (context, snapshot) {
-        if (data == null) {
+        if (snapshot.data == null) {
           return Center(
-              child: Image.asset(
-                "assets/loadingq.gif",
-                width: 110.0,
-              )
+              child: CircularProgressIndicator()
           );
         } else {
-          return data == 0 ?
+          return snapshot.data == 0 ?
           Container(
               height: double.infinity, width : double.infinity,
               child: new
@@ -143,7 +132,7 @@ class _PaymentMethodRegistrationState extends State<PaymentMethodRegistration>{
                   )))
               :
           new ListView.builder(
-            itemCount: data == null ? 0 : data.length,
+            itemCount: snapshot.data == null ? 0 : snapshot.data.length,
             padding: const EdgeInsets.only(top: 5,bottom: 80,left: 5,right: 5),
             itemBuilder: (context, i) {
               return Column(
@@ -155,12 +144,12 @@ class _PaymentMethodRegistrationState extends State<PaymentMethodRegistration>{
                     child: ListTile(
                       leading:
                       Padding(padding: const EdgeInsets.only(top: 5),
-                        child: Image.network(applink+'photo/payment/'+data[i]["e"],
+                        child: Image.network(applink+'photo/payment/'+snapshot.data[i]["e"],
                           alignment: Alignment.center,
                           height: 25,
                           width: 53,
                          )),
-                      title: Text(data[i]["b"], style: TextStyle(fontFamily: 'VarelaRound', fontSize: 20,
+                      title: Text(snapshot.data[i]["b"], style: TextStyle(fontFamily: 'VarelaRound', fontSize: 20,
                           fontWeight: FontWeight.bold)),
                       subtitle: Align(
                         alignment: Alignment.centerLeft,
@@ -170,7 +159,7 @@ class _PaymentMethodRegistrationState extends State<PaymentMethodRegistration>{
                               padding: const EdgeInsets.only(top: 5),
                               child: Align(
                                 alignment: Alignment.centerLeft,
-                                child: Text(data[i]["c"], style: TextStyle(fontFamily: 'VarelaRound', fontSize: 15
+                                child: Text(snapshot.data[i]["c"], style: TextStyle(fontFamily: 'VarelaRound', fontSize: 15
                                     ,color: Colors.black)),
                               )
                             ),
@@ -178,7 +167,7 @@ class _PaymentMethodRegistrationState extends State<PaymentMethodRegistration>{
                               padding: const EdgeInsets.only(top: 5),
                               child: Align(
                                   alignment: Alignment.centerLeft,
-                                  child: Text("a.n "+data[i]["d"], style: TextStyle(fontFamily: 'VarelaRound',
+                                  child: Text("a.n "+snapshot.data[i]["d"], style: TextStyle(fontFamily: 'VarelaRound',
                                       fontSize: 11,color: Colors.black))),
                             )
                           ],
@@ -190,7 +179,7 @@ class _PaymentMethodRegistrationState extends State<PaymentMethodRegistration>{
                           child: FaIcon(FontAwesomeIcons.copy,size: 23,),
                         ),
                         onTap: () {
-                          FlutterClipboard.copy(data[i]["c"]).then(( value ) =>
+                          FlutterClipboard.copy(snapshot.data[i]["c"]).then(( value ) =>
                               showToast("Nomor Akun berhasil disalin", gravity: Toast.BOTTOM,
                                   duration: Toast.LENGTH_LONG)
                           );

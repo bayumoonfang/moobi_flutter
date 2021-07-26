@@ -13,6 +13,7 @@ import 'package:hexcolor/hexcolor.dart';
 import 'package:intl/intl.dart';
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 import 'package:moobi_flutter/Helper/check_connection.dart';
+import 'package:moobi_flutter/Helper/color_based.dart';
 import 'package:moobi_flutter/Helper/page_route.dart';
 import 'package:moobi_flutter/Helper/session.dart';
 import 'package:moobi_flutter/page_login.dart';
@@ -140,7 +141,8 @@ class CheckoutState extends State<Checkout> {
   String sortby = '0';
   Future<List> getData() async {
     http.Response response = await http.get(
-        Uri.encodeFull(applink+"api_model.php?act=getdata_produkcheckout&branch="+getBranchVal+"&operator="+getNamaUser),
+        Uri.encodeFull(applink+"api_model.php?act=getdata_produkcheckout&branch="
+            +getBranchVal+"&operator="+getNamaUser),
         headers: {"Accept":"application/json"}
     );
     setState((){
@@ -151,7 +153,8 @@ class CheckoutState extends State<Checkout> {
 
   Future<List> getDataTotal() async {
     http.Response response = await http.get(
-        Uri.encodeFull(applink+"api_model.php?act=getdata_charttotal&branch="+getBranchVal+"&operator="+getNamaUser),
+        Uri.encodeFull(applink+"api_model.php?act=getdata_charttotal&branch="+getBranchVal+""
+            "&operator="+getNamaUser),
         headers: {"Accept":"application/json"}
     );
     setState((){
@@ -162,7 +165,8 @@ class CheckoutState extends State<Checkout> {
 
   Future<List> getDataSubTotal() async {
     http.Response response = await http.get(
-        Uri.encodeFull(applink+"api_model.php?act=getdata_subtotal2&branch="+getBranchVal+"&operator="+getNamaUser),
+        Uri.encodeFull(applink+"api_model.php?act=getdata_subtotal2&branch="+getBranchVal+""
+            "&operator="+getNamaUser),
         headers: {"Accept":"application/json"}
     );
     setState((){
@@ -173,7 +177,8 @@ class CheckoutState extends State<Checkout> {
 
   Future<List> getDataServchargeTotal() async {
     http.Response response = await http.get(
-        Uri.encodeFull(applink+"api_model.php?act=getdata_servchargetotal&branch="+getBranchVal+"&operator="+getNamaUser),
+        Uri.encodeFull(applink+"api_model.php?act=getdata_servchargetotal&branch="
+            ""+getBranchVal+"&operator="+getNamaUser),
         headers: {"Accept":"application/json"}
     );
     setState((){
@@ -184,7 +189,8 @@ class CheckoutState extends State<Checkout> {
 
   Future<List> getDataPPNTotal() async {
     http.Response response = await http.get(
-        Uri.encodeFull(applink+"api_model.php?act=getdata_ppntotal&branch="+getBranchVal+"&operator="+getNamaUser),
+        Uri.encodeFull(applink+"api_model.php?act=getdata_ppntotal&branch="+getBranchVal+""
+            "&operator="+getNamaUser),
         headers: {"Accept":"application/json"}
     );
     setState((){
@@ -222,7 +228,8 @@ class CheckoutState extends State<Checkout> {
 
 
   doEditOrder(String idOrder) async {
-    final response = await http.post(applink+"api_model.php?act=edit_orderpending", body: {
+    final response = await http.post(applink+"api_model.php?act=edit_orderpending",
+        body: {
       "order_id": idOrder,
       "order_comment" : _transcomment.text,
       "order_qty" : valJumlahq.toString()
@@ -259,7 +266,8 @@ class CheckoutState extends State<Checkout> {
                       children: [
                         Padding(padding: const EdgeInsets.only(top: 8), child:
                         Align(alignment: Alignment.center, child: Text("Tambah Biaya",
-                            style: TextStyle(fontFamily: 'VarelaRound', fontSize: 16, fontWeight: FontWeight.bold))
+                            style: TextStyle(fontFamily: 'VarelaRound', fontSize: 16,
+                                fontWeight: FontWeight.bold))
                         ),),
                         Padding(padding: const EdgeInsets.only(top: 15), child:
                         Align(alignment: Alignment.center, child:
@@ -278,7 +286,8 @@ class CheckoutState extends State<Checkout> {
                             ),
                             hintText: 'Nama Biaya. Contoh : Ongkir, dll',
                             floatingLabelBehavior: FloatingLabelBehavior.always,
-                            hintStyle: TextStyle(fontFamily: "VarelaRound", color: HexColor("#c4c4c4")),
+                            hintStyle: TextStyle(fontFamily: "VarelaRound", color:
+                            HexColor("#c4c4c4")),
                           ),
                         ),
                         )),
@@ -299,7 +308,8 @@ class CheckoutState extends State<Checkout> {
                             ),
                             hintText: 'Biaya. Contoh : 12000, 15000',
                             floatingLabelBehavior: FloatingLabelBehavior.always,
-                            hintStyle: TextStyle(fontFamily: "VarelaRound", color: HexColor("#c4c4c4")),
+                            hintStyle: TextStyle(fontFamily: "VarelaRound",
+                                color: HexColor("#c4c4c4")),
                           ),
                         ),
                         )),
@@ -316,7 +326,8 @@ class CheckoutState extends State<Checkout> {
                                 FocusScope.of(context).requestFocus(FocusNode());
 
                                 Navigator.pop(context);
-                              }, child: Text("Tambah", style: TextStyle(color: Colors.red),),)),
+                              }, child: Text("Tambah", style: TextStyle(color:
+                            Colors.red),),)),
                           ],),)
                       ],
                     )
@@ -349,21 +360,25 @@ class CheckoutState extends State<Checkout> {
                       children: [
                         Padding(padding: const EdgeInsets.only(top: 8), child:
                         Align(alignment: Alignment.center, child: Text(valNama,
-                            style: TextStyle(fontFamily: 'VarelaRound', fontSize: 16, fontWeight: FontWeight.bold))
+                            style: TextStyle(fontFamily: 'VarelaRound', fontSize: 16,
+                                fontWeight: FontWeight.bold))
                         ),),
                         Padding(padding: const EdgeInsets.only(top: 25,bottom: 15),
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
-                              FlatButton(child: Text("-",style: TextStyle(fontSize: 48,fontWeight: FontWeight.bold),),
+                              FlatButton(child: Text("-",style: TextStyle(fontSize: 48,
+                                  fontWeight: FontWeight.bold),),
                                 onPressed: (){
                                   setState(() {
                                     _kurangqty();
                                     valJumlahq2 -= 1;
                                   });
                                 },),
-                              Text("$valJumlahq2",style: TextStyle(fontSize: 52,fontWeight: FontWeight.bold),),
-                              FlatButton(child: Text("+",style: TextStyle(fontSize: 46,fontWeight: FontWeight.bold),),
+                              Text("$valJumlahq2",style: TextStyle(fontSize: 52,
+                                  fontWeight: FontWeight.bold),),
+                              FlatButton(child: Text("+",style: TextStyle(fontSize: 46,
+                                  fontWeight: FontWeight.bold),),
                                 onPressed: (){
                                   setState(() {
                                     _tambahqty();
@@ -389,7 +404,8 @@ class CheckoutState extends State<Checkout> {
                             ),
                             hintText: 'Note. Contoh : Pedas, Tidak Pedas',
                             floatingLabelBehavior: FloatingLabelBehavior.always,
-                            hintStyle: TextStyle(fontFamily: "VarelaRound", color: HexColor("#c4c4c4")),
+                            hintStyle: TextStyle(fontFamily: "VarelaRound",
+                                color: HexColor("#c4c4c4")),
                           ),
                         ),
                         )),
@@ -406,7 +422,8 @@ class CheckoutState extends State<Checkout> {
                                 FocusScope.of(context).requestFocus(FocusNode());
                                 doEditOrder(valID);
                                 Navigator.pop(context);
-                              }, child: Text("Edit Order", style: TextStyle(color: Colors.red),),)),
+                              }, child: Text("Edit Order", style: TextStyle(
+                                color: Colors.red),),)),
                           ],),)
                       ],
                     )
@@ -429,7 +446,7 @@ class CheckoutState extends State<Checkout> {
             backgroundColor: Colors.white,
             title: Container(
               padding: const EdgeInsets.only(top: 2),
-              height: 120,
+              height: double.infinity,
               width: 100,
               child: FutureBuilder(
                 future: getDataTotal(),
@@ -498,7 +515,7 @@ class CheckoutState extends State<Checkout> {
             color: Colors.white,
             child: Column(
               children: [
-                Container(
+               /* Container(
                     height: 50,
                     width: double.infinity,
                     child: SingleChildScrollView(
@@ -522,7 +539,7 @@ class CheckoutState extends State<Checkout> {
                         ],
                       ),
                     )
-                ),
+                ),*/
                 Padding(padding: const EdgeInsets.only(left: 15,right: 15),
                   child: Divider(height: 4,),),
                 Padding(padding: const EdgeInsets.only(top: 10),),
@@ -601,9 +618,12 @@ class CheckoutState extends State<Checkout> {
                                         alignment: Alignment.centerRight,
                                         child: Text("Rp. "+
                                             NumberFormat.currency(
-                                                locale: 'id', decimalDigits: 0, symbol: '').format(
-                                                int.parse(dataSubTotal[i]["a"].toString())),style: TextStyle(fontSize: 13,
-                                            fontWeight: FontWeight.bold,fontFamily: 'VarelaRound',
+                                                locale: 'id', decimalDigits: 0, symbol: '').
+                                            format(
+                                                int.parse(dataSubTotal[i]["a"].toString())),
+                                            style: TextStyle(fontSize: 13,
+                                            fontWeight: FontWeight.bold,
+                                                fontFamily: 'VarelaRound',
                                             color: Colors.black)),
                                       );
                                   },
@@ -635,9 +655,12 @@ class CheckoutState extends State<Checkout> {
                                       alignment: Alignment.centerRight,
                                       child: Text("Rp. "+
                                           NumberFormat.currency(
-                                              locale: 'id', decimalDigits: 0, symbol: '').format(
-                                              int.parse(dataServCharge[i]["a"].toString())),style: TextStyle(fontSize: 13,
-                                          fontWeight: FontWeight.bold,fontFamily: 'VarelaRound',
+                                              locale: 'id', decimalDigits: 0, symbol: '').
+                                          format(
+                                              int.parse(dataServCharge[i]["a"].toString())),
+                                          style: TextStyle(fontSize: 13,
+                                          fontWeight: FontWeight.bold,
+                                              fontFamily: 'VarelaRound',
                                           color: Colors.black)),
                                     );
                                   },
@@ -669,9 +692,12 @@ class CheckoutState extends State<Checkout> {
                                       alignment: Alignment.centerRight,
                                       child: Text("Rp. "+
                                           NumberFormat.currency(
-                                              locale: 'id', decimalDigits: 0, symbol: '').format(
-                                              int.parse(dataPPN[i]["a"].toString())),style: TextStyle(fontSize: 13,
-                                          fontWeight: FontWeight.bold,fontFamily: 'VarelaRound',
+                                              locale: 'id', decimalDigits: 0, symbol: '').
+                                          format(
+                                              int.parse(dataPPN[i]["a"].toString())),
+                                          style: TextStyle(fontSize: 13,
+                                          fontWeight: FontWeight.bold,
+                                              fontFamily: 'VarelaRound',
                                           color: Colors.black)),
                                     );
                                   },
@@ -732,63 +758,68 @@ class CheckoutState extends State<Checkout> {
               :
           new ListView.builder(
             itemCount: data == null ? 0 : data.length,
-            padding: const EdgeInsets.only(top: 2,bottom: 80),
+            padding: const EdgeInsets.only(top: 2,bottom: 50),
             itemBuilder: (context, i) {
               return Column(
                 children: <Widget>[
                   InkWell(
                     onTap: (){
-                      if (data[i]["n"].toString() == "null") {
+                      if (data[i]["f"].toString() == "null") {
                         _transcomment.text = "";
                       } else {
-                        _transcomment.text = data[i]["n"].toString();
+                        _transcomment.text = data[i]["f"].toString();
                       }
-                      valJumlahq = data[i]["j"];
-                      dialogAdd(data[i]["m"].toString(), data[i]["a"], data[i]["j"]);
+                      valJumlahq = data[i]["d"];
+                      dialogAdd(data[i]["g"].toString(), data[i]["b"], data[i]["d"]);
                     },
                     child: ListTile(
                       leading:
                       SizedBox(
                           width: 50,
                           height: 50,
-                          child: ClipRRect(
-                            borderRadius: BorderRadius.circular(6.0),
-                            child : Text(data[i]["n"].toString().substring(1,2)),
-                          )),
-                      title: data[i]["n"] != "" ?
+                          child:       OutlineButton(
+                            onPressed: () { },
+                            shape: new CircleBorder(),
+                            borderSide: BorderSide(color: Colors.black),
+                            child: Text(data[i]["b"].toString().substring(0,2).toUpperCase(),style:
+                              TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
+                          ),
+                      ),
+
+                      title: data[i]["f"] != "" ?
                         Column(
                           children: [
                             Align(alignment: Alignment.centerLeft,
-                              child: Text(data[i]["a"],
+                              child: Text(data[i]["b"],
                                   style: TextStyle(fontFamily: "VarelaRound",
                                       fontSize: 13,fontWeight: FontWeight.bold)),),
                       Padding(padding: const EdgeInsets.only(top: 5,bottom: 5),child:
                       Align(alignment: Alignment.centerLeft,
-                        child: Text(":: "+data[i]["n"],
+                        child: Text(":: "+data[i]["f"],
                             style: TextStyle(fontFamily: "VarelaRound",
                                 fontSize: 12,)),),)
                           ],
                         )
                         :
                         Align(alignment: Alignment.centerLeft,
-                        child: Text(data[i]["a"],
+                        child: Text(data[i]["b"],
                         style: TextStyle(fontFamily: "VarelaRound",
                         fontSize: 13,fontWeight: FontWeight.bold)),),
                       subtitle: Align(alignment: Alignment.centerLeft,
                           child:
-                          Text(data[i]["j"].toString() + " x"+" Rp. "+
+                          Text(data[i]["d"].toString() + " x"+" Rp. "+
                               NumberFormat.currency(
                                   locale: 'id', decimalDigits: 0, symbol: '').format(
-                                  data[i]["k"])+" = "+NumberFormat.currency(
+                                  data[i]["c"])+" = "+NumberFormat.currency(
                               locale: 'id', decimalDigits: 0, symbol: '').format(
-                              data[i]["l"]), style: new TextStyle(
+                              data[i]["e"]), style: new TextStyle(
                               fontFamily: 'VarelaRound',fontSize: 12),)
                       ),
                       trailing: Container(
                         height: 20,
                         width : 55,
                         child: OutlineButton(
-                          child: Text(data[i]["j"].toString(),style: TextStyle(
+                          child: Text(data[i]["d"].toString(),style: TextStyle(
                             fontWeight: FontWeight.bold,
                             fontSize: 14
                           ),textAlign: TextAlign.center,),

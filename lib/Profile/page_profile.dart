@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:hexcolor/hexcolor.dart';
+import 'package:moobi_flutter/Helper/app_helper.dart';
 import 'package:moobi_flutter/Helper/check_connection.dart';
 import 'package:moobi_flutter/Helper/color_based.dart';
 import 'package:moobi_flutter/Profile/page_profile_changename.dart';
@@ -36,19 +37,26 @@ class _ProfileState extends State<Profile> {
     Toast.show(msg, context, duration: duration, gravity: gravity);
   }
 
-
-  _connect() async {
-    Checkconnection().check().then((internet){
-      if (internet != null && internet) {} else {
-        showToast("Koneksi terputus..", gravity: Toast.CENTER,
-            duration: Toast.LENGTH_LONG);
-        return ;
-      }
+  String getEmail = "...";
+  String getRole = "...";
+  String getUserId = "...";
+  String getRegisterDate = "...";
+  String getNama = "...";
+  _startingVariable() async {
+    await AppHelper().getConnect().then((value){if(value == 'ConnInterupted'){
+      showToast("Koneksi terputus..", gravity: Toast.CENTER,duration:
+      Toast.LENGTH_LONG);}});
+    await AppHelper().getSession().then((value){if(value[0] != 1) {
+      Navigator.pushReplacement(context, ExitPage(page: Login()));}else{setState(() {getEmail = value[1];});}});
+    await AppHelper().getDetailUser(getEmail.toString()).then((value){
+      setState(() {
+          getRole = value[5];
+          getUserId = value[6];
+          getRegisterDate = value[7];
+          getNama = value[4];
+      });
     });
   }
-
-
-
 
   signOut() async {
     await googleSignIn.signOut();
@@ -63,46 +71,8 @@ class _ProfileState extends State<Profile> {
   }
 
 
-  String getEmail = "...";
-  _session() async {
-    int value = await Session.getValue();
-    getEmail = await Session.getEmail();
-    if (value != 1) {
-      Navigator.pushReplacement(context, ExitPage(page: Login()));
-    }
-  }
-
-
-
-  String getNama = "...";
-  String getUsername = "...";
-  String getRole = "...";
-  String getUserId = "...";
-  String getRegisterDate = "...";
-
-  _userDetail() async {
-    final response = await http.get(
-        applink+"api_model.php?act=userdetail&id="+getEmail.toString()).timeout(Duration(seconds: 10),
-        onTimeout: (){
-          showToast("Koneksi timeout , mohon periksa jaringan anda..", gravity: Toast.BOTTOM,
-              duration: Toast.LENGTH_LONG);
-          return;
-        });
-    Map data = jsonDecode(response.body);
-    setState(() {
-      getNama = data["j"].toString();
-      getUsername = data["k"].toString();
-      getRole = data["l"].toString();
-      getUserId = data["m"].toString();
-      getRegisterDate = data["n"].toString();
-    });
-  }
-
-
   loadData() async {
-    await _connect();
-    await _session();
-    await _userDetail();
+    await _startingVariable();
   }
 
 
@@ -305,7 +275,7 @@ class _ProfileState extends State<Profile> {
                             child: InkWell(
                               child: ListTile(
                                 onTap: (){
-                                  Navigator.pushReplacement(context, ExitPage(page: ProfileUbahNama(getEmail, getNama.toString())));
+                                  Navigator.pushReplacement(context, ExitPage(page: ProfileUbahNama()));
                                 },
                                 leading: FaIcon(FontAwesomeIcons.user,color: HexColor(third_color),),
                                 title: Text("Ubah Nama",style: TextStyle(
@@ -321,7 +291,7 @@ class _ProfileState extends State<Profile> {
                               child: InkWell(
                                 child: ListTile(
                                   onTap: (){
-                                    Navigator.pushReplacement(context, ExitPage(page: ProfileUbahSandi(getEmail, getNama.toString())));
+                                    Navigator.push(context, ExitPage(page: ProfileUbahSandi()));
                                   },
                                   leading: FaIcon(FontAwesomeIcons.lock,color: HexColor(third_color),),
                                   title: Text("Ubah Sandi Akun",style: TextStyle(

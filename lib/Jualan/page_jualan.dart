@@ -277,7 +277,6 @@ class JualanState extends State<Jualan> {
                         child :
                         Column(
                           children: [
-
                             InkWell(
                               onTap: (){
                                 setState(() {

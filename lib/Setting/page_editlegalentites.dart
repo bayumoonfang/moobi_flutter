@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:hexcolor/hexcolor.dart';
 import 'package:moobi_flutter/Helper/api_link.dart';
+import 'package:moobi_flutter/Helper/app_helper.dart';
 import 'package:moobi_flutter/Helper/check_connection.dart';
 import 'package:moobi_flutter/Helper/color_based.dart';
 import 'package:moobi_flutter/Helper/page_route.dart';
@@ -39,11 +40,13 @@ class UbahKeteranganTokoState extends State<UbahKeteranganToko> {
   }
 
 
-  String getEmail = '...';
-  _session() async {
-    int value = await Session.getValue();
-    getEmail = await Session.getEmail();
-    if (value != 1) {Navigator.pushReplacement(context, ExitPage(page: Login()));}
+  String getEmail = "...";
+  _startingVariable() async {
+    await AppHelper().getConnect().then((value){if(value == 'ConnInterupted'){
+      showToast("Koneksi terputus..", gravity: Toast.CENTER,duration:
+      Toast.LENGTH_LONG);}});
+    await AppHelper().getSession().then((value){if(value[0] != 1) {
+      Navigator.pushReplacement(context, ExitPage(page: Login()));}else{setState(() {getEmail = value[1];});}});
   }
 
 
@@ -66,19 +69,8 @@ class UbahKeteranganTokoState extends State<UbahKeteranganToko> {
   }
 
 
-
-  _connect() async {
-    Checkconnection().check().then((internet){
-      if (internet != null && internet) {} else {
-        showToast("Koneksi terputus..", gravity: Toast.CENTER, duration: Toast.LENGTH_LONG);
-      }
-    });
-  }
-
-
   _prepare() async {
-    await _connect();
-    await _session();
+    await _startingVariable();
     await _userDetail();
     setState(() {
       valAlamat.text = getStoreAddress.toString();
@@ -170,7 +162,7 @@ class UbahKeteranganTokoState extends State<UbahKeteranganToko> {
         appBar: new AppBar(
           backgroundColor: HexColor(main_color),
           title: Text(
-            "Edit Legal Entities",
+            "Edit Keterangan Toko",
             style: TextStyle(
                 color: Colors.white, fontFamily: 'VarelaRound', fontSize: 16),
           ),

@@ -8,6 +8,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:hexcolor/hexcolor.dart';
+import 'package:moobi_flutter/Helper/app_helper.dart';
 import 'package:moobi_flutter/Helper/check_connection.dart';
 import 'package:moobi_flutter/Helper/color_based.dart';
 import 'package:moobi_flutter/Helper/page_route.dart';
@@ -19,9 +20,6 @@ import 'package:http/http.dart' as http;
 import 'package:moobi_flutter/Helper/api_link.dart';
 
 class ProfileUbahSandi extends StatefulWidget {
-  final String varEmail;
-  final String varNama;
-  const ProfileUbahSandi(this.varEmail, this.varNama);
   @override
   ProfileUbahSandiState createState() => ProfileUbahSandiState();
 }
@@ -29,37 +27,30 @@ class ProfileUbahSandi extends StatefulWidget {
 class ProfileUbahSandiState extends State<ProfileUbahSandi> {
   TextEditingController valPassword = TextEditingController();
   Future<bool> _onWillPop() async {
-    Navigator.pushReplacement(context, EnterPage(page: Profile()));
+    Navigator.pop(context);
   }
   void showToast(String msg, {int duration, int gravity}) {
     Toast.show(msg, context, duration: duration, gravity: gravity);
   }
 
-
-  String getEmail = '...';
-  _session() async {
-    int value = await Session.getValue();
-    getEmail = await Session.getEmail();
-    if (value != 1) {Navigator.pushReplacement(context, ExitPage(page: Login()));}
-  }
-
-  _connect() async {
-    Checkconnection().check().then((internet){
-      if (internet != null && internet) {} else {
-        showToast("Koneksi terputus..", gravity: Toast.CENTER, duration: Toast.LENGTH_LONG);
-      }
+  String getEmail = "...";
+  String getNama = "...";
+  _startingVariable() async {
+    await AppHelper().getConnect().then((value){if(value == 'ConnInterupted'){
+      showToast("Koneksi terputus..", gravity: Toast.CENTER,duration:
+      Toast.LENGTH_LONG);}});
+    await AppHelper().getSession().then((value){if(value[0] != 1) {
+      Navigator.pushReplacement(context, ExitPage(page: Login()));}else{setState(() {getEmail = value[1];});}});
+    await AppHelper().getDetailUser(getEmail.toString()).then((value){
+      setState(() {
+        getNama = value[4];
+      });
     });
   }
 
-
-
   _prepare() async {
-    await _connect();
-    await _session();
-
+    await _startingVariable();
   }
-
-
 
   @override
   void initState() {
@@ -70,8 +61,8 @@ class ProfileUbahSandiState extends State<ProfileUbahSandi> {
   doSimpan() async {
     final response = await http.post(applink+"api_model.php?act=edit_sandipengguna", body: {
       "valpassword_edit": valPassword.text,
-      "valemail_edit" : widget.varEmail.toString(),
-      "valnama_edit": widget.varNama.toString()
+      "valemail_edit" : getNama.toString(),
+      "valnama_edit": getNama.toString()
     });
     Map data = jsonDecode(response.body);
     setState(() {
@@ -147,7 +138,7 @@ class ProfileUbahSandiState extends State<ProfileUbahSandi> {
                 icon: new Icon(Icons.arrow_back),
                 color: Colors.white,
                 onPressed: () => {
-                  Navigator.pushReplacement(context, EnterPage(page: Profile()))
+                  Navigator.pop(context)
                 }),
           ),
           actions: [

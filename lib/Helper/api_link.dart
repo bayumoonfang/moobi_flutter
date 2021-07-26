@@ -1,1 +1,1 @@
-String applink = "http://192.168.1.192/m-moobi/";
+String applink = "https://duakata-dev.com/moobi/m-moobi/";

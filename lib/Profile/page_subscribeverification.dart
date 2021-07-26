@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:hexcolor/hexcolor.dart';
 import 'package:intl/intl.dart';
+import 'package:moobi_flutter/Helper/app_helper.dart';
 import 'package:moobi_flutter/Helper/check_connection.dart';
 import 'package:moobi_flutter/Helper/color_based.dart';
 import 'dart:async';
@@ -33,7 +34,6 @@ class SubscribeVerificationState extends State<SubscribeVerification> {
   List bankUserList = List();
   String selectedTransferKe;
   String selectedBankUser;
-  String getEmail = '...';
   final valUserid = TextEditingController();
   String valType = "REGISTER";
   String valAmount = hargaAplikasi;
@@ -69,20 +69,19 @@ class SubscribeVerificationState extends State<SubscribeVerification> {
       });
   }
 
-
-  _session() async {
-    int value = await Session.getValue();
-    getEmail = await Session.getEmail();
-    if (value != 1) {
-      Navigator.pushReplacement(context, ExitPage(page: Login()));
-    }
-  }
-  _connect() async {
-    Checkconnection().check().then((internet){
-      if (internet != null && internet) {} else {
-        showToast("Koneksi terputus..", gravity: Toast.CENTER,
-            duration: Toast.LENGTH_LONG);
-      }
+  String getEmail = "...";
+  String getNama = "...";
+  _startingVariable() async {
+    await AppHelper().getConnect().then((value){if(value == 'ConnInterupted'){
+      showToast("Koneksi terputus..", gravity: Toast.CENTER,duration:
+      Toast.LENGTH_LONG);}});
+    await AppHelper().getSession().then((value){if(value[0] != 1) {
+      Navigator.pushReplacement(context, ExitPage(page: Login()));}else{setState(() {getEmail = value[1];});}});
+    await AppHelper().getDetailUser(getEmail.toString()).then((value){
+      setState(() {
+        getNama = value[4];
+        valUserid.text = value[6];
+      });
     });
   }
 
@@ -111,27 +110,12 @@ class SubscribeVerificationState extends State<SubscribeVerification> {
     //print(bankUserList);
   }
 
-  String getUserId = "...";
-  _userDetail() async {
-    final response = await http.get(
-        applink+"api_model.php?act=userdetail&id="+getEmail.toString()).timeout(Duration(seconds: 10),
-        onTimeout: (){
-          showToast("Koneksi timeout , mohon periksa jaringan anda..", gravity: Toast.BOTTOM,
-              duration: Toast.LENGTH_LONG);
-          return;
-        });
-    Map data = jsonDecode(response.body);
-    setState(() {
-      valUserid.text = data["m"].toString();
-    });
-  }
+
 
 
 
   _prepare() async {
-    await _connect();
-    await _session();
-    await _userDetail();
+    await _startingVariable();
     await getAllItem();
     await getBankUser();
   }
@@ -283,7 +267,7 @@ class SubscribeVerificationState extends State<SubscribeVerification> {
                         Align(alignment: Alignment.centerLeft,child: Padding(
                           padding: const EdgeInsets.only(left: 0),
                           child: TextFormField(
-                            style: TextStyle(color: HexColor("#AAAAAA")),
+                            style: TextStyle(color: HexColor("#AAAAAA"),fontFamily: "VarelaRound", ),
                             textCapitalization: TextCapitalization.sentences,
                             enabled: false,
                             controller: valUserid,
@@ -324,7 +308,9 @@ class SubscribeVerificationState extends State<SubscribeVerification> {
                             padding: const EdgeInsets.only(top:10),
                             child: DropdownButton(
                               isExpanded: false,
-                              hint: Text("Pilih Bank/Payment Tujuan"),
+                              hint: Text("Pilih Bank/Payment Tujuan",style: TextStyle(
+                                fontFamily: "VarelaRound", fontSize: 14
+                                 )),
                               value: selectedTransferKe,
                               items: itemList.map((myitem){
                                 return DropdownMenuItem(
@@ -362,7 +348,9 @@ class SubscribeVerificationState extends State<SubscribeVerification> {
                               padding: const EdgeInsets.only(top:10),
                               child: DropdownButton(
                                 isExpanded: false,
-                                hint: Text("Pilih Payment anda"),
+                                hint: Text("Pilih Payment anda",style: TextStyle(
+                                    fontFamily: "VarelaRound", fontSize: 14
+                                )),
                                 value: selectedBankUser,
                                 items: bankUserList.map((myitem){
                                   return DropdownMenuItem(
@@ -396,7 +384,7 @@ class SubscribeVerificationState extends State<SubscribeVerification> {
                         Align(alignment: Alignment.centerLeft,child: Padding(
                           padding: const EdgeInsets.only(left: 0),
                           child: TextFormField(
-                            //style: TextStyle(color: HexColor("#AAAAAA")),
+                            style: TextStyle(fontFamily: "VarelaRound", ),
                             textCapitalization: TextCapitalization.words,
                             controller: valNamaUserPembayaran,
                             decoration: InputDecoration(

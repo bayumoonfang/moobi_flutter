@@ -10,6 +10,7 @@ import 'package:google_sign_in/google_sign_in.dart';
 import 'package:hexcolor/hexcolor.dart';
 import 'package:intl/intl.dart';
 import 'package:moobi_flutter/Gudang/page_gudang.dart';
+import 'package:moobi_flutter/Helper/app_helper.dart';
 import 'package:moobi_flutter/Helper/color_based.dart';
 import 'package:moobi_flutter/Jualan/page_jualan.dart';
 import 'package:moobi_flutter/Kategori/page_kategori.dart';
@@ -32,67 +33,51 @@ import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class Home extends StatefulWidget {
+
   @override
   _HomeState createState() => _HomeState();
 }
 
 
 class _HomeState extends State<Home> {
-  String getUsername, getEmail = "";
   List data;
-  List data2;
-  GoogleSignIn _googleSignIn = GoogleSignIn(scopes: ['email']);
+  List data2;var client = http.Client();
+
   void showToast(String msg, {int duration, int gravity}) {
     Toast.show(msg, context, duration: duration, gravity: gravity);
   }
 
 
-  Future<bool> _onWillPop() async {
-  }
+  Future<bool> _onWillPop() async {}
 
-  _session() async {
-    int value = await Session.getValue();
-    getEmail = await Session.getEmail();
-    if (value != 1) {
-      Navigator.push(context, ExitPage(page: Login()));
-    }
-  }
-
-
-
-
+  //=============================================================================
+  String getEmail = '...';
   String getMoobiIdentity = '...';
-  String getStorename = '...';
   String getBranch = '...';
   String getUserID = '...';
-  _userDetail() async {
-    final response = await http.get(
-         applink+"api_model.php?act=userdetail&id="+getEmail.toString());
-    Map data = jsonDecode(response.body);
-    setState(() {
-      getMoobiIdentity = data["d"].toString();
-      getStorename = data["b"].toString();
-      getBranch = data["c"].toString();
-      getUserID = data["m"].toString();
+  String getStorename = '...';
+  String getNamaUser = '...';
+  _startingVariable() async {
+    await AppHelper().getConnect().then((value){if(value == 'ConnInterupted'){
+      showToast("Koneksi terputus..", gravity: Toast.CENTER,duration:
+      Toast.LENGTH_LONG);}});
+    await AppHelper().getSession().then((value){if(value[0] != 1) {
+       Navigator.pushReplacement(context, ExitPage(page: Home()));} else{setState(() {getEmail = value[1];});}});
+    await AppHelper().getDetailUser(getEmail.toString()).then((value){
+      setState(() {
+        getMoobiIdentity = value[0];
+        getBranch = value[1];
+        getUserID = value[2];
+        getStorename = value[3];
+        getNamaUser = value[4];
+      });
     });
   }
 
-  String getBulan = '...';
-  String getTahun = "...";
-  getDateNow() async {
-    final response = await http.get(
-        applink+"api_model.php?act=getdatenow");
-    Map data2 = jsonDecode(response.body);
-    setState(() {
-      getBulan = data2["a"].toString();
-      getTahun = data2["b"].toString();
-    });
-  }
+
 
   void _loaddata() async {
-    await _session();
-    await _userDetail();
-    await getDateNow();
+    await _startingVariable();
   }
 
 
@@ -107,9 +92,7 @@ class _HomeState extends State<Home> {
         Uri.encodeFull(applink+"api_model.php?act=getdata_monthsalestotal&branch="+getBranch),
         headers: {"Accept":"application/json"}
     );
-    setState((){
-      data = json.decode(response.body);
-    });
+      return json.decode(response.body);
   }
 
 
@@ -119,9 +102,7 @@ class _HomeState extends State<Home> {
         Uri.encodeFull(applink+"api_model.php?act=getdata_totalnotif&userid="+getUserID.toString()),
         headers: {"Accept":"application/json"}
     );
-    setState((){
-      data2 = json.decode(response.body);
-    });
+   return json.decode(response.body);
   }
 
 
@@ -145,9 +126,9 @@ class _HomeState extends State<Home> {
                     future: getDataTotalNotif(),
                     builder: (context, snapshot) {
                       return ListView.builder(
-                        itemCount: data2 == null ? 0 : data2.length,
+                        itemCount: snapshot.data == null ? 0 : snapshot.data.length,
                         itemBuilder: (context, i) {
-                          return data2[i]["a"] == "0" ?
+                          return snapshot.data[i]["a"] == "0" ?
                           InkWell(
                               onTap: (){
                                 Navigator.push(context, ExitPage(page: NotificationPage()));
@@ -160,7 +141,7 @@ class _HomeState extends State<Home> {
                            Navigator.push(context, ExitPage(page: NotificationPage()));
                          },
                          child: Badge(
-                           badgeContent: Text(data2[i]["a"].toString(),
+                           badgeContent: Text(snapshot.data[i]["a"].toString(),
                              style: TextStyle(color: Colors.white,fontSize: 12),),
                            child: FaIcon(FontAwesomeIcons.solidBell, size: 20,),
                          )
@@ -225,10 +206,10 @@ class _HomeState extends State<Home> {
                                               future: getDataTotal(),
                                               builder: (context, snapshot) {
                                                 return ListView.builder(
-                                                  itemCount: (data == null ? 0 : data.length),
+                                                  itemCount: (snapshot.data == null ? 0 : snapshot.data.length),
                                                   itemBuilder: (context, i) {
                                                     return
-                                                      data[i]['a'] == null ?
+                                                      snapshot.data[i]['a'] == null ?
                                                       Text("Rp. 0",
                                                         style: TextStyle(
                                                             color: Colors.white,
@@ -240,8 +221,8 @@ class _HomeState extends State<Home> {
                                                           NumberFormat.currency(
                                                               locale: 'id', decimalDigits: 0, symbol: '').format(
                                                               int.parse(
-                                                                  data[i]['a'] == null ? "0" :
-                                                                  data[i]['a'].toString())),
+                                                                  snapshot.data[i]['a'] == null ? "0" :
+                                                                  snapshot.data[i]['a'].toString())),
                                                         style: TextStyle(
                                                             color: Colors.white,
                                                             fontFamily: 'VarelaRound',
@@ -261,7 +242,7 @@ class _HomeState extends State<Home> {
                                           alignment: Alignment.bottomLeft,
                                           child:  Opacity(
                                             opacity: 0.7,
-                                            child: Text(getBulan.toString()+" "+getTahun.toString(), style: TextStyle(color: Colors.white,
+                                            child: Text(AppHelper().getBulan+" "+AppHelper().getTahun, style: TextStyle(color: Colors.white,
                                                 fontFamily: 'VarelaRound', fontSize: 11,
                                                 fontWeight: FontWeight.bold),textAlign: TextAlign.left,),
                                           )

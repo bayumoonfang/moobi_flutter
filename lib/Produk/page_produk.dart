@@ -6,6 +6,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:hexcolor/hexcolor.dart';
+import 'package:moobi_flutter/Helper/app_helper.dart';
 import 'package:moobi_flutter/Helper/page_route.dart';
 import 'package:moobi_flutter/Produk/page_produkdetail.dart';
 import 'package:moobi_flutter/Produk/page_produkhome.dart';
@@ -38,33 +39,18 @@ class _ProdukState extends State<Produk> {
   }
   bool _isvisible = true;
 
-
-  String getEmail = '...';
-  _session() async {
-    int value = await Session.getValue();
-    getEmail = await Session.getEmail();
-    if (value != 1) {
-      Navigator.pushReplacement(context, ExitPage(page: Login()));
-    }
-  }
-  _connect() async {
-    Checkconnection().check().then((internet){
-      if (internet != null && internet) {
-        // Internet Present Case
-      } else {
-        showToast("Koneksi terputus..", gravity: Toast.CENTER,
-            duration: Toast.LENGTH_LONG);
-      }
-    });
-  }
-
-  String getBranchVal = '';
-  _getBranch() async {
-    final response = await http.get(
-        applink+"api_model.php?act=userdetail&id="+getEmail.toString());
-    Map data = jsonDecode(response.body);
-    setState(() {
-      getBranchVal = data["c"].toString();
+  String getEmail = "...";
+  String getBranch = "...";
+  _startingVariable() async {
+    await AppHelper().getConnect().then((value){if(value == 'ConnInterupted'){
+      showToast("Koneksi terputus..", gravity: Toast.CENTER,duration:
+      Toast.LENGTH_LONG);}});
+    await AppHelper().getSession().then((value){if(value[0] != 1) {
+      Navigator.pushReplacement(context, ExitPage(page: Login()));}else{setState(() {getEmail = value[1];});}});
+    await AppHelper().getDetailUser(getEmail.toString()).then((value){
+      setState(() {
+        getBranch = value[1];
+      });
     });
   }
 
@@ -73,20 +59,19 @@ class _ProdukState extends State<Produk> {
   String sortby = '0';
   Future<List> getData() async {
     http.Response response = await http.get(
-        Uri.encodeFull(applink+"api_model.php?act=getdata_produk&id="+getBranchVal+"&filter="+filter
+        Uri.encodeFull(applink+"api_model.php?act=getdata_produk&id="
+            +getBranch+"&filter="+filter
             +"&sort="+sortby),
         headers: {"Accept":"application/json"}
     );
-    setState((){
-      data = json.decode(response.body);
-    });
+
+      return json.decode(response.body);
+
   }
 
 
   _prepare() async {
-      await _connect();
-      await _session();
-      await _getBranch();
+      await _startingVariable();
   }
 
   startSCreen() async {
@@ -184,7 +169,6 @@ class _ProdukState extends State<Produk> {
   }
 
   Future<bool> _onWillPop() async {
-    //Navigator.pushReplacement(context, EnterPage(page: Home()));
     Navigator.pop(context);
   }
 
@@ -343,15 +327,12 @@ class _ProdukState extends State<Produk> {
         return FutureBuilder(
               future : getData(),
               builder: (context, snapshot) {
-                  if (data == null) {
+                  if (snapshot.data == null) {
                     return Center(
-                        child: Image.asset(
-                          "assets/loadingq.gif",
-                          width: 110.0,
-                        )
+                        child: CircularProgressIndicator()
                     );
                   } else {
-                            return data == 0 ?
+                            return snapshot.data == 0 ?
                             Container(
                               height: double.infinity, width : double.infinity,
                                 child: new
@@ -375,19 +356,19 @@ class _ProdukState extends State<Produk> {
                                 )))
                                 :
                                new ListView.builder(
-                                        itemCount: data == null ? 0 : data.length,
+                                        itemCount: snapshot.data == null ? 0 : snapshot.data.length,
                                         padding: const EdgeInsets.only(top: 2,bottom: 80),
                                         itemBuilder: (context, i) {
                                               return Column(
                                                   children: <Widget>[
                                                         InkWell(
-                                                          onLongPress: (){alertHapus(data[i]["i"].toString());},
+                                                          onLongPress: (){alertHapus(snapshot.data[i]["i"].toString());},
                                                           onTap: () {
-                                                            Navigator.push(context, ExitPage(page: ProdukDetail(data[i]["i"].toString())));
+                                                            Navigator.push(context, ExitPage(page: ProdukDetail(snapshot.data[i]["i"].toString())));
                                                           },
                                                           child: ListTile(
                                                             leading:
-                                                         data[i]["e"] != 0 ?
+                                                            snapshot.data[i]["e"] != 0 ?
                                                            Badge(
                                                              position: BadgePosition.topEnd(top: 0, end: 0 ),
                                                              child: CircleAvatar(
@@ -400,11 +381,11 @@ class _ProdukState extends State<Produk> {
                                                                  data[i]["d"] == '' ?
                                                                  CachedNetworkImageProvider(applink+"photo/nomage.jpg")
                                                                      :
-                                                                 CachedNetworkImageProvider(applink+"photo/"+getBranchVal+"/"+data[i]["d"],
+                                                                 CachedNetworkImageProvider(applink+"photo/"+getBranch+"/"+snapshot.data[i]["d"],
                                                                  ),
                                                                ),
                                                              ),
-                                                             badgeContent: Text(data[i]["e"].toString(),style: TextStyle(color: Colors.white,
+                                                             badgeContent: Text(snapshot.data[i]["e"].toString(),style: TextStyle(color: Colors.white,
                                                                  fontSize: 11),),
                                                              toAnimate: false,
                                                            )
@@ -416,25 +397,25 @@ class _ProdukState extends State<Produk> {
                                                                  backgroundColor: Colors.white,
                                                                radius: 27,
                                                                backgroundImage:
-                                                               data[i]["d"] == '' ?
+                                                               snapshot.data[i]["d"] == '' ?
                                                                  CachedNetworkImageProvider(applink+"photo/nomage.jpg")
                                                                    :
-                                                                 CachedNetworkImageProvider(applink+"photo/"+getBranchVal+"/"+data[i]["d"],
+                                                                 CachedNetworkImageProvider(applink+"photo/"+getBranch+"/"+data[i]["d"],
                                                                  ),
                                                                ),
                                                            ),
 
                                                             title: Align(alignment: Alignment.centerLeft,
-                                                              child: Text(data[i]["a"],
+                                                              child: Text(snapshot.data[i]["a"],
                                                                   style: TextStyle(fontFamily: "VarelaRound",
                                                                       fontSize: 13,fontWeight: FontWeight.bold)),),
                                                             subtitle: Align(alignment: Alignment.centerLeft,
-                                                              child: Text(data[i]["b"],
+                                                              child: Text(snapshot.data[i]["b"],
                                                                   style: TextStyle(fontFamily: "VarelaRound",
                                                                     fontSize: 11,)),
                                                             ),
                                                               trailing:
-                                                              data[i]["e"] != 0 ?
+                                                              snapshot.data[i]["e"] != 0 ?
                                                               ResponsiveContainer(
                                                                 widthPercent: 43,
                                                                 heightPercent: 2,
@@ -445,14 +426,14 @@ class _ProdukState extends State<Produk> {
                                                                     Text("Rp "+
                                                                         NumberFormat.currency(
                                                                             locale: 'id', decimalDigits: 0, symbol: '').format(
-                                                                            data[i]["c"]), style: new TextStyle(
+                                                                            snapshot.data[i]["c"]), style: new TextStyle(
                                                                         decoration: TextDecoration.lineThrough,
                                                                         fontFamily: 'VarelaRound',fontSize: 12),),
                                                                     Padding(padding: const EdgeInsets.only(left: 5),child:
                                                                     Text("Rp "+
                                                                         NumberFormat.currency(
                                                                             locale: 'id', decimalDigits: 0, symbol: '').format(
-                                                                            data[i]["c"] - double.parse(data[i]["f"])), style: new TextStyle(
+                                                                            snapshot.data[i]["c"] - double.parse(snapshot.data[i]["f"])), style: new TextStyle(
                                                                         fontFamily: 'VarelaRound',fontSize: 12,fontWeight: FontWeight.bold),),)
                                                                   ],
                                                                 ),
@@ -461,7 +442,7 @@ class _ProdukState extends State<Produk> {
                                                               Text("Rp "+
                                                                   NumberFormat.currency(
                                                                       locale: 'id', decimalDigits: 0, symbol: '').format(
-                                                                      data[i]["c"]), style: new TextStyle(
+                                                                      snapshot.data[i]["c"]), style: new TextStyle(
                                                                   fontFamily: 'VarelaRound',fontSize: 12,fontWeight: FontWeight.bold),)
                                                           ),
                                                         ),

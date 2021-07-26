@@ -37,42 +37,6 @@ class SubscribeState extends State<Subscribe> {
   }
 
 
-  String getEmail = '...';
-  _session() async {
-    int value = await Session.getValue();
-    getEmail = await Session.getEmail();
-    if (value != 1) {Navigator.pushReplacement(context, ExitPage(page: Login()));}
-  }
-
-  _connect() async {
-    Checkconnection().check().then((internet){
-      if (internet != null && internet) {} else {
-        showToast("Koneksi terputus..", gravity: Toast.CENTER, duration: Toast.LENGTH_LONG);
-      }
-    });
-  }
-
-
-
-  _prepare() async {
-    await _connect();
-    await _session();
-
-  }
-
-
-
-  @override
-  void initState() {
-    super.initState();
-    _prepare();
-  }
-
-
-
-
-
-
   @override
   Widget build(BuildContext context) {
     return WillPopScope(

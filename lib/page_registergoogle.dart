@@ -33,6 +33,7 @@ class _RegisterGoogleState extends State<RegisterGoogle> {
   final _password = TextEditingController();
   final _namatoko = TextEditingController();
   bool _isPressed = false;
+  var client = http.Client();
 
   void showToast(String msg, {int duration, int gravity}) {
     Toast.show(msg, context, duration: duration, gravity: gravity);
