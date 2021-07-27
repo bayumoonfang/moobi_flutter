@@ -10,6 +10,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:hexcolor/hexcolor.dart';
+import 'package:moobi_flutter/Helper/app_helper.dart';
 import 'package:moobi_flutter/helper/api_link.dart';
 import 'package:moobi_flutter/helper/check_connection.dart';
 import 'package:moobi_flutter/helper/page_route.dart';
@@ -28,52 +29,31 @@ class ProdukPenjualan extends StatefulWidget{
 
 class _ProdukPenjualanState extends State<ProdukPenjualan> {
   List data;
-  bool _isvisible = true;
 
   void showToast(String msg, {int duration, int gravity}) {
     Toast.show(msg, context, duration: duration, gravity: gravity);
   }
 
-  _connect() async {
-    Checkconnection().check().then((internet){
-      if (internet != null && internet) {} else {
-        showToast("Koneksi terputus..", gravity: Toast.CENTER, duration: Toast.LENGTH_LONG);
-      }
-    });
-  }
-
-
-  String getEmail = '...';
-  _session() async {
-    int value = await Session.getValue();
-    getEmail = await Session.getEmail();
-    if (value != 1) {Navigator.pushReplacement(context, ExitPage(page: Login()));}
-  }
-
-
+  String getEmail = "...";
   String getBranch = "...";
-  _getBranch() async {
-    final response = await http.get(applink+"api_model.php?act=userdetail&id="+getEmail.toString());
-    Map data = jsonDecode(response.body);
-    setState(() {
-      getBranch = data["c"].toString();
-    });
-  }
-
-  startSCreen() async {
-    var duration = const Duration(seconds: 1);
-    return Timer(duration, () {
+  _startingVariable() async {
+    await AppHelper().getConnect().then((value){if(value == 'ConnInterupted'){
+      showToast("Koneksi terputus..", gravity: Toast.CENTER,duration:
+      Toast.LENGTH_LONG);}});
+    await AppHelper().getSession().then((value){if(value[0] != 1) {
+      Navigator.pushReplacement(context, ExitPage(page: Login()));}else{setState(() {getEmail = value[1];});}});
+    await AppHelper().getDetailUser(getEmail.toString()).then((value){
       setState(() {
-        _isvisible = true;
+        getBranch = value[1];
       });
     });
   }
 
 
+
+
   _prepare() async {
-    await _connect();
-    await _session();
-    await _getBranch();
+    await _startingVariable();
 
   }
 
@@ -93,9 +73,8 @@ class _ProdukPenjualanState extends State<ProdukPenjualan> {
         ),
         headers: {"Accept":"application/json"}
     );
-    setState((){
-      data = json.decode(response.body);
-    });
+  return json.decode(response.body);
+
   }
 
 
@@ -138,8 +117,6 @@ class _ProdukPenjualanState extends State<ProdukPenjualan> {
                       onChanged: (text) {
                         setState(() {
                           filter = text;
-                          _isvisible = false;
-                          startSCreen();
                         });
                       },
                       style: TextStyle(fontFamily: "VarelaRound",fontSize: 14),
@@ -166,22 +143,16 @@ class _ProdukPenjualanState extends State<ProdukPenjualan> {
               ),
 
                   Padding(padding: const EdgeInsets.only(top: 10),),
-                  Visibility(
-                    visible: _isvisible,
-                    child :
                     Expanded(
                     child: FutureBuilder(
                         future: getData(),
                         builder: (context, snapshot) {
-                          if (data == null) {
+                          if (snapshot.data == null) {
                             return Center(
-                                child: Image.asset(
-                                  "assets/loadingq.gif",
-                                  width: 110.0,
-                                )
+                                child: CircularProgressIndicator()
                             );
                           } else {
-                            return data == 0 ?
+                            return snapshot.data == 0 ?
                             Container(
                                 height: double.infinity, width : double.infinity,
                                 child: new
@@ -205,7 +176,7 @@ class _ProdukPenjualanState extends State<ProdukPenjualan> {
                                     )))
                                 :
                                 ListView.builder(
-                                  itemCount: data == null ? 0 : data.length,
+                                  itemCount: snapshot.data == null ? 0 : snapshot.data.length,
                                   padding: const EdgeInsets.only(left: 5,right: 5),
                                   itemBuilder: (context, i) {
                                     return Column(
@@ -217,8 +188,8 @@ class _ProdukPenjualanState extends State<ProdukPenjualan> {
                                             child: Row(
                                               children: [
                                                 Opacity(opacity: 0.7,child: Align(alignment: Alignment.centerLeft,
-                                                  child: Text(data[i]["f"].toString() + " - "+ new DateFormat.MMM().format(DateTime.parse(data[i]["c"])) +
-                                                      " - "+data[i]["d"].toString(),style: TextStyle(
+                                                  child: Text(snapshot.data[i]["f"].toString() + " - "+ new DateFormat.MMM().format(DateTime.parse(snapshot.data[i]["c"])) +
+                                                      " - "+snapshot.data[i]["d"].toString(),style: TextStyle(
                                                       fontFamily: 'VarelaRound', fontSize: 12,fontWeight: FontWeight.bold),),),),
                                                 Padding(padding: const EdgeInsets.only(left: 5),child:
                                                 FaIcon(FontAwesomeIcons.circle,size: 6,color: Colors.black,),),
@@ -226,7 +197,7 @@ class _ProdukPenjualanState extends State<ProdukPenjualan> {
                                                   child: Opacity(
                                                     opacity: 0.4,
                                                     child:Align(alignment: Alignment.centerLeft,
-                                                      child: Text("Jumlah : "+data[i]["i"].toString(),style: TextStyle(
+                                                      child: Text("Jumlah : "+snapshot.data[i]["i"].toString(),style: TextStyle(
                                                           fontFamily: 'VarelaRound', fontSize: 12),),),
                                                   ),)
                                               ],
@@ -235,14 +206,14 @@ class _ProdukPenjualanState extends State<ProdukPenjualan> {
                                           subtitle:         Padding(
                                             padding: const EdgeInsets.only(top: 5),
                                             child: Align(alignment: Alignment.centerLeft,
-                                              child: Text("Nomor transaksi : "+data[i]["b"].toString(),style: TextStyle(
+                                              child: Text("Nomor transaksi : "+snapshot.data[i]["b"].toString(),style: TextStyle(
                                                   fontFamily: 'VarelaRound', fontSize: 14,color: Colors.black),),),
                                           ),
                                           trailing: Text(
                                             "Rp "+
-                                                NumberFormat.currency(locale: 'id', decimalDigits: 0, symbol: '').format(data[i]["a"]),
+                                                NumberFormat.currency(locale: 'id', decimalDigits: 0, symbol: '').format(snapshot.data[i]["a"]),
                                               style :
-                                              data[i]["a"].toString().substring(0,1) == '-' ?
+                                              snapshot.data[i]["a"].toString().substring(0,1) == '-' ?
                                               TextStyle(
                                                   fontFamily: 'VarelaRound', fontSize: 14,
                                                   color: HexColor("#fb3464"))
@@ -263,7 +234,6 @@ class _ProdukPenjualanState extends State<ProdukPenjualan> {
                           }
                         },
                       )
-                    )
                   )
             ],
           ),

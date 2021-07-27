@@ -1,6 +1,7 @@
 
 
 
+import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
@@ -11,6 +12,7 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:hexcolor/hexcolor.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
+import 'package:moobi_flutter/Helper/app_helper.dart';
 import 'package:moobi_flutter/Produk/page_produkdetailimage.dart';
 import 'package:moobi_flutter/Produk/page_produkpenjualanpro.dart';
 import 'package:moobi_flutter/Produk/page_produkstok.dart';
@@ -48,38 +50,28 @@ class _ProdukDetailState extends State<ProdukDetail> {
   bool isVisible = false;
 
 
-  String getEmail = '...';
-  _session() async {
-    int value = await Session.getValue();
-    getEmail = await Session.getEmail();
-    if (value != 1) {Navigator.pushReplacement(context, ExitPage(page: Login()));}
-  }
-
-  _connect() async {
-    Checkconnection().check().then((internet){
-      if (internet != null && internet) {} else {
-        showToast("Koneksi terputus..", gravity: Toast.CENTER, duration: Toast.LENGTH_LONG);
-      }
-    });
-  }
-
+  String getEmail = "...";
   String getBranch = "...";
-  _getBranch() async {
-    final response = await http.get(applink+"api_model.php?act=userdetail&id="+getEmail.toString());
-    Map data = jsonDecode(response.body);
-    setState(() {
-      getBranch = data["c"].toString();
+  _startingVariable() async {
+    await AppHelper().getConnect().then((value){if(value == 'ConnInterupted'){
+      showToast("Koneksi terputus..", gravity: Toast.CENTER,duration:
+      Toast.LENGTH_LONG);}});
+    await AppHelper().getSession().then((value){if(value[0] != 1) {
+      Navigator.pushReplacement(context, ExitPage(page: Login()));}else{setState(() {getEmail = value[1];});}});
+    await AppHelper().getDetailUser(getEmail.toString()).then((value){
+      setState(() {
+        getBranch = value[1];
+      });
     });
   }
 
   String getCountJual = '0';
   String getSatuan = "...";
   _getCountTerjual() async {
-    final response = await http.get(applink+"api_model.php?act=count_terjual&itemn="+widget.idItem+"&branch="+getBranch.toString());
+    final response = await http.get(applink+"api_model.php?act=count_terjual&itemn="+widget.idItem+"&branch="+getBranch);
     Map data = jsonDecode(response.body);
     setState(() {
       getCountJual = data["a"].toString();
-
     });
   }
 
@@ -100,8 +92,8 @@ class _ProdukDetailState extends State<ProdukDetail> {
     setState(() {
       getName = data["a"].toString();
       getPhoto = data["g"].toString();
-      //getDiscount = data["b"].toString();
-      //getDiscountVal = data["k"].toString();
+      getDiscount = data["b"].toString();
+      getDiscountVal = data["k"].toString();
       getHarga = data["d"].toString();
       getItemNumb = data["l"].toString();
       getKategori = data["i"].toString();
@@ -112,35 +104,6 @@ class _ProdukDetailState extends State<ProdukDetail> {
   }
 
 
-  Future<List> getData() async {
-    http.Response response = await http.get(
-        Uri.encodeFull(applink+"api_model.php?act=getdata_statusproduk&id="+widget.idItem),
-        headers: {"Accept":"application/json"}
-    );
-    setState((){
-      data = json.decode(response.body);
-    });
-  }
-
-  Future<List> getDataItemDiskon() async {
-    http.Response response = await http.get(
-        Uri.encodeFull(applink+"api_model.php?act=getdata_diskonproduk&id="+widget.idItem),
-        headers: {"Accept":"application/json"}
-    );
-    setState((){
-      data2 = json.decode(response.body);
-    });
-  }
-
-  Future<List> getDataItemHarga() async {
-    http.Response response = await http.get(
-        Uri.encodeFull(applink+"api_model.php?act=getdata_hargaproduk&id="+widget.idItem),
-        headers: {"Accept":"application/json"}
-    );
-    setState((){
-      data3 = json.decode(response.body);
-    });
-  }
 
   void _nonaktifproduk() {
     var url = applink+"api_model.php?act=action_nonaktifproduk";
@@ -150,17 +113,15 @@ class _ProdukDetailState extends State<ProdukDetail> {
         });
     showToast("Status produk berhasil dirubah", gravity: Toast.BOTTOM,
         duration: Toast.LENGTH_LONG);
+    setState(() {
+       _getDetail();
+    });
   }
 
   _prepare() async {
-    await _connect();
-    await _session();
-    await _getBranch();
+    await _startingVariable();
     await _getCountTerjual();
     await _getDetail();
-    setState(() {
-      isVisible = true;
-    });
   }
 
 
@@ -171,6 +132,9 @@ class _ProdukDetailState extends State<ProdukDetail> {
           "produk_id" : widget.idItem
         });
     showToast("Photo produk berhasil dihapus.. Silahkan refresh halaman ini", gravity: Toast.BOTTOM, duration: Toast.LENGTH_LONG);
+    setState(() {
+      _getDetail();
+    });
     return;
   }
 
@@ -268,9 +232,6 @@ class _ProdukDetailState extends State<ProdukDetail> {
         "produk_id" : widget.idItem
       });
       Navigator.pop(context);
-      Navigator.pop(context);
-      showToast("Produk berhasil dihapus", gravity: Toast.BOTTOM,
-          duration: Toast.LENGTH_LONG);
       return false;
   }
 
@@ -292,7 +253,9 @@ class _ProdukDetailState extends State<ProdukDetail> {
               duration: Toast.LENGTH_LONG);
           return false;
         } else {
-          _produksetdiskon.clear();
+          setState(() {
+            _getDetail();
+          });
           Navigator.pop(context);
           showToast("Diskon berhasil dirubah", gravity: Toast.BOTTOM,
               duration: Toast.LENGTH_LONG);
@@ -401,7 +364,6 @@ class _ProdukDetailState extends State<ProdukDetail> {
                     child :
                     Column(
                       children: [
-                        isVisible == true ?
                         getPhoto != '' ?
                         Column(
                           children: [
@@ -499,10 +461,6 @@ class _ProdukDetailState extends State<ProdukDetail> {
                                 ),
                               ],
                             )
-                        :
-                            Container(width: 0,height: 0,),
-
-
                       ],
                     ),
                   ))
@@ -582,63 +540,34 @@ class _ProdukDetailState extends State<ProdukDetail> {
                         height: 30,
                         width: 100,
                         child :
-                      FutureBuilder(
-                          future: getDataItemHarga(),
-                          builder: (context, snapshot) {
-                            return ListView.builder(
-                                itemCount: 1,
-                                itemBuilder: (context, i) {
-                                  if (data3 == null) {
-                                    return Container(
-                                        width: 10,
-                                        height: 10
-                                    );
-                                  } else {
-                                    return  Container(
-                                        width: 100,
-                                        height: 25,
-                                        child: data3[i]["a"].toString() != '0' ?
-                                        Align (
-                                            alignment: Alignment.centerLeft,
-                                            child :
-                                            Row(
-                                              children: [
-                                                Text("Rp "+
-                                                    NumberFormat.currency(
-                                                        locale: 'id', decimalDigits: 0, symbol: '').format(
-                                                        double.parse(data3[i]["b"].toString())), style: new TextStyle(
-                                                    decoration: TextDecoration.lineThrough,
-                                                    fontFamily: 'VarelaRound',fontSize: 13),),
-                                                Padding(padding: const EdgeInsets.only(left: 5),child:
-                                                Text("Rp "+
-                                                    NumberFormat.currency(
-                                                        locale: 'id', decimalDigits: 0, symbol: '').format(
-                                                        double.parse(data3[i]["b"].toString())- double.parse(data3[i]["c"].toString())), style: new TextStyle(
-                                                    fontFamily: 'VarelaRound',fontSize: 13, color: Colors.black,
-                                                    fontWeight: FontWeight.bold),),)
-                                              ],
-                                            ))
-                                            :
-                                    Padding (
+                        getDiscount != '0' ?
+                                      Row(
+                                        children: [
+                                          Text("Rp "+
+                                              NumberFormat.currency(
+                                                  locale: 'id', decimalDigits: 0, symbol: '').format(
+                                                  double.parse(getHarga.toString())), style: new TextStyle(
+                                              decoration: TextDecoration.lineThrough,
+                                              fontFamily: 'VarelaRound',fontSize: 13),),
+                                          Padding(padding: const EdgeInsets.only(left: 5),child:
+                                          Text("Rp "+
+                                              NumberFormat.currency(
+                                                  locale: 'id', decimalDigits: 0, symbol: '').format(
+                                                  double.parse(getHarga.toString())- double.parse(getDiscountVal.toString())), style: new TextStyle(
+                                              fontFamily: 'VarelaRound',fontSize: 13, color: Colors.black,
+                                              fontWeight: FontWeight.bold),),)
+                                        ],
+                                      )
+                                          :
+                                      Padding (
                                       padding : const EdgeInsets.only(top: 5)
-                                        ,child :Text("Rp "+
-                                          NumberFormat.currency(
-                                              locale: 'id', decimalDigits: 0, symbol: '').format(
-                                              double.parse(data3[i]["b"].toString())), style: new TextStyle(
-                                          fontFamily: 'VarelaRound',fontSize: 13,fontWeight: FontWeight.bold),)
-                                    )
-
-                                    );
-                                  }
-                                }
-                            );
-                          },
-                      ))
-
-
-
+                              ,child :Text("Rp "+
+                              NumberFormat.currency(
+                                  locale: 'id', decimalDigits: 0, symbol: '').format(
+                                  double.parse(getHarga.toString())), style: new TextStyle(
+                              fontFamily: 'VarelaRound',fontSize: 13,fontWeight: FontWeight.bold),)
+                          )))
                     ),
-                  ),
                   Padding(padding: const EdgeInsets.only(left: 15,right: 15,top: 10),
                     child: Divider(height: 3,),),
                   Padding(padding: const EdgeInsets.only(left: 15,right: 15),
@@ -715,31 +644,13 @@ class _ProdukDetailState extends State<ProdukDetail> {
                                     width: 50,
                                     height: 13,
                                     child :
-                                  FutureBuilder(
-                                  future : getDataItemDiskon(),
-                                  builder :  (context, snapshot) {
-                                      return ListView.builder(
-                                          itemCount: 1,
-                                          itemBuilder: (context, i) {
-                                            if (data2 == null) {
-                                              return Container(
-                                                  width: 10,
-                                                  height: 10
-                                              );
-                                            } else {
-                                            return Align(alignment: Alignment.centerRight,
-                                            child: Text(data2[i]["a"].toString()+" %",
-                                                style: TextStyle(
-                                                    fontFamily: 'VarelaRound',
-                                                    fontSize: 14)
-                                            ));
-                                              }
-                                          }
-                                      );
-                                  })),
-
-
-
+                                    Align(alignment: Alignment.centerRight,
+                                        child: Text(getDiscount.toString()+" %",
+                                            style: TextStyle(
+                                                fontFamily: 'VarelaRound',
+                                                fontSize: 14)
+                                        ))
+                                  ),
                             ],
                           ),),
 
@@ -869,42 +780,26 @@ class _ProdukDetailState extends State<ProdukDetail> {
                                    Container(
                                      alignment: Alignment.centerRight,
                                      width: 50,
-                                     child: FutureBuilder(
-                                       future: getData(),
-                                       builder: (context, snapshot) {
-                                         if (data == null) {
-                                            return Container(
-                                              width: 10,
-                                              height: 10
-                                            );
-                                         } else {
-                                           return ListView.builder(
-                                             itemCount: 1,
-                                             itemBuilder: (context, i) {
-                                               return data[i]["a"] == 'Aktif' ?
-                                                 Padding(padding: const EdgeInsets.only(top: 10),child:
-                                                 Align(
-                                                   alignment: Alignment
-                                                       .centerRight,
-                                                   child: FaIcon(
-                                                     FontAwesomeIcons.toggleOn,
-                                                     size: 30,
-                                                     color: HexColor("#02ac0e"),),
-                                                 ),)
-                                                   :
-                                               Padding(padding: const EdgeInsets.only(top: 10),child:
-                                               Align(
-                                                 alignment: Alignment
-                                                     .centerRight,
-                                                 child: FaIcon(
-                                                   FontAwesomeIcons.toggleOff,
-                                                   size: 30,),
-                                               ));
-                                             },
-                                           );
-                                         }
-                                       },
-                                     ),
+                                     child:
+                                     getStatusProduk == 'Aktif' ?
+                                   Padding(padding: const EdgeInsets.only(top: 10),child:
+                                        Align(
+                                          alignment: Alignment
+                                              .centerRight,
+                                          child: FaIcon(
+                                            FontAwesomeIcons.toggleOn,
+                                            size: 30,
+                                            color: HexColor("#02ac0e"),),
+                                        ),)
+                                    :
+                                      Padding(padding: const EdgeInsets.only(top: 10),child:
+                                      Align(
+                                        alignment: Alignment
+                                            .centerRight,
+                                        child: FaIcon(
+                                          FontAwesomeIcons.toggleOff,
+                                          size: 30,),
+                                      ))
                                    )
                               ),
                             )

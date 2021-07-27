@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:hexcolor/hexcolor.dart';
 import 'package:moobi_flutter/Helper/api_link.dart';
+import 'package:moobi_flutter/Helper/app_helper.dart';
 import 'package:moobi_flutter/Helper/check_connection.dart';
 import 'package:moobi_flutter/Helper/page_route.dart';
 import 'package:moobi_flutter/Helper/session.dart';
@@ -31,39 +32,24 @@ class _ProdukKategoriInsertState extends State<ProdukKategoriInsert> {
 
 
 
-  String getEmail = '...';
-  _session() async {
-    int value = await Session.getValue();
-    getEmail = await Session.getEmail();
-    if (value != 1) {
-      Navigator.pushReplacement(context, ExitPage(page: Login()));
-    }
-  }
-  _connect() async {
-    Checkconnection().check().then((internet){
-      if (internet != null && internet) {} else {
-        showToast("Koneksi terputus..", gravity: Toast.CENTER,
-            duration: Toast.LENGTH_LONG);
-      }
+  String getEmail = "...";
+  String getBranch = "...";
+  _startingVariable() async {
+    await AppHelper().getConnect().then((value){if(value == 'ConnInterupted'){
+      showToast("Koneksi terputus..", gravity: Toast.CENTER,duration:
+      Toast.LENGTH_LONG);}});
+    await AppHelper().getSession().then((value){if(value[0] != 1) {
+      Navigator.pushReplacement(context, ExitPage(page: Login()));}else{setState(() {getEmail = value[1];});}});
+    await AppHelper().getDetailUser(getEmail.toString()).then((value){
+      setState(() {
+        getBranch = value[1];
+      });
     });
   }
-
-  String getBranchVal = '';
-  _getBranch() async {
-    final response = await http.get(
-        applink+"api_model.php?act=userdetail&id="+getEmail.toString());
-    Map data = jsonDecode(response.body);
-    setState(() {
-      getBranchVal = data["c"].toString();
-    });
-  }
-
 
 
   _prepare() async {
-    await _connect();
-    await _session();
-    await _getBranch();
+    await _startingVariable();
   }
 
   @override
@@ -77,7 +63,7 @@ class _ProdukKategoriInsertState extends State<ProdukKategoriInsert> {
     FocusScope.of(context).requestFocus(FocusNode());
     final response = await http.post(applink+"api_model.php?act=add_kategori", body: {
       "kategori_nama": _namakategori.text,
-      "kategori_branch" : getBranchVal
+      "kategori_branch" : getBranch
     });
     Map data = jsonDecode(response.body);
     setState(() {
@@ -86,7 +72,6 @@ class _ProdukKategoriInsertState extends State<ProdukKategoriInsert> {
             duration: Toast.LENGTH_LONG);
         return false;
       } else {
-
         _namakategori.clear();
         showToast("Kategori berhasil ditambah", gravity: Toast.BOTTOM,
             duration: Toast.LENGTH_LONG);

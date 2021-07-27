@@ -34,11 +34,12 @@ class _ProdukState extends State<Produk> {
   List data;
   String getFilter = '';
   FocusNode focusNode;
+  var client = http.Client();
   void showToast(String msg, {int duration, int gravity}) {
     Toast.show(msg, context, duration: duration, gravity: gravity);
   }
-  bool _isvisible = true;
 
+  bool _isVisible = true;
   String getEmail = "...";
   String getBranch = "...";
   _startingVariable() async {
@@ -54,40 +55,38 @@ class _ProdukState extends State<Produk> {
     });
   }
 
-
-  String filter = "";
-  String sortby = '0';
-  Future<List> getData() async {
-    http.Response response = await http.get(
-        Uri.encodeFull(applink+"api_model.php?act=getdata_produk&id="
-            +getBranch+"&filter="+filter
-            +"&sort="+sortby),
-        headers: {"Accept":"application/json"}
-    );
-
-      return json.decode(response.body);
-
-  }
-
-
-  _prepare() async {
-      await _startingVariable();
-  }
-
   startSCreen() async {
-    var duration = const Duration(seconds: 1);
-    return Timer(duration, () {
+    Timer.periodic(Duration(seconds: 5), (timer) {
       setState(() {
-        _isvisible = true;
+        getDataProduk();
       });
     });
   }
 
 
+  String filter = "Semua";
+  String filterq = "";
+  Future<dynamic> getDataProduk() async {
+    http.Response response = await client.get(
+        Uri.parse(applink+"api_model.php?act=getdata_produk_jual&id="
+            +getBranch+""
+            "&filter="+filter+"&filterq="+filterq),
+        headers: {
+          "Accept":"application/json",
+          "Content-Type": "application/json"}
+    );
+    return json.decode(response.body);
+  }
+
+  _prepare() async {
+      await _startingVariable();
+  }
+
   @override
   void initState() {
     super.initState();
     _prepare();
+    //startSCreen ();
   }
 
   void _filterMe() {
@@ -106,15 +105,13 @@ class _ProdukState extends State<Produk> {
                   InkWell(
                     onTap: (){
                         setState(() {
-                          sortby = '1';
-                          _isvisible = false;
-                          startSCreen();
+                          filter = 'Semua';
                           Navigator.pop(context);
                         });
                     },
                     child: Align(alignment: Alignment.centerLeft,
                     child:    Text(
-                      "Harga Terendah",
+                      "Nama Produk",
                       textAlign: TextAlign.left,
                       style: TextStyle(
                           fontFamily: 'VarelaRound',
@@ -126,9 +123,25 @@ class _ProdukState extends State<Produk> {
                   InkWell(
                     onTap: (){
                       setState(() {
-                        sortby = '2';
-                        _isvisible = false;
-                        startSCreen();
+                        filter = 'Termurah';
+                        Navigator.pop(context);
+                      });
+                    },
+                    child: Align(alignment: Alignment.centerLeft,
+                      child:    Text(
+                        "Harga Termurah",
+                        textAlign: TextAlign.left,
+                        style: TextStyle(
+                            fontFamily: 'VarelaRound',
+                            fontSize: 15),
+                      ),),
+                  ),
+                  Padding(padding: const EdgeInsets.only(top:15,bottom: 15,left: 4,right: 4),
+                    child: Divider(height: 5,),),
+                  InkWell(
+                    onTap: (){
+                      setState(() {
+                        filter = 'Termahal';
                         Navigator.pop(context);
                       });
                     },
@@ -146,9 +159,7 @@ class _ProdukState extends State<Produk> {
                   InkWell(
                     onTap: (){
                       setState(() {
-                        sortby = '3';
-                        _isvisible = false;
-                        startSCreen();
+                        filter = 'Diskon';
                         Navigator.pop(context);
                       });
                     },
@@ -175,7 +186,6 @@ class _ProdukState extends State<Produk> {
 
 
   alertHapus(String IDProduk) {
-
     showDialog(
         context: context,
         builder: (BuildContext context) {
@@ -222,6 +232,9 @@ class _ProdukState extends State<Produk> {
     Navigator.pop(context);
     showToast("Produk berhasil dihapus", gravity: Toast.BOTTOM,
         duration: Toast.LENGTH_LONG);
+    setState(() {
+      getDataProduk();
+    });
     return false;
   }
 
@@ -261,53 +274,50 @@ class _ProdukState extends State<Produk> {
 
                 ],
               ),
-              body: Container(
-                child: Column(
-                  children: [
-                    Padding(padding: const EdgeInsets.only(left: 15,top: 10,right: 15),
-                      child: Container(
-                        height: 50,
-                        child: TextFormField(
-                          enableInteractiveSelection: false,
-                          onChanged: (text) {
-                              setState(() {
-                                  filter = text;
-                                 _isvisible = false;
-                                  startSCreen();
-                              });
-                          },
-                          style: TextStyle(fontFamily: "VarelaRound",fontSize: 14),
-                          decoration: new InputDecoration(
-                            contentPadding: const EdgeInsets.all(10),
-                            fillColor: HexColor("#f4f4f4"),
-                            filled: true,
-                            prefixIcon: Padding(
-                              padding: const EdgeInsets.only(bottom: 4),
-                              child: Icon(Icons.search,size: 18,color: HexColor("#6c767f"),),
+              body: RefreshIndicator(
+                onRefresh: getDataProduk,
+                child: Container(
+                  child: Column(
+                    children: [
+                      Padding(padding: const EdgeInsets.only(left: 15,top: 10,right: 15),
+                          child: Container(
+                            height: 50,
+                            child: TextFormField(
+                              enableInteractiveSelection: false,
+                              onChanged: (text) {
+                                setState(() {
+                                  filterq = text;
+                                });
+                              },
+                              style: TextStyle(fontFamily: "VarelaRound",fontSize: 14),
+                              decoration: new InputDecoration(
+                                contentPadding: const EdgeInsets.all(10),
+                                fillColor: HexColor("#f4f4f4"),
+                                filled: true,
+                                prefixIcon: Padding(
+                                  padding: const EdgeInsets.only(bottom: 4),
+                                  child: Icon(Icons.search,size: 18,color: HexColor("#6c767f"),),
+                                ),
+                                focusedBorder: OutlineInputBorder(
+                                  borderSide: BorderSide(color: Colors.white, width: 1.0,),
+                                  borderRadius: BorderRadius.circular(5.0),
+                                ),
+                                enabledBorder: OutlineInputBorder(
+                                  borderSide: BorderSide(color: HexColor("#f4f4f4"), width: 1.0),
+                                  borderRadius: BorderRadius.circular(5.0),
+                                ),
+                                hintText: 'Cari Produk...',
+                              ),
                             ),
-                            focusedBorder: OutlineInputBorder(
-                              borderSide: BorderSide(color: Colors.white, width: 1.0,),
-                              borderRadius: BorderRadius.circular(5.0),
-                            ),
-                            enabledBorder: OutlineInputBorder(
-                              borderSide: BorderSide(color: HexColor("#f4f4f4"), width: 1.0),
-                              borderRadius: BorderRadius.circular(5.0),
-                            ),
-                            hintText: 'Cari Produk...',
-                          ),
-                        ),
-                      )
-                    ),
-                    Padding(padding: const EdgeInsets.only(top: 10),),
-                        Visibility(
-                          visible: _isvisible,
-                          child :
-                            Expanded(child: _dataField())
-                        )
-                        //
-                  ],
-                ),
-              ),
+                          )
+                      ),
+                      Padding(padding: const EdgeInsets.only(top: 10),),
+                      Visibility(
+                          visible: _isVisible,
+                          child: Expanded(child: _dataField()))//
+                    ],
+                  )
+              )),
               floatingActionButton: Padding(
                 padding: const EdgeInsets.only(right : 10),
                 child: FloatingActionButton(
@@ -324,135 +334,120 @@ class _ProdukState extends State<Produk> {
   }
 
   Widget _dataField() {
-        return FutureBuilder(
-              future : getData(),
-              builder: (context, snapshot) {
-                  if (snapshot.data == null) {
-                    return Center(
-                        child: CircularProgressIndicator()
-                    );
-                  } else {
-                            return snapshot.data == 0 ?
-                            Container(
-                              height: double.infinity, width : double.infinity,
-                                child: new
-                                Center(
-                                  child :
-                                Column(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  crossAxisAlignment: CrossAxisAlignment.center,
-                                  children: <Widget>[
-                                    new Text(
-                                      "Data tidak ditemukan",
-                                      style: new TextStyle(
-                                          fontFamily: 'VarelaRound', fontSize: 18),
-                                    ),
-                                    new Text(
-                                      "Silahkan lakukan input data",
-                                      style: new TextStyle(
-                                          fontFamily: 'VarelaRound', fontSize: 12),
-                                    ),
-                                  ],
-                                )))
-                                :
-                               new ListView.builder(
-                                        itemCount: snapshot.data == null ? 0 : snapshot.data.length,
-                                        padding: const EdgeInsets.only(top: 2,bottom: 80),
-                                        itemBuilder: (context, i) {
-                                              return Column(
-                                                  children: <Widget>[
-                                                        InkWell(
-                                                          onLongPress: (){alertHapus(snapshot.data[i]["i"].toString());},
-                                                          onTap: () {
-                                                            Navigator.push(context, ExitPage(page: ProdukDetail(snapshot.data[i]["i"].toString())));
-                                                          },
-                                                          child: ListTile(
-                                                            leading:
-                                                            snapshot.data[i]["e"] != 0 ?
-                                                           Badge(
-                                                             position: BadgePosition.topEnd(top: 0, end: 0 ),
-                                                             child: CircleAvatar(
-                                                               radius: 30,
-                                                               backgroundColor: HexColor("#602d98"),
-                                                               child: CircleAvatar(
-                                                                 backgroundColor: Colors.white,
-                                                                 radius: 27,
-                                                                 backgroundImage:
-                                                                 data[i]["d"] == '' ?
-                                                                 CachedNetworkImageProvider(applink+"photo/nomage.jpg")
-                                                                     :
-                                                                 CachedNetworkImageProvider(applink+"photo/"+getBranch+"/"+snapshot.data[i]["d"],
-                                                                 ),
-                                                               ),
-                                                             ),
-                                                             badgeContent: Text(snapshot.data[i]["e"].toString(),style: TextStyle(color: Colors.white,
-                                                                 fontSize: 11),),
-                                                             toAnimate: false,
-                                                           )
-                                                        :
-                                                           CircleAvatar(
-                                                               radius: 30,
-                                                               backgroundColor: HexColor("#602d98"),
-                                                               child: CircleAvatar(
-                                                                 backgroundColor: Colors.white,
-                                                               radius: 27,
-                                                               backgroundImage:
-                                                               snapshot.data[i]["d"] == '' ?
-                                                                 CachedNetworkImageProvider(applink+"photo/nomage.jpg")
-                                                                   :
-                                                                 CachedNetworkImageProvider(applink+"photo/"+getBranch+"/"+data[i]["d"],
-                                                                 ),
-                                                               ),
-                                                           ),
-
-                                                            title: Align(alignment: Alignment.centerLeft,
-                                                              child: Text(snapshot.data[i]["a"],
-                                                                  style: TextStyle(fontFamily: "VarelaRound",
-                                                                      fontSize: 13,fontWeight: FontWeight.bold)),),
-                                                            subtitle: Align(alignment: Alignment.centerLeft,
-                                                              child: Text(snapshot.data[i]["b"],
-                                                                  style: TextStyle(fontFamily: "VarelaRound",
-                                                                    fontSize: 11,)),
-                                                            ),
-                                                              trailing:
-                                                              snapshot.data[i]["e"] != 0 ?
-                                                              ResponsiveContainer(
-                                                                widthPercent: 43,
-                                                                heightPercent: 2,
-                                                                child: Row(
-                                                                  mainAxisAlignment: MainAxisAlignment.end,
-                                                                  crossAxisAlignment: CrossAxisAlignment.end,
-                                                                  children: [
-                                                                    Text("Rp "+
-                                                                        NumberFormat.currency(
-                                                                            locale: 'id', decimalDigits: 0, symbol: '').format(
-                                                                            snapshot.data[i]["c"]), style: new TextStyle(
-                                                                        decoration: TextDecoration.lineThrough,
-                                                                        fontFamily: 'VarelaRound',fontSize: 12),),
-                                                                    Padding(padding: const EdgeInsets.only(left: 5),child:
-                                                                    Text("Rp "+
-                                                                        NumberFormat.currency(
-                                                                            locale: 'id', decimalDigits: 0, symbol: '').format(
-                                                                            snapshot.data[i]["c"] - double.parse(snapshot.data[i]["f"])), style: new TextStyle(
-                                                                        fontFamily: 'VarelaRound',fontSize: 12,fontWeight: FontWeight.bold),),)
-                                                                  ],
-                                                                ),
-                                                              )
-                                                                  :
-                                                              Text("Rp "+
-                                                                  NumberFormat.currency(
-                                                                      locale: 'id', decimalDigits: 0, symbol: '').format(
-                                                                      snapshot.data[i]["c"]), style: new TextStyle(
-                                                                  fontFamily: 'VarelaRound',fontSize: 12,fontWeight: FontWeight.bold),)
-                                                          ),
-                                                        ),
-                                                  ],
-                                              );
-                                        },
-                                    );
-                  }
-              },
-        );
+    return FutureBuilder(
+      future: getDataProduk(),
+      builder: (context, snapshot) {
+        if (snapshot.data == null) {
+          return Center(
+              child: CircularProgressIndicator()
+          );
+        } else {
+          return ListView.builder(
+            itemCount: snapshot.data == null ? 0 : snapshot.data.length,
+            padding: const EdgeInsets.only(top: 10,bottom: 80),
+            itemBuilder: (context, i) {
+              return Column(
+                children: [
+                  InkWell(
+                    onLongPress: (){alertHapus(snapshot.data[i]["i"].toString());},
+                    onTap: () {
+                      Navigator.push(context, ExitPage(page: ProdukDetail(snapshot.data[i]["i"].toString())));
+                    },
+                    child: ListTile(
+                      leading:
+                      snapshot.data[i]["e"] != 0 ?
+                      Badge(
+                        badgeContent: Text(snapshot.data[i]["e"].toString(),
+                            style: TextStyle(color: Colors.white,fontSize: 12)),
+                        child: SizedBox(
+                            width: 60,
+                            height: 100,
+                            child: ClipRRect(
+                              borderRadius: BorderRadius.circular(6.0),
+                              child : CachedNetworkImage(
+                                fit: BoxFit.cover,
+                                imageUrl:
+                                snapshot.data[i]["d"] == '' ?
+                                applink+"photo/nomage.jpg"
+                                    :
+                                applink+"photo/"+getBranch+"/"+snapshot.data[i]["d"],
+                                progressIndicatorBuilder: (context, url,
+                                    downloadProgress) =>
+                                    CircularProgressIndicator(value:
+                                    downloadProgress.progress),
+                                errorWidget: (context, url, error) => Icon(Icons.error),
+                              ),
+                            )),
+                      )
+                          :
+                      SizedBox(
+                          width: 60,
+                          height: 100,
+                          child: ClipRRect(
+                            borderRadius: BorderRadius.circular(6.0),
+                            child : CachedNetworkImage(
+                              fit: BoxFit.cover,
+                              imageUrl:
+                              snapshot.data[i]["d"] == '' ?
+                              applink+"photo/nomage.jpg"
+                                  :
+                              applink+"photo/"+getBranch+"/"+snapshot.data[i]["d"],
+                              progressIndicatorBuilder: (context, url,
+                                  downloadProgress) =>
+                                  CircularProgressIndicator(value:
+                                  downloadProgress.progress),
+                              errorWidget: (context, url, error) => Icon(Icons.error),
+                            ),
+                          )),
+                      title: Align(alignment: Alignment.centerLeft,
+                        child: Text(snapshot.data[i]["a"],
+                            style: TextStyle(fontFamily: "VarelaRound",
+                                fontSize: 13,fontWeight: FontWeight.bold)),),
+                      subtitle: Align(alignment: Alignment.centerLeft,
+                          child:
+                          snapshot.data[i]["e"] != 0 ?
+                          ResponsiveContainer(
+                            widthPercent: 45,
+                            heightPercent: 2,
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.start,
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text("Rp "+
+                                    NumberFormat.currency(
+                                        locale: 'id', decimalDigits: 0, symbol: '').
+                                    format(
+                                        snapshot.data[i]["c"]), style: new TextStyle(
+                                    decoration: TextDecoration.lineThrough,
+                                    fontFamily: 'VarelaRound',fontSize: 12),),
+                                Padding(padding: const EdgeInsets.only(left: 5),child:
+                                Text("Rp "+
+                                    NumberFormat.currency(
+                                        locale: 'id', decimalDigits: 0, symbol: '').
+                                    format(
+                                        snapshot.data[i]["c"] - double.parse(snapshot.data[i]["f"])),
+                                  style: new TextStyle(
+                                      fontFamily: 'VarelaRound',fontSize: 12),),)
+                              ],
+                            ),
+                          )
+                              :
+                          Text("Rp "+
+                              NumberFormat.currency(
+                                  locale: 'id', decimalDigits: 0, symbol: '').format(
+                                  snapshot.data[i]["c"]), style: new TextStyle(
+                              fontFamily: 'VarelaRound',fontSize: 12),)
+                      ),
+                    ),
+                  ),
+                  // Padding(padding: const EdgeInsets.only(top :10 ))
+                ],
+              );
+            },
+          );
+        }
+      },
+    );
   }
 
 

@@ -9,6 +9,7 @@ import 'package:hexcolor/hexcolor.dart';
 import 'package:http/http.dart' as http;
 import 'package:image_picker/image_picker.dart';
 import 'package:moobi_flutter/Helper/api_link.dart';
+import 'package:moobi_flutter/Helper/app_helper.dart';
 import 'package:moobi_flutter/Helper/check_connection.dart';
 import 'package:moobi_flutter/Helper/page_route.dart';
 import 'dart:async';
@@ -45,40 +46,24 @@ class _ProdukInsertState extends State<ProdukInsert> {
     Toast.show(msg, context, duration: duration, gravity: gravity);
   }
 
-
-  String getEmail = '...';
-  _session() async {
-    int value = await Session.getValue();
-    getEmail = await Session.getEmail();
-    if (value != 1) {
-      Navigator.pushReplacement(context, ExitPage(page: Login()));
-    }
-  }
-  _connect() async {
-    Checkconnection().check().then((internet){
-      if (internet != null && internet) {} else {
-        showToast("Koneksi terputus..", gravity: Toast.CENTER,
-            duration: Toast.LENGTH_LONG);
-      }
+  String getEmail = "...";
+  String getBranchVal = "...";
+  _startingVariable() async {
+    await AppHelper().getConnect().then((value){if(value == 'ConnInterupted'){
+      showToast("Koneksi terputus..", gravity: Toast.CENTER,duration:
+      Toast.LENGTH_LONG);}});
+    await AppHelper().getSession().then((value){if(value[0] != 1) {
+      Navigator.pushReplacement(context, ExitPage(page: Login()));}else{setState(() {getEmail = value[1];});}});
+    await AppHelper().getDetailUser(getEmail.toString()).then((value){
+      setState(() {
+        getBranchVal = value[1];
+      });
     });
   }
-
-  String getBranchVal = '';
-  _getBranch() async {
-    final response = await http.get(
-        applink+"api_model.php?act=userdetail&id="+getEmail.toString());
-    Map data = jsonDecode(response.body);
-    setState(() {
-      getBranchVal = data["c"].toString();
-    });
-  }
-
 
 
   _prepare() async {
-    await _connect();
-    await _session();
-    await _getBranch();
+    await _startingVariable();
     await getAllItem();
     await getAllCategory();
   }
@@ -319,10 +304,10 @@ class _ProdukInsertState extends State<ProdukInsert> {
                           child: Text("Satuan",style: TextStyle(fontWeight: FontWeight.bold,fontFamily: "VarelaRound",
                               fontSize: 12,color: HexColor("#0074D9")),),
                         ),),
-                       Padding(
+                  Align(alignment: Alignment.centerLeft,child: Padding(
                          padding: const EdgeInsets.only(top:10),
                          child: DropdownButton(
-                           isExpanded: true,
+                           isExpanded: false,
                            hint: Text("Pilih Satuan"),
                            value: selectedSatuan,
                            items: itemList.map((myitem){
@@ -338,7 +323,7 @@ class _ProdukInsertState extends State<ProdukInsert> {
                              });
                            },
                          ),
-                       )
+                       ))
                     ],
                   )
               ),
@@ -386,10 +371,10 @@ class _ProdukInsertState extends State<ProdukInsert> {
                         child: Text("Category",style: TextStyle(fontWeight: FontWeight.bold,fontFamily: "VarelaRound",
                             fontSize: 12,color: HexColor("#0074D9")),),
                       ),),
-                      Padding(
+                  Align(alignment: Alignment.centerLeft,child: Padding(
                         padding: const EdgeInsets.only(top:10),
                         child: DropdownButton(
-                          isExpanded: true,
+                          isExpanded: false,
                           hint: Text("Pilih Category"),
                           value: selectedCategory,
                           items: categoryList.map((myitem){
@@ -405,7 +390,7 @@ class _ProdukInsertState extends State<ProdukInsert> {
                             });
                           },
                         ),
-                      )
+                      ))
                     ],
                   )
               ),

@@ -10,6 +10,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:hexcolor/hexcolor.dart';
+import 'package:moobi_flutter/Helper/app_helper.dart';
 import 'package:moobi_flutter/helper/api_link.dart';
 import 'package:moobi_flutter/helper/check_connection.dart';
 import 'package:moobi_flutter/helper/page_route.dart';
@@ -28,39 +29,30 @@ class ProdukTransaksi extends StatefulWidget{
 
 class _ProdukTransaksiState extends State<ProdukTransaksi> {
   List data;
-  bool _isvisible = true;
+
 
   void showToast(String msg, {int duration, int gravity}) {
     Toast.show(msg, context, duration: duration, gravity: gravity);
   }
 
-  _connect() async {
-    Checkconnection().check().then((internet){
-      if (internet != null && internet) {} else {
-        showToast("Koneksi terputus..", gravity: Toast.CENTER, duration: Toast.LENGTH_LONG);
-      }
-    });
-  }
 
   Future<bool> _onWillPop() async {
     Navigator.pop(context);
   }
 
 
-  String getEmail = '...';
-  _session() async {
-    int value = await Session.getValue();
-    getEmail = await Session.getEmail();
-    if (value != 1) {Navigator.pushReplacement(context, ExitPage(page: Login()));}
-  }
-
-
+  String getEmail = "...";
   String getBranch = "...";
-  _getBranch() async {
-    final response = await http.get(applink+"api_model.php?act=userdetail&id="+getEmail.toString());
-    Map data = jsonDecode(response.body);
-    setState(() {
-      getBranch = data["c"].toString();
+  _startingVariable() async {
+    await AppHelper().getConnect().then((value){if(value == 'ConnInterupted'){
+      showToast("Koneksi terputus..", gravity: Toast.CENTER,duration:
+      Toast.LENGTH_LONG);}});
+    await AppHelper().getSession().then((value){if(value[0] != 1) {
+      Navigator.pushReplacement(context, ExitPage(page: Login()));}else{setState(() {getEmail = value[1];});}});
+    await AppHelper().getDetailUser(getEmail.toString()).then((value){
+      setState(() {
+        getBranch = value[1];
+      });
     });
   }
 
@@ -68,26 +60,15 @@ class _ProdukTransaksiState extends State<ProdukTransaksi> {
   _getWarehouse() async {
     final response = await http.get(applink+"api_model.php?act=getdata_warehouse&branch="+getBranch.toString());
     Map data = jsonDecode(response.body);
-    setState(() {
-      getWarehouse = data["a"].toString();
-    });
-  }
+       setState(() {
+         getWarehouse = data["a"].toString();
+       });
 
-
-  startSCreen() async {
-    var duration = const Duration(seconds: 1);
-    return Timer(duration, () {
-      setState(() {
-        _isvisible = true;
-      });
-    });
   }
 
 
   _prepare() async {
-    await _connect();
-    await _session();
-    await _getBranch();
+    await _startingVariable();
     await _getWarehouse();
   }
 
@@ -103,13 +84,10 @@ class _ProdukTransaksiState extends State<ProdukTransaksi> {
     http.Response response = await http.get(
         Uri.encodeFull(applink+"api_model.php?act=getdata_produktransaksi&gudang="+getWarehouse.toString()+"&item="
             +widget.idProduk.toString()+"&filter="+filter.toString()
-            //+"&filter="+filter +"&sort="+sortby
         ),
         headers: {"Accept":"application/json"}
     );
-    setState((){
-      data = json.decode(response.body);
-    });
+      return json.decode(response.body);
   }
 
 
@@ -136,7 +114,11 @@ class _ProdukTransaksiState extends State<ProdukTransaksi> {
                     fontSize: 16),
               ),
             ),
-            body: Container(
+            body:
+            RefreshIndicator(
+            onRefresh: getData,
+            child :
+            Container(
              child: Column(
                children: [
                  Padding(padding: const EdgeInsets.only(left: 15,top: 10,right: 15),
@@ -147,8 +129,6 @@ class _ProdukTransaksiState extends State<ProdukTransaksi> {
                          onChanged: (text) {
                            setState(() {
                              filter = text;
-                             _isvisible = false;
-                             startSCreen();
                            });
                          },
                          style: TextStyle(fontFamily: "VarelaRound",fontSize: 14),
@@ -174,22 +154,16 @@ class _ProdukTransaksiState extends State<ProdukTransaksi> {
                      )
                  ),
                  Padding(padding: const EdgeInsets.only(top: 10),),
-              Visibility(
-              visible: _isvisible,
-                child :
                  Expanded(
                     child: FutureBuilder(
                       future: getData(),
                       builder: (context, snapshot) {
-                        if (data == null) {
+                        if (snapshot.data == null) {
                           return Center(
-                              child: Image.asset(
-                                "assets/loadingq.gif",
-                                width: 110.0,
-                              )
+                              child: CircularProgressIndicator()
                           );
                         } else {
-                          return data == 0 ?
+                          return snapshot.data == 0 ?
                           Container(
                               height: double.infinity, width : double.infinity,
                               child: new
@@ -213,7 +187,7 @@ class _ProdukTransaksiState extends State<ProdukTransaksi> {
                                   )))
                               :
                               ListView.builder(
-                                itemCount: data == null ? 0 : data.length,
+                                itemCount: snapshot.data == null ? 0 : snapshot.data.length,
                                 itemBuilder: (context, i ) {
                                   return Column(
                                     children: [
@@ -225,17 +199,17 @@ class _ProdukTransaksiState extends State<ProdukTransaksi> {
                                           width: 40,
                                           decoration: BoxDecoration(
                                               color:
-                                              data[i]["d"].toString().substring(0,1) == '-' ?
+                                              snapshot.data[i]["d"].toString().substring(0,1) == '-' ?
                                               HexColor("#ffeaef") : HexColor("#eaffee"),
 
                                               shape: BoxShape.circle
                                           ),
                                           child: Align(
                                             alignment: Alignment.center,
-                                            child: Text(data[i]["d"].toString(),
+                                            child: Text(snapshot.data[i]["d"].toString(),
                                               overflow: TextOverflow.ellipsis,
                                               style:
-                                              data[i]["d"].toString().substring(0,1) == '-' ?
+                                              snapshot.data[i]["d"].toString().substring(0,1) == '-' ?
                                               TextStyle(
                                                 fontFamily: 'VarelaRound', fontSize: 15,
                                                   color: HexColor("#fb3464"),
@@ -255,8 +229,8 @@ class _ProdukTransaksiState extends State<ProdukTransaksi> {
                                                 child: Row(
                                                   children: [
                                                     Opacity(opacity: 0.7,child: Align(alignment: Alignment.centerLeft,
-                                                      child: Text(data[i]["k"].toString() + " - "+ new DateFormat.MMM().format(DateTime.parse(data[i]["g"])) +
-                                                          " - "+data[i]["i"].toString(),style: TextStyle(
+                                                      child: Text(snapshot.data[i]["k"].toString() + " - "+ new DateFormat.MMM().format(DateTime.parse(snapshot.data[i]["g"])) +
+                                                          " - "+snapshot.data[i]["i"].toString(),style: TextStyle(
                                                           fontFamily: 'VarelaRound', fontSize: 12,fontWeight: FontWeight.bold),),),),
                                                     Padding(padding: const EdgeInsets.only(left: 5),child:
                                                       FaIcon(FontAwesomeIcons.circle,size: 6,color: Colors.black,),),
@@ -264,7 +238,7 @@ class _ProdukTransaksiState extends State<ProdukTransaksi> {
                                                     child: Opacity(
                                                       opacity: 0.4,
                                                       child:Align(alignment: Alignment.centerLeft,
-                                                        child: Text(data[i]["f"].toString(),style: TextStyle(
+                                                        child: Text(snapshot.data[i]["f"].toString(),style: TextStyle(
                                                             fontFamily: 'VarelaRound', fontSize: 12),),),
                                                     ),)
                                                   ],
@@ -273,7 +247,7 @@ class _ProdukTransaksiState extends State<ProdukTransaksi> {
                                             Padding(
                                               padding: const EdgeInsets.only(top: 10),
                                               child: Align(alignment: Alignment.centerLeft,
-                                                child: Text(data[i]["a"].toString(),style: TextStyle(
+                                                child: Text(snapshot.data[i]["a"].toString(),style: TextStyle(
                                                     fontFamily: 'VarelaRound', fontSize: 16,fontWeight: FontWeight.bold),),),
                                             ),
                                             Padding(
@@ -281,7 +255,7 @@ class _ProdukTransaksiState extends State<ProdukTransaksi> {
                                               child: Align(alignment: Alignment.centerLeft,
                                                 child: Opacity(
                                                   opacity: 0.4,
-                                                  child: Text("Transaksi dari gudang "+data[i]["e"].toString(),
+                                                  child: Text("Transaksi dari gudang "+snapshot.data[i]["e"].toString(),
                                                     style: TextStyle(fontFamily: 'VarelaRound', fontSize: 13),),
                                                 ),),
                                             )
@@ -297,12 +271,12 @@ class _ProdukTransaksiState extends State<ProdukTransaksi> {
                         }
                       },
                     ),
-                 ))
+                 )
 
 
                ],
              ),
-            ),
+            )),
           ),
         );
 

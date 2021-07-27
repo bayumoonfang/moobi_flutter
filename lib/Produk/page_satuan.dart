@@ -7,6 +7,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:hexcolor/hexcolor.dart';
+import 'package:moobi_flutter/Helper/app_helper.dart';
 import 'package:moobi_flutter/Helper/check_connection.dart';
 import 'package:moobi_flutter/Helper/page_route.dart';
 import 'package:moobi_flutter/Helper/session.dart';
@@ -29,33 +30,27 @@ class _ProdukSatuanState extends State<ProdukSatuan> {
     Toast.show(msg, context, duration: duration, gravity: gravity);}
 
 
-  _connect() async {
-    Checkconnection().check().then((internet){
-      if (internet != null && internet) {} else {
-        showToast("Koneksi terputus..", gravity: Toast.CENTER,duration: Toast.LENGTH_LONG);}});}
-
-
-  String getEmail = '...';
-  _session() async {
-    int value = await Session.getValue();
-    getEmail = await Session.getEmail();
-    if (value != 1) {Navigator.pushReplacement(context, ExitPage(page: Login()));}}
-
-
-  String getBranchVal = '';
-  _getBranch() async {
-    final response = await http.get(applink+"api_model.php?act=userdetail&id="+getEmail.toString());
-    Map data = jsonDecode(response.body);
-    setState(() {getBranchVal = data["c"].toString();});}
+  String getEmail = "...";
+  String getBranch = "...";
+  _startingVariable() async {
+    await AppHelper().getConnect().then((value){if(value == 'ConnInterupted'){
+      showToast("Koneksi terputus..", gravity: Toast.CENTER,duration:
+      Toast.LENGTH_LONG);}});
+    await AppHelper().getSession().then((value){if(value[0] != 1) {
+      Navigator.pushReplacement(context, ExitPage(page: Login()));}else{setState(() {getEmail = value[1];});}});
+    await AppHelper().getDetailUser(getEmail.toString()).then((value){
+      setState(() {
+        getBranch = value[1];
+      });
+    });
+  }
 
   Future<bool> _onWillPop() async {
     Navigator.pop(context);}
 
 
   _prepare() async {
-    await _connect();
-    await _session();
-    await _getBranch();
+    await _startingVariable();
   }
 
   @override
@@ -66,14 +61,6 @@ class _ProdukSatuanState extends State<ProdukSatuan> {
 
 
 
-  startSCreen() async {
-    var duration = const Duration(seconds: 1);
-    return Timer(duration, () {
-      setState(() {
-        _isvisible = true;
-      });
-    });
-  }
 
 
   String filter = "";
@@ -81,16 +68,18 @@ class _ProdukSatuanState extends State<ProdukSatuan> {
   Future<List> getData() async {
     http.Response response = await http.get(
         Uri.encodeFull(applink+"api_model.php?act=getdata_satuan&"
-            "branch="+getBranchVal+
+            "branch="+getBranch+
             "&filter="+filter),headers: {"Accept":"application/json"});
-    setState((){
-      data = json.decode(response.body);
-    });
+  return json.decode(response.body);
+
   }
 
   _doHapus (String valueParse2) {
     http.get(applink+"api_model.php?act=action_hapussatuan&id="+valueParse2.toString()+"");
     showToast("Satuan berhasil dihapus", gravity: Toast.BOTTOM,duration: Toast.LENGTH_LONG);
+    setState(() {
+      getData();
+    });
   }
 
 
@@ -157,7 +146,11 @@ class _ProdukSatuanState extends State<ProdukSatuan> {
                }),
          ),
        ),
-       body: Container(
+       body:
+       RefreshIndicator(
+        onRefresh: getData,
+       child :
+       Container(
          child: Column(
            children: [
              Padding(padding: const EdgeInsets.only(left: 15,top: 10,right: 15),
@@ -168,8 +161,6 @@ class _ProdukSatuanState extends State<ProdukSatuan> {
                      onChanged: (text) {
                        setState(() {
                          filter = text;
-                         _isvisible = false;
-                         startSCreen();
                        });
                      },
                      style: TextStyle(fontFamily: "VarelaRound",fontSize: 14),
@@ -196,22 +187,16 @@ class _ProdukSatuanState extends State<ProdukSatuan> {
              ),
 
              Padding(padding: const EdgeInsets.only(top: 10),),
-             Visibility(
-                 visible: _isvisible,
-                 child :
                  Expanded(
                      child: FutureBuilder(
                        future: getData(),
                        builder: (context, snapshot){
-                         if (data == null) {
+                         if (snapshot.data == null) {
                            return Center(
-                               child: Image.asset(
-                                 "assets/loadingq.gif",
-                                 width: 110.0,
-                               )
+                               child: CircularProgressIndicator()
                            );
                          } else {
-                           return data == 0 ?
+                           return snapshot.data == 0 ?
                            Container(
                                height: double.infinity, width : double.infinity,
                                child: new
@@ -235,7 +220,7 @@ class _ProdukSatuanState extends State<ProdukSatuan> {
                                    )))
                                :
                            ListView.builder(
-                             itemCount: data == null ? 0 : data.length,
+                             itemCount: snapshot.data == null ? 0 : snapshot.data.length,
                              padding: const EdgeInsets.only(left: 10,right: 15),
                              itemBuilder: (context, i) {
                                return Column(
@@ -244,15 +229,15 @@ class _ProdukSatuanState extends State<ProdukSatuan> {
                                      title: Row(
                                        children: [
                                        Padding(padding: const EdgeInsets.only(right: 5),child:
-                                       Text(data[i]["c"].toString(), style: new TextStyle(
+                                       Text(snapshot.data[i]["c"].toString(), style: new TextStyle(
                                            fontFamily: 'VarelaRound', fontSize: 15),),),
-                                         Text("("+data[i]["b"].toString()+")", style: new TextStyle(
+                                         Text("("+snapshot.data[i]["b"].toString()+")", style: new TextStyle(
                                              fontFamily: 'VarelaRound', fontSize: 15),),
                                        ],
                                ),
                                      trailing: InkWell(
                                        onTap: (){
-                                         _showDelete(data[i]["a"].toString());
+                                         _showDelete(snapshot.data[i]["a"].toString());
                                        },
                                        child: FaIcon(FontAwesomeIcons.trash,size: 18,color: Colors.redAccent,),
                                      ),
@@ -266,12 +251,11 @@ class _ProdukSatuanState extends State<ProdukSatuan> {
                          }
                        },
                      )
-                 )
              ),
 
            ],
          ),
-       ),
+       )),
          floatingActionButton: Padding(
            padding: const EdgeInsets.only(right : 10),
            child: FloatingActionButton(

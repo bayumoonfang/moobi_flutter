@@ -6,6 +6,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:hexcolor/hexcolor.dart';
+import 'package:moobi_flutter/Gudang/page_gudanginsert.dart';
 import 'package:moobi_flutter/Helper/app_helper.dart';
 import 'package:moobi_flutter/helper/api_link.dart';
 
@@ -38,21 +39,26 @@ class _GudangState extends State<Gudang> {
 
 
   String getEmail = "...";
+  String getBranch = "...";
   _startingVariable() async {
     await AppHelper().getConnect().then((value){if(value == 'ConnInterupted'){
       showToast("Koneksi terputus..", gravity: Toast.CENTER,duration:
       Toast.LENGTH_LONG);}});
     await AppHelper().getSession().then((value){if(value[0] != 1) {
       Navigator.pushReplacement(context, ExitPage(page: Login()));}else{setState(() {getEmail = value[1];});}});
+    await AppHelper().getDetailUser(getEmail.toString()).then((value){
+      setState(() {
+        getBranch = value[1];
+      });
+    });
   }
-
 
 
 
   String filter = "";
   Future<List> getData() async {
     http.Response response = await http.get(
-        Uri.encodeFull(applink+"api_model.php?act=getdata_gudang&id="+getEmail+"&filter="+filter.toString()),
+        Uri.encodeFull(applink+"api_model.php?act=getdata_gudang&id="+getBranch+"&filter="+filter.toString()),
         headers: {"Accept":"application/json"}
     );
      return json.decode(response.body);
@@ -139,7 +145,10 @@ class _GudangState extends State<Gudang> {
           Padding(
             padding: const EdgeInsets.only(right : 10),
             child: FloatingActionButton(
-              onPressed: (){},
+              onPressed: (){
+                FocusScope.of(context).requestFocus(FocusNode());
+                Navigator.push(context, ExitPage(page: GudangInsert()));
+              },
               child: FaIcon(FontAwesomeIcons.plus),
             ),
           )
@@ -147,6 +156,56 @@ class _GudangState extends State<Gudang> {
       ),
     );
   }
+
+  _doHapus (String valueParse2) {
+    http.get(applink+"api_model.php?act=action_hapusgudang&id="+valueParse2.toString()
+        +"&branch="+getBranch);
+    showToast("Gudang berhasil dihapus", gravity: Toast.BOTTOM,duration: Toast.LENGTH_LONG);
+    setState(() {
+      getData();
+    });
+  }
+
+  _showDelete(String valueParse) {
+    showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            //title: Text(),
+            content: Container(
+                width: double.infinity,
+                height: 178,
+                child: Column(
+                  children: [
+                    Align(alignment: Alignment.center, child:
+                    Text("Konfirmasi", style: TextStyle(fontFamily: 'VarelaRound', fontSize: 20,
+                        fontWeight: FontWeight.bold)),),
+                    Padding(padding: const EdgeInsets.only(top: 15), child:
+                    Align(alignment: Alignment.center, child: FaIcon(FontAwesomeIcons.trash,
+                      color: Colors.redAccent,size: 35,)),),
+                    Padding(padding: const EdgeInsets.only(top: 15), child:
+                    Align(alignment: Alignment.center, child:
+                    Text("Apakah anda yakin menghapus data ini ? ",
+                        style: TextStyle(fontFamily: 'VarelaRound', fontSize: 12)),)),
+                    Padding(padding: const EdgeInsets.only(top: 25), child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      children: <Widget>[
+                        Expanded(child: OutlineButton(
+                          onPressed: () {Navigator.pop(context);}, child: Text("Tidak"),)),
+                        Expanded(child: OutlineButton(
+                          borderSide: BorderSide(width: 1.0, color: Colors.redAccent),
+                          onPressed: () {
+                            _doHapus(valueParse);
+                            Navigator.pop(context);
+                          }, child: Text("Hapus", style: TextStyle(color: Colors.red),),)),
+                      ],),)
+                  ],
+                )
+            ),
+          );
+        });
+  }
+
 
   Widget _dataField() {
     return FutureBuilder(
@@ -194,9 +253,22 @@ class _GudangState extends State<Gudang> {
                         leading:
                         Padding(padding: const EdgeInsets.only(top: 5),
                         child: FaIcon(FontAwesomeIcons.warehouse,color: HexColor("#602d98"),),),
-                        title: Text(snapshot.data[i]["a"]),
-                        subtitle: Text(snapshot.data[i]["b"]),
-
+                        title: Text(snapshot.data[i]["a"], style: TextStyle(fontFamily: 'VarelaRound')),
+                        subtitle: Text(snapshot.data[i]["b"], style: TextStyle(fontFamily: 'VarelaRound',fontSize: 13)),
+                      trailing:
+                      snapshot.data[i]["a"] != 'Gudang Besar' ?
+                      Padding(
+                        padding: const EdgeInsets.only(right: 10),
+                        child: InkWell(
+                          onTap: (){
+                            FocusScope.of(context).requestFocus(FocusNode());
+                            _showDelete(snapshot.data[i]["c"].toString());
+                          },
+                          child: FaIcon(FontAwesomeIcons.trash,size: 18,color: Colors.redAccent,),
+                        ),
+                      )
+          :
+                          Padding(padding: const EdgeInsets.only(right: 5),)
                     ),
                   ),
                   Padding(padding: const EdgeInsets.only(top: 2,  left: 15,right: 15),

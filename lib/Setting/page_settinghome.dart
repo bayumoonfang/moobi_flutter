@@ -65,7 +65,7 @@ class SettingHomeState extends State<SettingHome> {
 
                 InkWell(
                   child: ListTile(
-                    onTap: (){Navigator.push(context, ExitPage(page: PaymentMethod()));},
+                    onTap: (){Navigator.push(context, ExitPage(page: MetodeBayar()));},
                     title: Text("Metode Pembayaran",style: TextStyle(
                         color: Colors.black, fontFamily: 'VarelaRound',fontSize: 15,
                         fontWeight: FontWeight.bold)),

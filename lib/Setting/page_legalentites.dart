@@ -82,7 +82,7 @@ class _TokoState extends State<Toko> {
         appBar: new AppBar(
           backgroundColor: HexColor("#602d98"),
           title: Text(
-            "Detail Toko",
+            "Detail Legal Entities",
             style: TextStyle(
                 color: Colors.white, fontFamily: 'VarelaRound', fontSize: 16),
           ),

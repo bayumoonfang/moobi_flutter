@@ -6,6 +6,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:hexcolor/hexcolor.dart';
+import 'package:moobi_flutter/Helper/app_helper.dart';
 import 'package:moobi_flutter/Helper/check_connection.dart';
 import 'package:moobi_flutter/Helper/page_route.dart';
 import 'package:moobi_flutter/Helper/session.dart';
@@ -29,51 +30,38 @@ class SettingPPNState extends State<SettingPPN> {
   }
 
 
-  String getEmail = '...';
-  _session() async {
-    int value = await Session.getValue();
-    getEmail = await Session.getEmail();
-    if (value != 1) {Navigator.pushReplacement(context, ExitPage(page: Login()));}
-  }
+  String getEmail = "...";
+  String getBranch = "...";
+  _startingVariable() async {
+    await AppHelper().getConnect().then((value){if(value == 'ConnInterupted'){
+      showToast("Koneksi terputus..", gravity: Toast.CENTER,duration:
+      Toast.LENGTH_LONG);}});
+    await AppHelper().getSession().then((value){if(value[0] != 1) {
+      Navigator.pushReplacement(context, ExitPage(page: Login()));}else{setState(() {getEmail = value[1];});}});
+    await AppHelper().getDetailUser(getEmail.toString()).then((value){
+      setState(() {
+        getBranch = value[1];
 
-  _connect() async {
-    Checkconnection().check().then((internet){
-      if (internet != null && internet) {} else {
-        showToast("Koneksi terputus..", gravity: Toast.CENTER, duration: Toast.LENGTH_LONG);
-      }
+      });
     });
   }
 
-  String getBranchVal = '';
-  _getBranch() async {
-    final response = await http.get(
-        applink+"api_model.php?act=userdetail&id="+getEmail.toString());
-    Map data = jsonDecode(response.body);
-    setState(() {
-      getBranchVal = data["c"].toString();
-    });
-  }
 
   String getTax = '...';
   _getDetail() async {
-    final response = await http.get(applink+"api_model.php?act=getdata_tax&id="+getBranchVal);
+    final response = await http.get(applink+"api_model.php?act=getdata_tax2&id="+getBranch);
     Map data = jsonDecode(response.body);
     setState(() {
       getTax = data["a"].toString();
+      valTax.text = getTax;
     });
   }
 
 
 
   _prepare() async {
-    await _connect();
-    await _session();
-    await _getBranch();
+    await _startingVariable();
     await _getDetail();
-    setState(() {
-       valTax.text = getTax;
-    });
-
   }
 
 
@@ -87,7 +75,7 @@ class SettingPPNState extends State<SettingPPN> {
   doSimpan() async {
     final response = await http.post(applink+"api_model.php?act=edit_tax", body: {
       "valTax_edit": valTax.text,
-      "branch" : getBranchVal
+      "branch" : getBranch
     });
     Map data = jsonDecode(response.body);
     setState(() {

@@ -10,6 +10,7 @@ import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:hexcolor/hexcolor.dart';
 import 'package:moobi_flutter/Helper/api_link.dart';
+import 'package:moobi_flutter/Helper/app_helper.dart';
 import 'package:moobi_flutter/Helper/check_connection.dart';
 import 'package:moobi_flutter/Helper/page_route.dart';
 import 'package:moobi_flutter/Helper/session.dart';
@@ -34,34 +35,27 @@ class _ProdukKategoriState extends State<ProdukKategori> {
   void showToast(String msg, {int duration, int gravity}) {
     Toast.show(msg, context, duration: duration, gravity: gravity);}
 
-
-  _connect() async {
-    Checkconnection().check().then((internet){
-      if (internet != null && internet) {} else {
-        showToast("Koneksi terputus..", gravity: Toast.CENTER,duration: Toast.LENGTH_LONG);}});}
-
-
-  String getEmail = '...';
-  _session() async {
-    int value = await Session.getValue();
-    getEmail = await Session.getEmail();
-    if (value != 1) {Navigator.pushReplacement(context, ExitPage(page: Login()));}}
-
-
-  String getBranchVal = '';
-  _getBranch() async {
-    final response = await http.get(applink+"api_model.php?act=userdetail&id="+getEmail.toString());
-    Map data = jsonDecode(response.body);
-    setState(() {getBranchVal = data["c"].toString();});}
+  String getEmail = "...";
+  String getBranch = "...";
+  _startingVariable() async {
+    await AppHelper().getConnect().then((value){if(value == 'ConnInterupted'){
+      showToast("Koneksi terputus..", gravity: Toast.CENTER,duration:
+      Toast.LENGTH_LONG);}});
+    await AppHelper().getSession().then((value){if(value[0] != 1) {
+      Navigator.pushReplacement(context, ExitPage(page: Login()));}else{setState(() {getEmail = value[1];});}});
+    await AppHelper().getDetailUser(getEmail.toString()).then((value){
+      setState(() {
+        getBranch = value[1];
+      });
+    });
+  }
 
   Future<bool> _onWillPop() async {
     Navigator.pop(context);}
 
 
   _prepare() async {
-    await _connect();
-    await _session();
-    await _getBranch();
+    await _startingVariable();
   }
 
   @override
@@ -87,18 +81,19 @@ class _ProdukKategoriState extends State<ProdukKategori> {
   Future<List> getData() async {
     http.Response response = await http.get(
         Uri.encodeFull(applink+"api_model.php?act=getdata_kategori&"
-            "branch="+getBranchVal+
+            "branch="+getBranch+
             "&filter="+filter),headers: {"Accept":"application/json"});
-    setState((){
-      data = json.decode(response.body);
-    });
+        return json.decode(response.body);
   }
 
   String getMessage = "...";
   _doHapus (String valueParse2) {
     http.get(applink+"api_model.php?act=action_hapuskategori&id="+valueParse2.toString()
-        +"&branch="+getBranchVal);
+        +"&branch="+getBranch);
     showToast("Kategori berhasil dihapus", gravity: Toast.BOTTOM,duration: Toast.LENGTH_LONG);
+    setState(() {
+      getData();
+    });
   }
 
   _showDelete(String valueParse) {
@@ -173,8 +168,6 @@ class _ProdukKategoriState extends State<ProdukKategori> {
                         onChanged: (text) {
                           setState(() {
                             filter = text;
-                            _isvisible = false;
-                            startSCreen();
                           });
                         },
                         style: TextStyle(fontFamily: "VarelaRound",fontSize: 14),
@@ -201,22 +194,16 @@ class _ProdukKategoriState extends State<ProdukKategori> {
                 ),
 
                 Padding(padding: const EdgeInsets.only(top: 10),),
-                Visibility(
-                    visible: _isvisible,
-                    child :
                     Expanded(
                         child: FutureBuilder(
                           future: getData(),
                           builder: (context, snapshot){
-                            if (data == null) {
+                            if (snapshot.data == null) {
                               return Center(
-                                  child: Image.asset(
-                                    "assets/loadingq.gif",
-                                    width: 110.0,
-                                  )
+                                  child: CircularProgressIndicator()
                               );
                             } else {
-                              return data == 0 ?
+                              return snapshot.data == 0 ?
                               Container(
                                   height: double.infinity, width : double.infinity,
                                   child: new
@@ -240,18 +227,18 @@ class _ProdukKategoriState extends State<ProdukKategori> {
                                       )))
                                   :
                               ListView.builder(
-                                itemCount: data == null ? 0 : data.length,
+                                itemCount: snapshot.data == null ? 0 : snapshot.data.length,
                                 padding: const EdgeInsets.only(left: 10,right: 15),
                                 itemBuilder: (context, i) {
                                   return Column(
                                     children: [
                                       ListTile(
-                                        title: Text(data[i]["b"].toString(), style: new TextStyle(
+                                        title: Text(snapshot.data[i]["b"].toString(), style: new TextStyle(
                                             fontFamily: 'VarelaRound', fontSize: 15),),
                                         trailing: InkWell(
                                           onTap: (){
                                             FocusScope.of(context).requestFocus(FocusNode());
-                                            _showDelete(data[i]["a"].toString());
+                                            _showDelete(snapshot.data[i]["a"].toString());
                                           },
                                           child: FaIcon(FontAwesomeIcons.trash,size: 18,color: Colors.redAccent,),
                                         ),
@@ -265,9 +252,7 @@ class _ProdukKategoriState extends State<ProdukKategori> {
                             }
                           },
                         )
-                    )
                 ),
-
               ],
             ),
           ),

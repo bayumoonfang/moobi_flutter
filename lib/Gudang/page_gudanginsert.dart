@@ -1,34 +1,30 @@
 
 
+
 import 'dart:convert';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:hexcolor/hexcolor.dart';
+import 'package:moobi_flutter/Helper/api_link.dart';
 import 'package:moobi_flutter/Helper/app_helper.dart';
-import 'package:moobi_flutter/Helper/check_connection.dart';
 import 'package:moobi_flutter/Helper/page_route.dart';
-import 'package:moobi_flutter/Helper/session.dart';
 import 'package:moobi_flutter/page_login.dart';
 import 'package:toast/toast.dart';
 import 'package:http/http.dart' as http;
-import 'package:moobi_flutter/Helper/api_link.dart';
 
-class SettingServCharge extends StatefulWidget {
-  @override
-  SettingServChargeState createState() => SettingServChargeState();
+
+class GudangInsert extends StatefulWidget{
+  _GudangInsert createState() => _GudangInsert();
 }
 
-class SettingServChargeState extends State<SettingServCharge> {
-  TextEditingController valInput = TextEditingController();
-  Future<bool> _onWillPop() async {
-    Navigator.pop(context);
-  }
+
+class _GudangInsert extends State<GudangInsert> {
+  final _valInsert = TextEditingController();
   void showToast(String msg, {int duration, int gravity}) {
     Toast.show(msg, context, duration: duration, gravity: gravity);
   }
-
 
   String getEmail = "...";
   String getBranch = "...";
@@ -41,61 +37,50 @@ class SettingServChargeState extends State<SettingServCharge> {
     await AppHelper().getDetailUser(getEmail.toString()).then((value){
       setState(() {
         getBranch = value[1];
-
       });
     });
   }
 
-  String getVal = '...';
-  _getDetail() async {
-    final response = await http.get(applink+"api_model.php?act=getdata_servcharge&id="+getBranch);
-    Map data = jsonDecode(response.body);
-    setState(() {
-      getVal = data["a"].toString();
-      valInput.text = getVal;
-    });
-  }
-
-
-
   _prepare() async {
     await _startingVariable();
-    await _getDetail();
   }
 
   @override
-  void initState() {
+  void initState(){
     super.initState();
     _prepare();
+
   }
 
   doSimpan() async {
-    final response = await http.post(applink+"api_model.php?act=edit_servcharge", body: {
-      "val_edit": valInput.text,
-      "branch" : getBranch
+    FocusScope.of(context).requestFocus(FocusNode());
+    final response = await http.post(applink+"api_model.php?act=add_gudang", body: {
+      "gudang_nama": _valInsert.text,
+      "gudang_branch" : getBranch
     });
     Map data = jsonDecode(response.body);
     setState(() {
       if (data["message"].toString() == '0') {
-        showToast("Isian tidak boleh kurang dari 0", gravity: Toast.BOTTOM,
+        showToast("Gudang sudah ada", gravity: Toast.BOTTOM,
             duration: Toast.LENGTH_LONG);
         return false;
       } else {
-        Navigator.pop(context);
-        showToast("Service Charge berhasil diedit", gravity: Toast.BOTTOM,
+        _valInsert.clear();
+        showToast("Gudang berhasil ditambah", gravity: Toast.BOTTOM,
             duration: Toast.LENGTH_LONG);
         return false;
       }
     });
   }
 
-
-  alertSimpan() {
-    if (valInput.text == "" ) {
-      showToast("Form tidak boleh kosong ", gravity: Toast.BOTTOM,
+  _showAlert() {
+    FocusScope.of(context).requestFocus(FocusNode());
+    if (_valInsert.text == "") {
+      showToast("Nama Gudang tidak boleh kosong", gravity: Toast.BOTTOM,
           duration: Toast.LENGTH_LONG);
       return false;
     }
+
     showDialog(
         context: context,
         builder: (BuildContext context) {
@@ -125,6 +110,7 @@ class SettingServChargeState extends State<SettingServCharge> {
                           borderSide: BorderSide(width: 1.0, color: Colors.redAccent),
                           onPressed: () {
                             doSimpan();
+                            Navigator.pop(context);
                           }, child: Text("Simpan", style: TextStyle(color: Colors.red),),)),
                       ],),)
                   ],
@@ -135,15 +121,15 @@ class SettingServChargeState extends State<SettingServCharge> {
   }
 
 
+
   @override
   Widget build(BuildContext context) {
     return WillPopScope(
-      onWillPop: _onWillPop,
       child: Scaffold(
         appBar: new AppBar(
           backgroundColor: HexColor("#602d98"),
           title: Text(
-            "Pengaturan Service Charge",
+            "Tambah Gudang ",
             style: TextStyle(
                 color: Colors.white, fontFamily: 'VarelaRound', fontSize: 16),
           ),
@@ -158,8 +144,7 @@ class SettingServChargeState extends State<SettingServCharge> {
           actions: [
             InkWell(
               onTap: () {
-                FocusScope.of(context).requestFocus(FocusNode());
-                alertSimpan();
+                _showAlert();
               },
               child: Padding(
                 padding: const EdgeInsets.only(right: 27,top : 14),
@@ -180,18 +165,17 @@ class SettingServChargeState extends State<SettingServCharge> {
                       children: [
                         Align(alignment: Alignment.centerLeft,child: Padding(
                           padding: const EdgeInsets.only(left: 0,top: 15),
-                          child: Text("Service Charge (dalam persen)",style: TextStyle(fontWeight: FontWeight.bold,fontFamily: "VarelaRound",
+                          child: Text("Nama Gudang",style: TextStyle(fontWeight: FontWeight.bold,fontFamily: "VarelaRound",
                               fontSize: 12,color: HexColor("#0074D9")),),
                         ),),
                         Align(alignment: Alignment.centerLeft,child: Padding(
                           padding: const EdgeInsets.only(left: 0),
                           child: TextFormField(
-                            controller: valInput,
-                            keyboardType: TextInputType.number,
+                            controller: _valInsert,
                             textCapitalization: TextCapitalization.sentences,
                             decoration: InputDecoration(
                               contentPadding: const EdgeInsets.only(top:2),
-                              hintText: 'Contoh : 0, 10, 15, dll',
+                              hintText: 'Contoh : Gudang Penjualan, Gudang Penerimaan, dll',
                               labelText: '',
                               floatingLabelBehavior: FloatingLabelBehavior.always,
                               hintStyle: TextStyle(fontFamily: "VarelaRound", color: HexColor("#c4c4c4")),
@@ -207,9 +191,6 @@ class SettingServChargeState extends State<SettingServCharge> {
                             ),
                           ),
                         ),),
-
-
-
                       ],
                     )
                 ),
@@ -219,7 +200,6 @@ class SettingServChargeState extends State<SettingServCharge> {
         ),
       ),
     );
-
 
   }
 }
