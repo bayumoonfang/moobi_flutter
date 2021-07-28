@@ -15,6 +15,7 @@ import 'package:moobi_flutter/Helper/color_based.dart';
 import 'package:moobi_flutter/Jualan/page_jualan.dart';
 import 'package:moobi_flutter/Kategori/page_kategori.dart';
 import 'package:moobi_flutter/Notification/page_notification.dart';
+import 'package:moobi_flutter/Outlet/page_outlet.dart';
 import 'package:moobi_flutter/Produk/page_produk.dart';
 import 'package:moobi_flutter/Produk/page_produkhome.dart';
 import 'package:moobi_flutter/Profile/page_profile.dart';
@@ -62,7 +63,7 @@ class _HomeState extends State<Home> {
       showToast("Koneksi terputus..", gravity: Toast.CENTER,duration:
       Toast.LENGTH_LONG);}});
     await AppHelper().getSession().then((value){if(value[0] != 1) {
-       Navigator.pushReplacement(context, ExitPage(page: Home()));} else{setState(() {getEmail = value[1];});}});
+       Navigator.pushReplacement(context, ExitPage(page: Login()));} else{setState(() {getEmail = value[1];});}});
     await AppHelper().getDetailUser(getEmail.toString()).then((value){
       setState(() {
         getMoobiIdentity = value[0];
@@ -295,7 +296,7 @@ class _HomeState extends State<Home> {
                                         ),
                                         InkWell(
                                           onTap: () {
-                                            Navigator.push(context, ExitPage(page: Toko()));
+                                            Navigator.push(context, ExitPage(page: Outlet()));
                                           },
                                           child:
                                         Column(
@@ -467,6 +468,29 @@ class _HomeState extends State<Home> {
                                       ],
                                     ),
                                   ),
+
+                                  InkWell(
+                                    child:Column(
+                                      children: [
+                                        Container(
+                                            height: 55, width: 55,
+                                            decoration: BoxDecoration(
+                                              borderRadius: BorderRadius.circular(50),
+                                              color: HexColor("#eef9ff"),
+                                            ),
+                                            child: Center(
+                                              child: FaIcon(FontAwesomeIcons.usersCog, color: HexColor("#36bbf6"),
+                                                size: 24,),
+                                            )
+                                        ),
+                                        Padding(padding: const EdgeInsets.only(top:8),
+                                          child: Text("Users",
+                                              style: TextStyle(fontFamily: 'VarelaRound',fontSize: 13)),)
+                                      ],
+                                    ),
+                                  ),
+
+
   //PREIMUM CONTENT=====================================================
                                   Opacity(
                                     opacity: 0.6,

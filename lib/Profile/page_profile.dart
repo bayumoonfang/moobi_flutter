@@ -65,6 +65,8 @@ class _ProfileState extends State<Profile> {
       preferences.setInt("value", null);
       preferences.setString("username", null);
       preferences.setString("email", null);
+      preferences.setString("role", null);
+      preferences.setString("level", null);
       preferences.commit();
       Navigator.pushReplacement(context, ExitPage(page: Login()));
     });

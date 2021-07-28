@@ -27,7 +27,9 @@ class AppHelper {
   Future<dynamic> getSession () async {
     int value = await Session.getValue();
     String getEmail = await Session.getEmail();
-    return [value,getEmail];
+    String getRole = await Session.getRole();
+    String getLevel = await Session.getLevel();
+    return [value,getEmail,getRole,getLevel];
   }
 
 

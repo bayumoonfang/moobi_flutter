@@ -12,8 +12,11 @@ import 'package:hexcolor/hexcolor.dart';
 import 'package:moobi_flutter/Helper/api_link.dart';
 import 'package:moobi_flutter/Helper/app_helper.dart';
 import 'package:moobi_flutter/Helper/check_connection.dart';
+import 'package:moobi_flutter/Helper/color_based.dart';
 import 'package:moobi_flutter/Helper/page_route.dart';
 import 'package:moobi_flutter/Helper/session.dart';
+import 'package:moobi_flutter/Outlet/page_detailoutlet.dart';
+import 'package:moobi_flutter/Outlet/page_outletinsert.dart';
 import 'package:moobi_flutter/Produk/page_kategoriinsert.dart';
 import 'package:moobi_flutter/Setting/page_metodebayarinsert.dart';
 import 'package:moobi_flutter/page_home.dart';
@@ -23,13 +26,13 @@ import 'package:toast/toast.dart';
 import 'package:http/http.dart' as http;
 
 
-class MetodeBayar extends StatefulWidget{
+class Outlet extends StatefulWidget{
   @override
-  _MetodeBayar createState() => _MetodeBayar();
+  _Outlet createState() => _Outlet();
 }
 
 
-class _MetodeBayar extends State<MetodeBayar> {
+class _Outlet extends State<Outlet> {
   List data;
   bool _isvisible = true;
 
@@ -81,7 +84,7 @@ class _MetodeBayar extends State<MetodeBayar> {
   String sortby = '0';
   Future<List> getData() async {
     http.Response response = await http.get(
-        Uri.encodeFull(applink+"api_model.php?act=getdata_metodebayar&"
+        Uri.encodeFull(applink+"api_model.php?act=getdata_outlet&"
             "branch="+getBranch+
             "&filter="+filter),
         headers: {"Accept":"application/json"});
@@ -90,9 +93,9 @@ class _MetodeBayar extends State<MetodeBayar> {
 
   String getMessage = "...";
   _doHapus (String valueParse2) {
-    http.get(applink+"api_model.php?act=action_hapusmetodebayar&id="+valueParse2.toString()
+    http.get(applink+"api_model.php?act=action_hapusoutlet&id="+valueParse2.toString()
         +"&branch="+getBranch);
-    showToast("Metode Bayar berhasil dihapus", gravity: Toast.BOTTOM,duration: Toast.LENGTH_LONG);
+    showToast("Outlet berhasil dihapus", gravity: Toast.BOTTOM,duration: Toast.LENGTH_LONG);
     setState(() {
       getData();
     });
@@ -146,7 +149,7 @@ class _MetodeBayar extends State<MetodeBayar> {
           appBar: new AppBar(
             backgroundColor: HexColor("#602d98"),
             title: Text(
-              "Metode Bayar ",
+              "Outlet Saya",
               style: TextStyle(
                   color: Colors.white, fontFamily: 'VarelaRound', fontSize: 16),
             ),
@@ -189,7 +192,7 @@ class _MetodeBayar extends State<MetodeBayar> {
                             borderSide: BorderSide(color: HexColor("#f4f4f4"), width: 1.0),
                             borderRadius: BorderRadius.circular(5.0),
                           ),
-                          hintText: 'Cari Metode Bayar...',
+                          hintText: 'Cari Outlet...',
                         ),
                       ),
                     )
@@ -230,35 +233,52 @@ class _MetodeBayar extends State<MetodeBayar> {
                             padding: const EdgeInsets.only(left: 10,right: 15),
                             itemBuilder: (context, i) {
                               return Card(
-                                child: Column(
-                                  children: [
-                                    Padding(padding: const EdgeInsets.only(top: 10)),
-                                    ListTile(
-                                      title: Text(snapshot.data[i]["c"].toString(), style: new TextStyle(
-                                          fontFamily: 'VarelaRound', fontSize: 16,fontWeight: FontWeight.bold),),
-                                      trailing: InkWell(
-                                        onTap: (){
-                                          FocusScope.of(context).requestFocus(FocusNode());
-                                          _showDelete(snapshot.data[i]["a"].toString());
-                                        },
-                                        child: Padding(padding: const EdgeInsets.only(right: 10),
-                                        child: FaIcon(FontAwesomeIcons.trashAlt,size: 17,color: Colors.redAccent,),)
+                                  child: Column(
+                                    children: [
+                                      Padding(padding: const EdgeInsets.only(top: 15)),
+                                      ListTile(
+                                        title: Text(snapshot.data[i]["b"].toString(), style: new TextStyle(
+                                            fontFamily: 'VarelaRound', fontSize: 17,fontWeight: FontWeight.bold),),
+                                        trailing: InkWell(
+                                            onTap: (){
+                                              FocusScope.of(context).requestFocus(FocusNode());
+                                              _showDelete(snapshot.data[i]["a"].toString());
+                                            },
+                                            child: Padding(padding: const EdgeInsets.only(right: 10),
+                                              child: FaIcon(FontAwesomeIcons.trashAlt,size: 17,color: Colors.redAccent,),)
+                                        ),
+                                        subtitle: Column(
+                                          children: [
+                                            Padding(padding: const EdgeInsets.only(top: 5),
+                                                child:Align(alignment: Alignment.centerLeft,
+                                                  child: Text(snapshot.data[i]["e"].toString(), style: TextStyle(
+                                                      fontFamily: 'VarelaRound',fontSize: 12,color: Colors.black)),)),
+                                            Padding(padding: const EdgeInsets.only(top: 5),
+                                              child: Align(alignment: Alignment.centerLeft,
+                                                child: Text(snapshot.data[i]["c"].toString(), style: TextStyle(
+                                                    fontFamily: 'VarelaRound',fontSize: 13,color: Colors.black)),),)
+                                          ],
+                                        ),
                                       ),
-                                      subtitle: Column(
-                                        children: [
-                                          Padding(padding: const EdgeInsets.only(top: 5),
-                                          child:Align(alignment: Alignment.centerLeft,
-                                          child: Text(snapshot.data[i]["d"].toString(), style: TextStyle(fontFamily: 'VarelaRound')),)),
-                                          Padding(padding: const EdgeInsets.only(top: 5),
-                                          child: Align(alignment: Alignment.centerLeft,
-                                            child: Text(snapshot.data[i]["e"].toString(), style: TextStyle(fontFamily: 'VarelaRound')),),)
-                                        ],
-                                      ),
-                                    ),
-                                    Padding(padding: const EdgeInsets.only(bottom: 10))
 
-                                  ],
-                                )
+                                      Container(
+                                        padding: const EdgeInsets.only(top:10,left: 15,right: 15),
+                                        child: Container(
+                                          width: double.infinity,
+                                          height: 40,
+                                          child: OutlinedButton(
+                                            onPressed: (){
+                                              Navigator.push(context, ExitPage(page: DetailOutlet(snapshot.data[i]["a"].toString())));
+                                            },
+                                            child: Text("Lihat Outlet",style: TextStyle(
+                                                color: Colors.black, fontFamily: 'VarelaRound')),
+                                          ),
+                                        ),
+                                      ),
+                                      Padding(padding: const EdgeInsets.only(bottom: 15)),
+
+                                    ],
+                                  )
                               );
                             },
                           );
@@ -274,7 +294,7 @@ class _MetodeBayar extends State<MetodeBayar> {
             child: FloatingActionButton(
               onPressed: (){
                 FocusScope.of(context).requestFocus(FocusNode());
-                Navigator.push(context, ExitPage(page: MetodeBayarInsert()));
+                Navigator.push(context, ExitPage(page: OutletInsert()));
               },
               child: FaIcon(FontAwesomeIcons.plus),
             ),

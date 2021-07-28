@@ -13,6 +13,16 @@ class Session {
     return preferences.getString("email");
   }
 
+  static Future<String> getRole() async {
+    final SharedPreferences preferences = await _prefs;
+    return preferences.getString("role");
+  }
+
+  static Future<String> getLevel() async {
+    final SharedPreferences preferences = await _prefs;
+    return preferences.getString("level");
+  }
+
   static Future<int> getValue() async {
     final SharedPreferences preferences = await _prefs;
     return preferences.getInt("value");

@@ -3,6 +3,7 @@
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:hexcolor/hexcolor.dart';
 import 'package:moobi_flutter/Helper/api_link.dart';
 import 'package:moobi_flutter/Helper/check_connection.dart';
@@ -32,6 +33,8 @@ class RegisterGoogle extends StatefulWidget{
 class _RegisterGoogleState extends State<RegisterGoogle> {
   final _password = TextEditingController();
   final _namatoko = TextEditingController();
+  final _alamat = TextEditingController();
+  final _nomorhp = TextEditingController();
   bool _isPressed = false;
   var client = http.Client();
 
@@ -57,7 +60,7 @@ class _RegisterGoogleState extends State<RegisterGoogle> {
 
   String getMessage;
   _daftar() async {
-    if (_password.text == '' || _namatoko.text == '') {
+    if (_password.text == '' || _namatoko.text == '' || _alamat.text == '' || _nomorhp.text == '') {
       setState(() {
         _isPressed = false;
       });
@@ -70,7 +73,9 @@ class _RegisterGoogleState extends State<RegisterGoogle> {
             "nama": widget.parUsername.toString(),
             "email": widget.parEmail.toString(),
             "password": _password.text.toString(),
-            "namatoko": _namatoko.text.toString()
+            "namatoko": _namatoko.text.toString(),
+            "alamattoko": _alamat.text.toString(),
+            "nomortoko": _nomorhp.text.toString()
           }).timeout(Duration(seconds: 20),
           onTimeout: (){
             setState(() {
@@ -93,6 +98,9 @@ class _RegisterGoogleState extends State<RegisterGoogle> {
         } else if (getMessage == '2') {
           savePref(1, widget.parEmail);
           Navigator.pushReplacement(context, EnterPage(page: Home()));
+        } else {
+          showToast(getMessage, gravity: Toast.CENTER, duration: Toast.LENGTH_LONG);
+          return;
         }
         setState(() {
           _isPressed = false;
@@ -106,6 +114,8 @@ class _RegisterGoogleState extends State<RegisterGoogle> {
     setState(() {
       preferences.setInt("value", value);
       preferences.setString("email", emailval);
+      preferences.setString("role", "Trial");
+      preferences.setString("level", "Admin");
       preferences.commit();
     });
   }
@@ -171,6 +181,42 @@ class _RegisterGoogleState extends State<RegisterGoogle> {
                     ),
                   ),
                 ),
+
+                Padding(padding: const EdgeInsets.only(left: 15,top: 20,right: 15),
+                  child: TextFormField(
+                    controller: _alamat,
+                    style: TextStyle(fontFamily: "VarelaRound",fontSize: 15),
+                    decoration: new InputDecoration(
+                      contentPadding: const EdgeInsets.only(top: 1,left: 10,bottom: 1),
+                      focusedBorder: OutlineInputBorder(
+                        borderSide: BorderSide(color: HexColor("#DDDDDD"), width: 1.0),
+                      ),
+                      enabledBorder: OutlineInputBorder(
+                        borderSide: BorderSide(color: HexColor("#DDDDDD"), width: 1.0),
+                      ),
+                      hintText: 'Alamat Toko',
+                    ),
+                  ),
+                ),
+
+                Padding(padding: const EdgeInsets.only(left: 15,top: 20,right: 15),
+                  child: TextFormField(
+                    controller: _nomorhp,
+                    keyboardType: TextInputType.number,
+                    style: TextStyle(fontFamily: "VarelaRound",fontSize: 15),
+                    decoration: new InputDecoration(
+                      contentPadding: const EdgeInsets.only(top: 1,left: 10,bottom: 1),
+                      focusedBorder: OutlineInputBorder(
+                        borderSide: BorderSide(color: HexColor("#DDDDDD"), width: 1.0),
+                      ),
+                      enabledBorder: OutlineInputBorder(
+                        borderSide: BorderSide(color: HexColor("#DDDDDD"), width: 1.0),
+                      ),
+                      hintText: 'Nomor Telpon / HP',
+                    ),
+                  ),
+                ),
+
 
                 Padding(padding: const EdgeInsets.only(left: 15,top: 20,right: 15),
                   child: TextFormField(

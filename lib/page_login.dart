@@ -61,13 +61,16 @@ class _LoginState extends State<Login> {
           headers: {"Accept":"application/json"});
       Map data = jsonDecode(response.body);
       setState(() {
+        int getValue = data["value"];
+        String getRole = data["role"];
+        String getLevel = data["level"];
         if (data["message"].toString() == '1') {
-          savePref(1, parEmail);
+          savePref(1, parEmail, getRole, getLevel);
           Navigator.pushReplacement(context, EnterPage(page: Home()));
           _googleSignIn.signOut();
         } else {
           _googleSignIn.signOut();
-          showToast("Email tidak terdaftar", gravity: Toast.CENTER, duration: Toast.LENGTH_LONG);
+          showToast("Gagal Login", gravity: Toast.CENTER, duration: Toast.LENGTH_LONG);
           return;
         }
       });
@@ -96,23 +99,26 @@ class _LoginState extends State<Login> {
             headers: {"Accept":"application/json"});
         Map data = jsonDecode(response.body);
         setState(() {
-          int getValue = data["value"];
-          if (getValue == 1) {
-            savePref(getValue, _username.text);
+          String getRole = data["role"];
+          String getLevel = data["level"];
+          if (data["message"].toString() == '1') {
+            savePref(1, _username.text, getRole ,getLevel);
             Navigator.pushReplacement(context, EnterPage(page: Home()));
           } else {
-            showToast("Email atau Password salah", gravity: Toast.CENTER, duration: Toast.LENGTH_LONG);
+            showToast("Gagal Login", gravity: Toast.CENTER, duration: Toast.LENGTH_LONG);
             return;
           }
         });
       }
   }
 
-    savePref(int value, String emailval) async {
+    savePref(int value, String emailval, String roleVal, String levelVal) async {
       SharedPreferences preferences = await SharedPreferences.getInstance();
       setState(() {
         preferences.setInt("value", value);
         preferences.setString("email", emailval);
+        preferences.setString("role", roleVal);
+        preferences.setString("level", levelVal);
         preferences.commit();
       });
     }

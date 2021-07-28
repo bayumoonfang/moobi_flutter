@@ -4,6 +4,7 @@ import 'dart:convert';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:hexcolor/hexcolor.dart';
 import 'package:moobi_flutter/Helper/api_link.dart';
@@ -16,17 +17,19 @@ import 'package:toast/toast.dart';
 import 'package:http/http.dart' as http;
 
 
-class MetodeBayarInsert extends StatefulWidget{
+class OutletInsert extends StatefulWidget{
 
   @override
-  _MetodeBayarInsert createState() => _MetodeBayarInsert();
+  _OutletInsert createState() => _OutletInsert();
 }
 
 
-class _MetodeBayarInsert extends State<MetodeBayarInsert> {
+class _OutletInsert extends State<OutletInsert> {
 
   final _valNama = TextEditingController();
-  final _valDetail = TextEditingController();
+  final _valAlamat = TextEditingController();
+  final _valKota = TextEditingController();
+  final _valTelpon = TextEditingController();
   void showToast(String msg, {int duration, int gravity}) {
     Toast.show(msg, context, duration: duration, gravity: gravity);
   }
@@ -75,22 +78,25 @@ class _MetodeBayarInsert extends State<MetodeBayarInsert> {
 
   doSimpan() async {
     FocusScope.of(context).requestFocus(FocusNode());
-    final response = await http.post(applink+"api_model.php?act=add_paymentmethod", body: {
-      "paymentmethod_nama": _valNama.text,
-      "paymentmethod_type" : selectedType,
-      "paymentmethod_detail" : _valDetail.text,
-      "paymentmethod_branch" : getBranch
+    final response = await http.post(applink+"api_model.php?act=add_outlet", body: {
+      "outlet_nama": _valNama.text,
+      "outlet_alamat" : _valAlamat.text,
+      "outlet_kota" : _valKota.text,
+      "outlet_telpon" : _valTelpon.text,
+      "outlet_branch" : getBranch
     });
     Map data = jsonDecode(response.body);
     setState(() {
       if (data["message"].toString() == '0') {
-        showToast("Metode Bayar sudah ada", gravity: Toast.BOTTOM,
+        showToast("Outlet Bayar sudah ada", gravity: Toast.BOTTOM,
             duration: Toast.LENGTH_LONG);
         return false;
       } else {
         _valNama.clear();
-        _valDetail.clear();
-        showToast("Metode Bayar berhasil ditambah", gravity: Toast.BOTTOM,
+        _valAlamat.clear();
+        _valKota.clear();
+        _valTelpon.clear();
+        showToast("Outlet berhasil ditambah", gravity: Toast.BOTTOM,
             duration: Toast.LENGTH_LONG);
         return false;
       }
@@ -100,7 +106,7 @@ class _MetodeBayarInsert extends State<MetodeBayarInsert> {
 
   _showAlert() {
     FocusScope.of(context).requestFocus(FocusNode());
-    if (_valNama.text == "" || _valDetail.text == "" || selectedType == "") {
+    if (_valNama.text == "" || _valAlamat.text == "" || _valKota.text == "" || _valTelpon.text == "") {
       showToast("Form tidak boleh kosong", gravity: Toast.BOTTOM,
           duration: Toast.LENGTH_LONG);
       return false;
@@ -154,7 +160,7 @@ class _MetodeBayarInsert extends State<MetodeBayarInsert> {
         appBar: new AppBar(
           backgroundColor: HexColor("#602d98"),
           title: Text(
-            "Tambah Metode Bayar ",
+            "Tambah Outlet ",
             style: TextStyle(
                 color: Colors.white, fontFamily: 'VarelaRound', fontSize: 16),
           ),
@@ -190,7 +196,7 @@ class _MetodeBayarInsert extends State<MetodeBayarInsert> {
                       children: [
                         Align(alignment: Alignment.centerLeft,child: Padding(
                           padding: const EdgeInsets.only(left: 0,top: 15),
-                          child: Text("Nama Pembayaran",style: TextStyle(fontWeight: FontWeight.bold,fontFamily: "VarelaRound",
+                          child: Text("Nama Outlet",style: TextStyle(fontWeight: FontWeight.bold,fontFamily: "VarelaRound",
                               fontSize: 12,color: HexColor("#0074D9")),),
                         ),),
                         Align(alignment: Alignment.centerLeft,child: Padding(
@@ -200,7 +206,41 @@ class _MetodeBayarInsert extends State<MetodeBayarInsert> {
                             textCapitalization: TextCapitalization.sentences,
                             decoration: InputDecoration(
                               contentPadding: const EdgeInsets.only(top:2),
-                              hintText: 'Contoh : Bank BCA, Bank BRI',
+                              labelText: '',
+                              floatingLabelBehavior: FloatingLabelBehavior.always,
+                              hintStyle: TextStyle(fontFamily: "VarelaRound", color: HexColor("#c4c4c4")),
+                              enabledBorder: UnderlineInputBorder(
+                                borderSide: BorderSide(color: HexColor("#DDDDDD")),
+                              ),
+                              focusedBorder: UnderlineInputBorder(
+                                borderSide: BorderSide(color: HexColor("#8c8989")),
+                              ),
+                              border: UnderlineInputBorder(
+                                borderSide: BorderSide(color: HexColor("#DDDDDD")),
+                              ),
+                            ),
+                          ),
+                        ),),
+                      ],
+                    )
+                ),
+
+                Padding(padding: const EdgeInsets.only(left: 15,top: 10,right: 15),
+                    child: Column(
+                      children: [
+                        Align(alignment: Alignment.centerLeft,child: Padding(
+                          padding: const EdgeInsets.only(left: 0,top: 15),
+                          child: Text("Alamat Outlet",style: TextStyle(fontWeight: FontWeight.bold,fontFamily: "VarelaRound",
+                              fontSize: 12,color: HexColor("#0074D9")),),
+                        ),),
+                        Align(alignment: Alignment.centerLeft,child: Padding(
+                          padding: const EdgeInsets.only(left: 0),
+                          child: TextFormField(
+                            controller: _valAlamat,
+                            maxLines: 5,
+                            textCapitalization: TextCapitalization.sentences,
+                            decoration: InputDecoration(
+                              contentPadding: const EdgeInsets.only(top:2),
                               labelText: '',
                               floatingLabelBehavior: FloatingLabelBehavior.always,
                               hintStyle: TextStyle(fontFamily: "VarelaRound", color: HexColor("#c4c4c4")),
@@ -226,33 +266,31 @@ class _MetodeBayarInsert extends State<MetodeBayarInsert> {
                       children: [
                         Align(alignment: Alignment.centerLeft,child: Padding(
                           padding: const EdgeInsets.only(left: 0,top: 15),
-                          child: Text("Type Pembayaran",style: TextStyle(fontWeight: FontWeight.bold,fontFamily: "VarelaRound",
+                          child: Text("Kota Outlet",style: TextStyle(fontWeight: FontWeight.bold,fontFamily: "VarelaRound",
                               fontSize: 12,color: HexColor("#0074D9")),),
                         ),),
                         Align(alignment: Alignment.centerLeft,child: Padding(
-                            padding: const EdgeInsets.only(left: 0),
-                            child: Padding(
-                              padding: const EdgeInsets.only(top:10),
-                              child: DropdownButton(
-                                isExpanded: false,
-                                hint: Text("Pilih Type Pembayaran",style: TextStyle(
-                                    fontFamily: "VarelaRound", fontSize: 14
-                                )),
-                                value: selectedType,
-                                items: typeList.map((myitem){
-                                  return DropdownMenuItem(
-                                      value: myitem['DATA'],
-                                      child: Text(myitem['DATA'])
-                                  );
-                                }).toList(),
-                                onChanged: (value) {
-                                  setState(() {
-                                    FocusScope.of(context).requestFocus(FocusNode());
-                                    selectedType = value;
-                                  });
-                                },
+                          padding: const EdgeInsets.only(left: 0),
+                          child: TextFormField(
+                            controller: _valKota,
+                            textCapitalization: TextCapitalization.sentences,
+                            decoration: InputDecoration(
+                              contentPadding: const EdgeInsets.only(top:2),
+                              labelText: '',
+                              hintText: 'Contoh : Surabaya, Jakarta, dll',
+                              floatingLabelBehavior: FloatingLabelBehavior.always,
+                              hintStyle: TextStyle(fontFamily: "VarelaRound", color: HexColor("#c4c4c4")),
+                              enabledBorder: UnderlineInputBorder(
+                                borderSide: BorderSide(color: HexColor("#DDDDDD")),
                               ),
-                            )
+                              focusedBorder: UnderlineInputBorder(
+                                borderSide: BorderSide(color: HexColor("#8c8989")),
+                              ),
+                              border: UnderlineInputBorder(
+                                borderSide: BorderSide(color: HexColor("#DDDDDD")),
+                              ),
+                            ),
+                          ),
                         ),),
                       ],
                     )
@@ -263,17 +301,17 @@ class _MetodeBayarInsert extends State<MetodeBayarInsert> {
                       children: [
                         Align(alignment: Alignment.centerLeft,child: Padding(
                           padding: const EdgeInsets.only(left: 0,top: 15),
-                          child: Text("Detail",style: TextStyle(fontWeight: FontWeight.bold,fontFamily: "VarelaRound",
+                          child: Text("Telpon Outlet",style: TextStyle(fontWeight: FontWeight.bold,fontFamily: "VarelaRound",
                               fontSize: 12,color: HexColor("#0074D9")),),
                         ),),
                         Align(alignment: Alignment.centerLeft,child: Padding(
                           padding: const EdgeInsets.only(left: 0),
                           child: TextFormField(
-                            controller: _valDetail,
+                            controller: _valTelpon,
+                            keyboardType: TextInputType.number,
                             textCapitalization: TextCapitalization.sentences,
                             decoration: InputDecoration(
                               contentPadding: const EdgeInsets.only(top:2),
-                              hintText: 'Contoh : No Rekening, dll',
                               labelText: '',
                               floatingLabelBehavior: FloatingLabelBehavior.always,
                               hintStyle: TextStyle(fontFamily: "VarelaRound", color: HexColor("#c4c4c4")),
