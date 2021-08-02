@@ -185,6 +185,7 @@ class _RegisterGoogleState extends State<RegisterGoogle> {
                 Padding(padding: const EdgeInsets.only(left: 15,top: 20,right: 15),
                   child: TextFormField(
                     controller: _alamat,
+                    textCapitalization: TextCapitalization.words,
                     style: TextStyle(fontFamily: "VarelaRound",fontSize: 15),
                     decoration: new InputDecoration(
                       contentPadding: const EdgeInsets.only(top: 1,left: 10,bottom: 1),

@@ -30,6 +30,8 @@ class _RegisterState extends State<Register> {
   final _email = TextEditingController();
   final _password = TextEditingController();
   final _namatoko = TextEditingController();
+  final _alamattoko = TextEditingController();
+  final _nomortoko = TextEditingController();
   GoogleSignIn _googleSignIn =  GoogleSignIn(scopes: ['email']);
   String authEmail = '';
   String autUsername = '';
@@ -85,7 +87,7 @@ class _RegisterState extends State<Register> {
   }
 
   _daftar() async {
-    if (_nama.text == '' || _email.text == '' || _password.text == '' || _namatoko.text == '') {
+    if (_nama.text == '' || _email.text == '' || _password.text == '' || _namatoko.text == '' || _alamattoko.text == '' || _nomortoko.text == '') {
       showToast("Form tidak boleh kosong", gravity: Toast.CENTER, duration: Toast.LENGTH_LONG);
       return;
     }  else {
@@ -95,7 +97,9 @@ class _RegisterState extends State<Register> {
             "nama": _nama.text.toString(),
             "email": _email.text.toString(),
             "password": _password.text.toString(),
-            "namatoko": _namatoko.text.toString()
+            "namatoko": _namatoko.text.toString(),
+            "alamattoko": _alamattoko.text.toString(),
+            "nomortoko": _nomortoko.text.toString()
           });
           Map showdata = jsonDecode(response.body);
           getMessage = showdata["message"].toString();
@@ -155,6 +159,7 @@ class _RegisterState extends State<Register> {
                         Padding(padding: const EdgeInsets.only(left: 15,top: 10,right: 15),
                           child: TextFormField(
                             controller: _nama,
+                            textCapitalization: TextCapitalization.words,
                             style: TextStyle(fontFamily: "VarelaRound",fontSize: 15),
                             decoration: new InputDecoration(
                               contentPadding: const EdgeInsets.only(top: 1,left: 10,bottom: 1),
@@ -165,6 +170,41 @@ class _RegisterState extends State<Register> {
                                 borderSide: BorderSide(color: HexColor("#DDDDDD"), width: 1.0),
                               ),
                               hintText: 'Nama Lengkap',
+                            ),
+                          ),
+                        ),
+                        Padding(padding: const EdgeInsets.only(left: 15,top: 10,right: 15),
+                          child: TextFormField(
+                            controller: _alamattoko,
+                            textCapitalization: TextCapitalization.words,
+                            keyboardType: TextInputType.text,
+                            style: TextStyle(fontFamily: "VarelaRound",fontSize: 15),
+                            decoration: new InputDecoration(
+                              contentPadding: const EdgeInsets.only(top: 1,left: 10,bottom: 1),
+                              focusedBorder: OutlineInputBorder(
+                                borderSide: BorderSide(color: HexColor("#DDDDDD"), width: 1.0),
+                              ),
+                              enabledBorder: OutlineInputBorder(
+                                borderSide: BorderSide(color: HexColor("#DDDDDD"), width: 1.0),
+                              ),
+                              hintText: 'Alamat',
+                            ),
+                          ),
+                        ),
+                        Padding(padding: const EdgeInsets.only(left: 15,top: 10,right: 15),
+                          child: TextFormField(
+                            controller: _nomortoko,
+                            keyboardType: TextInputType.number,
+                            style: TextStyle(fontFamily: "VarelaRound",fontSize: 15),
+                            decoration: new InputDecoration(
+                              contentPadding: const EdgeInsets.only(top: 1,left: 10,bottom: 1),
+                              focusedBorder: OutlineInputBorder(
+                                borderSide: BorderSide(color: HexColor("#DDDDDD"), width: 1.0),
+                              ),
+                              enabledBorder: OutlineInputBorder(
+                                borderSide: BorderSide(color: HexColor("#DDDDDD"), width: 1.0),
+                              ),
+                              hintText: 'Nomor Telpon',
                             ),
                           ),
                         ),
@@ -219,6 +259,7 @@ class _RegisterState extends State<Register> {
                         Padding(padding: const EdgeInsets.only(left: 15,top: 10,right: 15),
                           child: TextFormField(
                             controller: _namatoko,
+                            textCapitalization: TextCapitalization.words,
                             style: TextStyle(fontFamily: "VarelaRound",fontSize: 15),
                             decoration: new InputDecoration(
                               contentPadding: const EdgeInsets.only(top: 1,left: 10,bottom: 1),

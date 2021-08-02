@@ -6,6 +6,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:hexcolor/hexcolor.dart';
+import 'package:moobi_flutter/Gudang/page_gudangdetail.dart';
 import 'package:moobi_flutter/Gudang/page_gudanginsert.dart';
 import 'package:moobi_flutter/Helper/app_helper.dart';
 import 'package:moobi_flutter/helper/api_link.dart';
@@ -247,7 +248,7 @@ class _GudangState extends State<Gudang> {
                 children: <Widget>[
                   InkWell(
                     onTap: () {
-
+                      Navigator.push(context, ExitPage(page: GudangDetail(snapshot.data[i]["c"].toString())));
                     },
                     child: ListTile(
                         leading:
