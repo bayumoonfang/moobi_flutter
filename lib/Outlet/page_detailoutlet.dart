@@ -1,5 +1,6 @@
 
 
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:flutter/cupertino.dart';
@@ -11,6 +12,9 @@ import 'package:moobi_flutter/Helper/api_link.dart';
 import 'package:moobi_flutter/Helper/app_helper.dart';
 import 'package:moobi_flutter/Helper/color_based.dart';
 import 'package:moobi_flutter/Helper/page_route.dart';
+import 'package:moobi_flutter/Outlet/page_outletchangegudang.dart';
+import 'package:moobi_flutter/Outlet/page_riwayattransaksi.dart';
+import 'package:moobi_flutter/Outlet/page_ubahoutlet.dart';
 import 'package:moobi_flutter/page_login.dart';
 import 'package:toast/toast.dart';
 import 'package:http/http.dart' as http;
@@ -25,7 +29,8 @@ class DetailOutlet extends StatefulWidget {
 
 class _DetailOutlet extends State<DetailOutlet> {
   List data;
-  bool _isvisible = true;
+  List data2;
+  bool _status = true;
 
   void showToast(String msg, {int duration, int gravity}) {
     Toast.show(msg, context, duration: duration, gravity: gravity);}
@@ -66,12 +71,16 @@ class _DetailOutlet extends State<DetailOutlet> {
       getOutletCity = data["c"].toString();
       getOutletPhone = data["d"].toString();
       getOutletStatus = data["f"].toString();
+      if (getOutletStatus == 'Aktif') {
+        _status = true;
+      } else {
+        _status = false;
+      }
       getOutletWarehouse = data["g"].toString();
       getLegalNama = data["h"].toString();
       getStoreCode = data["e"].toString();
       getStoreID = data["i"].toString();
       getStoreWarehouse = data["j"].toString();
-      getStoreDefault = data["k"].toString();
     });
   }
 
@@ -99,7 +108,8 @@ class _DetailOutlet extends State<DetailOutlet> {
 
 
   Future<bool> _onWillPop() async {
-    Navigator.pop(context);}
+    Navigator.pop(context);
+  }
 
 
   _prepare() async {
@@ -109,6 +119,15 @@ class _DetailOutlet extends State<DetailOutlet> {
     await _outletSalesProduct();
   }
 
+
+
+  FutureOr onGoBack(dynamic value) {
+    getDataGudangDefault();
+    _outletDetail();
+    setState(() {});
+  }
+
+
   @override
   void initState() {
     super.initState();
@@ -116,23 +135,11 @@ class _DetailOutlet extends State<DetailOutlet> {
   }
 
 
-  void _gantiStatusToko() {
-    var url = applink+"api_model.php?act=action_changestatustoko";
-    http.post(url,
-        body: {
-          "id": getStoreID
-        });
-    showToast("Status Toko berhasil dirubah", gravity: Toast.BOTTOM,
-        duration: Toast.LENGTH_LONG);
-    setState(() {
-      _outletDetail();
-    });
-  }
 
   var client = http.Client();
-  Future<dynamic> getDataStatusDefault() async {
+  Future<dynamic> getDataGudangDefault() async {
     http.Response response = await client.get(
-        Uri.parse(applink+"api_model.php?act=getdata_storestatusdefault&id="
+        Uri.parse(applink+"api_model.php?act=getdata_gudangdefault&id="
             +widget.idOutlet),
         headers: {
           "Accept":"application/json",
@@ -153,18 +160,7 @@ class _DetailOutlet extends State<DetailOutlet> {
     return json.decode(response.body);
   }
 
-  void _gantiStatusDefault() {
-    var url = applink+"api_model.php?act=action_changestatusdefaulttoko";
-    http.post(url,
-        body: {
-          "id": getStoreID
-        });
-    showToast("Status Toko berhasil dirubah", gravity: Toast.BOTTOM,
-        duration: Toast.LENGTH_LONG);
-    setState(() {
-      getDataStatusDefault();
-    });
-  }
+
 
   void _gantiStatus() {
     var url = applink+"api_model.php?act=action_changestatustoko";
@@ -174,11 +170,10 @@ class _DetailOutlet extends State<DetailOutlet> {
         });
     showToast("Status Toko berhasil dirubah", gravity: Toast.BOTTOM,
         duration: Toast.LENGTH_LONG);
-    setState(() {
-      getDataStatusToko();
-    });
+   setState(() {
+     _outletDetail();
+   });
   }
-
 
 
 
@@ -275,13 +270,18 @@ class _DetailOutlet extends State<DetailOutlet> {
                             fontWeight: FontWeight.bold,
                             fontSize: 13),
                       ),
-                      Text("Lihat Riwayat",
+                      InkWell(
+                              onTap:() {
+                                Navigator.push(context, ExitPage(page: RiwayatTransaksiOutlet(widget.idOutlet)));
+                        },
+                      child :
+                          Text("Lihat Riwayat",
                           style: TextStyle(
                               fontFamily: 'VarelaRound',
                               color: HexColor("#02ac0e"),
                               fontWeight: FontWeight.bold,
                               fontSize: 13)),
-
+                        )
                     ],
                   )),
 
@@ -400,18 +400,34 @@ class _DetailOutlet extends State<DetailOutlet> {
                   child: InkWell(
                     child: ListTile(
                       onTap: (){
-                        //Navigator.pushReplacement(context, ExitPage(page: ProfileUbahNama()));
+                        Navigator.push(context, ExitPage(page: OutletChangeGudang(getStoreID))).then(onGoBack);
                       },
                       title: Column(
                         children: [
                           Align(alignment: Alignment.centerLeft,
                             child: Text("Gudang Default", style: TextStyle(color: HexColor("#72757a"),
                                 fontFamily: 'VarelaRound',fontSize: 11,)),),
-                          Padding(padding: const EdgeInsets.only(top:5),
-                            child: Align(alignment: Alignment.centerLeft,
-                              child: Text(getStoreWarehouse, style: TextStyle(
-                                fontFamily: 'VarelaRound',
-                                fontSize: 15,)),),)
+                          Align(
+                            alignment: Alignment.centerLeft,
+                            child: Container(
+                              padding: const EdgeInsets.only(top:5 ),
+                              height: 25,
+                              child: FutureBuilder(
+                                future: getDataGudangDefault(),
+                                builder: (context, snapshot2){
+                                  return ListView.builder(
+                                    itemCount: snapshot2.data == null ? 0 : snapshot2.data.length,
+                                    itemBuilder: (context, i) {
+                                      return Align(alignment: Alignment.centerLeft,
+                                          child: Text(snapshot2.data[i]["a"].toString(), style: TextStyle(
+                                            fontFamily: 'VarelaRound',
+                                            fontSize: 15,)));
+                                    },
+                                  );
+                                },
+                              ),
+                            ),
+                          )
                         ],
                       ),
                       trailing: FaIcon(FontAwesomeIcons.angleRight,color: HexColor(third_color),size: 23,),
@@ -425,7 +441,7 @@ class _DetailOutlet extends State<DetailOutlet> {
                   child: InkWell(
                     child: ListTile(
                       onTap: (){
-                        //Navigator.pushReplacement(context, ExitPage(page: ProfileUbahNama()));
+                        Navigator.push(context, ExitPage(page: UbahOutlet(getStoreID))).then(onGoBack);
                       },
                       title: Text("Ubah Keterangan Toko",style: TextStyle(
                           color: Colors.black, fontFamily: 'VarelaRound',fontSize: 15)),
@@ -436,73 +452,6 @@ class _DetailOutlet extends State<DetailOutlet> {
 
               Padding(padding: const EdgeInsets.only(top: 5,left: 25,right: 25),
                 child: Divider(height: 3,),),
-
-
-              Padding(padding: const EdgeInsets.only(left: 9,right: 25),
-                child: ListTile(
-                    onTap: (){
-                      //Navigator.pushReplacement(context, ExitPage(page: ProfileUbahNama()));
-                    },
-                    title: Padding(padding: const EdgeInsets.only(top: 10),
-                      child: Column(
-                        children: [
-                            Align(alignment: Alignment.centerLeft,child:
-                            Text("Toko Default", style: TextStyle(
-                              fontFamily: 'VarelaRound',fontSize: 15,)),),
-                            Padding(padding: const EdgeInsets.only(top: 5),
-                            child:    Align(alignment: Alignment.centerLeft,child:
-                            Text("Dengan pengaturan ini , anda akan otomatis memakai toko ini untuk berjualan",
-                                style: TextStyle(fontFamily: 'VarelaRound',fontSize: 13,color: HexColor("#72757a"),)),),)
-                        ],
-                      ),),
-                    trailing:
-                    Container(
-                        alignment: Alignment.centerRight,
-                        width: 50,
-                        child:
-                        FutureBuilder(
-                          future: getDataStatusDefault(),
-                          builder: (context, snapshot) {
-                            return ListView.builder(
-                              itemCount: snapshot.data == null ? 0 : snapshot.data.length,
-                              itemBuilder: (context, i) {
-                               return InkWell(
-                                    onTap: () {
-                                      _gantiStatusDefault();
-                                    },
-                                    child:
-                                    snapshot.data[i]["a"] == 'Yes' ?
-                                    Padding(padding: const EdgeInsets.only(top: 10),child:
-                                    Align(
-                                      alignment: Alignment
-                                          .centerRight,
-                                      child: FaIcon(
-                                        FontAwesomeIcons.toggleOn,
-                                        size: 30,
-                                        color: HexColor("#02ac0e"),),
-                                    ),)
-                                        :
-                                    Padding(padding: const EdgeInsets.only(top: 10),child:
-                                    Align(
-                                      alignment: Alignment
-                                          .centerRight,
-                                      child: FaIcon(
-                                        FontAwesomeIcons.toggleOff,
-                                        size: 30,),
-                                    ))
-                                );
-                              },
-                            );
-                          },
-                        )
-
-                    )
-                ),
-              ),
-              Padding(padding: const EdgeInsets.only(top: 5,left: 25,right: 25),
-                child: Divider(height: 3,),),
-
-
 
               Padding(padding: const EdgeInsets.only(left: 9,right: 25),
                   child: ListTile(
@@ -526,41 +475,21 @@ class _DetailOutlet extends State<DetailOutlet> {
                           alignment: Alignment.centerRight,
                           width: 50,
                           child:
-                          FutureBuilder(
-                            future: getDataStatusToko(),
-                            builder: (context, snapshot) {
-                              return ListView.builder(
-                                itemCount: snapshot.data == null ? 0 : snapshot.data.length,
-                                itemBuilder: (context, i) {
-                                  return InkWell(
-                                      onTap: () {
-                                        _gantiStatus();
-                                      },
-                                      child:
-                                      snapshot.data[i]["a"] == 'Aktif' ?
-                                      Padding(padding: const EdgeInsets.only(top: 10),child:
-                                      Align(
-                                        alignment: Alignment
-                                            .centerRight,
-                                        child: FaIcon(
-                                          FontAwesomeIcons.toggleOn,
-                                          size: 30,
-                                          color: HexColor("#02ac0e"),),
-                                      ),)
-                                          :
-                                      Padding(padding: const EdgeInsets.only(top: 10),child:
-                                      Align(
-                                        alignment: Alignment
-                                            .centerRight,
-                                        child: FaIcon(
-                                          FontAwesomeIcons.toggleOff,
-                                          size: 30,),
-                                      ))
-                                  );
-                                },
-                              );
-                            },
-                          )
+                          Padding(padding: const EdgeInsets.only(top: 10),child:
+                          Align(
+                            alignment: Alignment
+                                .centerRight,
+                            child: Switch(
+                              value: getOutletStatus == 'Aktif' ? true : false,
+                              onChanged: (value) {
+                                setState(() {
+                                  _gantiStatus();
+                                });
+                              },
+                              activeTrackColor: Colors.lightGreenAccent,
+                              activeColor: Colors.green,
+                            ),
+                          ),)
                       )
                     ),
                   ),
