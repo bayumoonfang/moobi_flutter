@@ -13,6 +13,7 @@ import 'package:moobi_flutter/Helper/app_helper.dart';
 import 'package:moobi_flutter/Helper/color_based.dart';
 import 'package:moobi_flutter/Helper/page_route.dart';
 import 'package:moobi_flutter/Outlet/page_outletchangegudang.dart';
+import 'package:moobi_flutter/Outlet/page_riwayatjualproduk.dart';
 import 'package:moobi_flutter/Outlet/page_riwayattransaksi.dart';
 import 'package:moobi_flutter/Outlet/page_ubahoutlet.dart';
 import 'package:moobi_flutter/page_login.dart';
@@ -87,7 +88,7 @@ class _DetailOutlet extends State<DetailOutlet> {
   String getStoreSales = '0';
   _outletSalesTotal() async {
     final response = await http.get(
-        applink+"api_model.php?act=outletsalestotal&id="+getStoreCode);
+        applink+"api_model.php?act=outletsalestotal&id="+widget.idOutlet);
     Map data = jsonDecode(response.body);
     setState(() {
       getStoreSales = data["a"].toString();
@@ -237,7 +238,7 @@ class _DetailOutlet extends State<DetailOutlet> {
                           color: HexColor("#eaffee"),
                           elevation: 1,
                           child: Text(getLegalNama,style: TextStyle(
-                              color: HexColor("#00ac48"), fontFamily: 'VarelaRound',fontSize: 9)),
+                              color: HexColor("#00ac48"), fontFamily: 'VarelaRound',fontSize: 11)),
                         ),
                       )
                     ],
@@ -338,12 +339,17 @@ class _DetailOutlet extends State<DetailOutlet> {
                                 fontWeight: FontWeight.bold,
                                 fontSize: 13),
                           ),
+                      InkWell(
+                        onTap:() {
+                          Navigator.push(context, ExitPage(page: RiwayatJualProduk(widget.idOutlet)));
+                        },
+                        child :
                           Text("Lihat Riwayat",
                               style: TextStyle(
                                   fontFamily: 'VarelaRound',
                                   color: HexColor("#02ac0e"),
                                   fontWeight: FontWeight.bold,
-                                  fontSize: 13)),
+                                  fontSize: 13))),
 
                         ],
                       )),
@@ -486,7 +492,7 @@ class _DetailOutlet extends State<DetailOutlet> {
                                   _gantiStatus();
                                 });
                               },
-                              activeTrackColor: Colors.lightGreenAccent,
+                              activeTrackColor: HexColor("#bbffce"),
                               activeColor: Colors.green,
                             ),
                           ),)

@@ -16,6 +16,7 @@ class AppHelper {
   var getTahun = new DateFormat.y().format(today);
 
 
+
   Future<String> getConnect() async {
     Checkconnection().check().then((internet){
       if (internet != null && internet) {} else {
