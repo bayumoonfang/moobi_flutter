@@ -101,6 +101,13 @@ class _Outlet extends State<Outlet> {
     });
   }
 
+
+  FutureOr onGoBack(dynamic value) {
+    getData();
+    setState(() {});
+  }
+
+
   _showDelete(String valueParse) {
     showDialog(
         context: context,
@@ -208,27 +215,7 @@ class _Outlet extends State<Outlet> {
                               child: CircularProgressIndicator()
                           );
                         } else {
-                          return snapshot.data.length == 0 ?
-                          Center(
-                              child :
-                              Column(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                crossAxisAlignment: CrossAxisAlignment.center,
-                                children: <Widget>[
-                                  new Text(
-                                    "Data tidak ditemukan",
-                                    style: new TextStyle(
-                                        fontFamily: 'VarelaRound', fontSize: 18),
-                                  ),
-                                  new Text(
-                                    "Silahkan lakukan input data",
-                                    style: new TextStyle(
-                                        fontFamily: 'VarelaRound', fontSize: 12),
-                                  ),
-                                ],
-                              ))
-                              :
-                          ListView.builder(
+                          return ListView.builder(
                             itemCount: snapshot.data == null ? 0 : snapshot.data.length,
                             padding: const EdgeInsets.only(left: 10,right: 15),
                             itemBuilder: (context, i) {
@@ -268,7 +255,7 @@ class _Outlet extends State<Outlet> {
                                           height: 40,
                                           child: OutlinedButton(
                                             onPressed: (){
-                                              Navigator.push(context, ExitPage(page: DetailOutlet(snapshot.data[i]["a"].toString())));
+                                              Navigator.push(context, ExitPage(page: DetailOutlet(snapshot.data[i]["a"].toString()))).then(onGoBack);
                                             },
                                             child: Text("Lihat Outlet",style: TextStyle(
                                                 color: Colors.black, fontFamily: 'VarelaRound')),

@@ -200,69 +200,56 @@ class _MetodeBayar extends State<MetodeBayar> {
                     child: FutureBuilder(
                       future: getData(),
                       builder: (context, snapshot){
+                      if (snapshot.hasData) {
                         if (snapshot.data == null) {
-                          return Center(
-                              child: CircularProgressIndicator()
-                          );
-                        } else {
-                          return snapshot.data.length == 0 ?
-                          Center(
-                              child :
-                              Column(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                crossAxisAlignment: CrossAxisAlignment.center,
-                                children: <Widget>[
-                                  new Text(
-                                    "Data tidak ditemukan",
-                                    style: new TextStyle(
-                                        fontFamily: 'VarelaRound', fontSize: 18),
-                                  ),
-                                  new Text(
-                                    "Silahkan lakukan input data",
-                                    style: new TextStyle(
-                                        fontFamily: 'VarelaRound', fontSize: 12),
-                                  ),
-                                ],
-                              ))
-                              :
-                          ListView.builder(
-                            itemCount: snapshot.data == null ? 0 : snapshot.data.length,
-                            padding: const EdgeInsets.only(left: 10,right: 15),
-                            itemBuilder: (context, i) {
-                              return Card(
-                                child: Column(
-                                  children: [
-                                    Padding(padding: const EdgeInsets.only(top: 10)),
-                                    ListTile(
-                                      title: Text(snapshot.data[i]["c"].toString(), style: new TextStyle(
-                                          fontFamily: 'VarelaRound', fontSize: 16,fontWeight: FontWeight.bold),),
-                                      trailing: InkWell(
-                                        onTap: (){
-                                          FocusScope.of(context).requestFocus(FocusNode());
-                                          _showDelete(snapshot.data[i]["a"].toString());
-                                        },
-                                        child: Padding(padding: const EdgeInsets.only(right: 10),
-                                        child: FaIcon(FontAwesomeIcons.trashAlt,size: 17,color: Colors.redAccent,),)
-                                      ),
-                                      subtitle: Column(
-                                        children: [
-                                          Padding(padding: const EdgeInsets.only(top: 5),
-                                          child:Align(alignment: Alignment.centerLeft,
-                                          child: Text(snapshot.data[i]["d"].toString(), style: TextStyle(fontFamily: 'VarelaRound')),)),
-                                          Padding(padding: const EdgeInsets.only(top: 5),
-                                          child: Align(alignment: Alignment.centerLeft,
-                                            child: Text(snapshot.data[i]["e"].toString(), style: TextStyle(fontFamily: 'VarelaRound')),),)
-                                        ],
-                                      ),
-                                    ),
-                                    Padding(padding: const EdgeInsets.only(bottom: 10))
+                                    return Center(
+                                        child: CircularProgressIndicator()
+                                    );
+                                  } else {
+                                    return
+                                      ListView.builder(
+                                        itemCount: snapshot.data == null ? 0 : snapshot.data.length,
+                                        padding: const EdgeInsets.only(left: 10,right: 15),
+                                        itemBuilder: (context, i) {
+                                          return Card(
+                                              child: Column(
+                                                children: [
+                                                  Padding(padding: const EdgeInsets.only(top: 10)),
+                                                  ListTile(
+                                                    title: Text(snapshot.data[i]["c"].toString(), style: new TextStyle(
+                                                        fontFamily: 'VarelaRound', fontSize: 16,fontWeight: FontWeight.bold),),
+                                                    trailing: InkWell(
+                                                        onTap: (){
+                                                          FocusScope.of(context).requestFocus(FocusNode());
+                                                          _showDelete(snapshot.data[i]["a"].toString());
+                                                        },
+                                                        child: Padding(padding: const EdgeInsets.only(right: 10),
+                                                          child: FaIcon(FontAwesomeIcons.trashAlt,size: 17,color: Colors.redAccent,),)
+                                                    ),
+                                                    subtitle: Column(
+                                                      children: [
+                                                        Padding(padding: const EdgeInsets.only(top: 5),
+                                                            child:Align(alignment: Alignment.centerLeft,
+                                                              child: Text(snapshot.data[i]["d"].toString(), style: TextStyle(fontFamily: 'VarelaRound')),)),
+                                                        Padding(padding: const EdgeInsets.only(top: 5),
+                                                          child: Align(alignment: Alignment.centerLeft,
+                                                            child: Text(snapshot.data[i]["e"].toString(), style: TextStyle(fontFamily: 'VarelaRound')),),)
+                                                      ],
+                                                    ),
+                                                  ),
+                                                  Padding(padding: const EdgeInsets.only(bottom: 10))
 
-                                  ],
-                                )
-                              );
-                            },
-                          );
-                        }
+                                                ],
+                                              )
+                                          );
+                                        },
+                                      );
+                                  }
+                                } else {
+                                      return Center(
+                                          child: CircularProgressIndicator()
+                                      );
+                                  }
                       },
                     )
                 ),

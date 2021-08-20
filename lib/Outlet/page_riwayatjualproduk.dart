@@ -8,6 +8,7 @@ import 'dart:convert';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:hexcolor/hexcolor.dart';
+import 'package:intl/intl.dart';
 import 'package:moobi_flutter/Helper/api_link.dart';
 import 'package:moobi_flutter/Helper/color_based.dart';
 import 'package:toast/toast.dart';
@@ -31,7 +32,6 @@ class _RiwayatJualProduk extends State<RiwayatJualProduk> {
     Toast.show(msg, context, duration: duration, gravity: gravity);
   }
 
-
   String limit = "30";
   int temp_limit;
 
@@ -49,7 +49,7 @@ class _RiwayatJualProduk extends State<RiwayatJualProduk> {
     super.initState();
     getDataProduk();
     _scrollController.addListener(() {
-      print(_scrollController.position.pixels);
+      //print(applink+"api_model.php?act=getdata_outletjualproduk&id="+widget.idOutlet+"&limit="+limit+"&filter="+filter);
       if(_scrollController.position.pixels == _scrollController.position.maxScrollExtent){
         setState(() {
           temp_limit = int.parse(limit) + 5;
@@ -65,6 +65,17 @@ class _RiwayatJualProduk extends State<RiwayatJualProduk> {
   void dispose() {
     _scrollController.dispose();
     super.dispose();
+  }
+
+  var refreshKey = GlobalKey<RefreshIndicatorState>();
+  Future refreshData() async {
+    getDatas.clear();
+    refreshKey.currentState?.show();
+    await Future.delayed(Duration(seconds: 2));
+    setState(() {
+      getDataProduk();
+    });
+    return null;
   }
 
 
@@ -83,6 +94,7 @@ class _RiwayatJualProduk extends State<RiwayatJualProduk> {
         _isVisible = false;
       });
     }
+    //print(applink+"api_model.php?act=getdata_outletjualproduk&id="+widget.idOutlet+"&limit="+limit+"&filter="+filter);
   }
 
 
@@ -123,8 +135,8 @@ class _RiwayatJualProduk extends State<RiwayatJualProduk> {
                           enableInteractiveSelection: false,
                           onChanged: (text) {
                             setState(() {
-                             // filter = text;
-                              //getDataProduk();
+                               filter = text;
+                               getDataProduk();
                             });
                           },
                           style: TextStyle(fontFamily: "VarelaRound",fontSize: 14),
@@ -150,10 +162,70 @@ class _RiwayatJualProduk extends State<RiwayatJualProduk> {
                       )
                   ),
                   Padding(padding: const EdgeInsets.only(top: 10),),
+                  Expanded(
+                      child:
+                        ListView.builder(
+                        itemCount: getDatas.length,
+                        controller: _scrollController,
+                        itemBuilder: (BuildContext context, int index) {
+                          return Column(
+                            children: [
+                              ListTile(
+                                  title: Column(
+                                    children: [
+                                      Align(alignment: Alignment.centerLeft, child: Text(
+                                        getDatas[index]["n"].toString()+" "+
+                                        getDatas[index]["i"],
+                                        overflow: TextOverflow.ellipsis,
+                                        //getDatas[index]["l"]+" "+getDatas[index]["m"]+" "+getDatas[index]["j"],
+                                        style: TextStyle(
+                                            fontFamily: 'VarelaRound',
+                                            fontWeight: FontWeight.bold,
+                                            fontSize: 13),),),
+                                      Padding(padding: const EdgeInsets.only(top: 7),
+                                          child: Align(alignment: Alignment.centerLeft, child:
+                                          Opacity(
+                                              opacity: 0.7,
+                                              child: Text("#"+getDatas[index]["l"]+" "+getDatas[index]["m"]+" "+getDatas[index]["j"]+" - "+getDatas[index]["e"],
+                                                style: TextStyle(
+                                                    fontFamily: 'VarelaRound',
+                                                    fontSize: 12),))
+                                            ,))
+                                    ],
+                                  ),
+                                  trailing:
+                                  getDatas[index]["d"].toString().substring(0,1) == '-' ?
+                                  Container(
+                                    height: 22,
+                                    child: RaisedButton(
+                                      onPressed: (){},
+                                      color: HexColor("#fe5c83"),
+                                      elevation: 0,
+                                      child: Text(getDatas[index]["d"].toString(),style: TextStyle(
+                                          color: HexColor("#f9fffd"), fontFamily: 'Nunito',fontSize: 12,fontWeight: FontWeight.bold)),
+                                    ),
+                                  )
+                                      :
+                                  Container(
+                                    height: 22,
+                                    child: RaisedButton(
+                                      onPressed: (){},
+                                      color: HexColor("#00aa5b"),
+                                      elevation: 0,
+                                      child: Text(getDatas[index]["d"].toString(),style: TextStyle(
+                                          color: HexColor("#f9fffd"), fontFamily: 'Nunito',fontSize: 12,fontWeight: FontWeight.bold)),
+                                    ),
+                                  )
+                              ),
+                              Divider(height: 5,)
+                            ],
+                          );
+                        },
+                      ),
+                    ),
                 ],
               ),
             ),
-          ),
-        );
+          ));
   }
 }

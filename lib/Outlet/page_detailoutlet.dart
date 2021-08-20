@@ -107,6 +107,56 @@ class _DetailOutlet extends State<DetailOutlet> {
   }
 
 
+  doHapus(String IDq) {
+    http.post(applink+"api_model.php?act=hapus_outlet", body: {
+      "id" : IDq
+    });
+    Navigator.pop(context);
+    return false;
+  }
+
+
+
+
+  alertHapus(String IDProduk) {
+    showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            //title: Text(),
+            content: Container(
+                width: double.infinity,
+                height: 205,
+                child: Column(
+                  children: [
+                    Align(alignment: Alignment.center, child:
+                    Text("Konfirmasi", style: TextStyle(fontFamily: 'VarelaRound', fontSize: 20,
+                        fontWeight: FontWeight.bold)),),
+                    Padding(padding: const EdgeInsets.only(top: 15), child:
+                    Align(alignment: Alignment.center, child: FaIcon(FontAwesomeIcons.trash,
+                      color: Colors.redAccent,size: 35,)),),
+                    Padding(padding: const EdgeInsets.only(top: 15), child:
+                    Align(alignment: Alignment.center, child:
+                    Text("Apakah anda yakin menghapus outlet ini ? Menghapus akan menghapus semua history outlet ini. ",
+                        style: TextStyle(fontFamily: 'VarelaRound', fontSize: 12),textAlign: TextAlign.center,),)),
+                    Padding(padding: const EdgeInsets.only(top: 25), child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      children: <Widget>[
+                        Expanded(child: OutlineButton(
+                          onPressed: () {Navigator.pop(context);}, child: Text("Tidak"),)),
+                        Expanded(child: OutlineButton(
+                          borderSide: BorderSide(width: 1.0, color: Colors.redAccent),
+                          onPressed: () {
+                            doHapus(IDProduk);
+                            Navigator.pop(context);
+                          }, child: Text("Hapus", style: TextStyle(color: Colors.red),),)),
+                      ],),)
+                  ],
+                )
+            ),
+          );
+        });
+  }
 
   Future<bool> _onWillPop() async {
     Navigator.pop(context);
@@ -202,7 +252,7 @@ class _DetailOutlet extends State<DetailOutlet> {
             InkWell(
               onTap: () {
                 FocusScope.of(context).requestFocus(FocusNode());
-                //alertSimpan();
+                alertHapus(widget.idOutlet);
               },
               child: Padding(
                 padding: const EdgeInsets.only(right: 30,top : 19),
@@ -357,9 +407,6 @@ class _DetailOutlet extends State<DetailOutlet> {
                   Padding(padding: const EdgeInsets.only(top: 10,left: 9),
                       child: InkWell(
                         child: ListTile(
-                          onTap: (){
-                            //Navigator.pushReplacement(context, ExitPage(page: ProfileUbahNama()));
-                          },
                           title: Column(
                             children: [
                               Align(alignment: Alignment.centerLeft,
@@ -367,7 +414,8 @@ class _DetailOutlet extends State<DetailOutlet> {
                                   fontFamily: 'VarelaRound',fontSize: 11,)),),
                               Padding(padding: const EdgeInsets.only(top:5),
                                 child: Align(alignment: Alignment.centerLeft,
-                                  child:      Text(getStoreSalesProduct.substring(1)
+                                  child:      Text(
+                                      getStoreSalesProduct.toString().substring(0,1) == '-' ? "0" : getStoreSalesProduct.toString()
                                       , style: TextStyle(
                                           fontFamily: 'VarelaRound',fontSize: 18,
                                           fontWeight: FontWeight.bold)),),)
