@@ -128,7 +128,7 @@ class _RiwayatTransaksiOutlet extends State<RiwayatTransaksiOutlet> {
                        onChanged: (text) {
                          setState(() {
                            filter = text;
-                           getDataProduk();
+                          getDataProduk();
                          });
                        },
                        style: TextStyle(fontFamily: "VarelaRound",fontSize: 14),

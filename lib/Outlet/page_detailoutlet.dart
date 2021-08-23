@@ -323,8 +323,10 @@ class _DetailOutlet extends State<DetailOutlet> {
                       ),
                       InkWell(
                               onTap:() {
-                                Navigator.push(context, ExitPage(page: RiwayatTransaksiOutlet(widget.idOutlet)));
-                        },
+                                //Navigator.push(context, ExitPage(page: RiwayatTransaksiOutlet(widget.idOutlet)));
+                                Navigator.push(context, MaterialPageRoute(builder: (context) => RiwayatTransaksiOutlet(widget.idOutlet)));
+
+                              },
                       child :
                           Text("Lihat Riwayat",
                           style: TextStyle(
@@ -391,7 +393,8 @@ class _DetailOutlet extends State<DetailOutlet> {
                           ),
                       InkWell(
                         onTap:() {
-                          Navigator.push(context, ExitPage(page: RiwayatJualProduk(widget.idOutlet)));
+                          //Navigator.push(context, ExitPage(page: RiwayatJualProduk(widget.idOutlet)));
+                          Navigator.push(context, MaterialPageRoute(builder: (context) => RiwayatJualProduk(widget.idOutlet)));
                         },
                         child :
                           Text("Lihat Riwayat",

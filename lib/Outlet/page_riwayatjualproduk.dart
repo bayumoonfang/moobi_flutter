@@ -7,6 +7,7 @@ import 'dart:convert';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:hexcolor/hexcolor.dart';
 import 'package:intl/intl.dart';
 import 'package:moobi_flutter/Helper/api_link.dart';
@@ -117,7 +118,7 @@ class _RiwayatJualProduk extends State<RiwayatJualProduk> {
               ),
               leading: Builder(
                 builder: (context) => IconButton(
-                    icon: new Icon(Icons.arrow_back),
+                    icon: new FaIcon(FontAwesomeIcons.times,size: 20,),
                     color: Colors.white,
                     onPressed: () => {
                       //Navigator.pushReplacement(context, EnterPage(page: DetailOutlet(widget.idOutlet)))
@@ -136,6 +137,8 @@ class _RiwayatJualProduk extends State<RiwayatJualProduk> {
                           onChanged: (text) {
                             setState(() {
                                filter = text;
+                               print(applink+"api_model.php?act=getdata_outletjualproduk&id="+widget.idOutlet+"&limit="+limit+"&filter="+filter);
+
                                getDataProduk();
                             });
                           },
@@ -174,7 +177,6 @@ class _RiwayatJualProduk extends State<RiwayatJualProduk> {
                                   title: Column(
                                     children: [
                                       Align(alignment: Alignment.centerLeft, child: Text(
-                                        getDatas[index]["n"].toString()+" "+
                                         getDatas[index]["i"],
                                         overflow: TextOverflow.ellipsis,
                                         //getDatas[index]["l"]+" "+getDatas[index]["m"]+" "+getDatas[index]["j"],
