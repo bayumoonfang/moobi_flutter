@@ -1,6 +1,7 @@
 
 
 
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
@@ -83,6 +84,21 @@ class _ProfileState extends State<Profile> {
     super.initState();
     loadData();
   }
+
+
+
+  FutureOr onGoBack(dynamic value) {
+     AppHelper().getDetailUser(getEmail.toString()).then((value){
+      setState(() {
+        getRole = value[5];
+        getUserId = value[6];
+        getRegisterDate = value[7];
+        getNama = value[4];
+      });
+    });
+    setState(() {});
+  }
+
 
 
   @override
@@ -277,7 +293,7 @@ class _ProfileState extends State<Profile> {
                             child: InkWell(
                               child: ListTile(
                                 onTap: (){
-                                  Navigator.pushReplacement(context, ExitPage(page: ProfileUbahNama()));
+                                  Navigator.push(context, ExitPage(page: ProfileUbahNama())).then(onGoBack);
                                 },
                                 leading: FaIcon(FontAwesomeIcons.user,color: HexColor(third_color),),
                                 title: Text("Ubah Nama",style: TextStyle(

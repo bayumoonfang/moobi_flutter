@@ -6,6 +6,7 @@ import 'dart:convert';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:hexcolor/hexcolor.dart';
 import 'package:intl/intl.dart';
 import 'package:moobi_flutter/Helper/api_link.dart';
@@ -108,7 +109,7 @@ class _RiwayatTransaksiOutlet extends State<RiwayatTransaksiOutlet> {
           ),
           leading: Builder(
             builder: (context) => IconButton(
-                icon: new Icon(Icons.arrow_back),
+                icon: new FaIcon(FontAwesomeIcons.times,size: 20,),
                 color: Colors.white,
                 onPressed: () => {
                   //Navigator.pushReplacement(context, EnterPage(page: DetailOutlet(widget.idOutlet)))

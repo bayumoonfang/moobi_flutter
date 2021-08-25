@@ -112,7 +112,8 @@ class _DetailOutlet extends State<DetailOutlet> {
       "id" : IDq
     });
     Navigator.pop(context);
-    return false;
+    Navigator.pop(context);
+   // return false;
   }
 
 
@@ -148,7 +149,7 @@ class _DetailOutlet extends State<DetailOutlet> {
                           borderSide: BorderSide(width: 1.0, color: Colors.redAccent),
                           onPressed: () {
                             doHapus(IDProduk);
-                            Navigator.pop(context);
+
                           }, child: Text("Hapus", style: TextStyle(color: Colors.red),),)),
                       ],),)
                   ],

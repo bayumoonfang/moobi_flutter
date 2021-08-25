@@ -19,12 +19,15 @@ import 'package:toast/toast.dart';
 import 'package:http/http.dart' as http;
 import 'package:moobi_flutter/Helper/api_link.dart';
 
-class ProfileUbahNama extends StatefulWidget {
+class GudangUbahNama extends StatefulWidget {
+  final String idGudang;
+  final String namaGudang;
+  const GudangUbahNama(this.idGudang, this.namaGudang);
   @override
-  ProfileUbahNamaState createState() => ProfileUbahNamaState();
+  GudangUbahNamaState createState() => GudangUbahNamaState();
 }
 
-class ProfileUbahNamaState extends State<ProfileUbahNama> {
+class GudangUbahNamaState extends State<GudangUbahNama> {
   TextEditingController valNama = TextEditingController();
   Future<bool> _onWillPop() async {
     Navigator.pop(context);
@@ -43,16 +46,11 @@ class ProfileUbahNamaState extends State<ProfileUbahNama> {
       Toast.LENGTH_LONG);}});
     await AppHelper().getSession().then((value){if(value[0] != 1) {
       Navigator.pushReplacement(context, ExitPage(page: Login()));}else{setState(() {getEmail = value[1];});}});
-    await AppHelper().getDetailUser(getEmail.toString()).then((value){
-      setState(() {
-        getNama = value[4];
-      });
-    });
   }
 
   _prepare() async {
     await _startingVariable();
-    valNama.text = getNama;
+    valNama.text = widget.namaGudang;
   }
 
   @override
@@ -62,14 +60,14 @@ class ProfileUbahNamaState extends State<ProfileUbahNama> {
   }
 
   doSimpan() async {
-    final response = await http.post(applink+"api_model.php?act=edit_namapengguna", body: {
+    final response = await http.post(applink+"api_model.php?act=edit_namagudang", body: {
       "valNama_edit": valNama.text,
-      "valEmail_edit" : getEmail.toString()
+      "valID_edit" : widget.idGudang
     });
     Map data = jsonDecode(response.body);
     setState(() {
       if (data["message"].toString() == '1') {
-        showToast("Nama berhasil diganti", gravity: Toast.BOTTOM,
+        showToast("Nama Gudang berhasil diganti", gravity: Toast.BOTTOM,
             duration: Toast.LENGTH_LONG);
         Navigator.pop(context);
         return false;
@@ -131,7 +129,7 @@ class ProfileUbahNamaState extends State<ProfileUbahNama> {
         appBar: new AppBar(
           backgroundColor: HexColor(main_color),
           title: Text(
-            "Ubah Nama",
+            "Ubah Nama Gudang",
             style: TextStyle(
                 color: Colors.white, fontFamily: 'VarelaRound', fontSize: 16),
           ),
@@ -140,7 +138,7 @@ class ProfileUbahNamaState extends State<ProfileUbahNama> {
                 icon: new Icon(Icons.arrow_back),
                 color: Colors.white,
                 onPressed: () => {
-                Navigator.pop(context)
+                  Navigator.pop(context)
                 }),
           ),
           actions: [
@@ -168,7 +166,7 @@ class ProfileUbahNamaState extends State<ProfileUbahNama> {
                       children: [
                         Align(alignment: Alignment.centerLeft,child: Padding(
                           padding: const EdgeInsets.only(left: 0,top: 15),
-                          child: Text("Nama Anda",style: TextStyle(fontWeight: FontWeight.bold,fontFamily: "VarelaRound",
+                          child: Text("Nama Gudang",style: TextStyle(fontWeight: FontWeight.bold,fontFamily: "VarelaRound",
                               fontSize: 12,color: HexColor("#0074D9")),),
                         ),),
                         Align(alignment: Alignment.centerLeft,child: Padding(
@@ -178,7 +176,7 @@ class ProfileUbahNamaState extends State<ProfileUbahNama> {
                             textCapitalization: TextCapitalization.sentences,
                             decoration: InputDecoration(
                               contentPadding: const EdgeInsets.only(top:2),
-                              hintText: 'Nama anda...',
+                              hintText: 'Nama gudang...',
                               labelText: '',
                               floatingLabelBehavior: FloatingLabelBehavior.always,
                               hintStyle: TextStyle(fontFamily: "VarelaRound", color: HexColor("#c4c4c4")),

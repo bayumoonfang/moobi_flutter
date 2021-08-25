@@ -80,6 +80,14 @@ class _GudangState extends State<Gudang> {
     Navigator.pop(context);
   }
 
+
+  FutureOr onGoBack(dynamic value) {
+    getData();
+    setState(() {});
+  }
+
+
+
   @override
   Widget build(BuildContext context) {
     return WillPopScope(
