@@ -251,27 +251,45 @@ class _GudangProduk extends State<GudangProduk> {
                             itemCount: snapshot.data == null ? 0 : snapshot.data.length,
                             padding: const EdgeInsets.only(top: 2,bottom: 80,left: 5,right: 5),
                             itemBuilder: (context, i) {
-                              return ListTile(
-                                leading: SizedBox(
-                                    width: 60,
-                                    height: 100,
-                                    child: ClipRRect(
-                                      borderRadius: BorderRadius.circular(6.0),
-                                      child : CachedNetworkImage(
-                                        fit: BoxFit.cover,
-                                        imageUrl:
-                                        snapshot.data[i]["c"] == '' ?
-                                        applink+"photo/nomage.jpg"
-                                            :
-                                        applink+"photo/"+snapshot.data[i]["f"]+"/"+snapshot.data[i]["c"],
-                                        progressIndicatorBuilder: (context, url,
-                                            downloadProgress) =>
-                                            CircularProgressIndicator(value:
-                                            downloadProgress.progress),
-                                        errorWidget: (context, url, error) =>
-                                            Icon(Icons.error),
-                                      ),
-                                    )),
+                              return Column(
+                                children: [
+                                  ListTile(
+                                    leading: SizedBox(
+                                        width: 45,
+                                        height: 40,
+                                        child: ClipRRect(
+                                          borderRadius: BorderRadius.circular(6.0),
+                                          child : CachedNetworkImage(
+                                            fit: BoxFit.cover,
+                                            imageUrl:
+                                            snapshot.data[i]["c"] == '' ?
+                                            applink+"photo/nomage.jpg"
+                                                :
+                                            applink+"photo/"+snapshot.data[i]["f"]+"/"+snapshot.data[i]["c"],
+                                            progressIndicatorBuilder: (context, url,
+                                                downloadProgress) =>
+                                                CircularProgressIndicator(value:
+                                                downloadProgress.progress),
+                                            errorWidget: (context, url, error) =>
+                                                Icon(Icons.error),
+                                          ),
+                                        )),
+                                    title: Align(alignment: Alignment.centerLeft,
+                                      child: Text(snapshot.data[i]["b"],
+                                          style: TextStyle(fontFamily: "VarelaRound",
+                                              fontSize: 12,fontWeight: FontWeight.bold)),),
+                                    subtitle: Padding(padding: const EdgeInsets.only(top: 2),
+                                      child: Align(alignment: Alignment.centerLeft,
+                                        child: Row(
+                                          children: [
+                                            Text("Owned By",style: TextStyle(
+                                                color: Colors.black, fontFamily: 'VarelaRound',fontSize: 12)),
+                                          ],
+                                        ),
+
+                                      ),),
+                                  ),
+                                ],
                               );
                             },
                           );
