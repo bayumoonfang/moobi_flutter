@@ -121,7 +121,7 @@ class _GudangDetail extends State<GudangDetail> {
           ),
           leading: Builder(
             builder: (context) => IconButton(
-                icon: new Icon(Icons.arrow_back),
+                icon: new FaIcon(FontAwesomeIcons.times,size: 20,),
                 color: Colors.white,
                 onPressed: () => {
                   Navigator.pop(context)
@@ -269,8 +269,8 @@ class _GudangDetail extends State<GudangDetail> {
                   child: InkWell(
                     child: ListTile(
                       onTap: (){
-                        Navigator.push(context, ExitPage(page: GudangProduk(widget.idGudang, getCodeWarehouse )));
-                        //Navigator.push(context, MaterialPageRoute(builder: (context) => GudangProduk(widget.idGudang, getCodeWarehouse )));
+                        //Navigator.push(context, ExitPage(page: GudangProduk(widget.idGudang, getCodeWarehouse )));
+                        Navigator.push(context, MaterialPageRoute(builder: (context) => GudangProduk(widget.idGudang, getCodeWarehouse)));
                       },
                       title: Padding(padding: const EdgeInsets.only(top: 10),
                         child: Column(

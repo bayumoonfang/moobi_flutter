@@ -44,7 +44,7 @@ class _RegisterState extends State<Register> {
 
 
   Future<bool> _onWillPop() async {
-    Navigator.push(context, EnterPage(page: Login()));
+    Navigator.pop(context);
   }
 
   _daftargoogle() async {

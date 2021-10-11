@@ -37,6 +37,7 @@ class _LoginState extends State<Login> {
     }
 
   Future<bool> _onWillPop() async {
+    Navigator.pop(context);
   }
 
   _loginGoogle() async {

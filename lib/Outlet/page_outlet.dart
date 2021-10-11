@@ -214,7 +214,30 @@ class _Outlet extends State<Outlet> {
                               child: CircularProgressIndicator()
                           );
                         } else {
-                          return ListView.builder(
+                          return snapshot.data == 0 ?
+                          Container(
+                              height: double.infinity, width : double.infinity,
+                              child: new
+                              Center(
+                                  child :
+                                  Column(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    crossAxisAlignment: CrossAxisAlignment.center,
+                                    children: <Widget>[
+                                      new Text(
+                                        "Tidak ada data",
+                                        style: new TextStyle(
+                                            fontFamily: 'VarelaRound', fontSize: 18),
+                                      ),
+                                      new Text(
+                                        "Silahkan lakukan input data",
+                                        style: new TextStyle(
+                                            fontFamily: 'VarelaRound', fontSize: 12),
+                                      ),
+                                    ],
+                                  )))
+                              :
+                          new ListView.builder(
                             itemCount: snapshot.data == null ? 0 : snapshot.data.length,
                             padding: const EdgeInsets.only(left: 10,right: 15),
                             itemBuilder: (context, i) {
@@ -254,7 +277,11 @@ class _Outlet extends State<Outlet> {
                                           height: 40,
                                           child: OutlinedButton(
                                             onPressed: (){
-                                              Navigator.push(context, ExitPage(page: DetailOutlet(snapshot.data[i]["a"].toString()))).then(onGoBack);
+                                              FocusScope.of(context).requestFocus(FocusNode());
+                                              Navigator.push(
+                                                context,
+                                                MaterialPageRoute(builder: (context) => DetailOutlet(snapshot.data[i]["a"].toString()))).then(onGoBack);
+                                              //Navigator.push(context, ExitPage(page: DetailOutlet(snapshot.data[i]["a"].toString()))).then(onGoBack);
                                             },
                                             child: Text("Lihat Outlet",style: TextStyle(
                                                 color: Colors.black, fontFamily: 'VarelaRound')),
@@ -280,7 +307,8 @@ class _Outlet extends State<Outlet> {
             child: FloatingActionButton(
               onPressed: (){
                 FocusScope.of(context).requestFocus(FocusNode());
-                Navigator.push(context, ExitPage(page: OutletInsert()));
+                Navigator.push(context, MaterialPageRoute(builder: (context) => OutletInsert()));
+               // Navigator.push(context, ExitPage(page: OutletInsert()));
               },
               child: FaIcon(FontAwesomeIcons.plus),
             ),

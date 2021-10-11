@@ -27,6 +27,7 @@ import 'package:moobi_flutter/helper/api_link.dart';
 import 'package:moobi_flutter/helper/check_connection.dart';
 import 'package:moobi_flutter/helper/page_route.dart';
 import 'package:moobi_flutter/helper/session.dart';
+import 'package:moobi_flutter/page_intoduction.dart';
 import 'package:moobi_flutter/page_login.dart';
 import 'package:toast/toast.dart';
 import 'package:http/http.dart' as http;
@@ -63,7 +64,7 @@ class _HomeState extends State<Home> {
       showToast("Koneksi terputus..", gravity: Toast.CENTER,duration:
       Toast.LENGTH_LONG);}});
     await AppHelper().getSession().then((value){if(value[0] != 1) {
-       Navigator.pushReplacement(context, ExitPage(page: Login()));} else{setState(() {getEmail = value[1];});}});
+       Navigator.pushReplacement(context, ExitPage(page: Introduction()));} else{setState(() {getEmail = value[1];});}});
     await AppHelper().getDetailUser(getEmail.toString()).then((value){
       setState(() {
         getMoobiIdentity = value[0];

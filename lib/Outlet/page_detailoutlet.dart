@@ -243,7 +243,7 @@ class _DetailOutlet extends State<DetailOutlet> {
           ),
           leading: Builder(
             builder: (context) => IconButton(
-                icon: new Icon(Icons.arrow_back),
+                icon: new FaIcon(FontAwesomeIcons.times,size: 20,),
                 color: Colors.white,
                 onPressed: () => {
                 Navigator.pop(context)
@@ -265,6 +265,9 @@ class _DetailOutlet extends State<DetailOutlet> {
           ],
         ),
         body: Container(
+          height: double.infinity,
+          width: double.infinity,
+          child : SingleChildScrollView(
           child: Column(
             children: [
               Padding(padding: const EdgeInsets.only(left: 15,top: 20),
@@ -555,7 +558,7 @@ class _DetailOutlet extends State<DetailOutlet> {
                 child: Divider(height: 3,),),
 
             ],
-          ),
+          )),
         ),
       ),
     );

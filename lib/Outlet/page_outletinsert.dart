@@ -166,7 +166,7 @@ class _OutletInsert extends State<OutletInsert> {
           ),
           leading: Builder(
             builder: (context) => IconButton(
-                icon: new Icon(Icons.arrow_back),
+                icon: new FaIcon(FontAwesomeIcons.times,size: 20,),
                 color: Colors.white,
                 onPressed: () => {
                   Navigator.pop(context)

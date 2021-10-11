@@ -9,6 +9,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:hexcolor/hexcolor.dart';
 import 'package:moobi_flutter/Helper/api_link.dart';
 import 'package:moobi_flutter/Helper/app_helper.dart';
@@ -166,7 +167,7 @@ class _GudangProduk extends State<GudangProduk> {
             ),
             leading: Builder(
               builder: (context) => IconButton(
-                  icon: new Icon(Icons.arrow_back),
+                  icon: new FaIcon(FontAwesomeIcons.times,size: 20,),
                   color: Colors.white,
                   onPressed: () => {
                     Navigator.pop(context)
@@ -235,7 +236,7 @@ class _GudangProduk extends State<GudangProduk> {
                                     crossAxisAlignment: CrossAxisAlignment.center,
                                     children: <Widget>[
                                       new Text(
-                                        "Data tidak ditemukan",
+                                        "Tidak ada data",
                                         style: new TextStyle(
                                             fontFamily: 'VarelaRound', fontSize: 18),
                                       ),
@@ -247,7 +248,7 @@ class _GudangProduk extends State<GudangProduk> {
                                     ],
                                   )))
                               :
-                           ListView.builder(
+                          new ListView.builder(
                             itemCount: snapshot.data == null ? 0 : snapshot.data.length,
                             padding: const EdgeInsets.only(top: 2,bottom: 80,left: 5,right: 5),
                             itemBuilder: (context, i) {
@@ -256,7 +257,7 @@ class _GudangProduk extends State<GudangProduk> {
                                   ListTile(
                                     leading: SizedBox(
                                         width: 45,
-                                        height: 40,
+                                        height: 45,
                                         child: ClipRRect(
                                           borderRadius: BorderRadius.circular(6.0),
                                           child : CachedNetworkImage(
@@ -275,19 +276,67 @@ class _GudangProduk extends State<GudangProduk> {
                                           ),
                                         )),
                                     title: Align(alignment: Alignment.centerLeft,
-                                      child: Text(snapshot.data[i]["b"],
-                                          style: TextStyle(fontFamily: "VarelaRound",
-                                              fontSize: 12,fontWeight: FontWeight.bold)),),
+                                      child: Row(
+                                        children: [
+                                          Text("Stock :", style: GoogleFonts.varelaRound(fontSize: 12),),
+
+                                          snapshot.data[i]["e"].toString().substring(0,1) == '-' ?
+                                          Container(
+                                            decoration: BoxDecoration(
+                                              borderRadius: BorderRadius.circular(6),
+                                              color: HexColor("#fe5c83"),
+                                            ),
+                                            child: Padding(padding : const EdgeInsets.all(3),
+                                              child: Text(snapshot.data[i]["e"].toString(),
+                                                  style: TextStyle(fontFamily: "VarelaRound",
+                                                      color: Colors.white,
+                                                      fontSize: 11)),),
+                                          )
+
+                                              :
+                                          Container(
+                                            decoration: BoxDecoration(
+                                              borderRadius: BorderRadius.circular(6),
+                                              color: HexColor("#00aa5b"),
+                                            ),
+                                            child: Padding(padding : const EdgeInsets.all(3),
+                                              child: Text(snapshot.data[i]["e"].toString(),
+                                                  style: TextStyle(fontFamily: "VarelaRound",
+                                                      color: Colors.white,
+                                                      fontSize: 11)),),
+                                          )
+
+                                        ],
+                                      )
+                                    ),
                                     subtitle: Padding(padding: const EdgeInsets.only(top: 2),
                                       child: Align(alignment: Alignment.centerLeft,
-                                        child: Row(
-                                          children: [
-                                            Text("Owned By",style: TextStyle(
-                                                color: Colors.black, fontFamily: 'VarelaRound',fontSize: 12)),
-                                          ],
-                                        ),
+                                        child:
+                                      Row(
+                                       children: [
+                                         Text("#"+snapshot.data[i]["a"],
+                                             style: TextStyle(fontFamily: "VarelaRound",
+                                                 fontSize: 13)),
+                                            Expanded(
+                                              child: Padding(padding: const EdgeInsets.only(left:2),
+                                                child: Text(" | "+snapshot.data[i]["b"],
+                                                    overflow: TextOverflow.ellipsis,
+                                                    style: TextStyle(fontFamily: "VarelaRound",
+                                                        fontSize: 13,fontWeight: FontWeight.bold,
+                                                        color: Colors.black)),),
+                                            )
+
+                                       ],
+                                     ),
+
 
                                       ),),
+                                    trailing: InkWell(
+                                      child: Padding(
+                                        padding: const EdgeInsets.only(right: 10),
+                                        child: FaIcon(FontAwesomeIcons.times,size: 20,color: Colors.redAccent,),
+                                      )
+                                    ),
                                   ),
                                 ],
                               );

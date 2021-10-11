@@ -236,7 +236,7 @@ class _GudangState extends State<Gudang> {
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: <Widget>[
                       new Text(
-                        "Data tidak ditemukan",
+                        "Tidak ada data",
                         style: new TextStyle(
                             fontFamily: 'VarelaRound', fontSize: 18),
                       ),
@@ -256,7 +256,11 @@ class _GudangState extends State<Gudang> {
                 children: <Widget>[
                   InkWell(
                     onTap: () {
-                      Navigator.push(context, ExitPage(page: GudangDetail(snapshot.data[i]["c"].toString())));
+                      FocusScope.of(context).requestFocus(FocusNode());
+                      Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (context) => GudangDetail(snapshot.data[i]["c"].toString())));
+                      //Navigator.push(context, ExitPage(page: GudangDetail(snapshot.data[i]["c"].toString())));
                     },
                     child: ListTile(
                         leading:
