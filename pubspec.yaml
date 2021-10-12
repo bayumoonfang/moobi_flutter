@@ -50,6 +50,8 @@ dependencies:
   pull_to_refresh: ^2.0.0
   introduction_screen: ^2.1.0
   google_fonts: ^1.1.2
+  flushbar: ^1.10.4
+
 
 dev_dependencies:
   flutter_test:

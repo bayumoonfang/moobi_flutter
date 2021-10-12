@@ -3,11 +3,16 @@
 
 import 'dart:async';
 import 'dart:convert';
+import 'dart:ui';
 
 
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:flushbar/flushbar.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/painting.dart';
+import 'package:flutter/rendering.dart';
+import 'package:flutter/widgets.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:hexcolor/hexcolor.dart';
@@ -40,6 +45,35 @@ class GudangProduk extends StatefulWidget{
 class _GudangProduk extends State<GudangProduk> {
   List data;
   bool _isvisible = true;
+
+
+  showFlushBar(BuildContext context, String stringme) => Flushbar(
+    // title:  "Hey Ninja",
+    message:  stringme,
+    shouldIconPulse: false,
+    duration:  Duration(seconds: 5),
+    backgroundColor: Colors.red,
+    flushbarPosition: FlushbarPosition.BOTTOM ,
+  )..show(context);
+
+
+  showFlushBarsuccess(BuildContext context, String stringme) => Flushbar(
+    // title:  "Hey Ninja",
+    message:  stringme,
+    shouldIconPulse: false,
+    duration:  Duration(seconds: 5),
+    backgroundColor: Colors.black,
+    flushbarPosition: FlushbarPosition.BOTTOM ,
+  )..show(context);
+
+
+  final buangKeterangan = TextEditingController();
+  final buangJumlah = TextEditingController();
+
+  void showerror(String txtError){
+    showFlushBar(context, txtError);
+    return;
+  }
 
   void showToast(String msg, {int duration, int gravity}) {
     Toast.show(msg, context, duration: duration, gravity: gravity);}
@@ -97,14 +131,39 @@ class _GudangProduk extends State<GudangProduk> {
     return json.decode(response.body);
   }
 
+
+
+
   String getMessage = "...";
   _doHapus (String valueParse2) {
-    http.get(applink+"api_model.php?act=action_hapusoutlet&id="+valueParse2.toString()
+    http.get(applink+"api_model.php?act=action_hapusgudangproduk&id="+valueParse2.toString()
         +"&branch="+getBranch);
-    showToast("Outlet berhasil dihapus", gravity: Toast.BOTTOM,duration: Toast.LENGTH_LONG);
-    getData();
-    setState(() {});
+
+    setState(() {
+      getData();
+    });
   }
+
+
+  _doBuangStock (String valueParse2) async {
+    final response = await http.post(applink+"api_model.php?act=action_hapusgudangproduk",
+        body: {"id": valueParse2,
+        "buangKeterangan" : buangKeterangan.text,
+        "buangJumlah" : buangJumlah.text},
+        headers: {"Accept":"application/json"});
+    Map data = jsonDecode(response.body);
+
+    http.get(applink+"api_model.php?act=action_hapusgudangproduk&id="+valueParse2.toString()
+        +"&branch="+getBranch);
+
+    setState(() {
+      getData();
+    });
+  }
+
+
+
+
 
 
   FutureOr onGoBack(dynamic value) {
@@ -132,7 +191,7 @@ class _GudangProduk extends State<GudangProduk> {
                       color: Colors.redAccent,size: 35,)),),
                     Padding(padding: const EdgeInsets.only(top: 15), child:
                     Align(alignment: Alignment.center, child:
-                    Text("Apakah anda yakin menghapus outlet ini ? Menghapus akan menghapus semua history outlet ini. ",
+                    Text("Apakah anda yakin menghapus produk dalam gudang ini ? Menghapus akan membersihkan semua stock yang ada. ",
                       style: TextStyle(fontFamily: 'VarelaRound', fontSize: 12),textAlign: TextAlign.center,),)),
                     Padding(padding: const EdgeInsets.only(top: 25), child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -142,7 +201,7 @@ class _GudangProduk extends State<GudangProduk> {
                         Expanded(child: OutlineButton(
                           borderSide: BorderSide(width: 1.0, color: Colors.redAccent),
                           onPressed: () {
-                            _doHapus(valueParse);
+                           _doHapus(valueParse);
                             Navigator.pop(context);
                           }, child: Text("Hapus", style: TextStyle(color: Colors.red),),)),
                       ],),)
@@ -153,6 +212,101 @@ class _GudangProduk extends State<GudangProduk> {
         });
   }
 
+
+  _showBuangStock(String valueParse) {
+    showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            //title: Text(),
+            content: Container(
+                width: double.infinity,
+                height: 255,
+                child: Column(
+                  children: [
+                    Align(alignment: Alignment.center, child:
+                    Text("Adjustment Stock", style: TextStyle(fontFamily: 'VarelaRound', fontSize: 20,
+                        fontWeight: FontWeight.bold)),),
+                    Padding(padding: const EdgeInsets.only(top: 15), child:
+                    Align(alignment: Alignment.center, child:
+                    Text("Membuang Stock",
+                      style: TextStyle(fontFamily: 'VarelaRound', fontSize: 12),textAlign: TextAlign.center,),)),
+                    Padding(padding: const EdgeInsets.only(top: 15), child:
+                      Align(alignment: Alignment.center, child:
+                      Container(
+                        child : TextFormField(
+                          style: TextStyle(
+                              fontFamily: 'VarelaRound', fontSize: 14),
+                          controller: buangKeterangan,
+                          decoration: InputDecoration(
+                            contentPadding: EdgeInsets.only(left:15,top:5,bottom:5,right: 15),
+                            hintText: "Keterangan",
+                            focusedBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(15.0),
+                              borderSide: BorderSide(
+                                color: HexColor("#602d98"),
+                              ),
+                            ),
+                            enabledBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(15.0),
+                              borderSide: BorderSide(
+                                color: HexColor("#dbd0ea"),
+                                width: 1.0,
+                              ),
+                            ),
+                          ),
+                        ),
+                      )
+                    )),
+                    Padding(padding: const EdgeInsets.only(top: 15), child:
+                    Align(alignment: Alignment.center, child:
+                    Container(
+                      child : TextFormField(
+                        keyboardType: TextInputType.number,
+                        style: TextStyle(
+                            fontFamily: 'VarelaRound', fontSize: 14),
+                        controller: buangJumlah,
+                        decoration: InputDecoration(
+                          contentPadding: EdgeInsets.only(left:15,top:5,bottom:5,right: 15),
+                          hintText: "Jumlah Stock Adjustment",
+                          focusedBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(15.0),
+                            borderSide: BorderSide(
+                              color: HexColor("#602d98"),
+                            ),
+                          ),
+                          enabledBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(15.0),
+                            borderSide: BorderSide(
+                              color: HexColor("#dbd0ea"),
+                              width: 1.0,
+                            ),
+                          ),
+
+                        ),
+                      ),
+                    )
+                    )),
+                    Padding(padding: const EdgeInsets.only(top: 25), child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      children: <Widget>[
+                        Expanded(child: OutlineButton(
+                          onPressed: () {Navigator.pop(context);}, child: Text("Tutup"),)),
+                        Expanded(child: RaisedButton(
+                          color: HexColor(main_color),
+                          onPressed: () {
+                            _doBuangStock(valueParse);
+                            Navigator.pop(context);
+                          }, child: Text("Post", style: TextStyle(color: Colors.white),),)),
+                      ],),)
+                  ],
+                )
+            ),
+          );
+        });
+  }
+
+
   @override
   Widget build(BuildContext context) {
     return WillPopScope(
@@ -161,7 +315,7 @@ class _GudangProduk extends State<GudangProduk> {
           appBar: new AppBar(
             backgroundColor: HexColor("#602d98"),
             title: Text(
-              "Daftar Produk",
+              "Daftar Produk Dalam Gudang",
               style: TextStyle(
                   color: Colors.white, fontFamily: 'VarelaRound', fontSize: 16),
             ),
@@ -254,90 +408,324 @@ class _GudangProduk extends State<GudangProduk> {
                             itemBuilder: (context, i) {
                               return Column(
                                 children: [
-                                  ListTile(
-                                    leading: SizedBox(
-                                        width: 45,
-                                        height: 45,
-                                        child: ClipRRect(
-                                          borderRadius: BorderRadius.circular(6.0),
-                                          child : CachedNetworkImage(
-                                            fit: BoxFit.cover,
-                                            imageUrl:
-                                            snapshot.data[i]["c"] == '' ?
-                                            applink+"photo/nomage.jpg"
-                                                :
-                                            applink+"photo/"+snapshot.data[i]["f"]+"/"+snapshot.data[i]["c"],
-                                            progressIndicatorBuilder: (context, url,
-                                                downloadProgress) =>
-                                                CircularProgressIndicator(value:
-                                                downloadProgress.progress),
-                                            errorWidget: (context, url, error) =>
-                                                Icon(Icons.error),
-                                          ),
-                                        )),
-                                    title: Align(alignment: Alignment.centerLeft,
-                                      child: Row(
-                                        children: [
-                                          Text("Stock :", style: GoogleFonts.varelaRound(fontSize: 12),),
+                                 snapshot.data[i]["d"].toString() == "Aktif" ?
+                                 InkWell(
+                                   onTap: () {
+                                     FocusScope.of(context).requestFocus(FocusNode());
+                                     showModalBottomSheet(
+                                         shape: RoundedRectangleBorder(
+                                           borderRadius: BorderRadius.only(
+                                               topLeft: Radius.circular(15),
+                                               topRight: Radius.circular(15),
+                                           ),
+                                         ),
+                                         context: context,
+                                         builder: (context) {
+                                           return Padding(
+                                             padding: const EdgeInsets.only(left: 5,right: 15,top: 15),
+                                             child :  Column(
+                                               mainAxisSize: MainAxisSize.min,
+                                               children: <Widget>[
+                                                 Padding(padding: const EdgeInsets.only(top: 10,right: 25,left: 15),
+                                                   child: Row(
+                                                     mainAxisAlignment: MainAxisAlignment
+                                                         .spaceBetween,
+                                                     children: [
+                                                       Text("Category", style: GoogleFonts.varelaRound(
+                                                           fontSize: 14, fontWeight: FontWeight.bold)
+                                                       ),
+                                                   Text(snapshot.data[i]["i"], style: GoogleFonts.varelaRound(
+                                                       fontSize: 14),textAlign: TextAlign.right,)
+                                                     ],
+                                                   ),),
+                                                 Padding(padding: const EdgeInsets.only(top: 10,right: 15,left: 15),
+                                                   child: Row(
+                                                     mainAxisAlignment: MainAxisAlignment
+                                                         .spaceBetween,
+                                                     children: [
+                                                       Text("Date Created", style: GoogleFonts.varelaRound(
+                                                           fontSize: 14, fontWeight: FontWeight.bold)
+                                                       ),
+                                                       Text(snapshot.data[i]["j"], style: GoogleFonts.varelaRound(
+                                                           fontSize: 14),textAlign: TextAlign.right,)
+                                                     ],
+                                                   ),),
 
-                                          snapshot.data[i]["e"].toString().substring(0,1) == '-' ?
-                                          Container(
-                                            decoration: BoxDecoration(
-                                              borderRadius: BorderRadius.circular(6),
-                                              color: HexColor("#fe5c83"),
-                                            ),
-                                            child: Padding(padding : const EdgeInsets.all(3),
-                                              child: Text(snapshot.data[i]["e"].toString(),
-                                                  style: TextStyle(fontFamily: "VarelaRound",
-                                                      color: Colors.white,
-                                                      fontSize: 11)),),
-                                          )
+                                                 Padding(
+                                                   padding: const EdgeInsets.only(left: 15,right: 15,top: 10),
+                                                   child : Divider(height:5)
+                                                 ),
 
-                                              :
-                                          Container(
-                                            decoration: BoxDecoration(
-                                              borderRadius: BorderRadius.circular(6),
-                                              color: HexColor("#00aa5b"),
-                                            ),
-                                            child: Padding(padding : const EdgeInsets.all(3),
-                                              child: Text(snapshot.data[i]["e"].toString(),
-                                                  style: TextStyle(fontFamily: "VarelaRound",
-                                                      color: Colors.white,
-                                                      fontSize: 11)),),
-                                          )
+                                                 Padding(
+                                                     padding: const EdgeInsets.only(left: 15,right: 15,top: 10,bottom:25),
+                                                     child : Center(
+                                                       child:  SingleChildScrollView(
+                                                         scrollDirection: Axis.horizontal,
+                                                         child :
+                                                         Row(
+                                                           mainAxisAlignment: MainAxisAlignment.center,
+                                                           children: <Widget>[
+                                                             Container(
+                                                               height : 35,
+                                                               child :
+                                                               RaisedButton(
+                                                                 color : HexColor("#9b9b9b"),
+                                                                 elevation: 0,
+                                                                 shape: RoundedRectangleBorder(
+                                                                   borderRadius: BorderRadius.circular(10.0),
+                                                                 ),
+                                                                 child: Text("Transfer", style: GoogleFonts.varelaRound(color:
+                                                                 Colors.white,fontSize: 13)),
+                                                                 onPressed: (){
+                                                                   showerror("Silahkan aktifkan subscribe moobi untuk menikmati fitur ini");
+                                                                 },
+                                                               ),
+                                                             ),
+                                                             SizedBox(
+                                                                 width : 10
+                                                             ),
+                                                             Container(
+                                                               height : 35,
+                                                               child :
+                                                               RaisedButton(
+                                                                 shape: RoundedRectangleBorder(
+                                                                   borderRadius: BorderRadius.circular(10.0),
+                                                                 ),
+                                                                 color: HexColor(main_color),
+                                                                 child: Text("Buang Stock", style: GoogleFonts.varelaRound(color:
+                                                                 Colors.white,fontSize: 13)),
+                                                                 onPressed: (){
+                                                                   _showBuangStock(snapshot.data[i]["g"].toString());
+                                                                 },
+                                                                 elevation: 0,
+                                                               ),
+                                                             ),
+                                                             SizedBox(
+                                                                 width : 10
+                                                             ),
+                                                             Container(
+                                                               height : 35,
+                                                               child :
+                                                               RaisedButton(
+                                                                 shape: RoundedRectangleBorder(
+                                                                   borderRadius: BorderRadius.circular(10.0),
+                                                                 ),
+                                                                 color: HexColor(main_color),
+                                                                 child: Text("Tambah Stock", style: GoogleFonts.varelaRound(color:
+                                                                 Colors.white,fontSize: 13)),
+                                                                 onPressed: (){
 
-                                        ],
-                                      )
-                                    ),
-                                    subtitle: Padding(padding: const EdgeInsets.only(top: 2),
-                                      child: Align(alignment: Alignment.centerLeft,
-                                        child:
-                                      Row(
-                                       children: [
-                                         Text("#"+snapshot.data[i]["a"],
-                                             style: TextStyle(fontFamily: "VarelaRound",
-                                                 fontSize: 13)),
-                                            Expanded(
-                                              child: Padding(padding: const EdgeInsets.only(left:2),
-                                                child: Text(" | "+snapshot.data[i]["b"],
-                                                    overflow: TextOverflow.ellipsis,
-                                                    style: TextStyle(fontFamily: "VarelaRound",
-                                                        fontSize: 13,fontWeight: FontWeight.bold,
-                                                        color: Colors.black)),),
-                                            )
+                                                                 },
+                                                                 elevation: 0,
+                                                               ),
+                                                             )
 
-                                       ],
+                                                           ],
+                                                         ),
+                                                       )
+                                                     )
+                                                 )
+
+
+                                               ],
+                                             )
+                                           );
+                                         });
+                                   },
+                                   child : ListTile(
+                                     leading: SizedBox(
+                                         width: 45,
+                                         height: 45,
+                                         child: ClipRRect(
+                                           borderRadius: BorderRadius.circular(6.0),
+                                           child : CachedNetworkImage(
+                                             fit: BoxFit.cover,
+                                             imageUrl:
+                                             snapshot.data[i]["c"] == '' ?
+                                             applink+"photo/nomage.jpg"
+                                                 :
+                                             applink+"photo/"+snapshot.data[i]["f"]+"/"+snapshot.data[i]["c"],
+                                             progressIndicatorBuilder: (context, url,
+                                                 downloadProgress) =>
+                                                 CircularProgressIndicator(value:
+                                                 downloadProgress.progress),
+                                             errorWidget: (context, url, error) =>
+                                                 Icon(Icons.error),
+                                           ),
+                                         )),
+                                     title: Align(alignment: Alignment.centerLeft,
+                                       child: Opacity(
+                                           opacity: 0.8,
+                                           child : Text("#"+snapshot.data[i]["a"],
+                                               style: GoogleFonts.varelaRound(fontSize: 12))
+                                       ),
                                      ),
+                                     subtitle: Align(
+                                       alignment: Alignment.centerLeft,
+                                       child: Column(
+                                         children: [
+                                           Align(
+                                             alignment: Alignment.centerLeft,
+                                             child: Padding(padding: const EdgeInsets.only(top:2), child :
+                                             Text(snapshot.data[i]["b"].toString(),
+                                                 style: GoogleFonts.varelaRound(fontSize: 14,fontWeight: FontWeight.bold,
+                                                     color: Colors.black))),
+                                           ),
+                                           Align(
+                                             alignment: Alignment.centerLeft,
+                                             child: Padding(padding: const EdgeInsets.only(top:2), child :
+                                             Row(
+                                               children: [
+                                                 Text("Stock :", style: GoogleFonts.varelaRound(fontSize: 12),),
 
+                                                 snapshot.data[i]["e"].toString().substring(0,1) == '-' ?
+                                                 Container(
+                                                   decoration: BoxDecoration(
+                                                     borderRadius: BorderRadius.circular(6),
+                                                     color: HexColor("#fe5c83"),
+                                                   ),
+                                                   child: Padding(padding : const EdgeInsets.only(left: 5,right: 5,top: 2,bottom: 1),
+                                                     child: Text(snapshot.data[i]["e"].toString(),
+                                                         style: TextStyle(fontFamily: "VarelaRound",
+                                                             color: Colors.white,
+                                                             fontSize: 11)),),
+                                                 )
 
-                                      ),),
-                                    trailing: InkWell(
-                                      child: Padding(
-                                        padding: const EdgeInsets.only(right: 10),
-                                        child: FaIcon(FontAwesomeIcons.times,size: 20,color: Colors.redAccent,),
+                                                     :
+                                                 Container(
+                                                   decoration: BoxDecoration(
+                                                     borderRadius: BorderRadius.circular(6),
+                                                     color: HexColor("#00aa5b"),
+                                                   ),
+                                                   child: Padding(padding : const EdgeInsets.only(left: 5,right: 5,top: 2,bottom: 1),
+                                                     child: Text(snapshot.data[i]["e"].toString(),
+                                                         style: TextStyle(fontFamily: "VarelaRound",
+                                                             color: Colors.white,
+                                                             fontSize: 11)),),
+                                                 )
+
+                                               ],
+                                             )
+
+                                             ),
+                                           )
+                                         ],
+                                       ),
+                                     ),
+                                     trailing: InkWell(
+                                       child: Padding(
+                                         padding: const EdgeInsets.only(right: 10),
+                                         child: FaIcon(FontAwesomeIcons.times,size: 20,color: Colors.redAccent,),
+                                       ),
+                                       onTap: (){
+                                         FocusScope.of(context).requestFocus(FocusNode());
+                                         _showDelete(snapshot.data[i]["g"].toString());
+                                       },
+                                     ),
+                                   )
+                                 )
+
+                                 :
+
+                                    InkWell(
+                                      onTap: (){
+                                        FocusScope.of(context).requestFocus(FocusNode());
+                                        showerror("Produk tidak aktif, silahkan aktifkan produk terlebih dahulu di menu produk");
+                                      },
+                                      child :  Opacity(
+                                        opacity: 0.3,
+                                        child:  ListTile(
+                                          leading: SizedBox(
+                                              width: 45,
+                                              height: 45,
+                                              child: ClipRRect(
+                                                borderRadius: BorderRadius.circular(6.0),
+                                                child : CachedNetworkImage(
+                                                  fit: BoxFit.cover,
+                                                  imageUrl:
+                                                  snapshot.data[i]["c"] == '' ?
+                                                  applink+"photo/nomage.jpg"
+                                                      :
+                                                  applink+"photo/"+snapshot.data[i]["f"]+"/"+snapshot.data[i]["c"],
+                                                  progressIndicatorBuilder: (context, url,
+                                                      downloadProgress) =>
+                                                      CircularProgressIndicator(value:
+                                                      downloadProgress.progress),
+                                                  errorWidget: (context, url, error) =>
+                                                      Icon(Icons.error),
+                                                ),
+                                              )),
+                                          title: Align(alignment: Alignment.centerLeft,
+                                            child: Opacity(
+                                                opacity: 0.8,
+                                                child : Text("#"+snapshot.data[i]["a"].toString(),
+                                                    style: GoogleFonts.varelaRound(fontSize: 12))
+                                            ),
+                                          ),
+                                          subtitle: Align(
+                                            alignment: Alignment.centerLeft,
+                                            child: Column(
+                                              children: [
+                                                Align(
+                                                  alignment: Alignment.centerLeft,
+                                                  child: Padding(padding: const EdgeInsets.only(top:2), child :
+                                                  Text(snapshot.data[i]["b"],
+                                                      style: GoogleFonts.varelaRound(fontSize: 14,fontWeight: FontWeight.bold,
+                                                          color: Colors.black))),
+                                                ),
+                                                Align(
+                                                  alignment: Alignment.centerLeft,
+                                                  child: Padding(padding: const EdgeInsets.only(top:2), child :
+                                                  Row(
+                                                    children: [
+                                                      Text("Stock :", style: GoogleFonts.varelaRound(fontSize: 12),),
+                                                      snapshot.data[i]["e"].toString().substring(0,1) == '-' ?
+                                                      Container(
+                                                        decoration: BoxDecoration(
+                                                          borderRadius: BorderRadius.circular(6),
+                                                          color: HexColor("#fe5c83"),
+                                                        ),
+                                                        child: Padding(padding : const EdgeInsets.only(left: 5,right: 5,top: 2,bottom: 1),
+                                                          child: Text(snapshot.data[i]["e"].toString(),
+                                                              style: TextStyle(fontFamily: "VarelaRound",
+                                                                  color: Colors.white,
+                                                                  fontSize: 11)),),
+                                                      )
+
+                                                          :
+                                                      Container(
+                                                        decoration: BoxDecoration(
+                                                          borderRadius: BorderRadius.circular(6),
+                                                          color: HexColor("#00aa5b"),
+                                                        ),
+                                                        child: Padding(padding : const EdgeInsets.only(left: 5,right: 5,top: 2,bottom: 1),
+                                                          child: Text(snapshot.data[i]["e"].toString(),
+                                                              style: TextStyle(fontFamily: "VarelaRound",
+                                                                  color: Colors.white,
+                                                                  fontSize: 11)),),
+                                                      )
+
+                                                    ],
+                                                  )
+
+                                                  ),
+                                                )
+                                              ],
+                                            ),
+                                          ),
+                                        ),
                                       )
                                     ),
-                                  ),
+
+
+                                  Container(
+                                    width: double.infinity,
+                                    height: 15,
+                                    child :Divider(
+                                      height: 5,
+                                    ),
+                                    padding: const EdgeInsets.only(left:15,right:15),
+                                  )
                                 ],
                               );
                             },
@@ -358,7 +746,7 @@ class _GudangProduk extends State<GudangProduk> {
               },
               child: FaIcon(FontAwesomeIcons.plus),
             ),
-          )
+          ),
       ),
     );
 
