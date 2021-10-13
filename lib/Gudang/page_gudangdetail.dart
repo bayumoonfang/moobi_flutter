@@ -24,7 +24,9 @@ import 'package:http/http.dart' as http;
 
 class GudangDetail extends StatefulWidget {
   final String idGudang;
-  const GudangDetail(this.idGudang);
+  final String valNamaUser;
+  final String valBranch;
+  const GudangDetail(this.idGudang, this.valNamaUser, this.valBranch);
   @override
   _GudangDetail createState() => _GudangDetail();
 }
@@ -36,20 +38,6 @@ class _GudangDetail extends State<GudangDetail> {
   void showToast(String msg, {int duration, int gravity}) {
     Toast.show(msg, context, duration: duration, gravity: gravity);}
 
-  String getEmail = "...";
-  String getBranch = "...";
-  _startingVariable() async {
-    await AppHelper().getConnect().then((value){if(value == 'ConnInterupted'){
-      showToast("Koneksi terputus..", gravity: Toast.CENTER,duration:
-      Toast.LENGTH_LONG);}});
-    await AppHelper().getSession().then((value){if(value[0] != 1) {
-      Navigator.pushReplacement(context, ExitPage(page: Login()));}else{setState(() {getEmail = value[1];});}});
-    await AppHelper().getDetailUser(getEmail.toString()).then((value){
-      setState(() {
-        getBranch = value[1];
-      });
-    });
-  }
 
   String getWarehouseName = "...";
   String getOutletName = "...";
@@ -87,7 +75,6 @@ class _GudangDetail extends State<GudangDetail> {
 
 
   _prepare() async {
-    await _startingVariable();
     await _outletDetail();
     await _warehouseTrans();
   }
@@ -270,7 +257,7 @@ class _GudangDetail extends State<GudangDetail> {
                     child: ListTile(
                       onTap: (){
                         //Navigator.push(context, ExitPage(page: GudangProduk(widget.idGudang, getCodeWarehouse )));
-                        Navigator.push(context, MaterialPageRoute(builder: (context) => GudangProduk(widget.idGudang, getCodeWarehouse)));
+                        Navigator.push(context, MaterialPageRoute(builder: (context) => GudangProduk(widget.idGudang, getCodeWarehouse, widget.valNamaUser, widget.valBranch)));
                       },
                       title: Padding(padding: const EdgeInsets.only(top: 10),
                         child: Column(

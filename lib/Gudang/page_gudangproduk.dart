@@ -16,6 +16,7 @@ import 'package:flutter/widgets.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:hexcolor/hexcolor.dart';
+import 'package:moobi_flutter/Gudang/page_tambahprodukgudang.dart';
 import 'package:moobi_flutter/Helper/api_link.dart';
 import 'package:moobi_flutter/Helper/app_helper.dart';
 import 'package:moobi_flutter/Helper/check_connection.dart';
@@ -36,7 +37,9 @@ import 'package:http/http.dart' as http;
 class GudangProduk extends StatefulWidget{
   final String idGudang;
   final String kodeGudang;
-  const GudangProduk(this.idGudang, this.kodeGudang);
+  final String valNamaUser;
+  final String valBranch;
+  const GudangProduk(this.idGudang, this.kodeGudang, this.valNamaUser, this.valBranch);
   @override
   _GudangProduk createState() => _GudangProduk();
 }
@@ -69,44 +72,27 @@ class _GudangProduk extends State<GudangProduk> {
 
   final buangKeterangan = TextEditingController();
   final buangJumlah = TextEditingController();
+  final tambahKeterangan = TextEditingController();
+  final tambahJumlah = TextEditingController();
+
 
   void showerror(String txtError){
     showFlushBar(context, txtError);
     return;
   }
 
+  void showsuccess(String txtError){
+    showFlushBarsuccess(context, txtError);
+    return;
+  }
+
   void showToast(String msg, {int duration, int gravity}) {
     Toast.show(msg, context, duration: duration, gravity: gravity);}
 
-  String getEmail = "...";
-  String getBranch = "...";
-  _startingVariable() async {
-    await AppHelper().getConnect().then((value){if(value == 'ConnInterupted'){
-      showToast("Koneksi terputus..", gravity: Toast.CENTER,duration:
-      Toast.LENGTH_LONG);}});
-    await AppHelper().getSession().then((value){if(value[0] != 1) {
-      Navigator.pushReplacement(context, ExitPage(page: Login()));}else{setState(() {getEmail = value[1];});}});
-    await AppHelper().getDetailUser(getEmail.toString()).then((value){
-      setState(() {
-        getBranch = value[1];
-      });
-    });
-  }
+
 
   Future<bool> _onWillPop() async {
     Navigator.pop(context);}
-
-
-  _prepare() async {
-    await _startingVariable();
-
-  }
-
-  @override
-  void initState() {
-    super.initState();
-    _prepare();
-  }
 
 
 
@@ -137,7 +123,7 @@ class _GudangProduk extends State<GudangProduk> {
   String getMessage = "...";
   _doHapus (String valueParse2) {
     http.get(applink+"api_model.php?act=action_hapusgudangproduk&id="+valueParse2.toString()
-        +"&branch="+getBranch);
+        +"&branch="+widget.valBranch);
 
     setState(() {
       getData();
@@ -146,23 +132,45 @@ class _GudangProduk extends State<GudangProduk> {
 
 
   _doBuangStock (String valueParse2) async {
-    final response = await http.post(applink+"api_model.php?act=action_hapusgudangproduk",
+    if (buangKeterangan.text == ""  || buangJumlah.text == "") {
+      showerror("Keterangan atau Jumlah tidak boleh kosong");
+    }
+    final response = await http.post(applink+"api_model.php?act=action_buangstock",
         body: {"id": valueParse2,
         "buangKeterangan" : buangKeterangan.text,
-        "buangJumlah" : buangJumlah.text},
+        "buangJumlah" : buangJumlah.text,
+        "kodeGudang" : widget.kodeGudang,
+        "namaUser" : widget.valNamaUser},
         headers: {"Accept":"application/json"});
-    Map data = jsonDecode(response.body);
-
-    http.get(applink+"api_model.php?act=action_hapusgudangproduk&id="+valueParse2.toString()
-        +"&branch="+getBranch);
-
+    FocusScope.of(context).requestFocus(FocusNode());
     setState(() {
+      buangKeterangan.text = "";
+      buangJumlah.text = "";
+      showsuccess("Adjustment stock berhasil diposting");
       getData();
     });
   }
 
 
-
+  _doTambahStock (String valueParse2) async {
+    if (tambahKeterangan.text == ""  || tambahJumlah.text == "") {
+      showerror("Keterangan atau Jumlah tidak boleh kosong");
+    }
+    final response = await http.post(applink+"api_model.php?act=action_tambahstock",
+        body: {"id": valueParse2,
+          "tambahKeterangan" : tambahKeterangan.text,
+          "tambahJumlah" : tambahJumlah.text,
+          "kodeGudang" : widget.kodeGudang,
+          "namaUser" : widget.valNamaUser},
+        headers: {"Accept":"application/json"});
+    FocusScope.of(context).requestFocus(FocusNode());
+    setState(() {
+      tambahKeterangan.text = "";
+      tambahJumlah.text = "";
+      showsuccess("Adjustment stock berhasil diposting");
+      getData();
+    });
+  }
 
 
 
@@ -238,6 +246,7 @@ class _GudangProduk extends State<GudangProduk> {
                           style: TextStyle(
                               fontFamily: 'VarelaRound', fontSize: 14),
                           controller: buangKeterangan,
+                          textCapitalization: TextCapitalization.sentences,
                           decoration: InputDecoration(
                             contentPadding: EdgeInsets.only(left:15,top:5,bottom:5,right: 15),
                             hintText: "Keterangan",
@@ -296,7 +305,101 @@ class _GudangProduk extends State<GudangProduk> {
                           color: HexColor(main_color),
                           onPressed: () {
                             _doBuangStock(valueParse);
-                            Navigator.pop(context);
+                          }, child: Text("Post", style: TextStyle(color: Colors.white),),)),
+                      ],),)
+                  ],
+                )
+            ),
+          );
+        });
+  }
+
+
+
+  _showTambahStock(String valueParse) {
+    showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            //title: Text(),
+            content: Container(
+                width: double.infinity,
+                height: 255,
+                child: Column(
+                  children: [
+                    Align(alignment: Alignment.center, child:
+                    Text("Adjustment Stock", style: TextStyle(fontFamily: 'VarelaRound', fontSize: 20,
+                        fontWeight: FontWeight.bold)),),
+                    Padding(padding: const EdgeInsets.only(top: 15), child:
+                    Align(alignment: Alignment.center, child:
+                    Text("Menambah Stock",
+                      style: TextStyle(fontFamily: 'VarelaRound', fontSize: 12),textAlign: TextAlign.center,),)),
+                    Padding(padding: const EdgeInsets.only(top: 15), child:
+                    Align(alignment: Alignment.center, child:
+                    Container(
+                      child : TextFormField(
+                        style: TextStyle(
+                            fontFamily: 'VarelaRound', fontSize: 14),
+                        controller: tambahKeterangan,
+                        textCapitalization: TextCapitalization.sentences,
+                        decoration: InputDecoration(
+                          contentPadding: EdgeInsets.only(left:15,top:5,bottom:5,right: 15),
+                          hintText: "Keterangan",
+                          focusedBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(15.0),
+                            borderSide: BorderSide(
+                              color: HexColor("#602d98"),
+                            ),
+                          ),
+                          enabledBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(15.0),
+                            borderSide: BorderSide(
+                              color: HexColor("#dbd0ea"),
+                              width: 1.0,
+                            ),
+                          ),
+                        ),
+                      ),
+                    )
+                    )),
+                    Padding(padding: const EdgeInsets.only(top: 15), child:
+                    Align(alignment: Alignment.center, child:
+                    Container(
+                      child : TextFormField(
+                        keyboardType: TextInputType.number,
+                        style: TextStyle(
+                            fontFamily: 'VarelaRound', fontSize: 14),
+                        controller: tambahJumlah,
+                        decoration: InputDecoration(
+                          contentPadding: EdgeInsets.only(left:15,top:5,bottom:5,right: 15),
+                          hintText: "Jumlah Stock Adjustment",
+                          focusedBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(15.0),
+                            borderSide: BorderSide(
+                              color: HexColor("#602d98"),
+                            ),
+                          ),
+                          enabledBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(15.0),
+                            borderSide: BorderSide(
+                              color: HexColor("#dbd0ea"),
+                              width: 1.0,
+                            ),
+                          ),
+
+                        ),
+                      ),
+                    )
+                    )),
+                    Padding(padding: const EdgeInsets.only(top: 25), child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      children: <Widget>[
+                        Expanded(child: OutlineButton(
+                          onPressed: () {Navigator.pop(context);}, child: Text("Tutup"),)),
+                        Expanded(child: RaisedButton(
+                          color: HexColor(main_color),
+                          onPressed: () {
+                            _doTambahStock(valueParse);
                           }, child: Text("Post", style: TextStyle(color: Colors.white),),)),
                       ],),)
                   ],
@@ -315,7 +418,7 @@ class _GudangProduk extends State<GudangProduk> {
           appBar: new AppBar(
             backgroundColor: HexColor("#602d98"),
             title: Text(
-              "Daftar Produk Dalam Gudang",
+              "Daftar produk dalam gudang",
               style: TextStyle(
                   color: Colors.white, fontFamily: 'VarelaRound', fontSize: 16),
             ),
@@ -514,7 +617,7 @@ class _GudangProduk extends State<GudangProduk> {
                                                                  child: Text("Tambah Stock", style: GoogleFonts.varelaRound(color:
                                                                  Colors.white,fontSize: 13)),
                                                                  onPressed: (){
-
+                                                                   _showTambahStock(snapshot.data[i]["g"].toString());
                                                                  },
                                                                  elevation: 0,
                                                                ),
@@ -742,7 +845,8 @@ class _GudangProduk extends State<GudangProduk> {
             child: FloatingActionButton(
               onPressed: (){
                 FocusScope.of(context).requestFocus(FocusNode());
-                Navigator.push(context, ExitPage(page: OutletInsert()));
+                Navigator.push(context, MaterialPageRoute(builder: (context) => TambahProdukGudang(widget.kodeGudang, widget.valBranch, widget.valNamaUser)));
+
               },
               child: FaIcon(FontAwesomeIcons.plus),
             ),

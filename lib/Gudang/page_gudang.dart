@@ -26,6 +26,9 @@ import 'package:toast/toast.dart';
 
 
 class Gudang extends StatefulWidget{
+  final String valBranch;
+  final String valNamaUser;
+  const Gudang(this.valBranch, this.valNamaUser);
   @override
   _GudangState createState() => _GudangState();
 }
@@ -39,42 +42,20 @@ class _GudangState extends State<Gudang> {
   }
 
 
-  String getEmail = "...";
-  String getBranch = "...";
-  _startingVariable() async {
-    await AppHelper().getConnect().then((value){if(value == 'ConnInterupted'){
-      showToast("Koneksi terputus..", gravity: Toast.CENTER,duration:
-      Toast.LENGTH_LONG);}});
-    await AppHelper().getSession().then((value){if(value[0] != 1) {
-      Navigator.pushReplacement(context, ExitPage(page: Login()));}else{setState(() {getEmail = value[1];});}});
-    await AppHelper().getDetailUser(getEmail.toString()).then((value){
-      setState(() {
-        getBranch = value[1];
-      });
-    });
-  }
 
 
 
   String filter = "";
   Future<List> getData() async {
     http.Response response = await http.get(
-        Uri.encodeFull(applink+"api_model.php?act=getdata_gudang&id="+getBranch+"&filter="+filter.toString()),
+        Uri.encodeFull(applink+"api_model.php?act=getdata_gudang&id="+widget.valBranch+"&filter="+filter.toString()),
         headers: {"Accept":"application/json"}
     );
      return json.decode(response.body);
 
   }
 
-  _prepare() async {
-    await _startingVariable();
-  }
 
-  @override
-  void initState() {
-    super.initState();
-    _prepare();
-  }
 
   Future<bool> _onWillPop() async {
     Navigator.pop(context);
@@ -168,7 +149,7 @@ class _GudangState extends State<Gudang> {
 
   _doHapus (String valueParse2) {
     http.get(applink+"api_model.php?act=action_hapusgudang&id="+valueParse2.toString()
-        +"&branch="+getBranch);
+        +"&branch="+widget.valBranch);
     showToast("Gudang berhasil dihapus", gravity: Toast.BOTTOM,duration: Toast.LENGTH_LONG);
     setState(() {
       getData();
@@ -259,7 +240,7 @@ class _GudangState extends State<Gudang> {
                       FocusScope.of(context).requestFocus(FocusNode());
                       Navigator.push(
                           context,
-                          MaterialPageRoute(builder: (context) => GudangDetail(snapshot.data[i]["c"].toString())));
+                          MaterialPageRoute(builder: (context) => GudangDetail(snapshot.data[i]["c"].toString(), widget.valNamaUser, widget.valBranch)));
                       //Navigator.push(context, ExitPage(page: GudangDetail(snapshot.data[i]["c"].toString())));
                     },
                     child: ListTile(
