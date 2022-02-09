@@ -201,10 +201,8 @@ class _GudangState extends State<Gudang> {
     return FutureBuilder(
       future : getData(),
       builder: (context, snapshot) {
-        if (snapshot.data == null) {
-          return Center(
-              child: CircularProgressIndicator()
-          );
+        if (snapshot.connectionState != ConnectionState.done) {
+          return CircularProgressIndicator();
         } else {
           return snapshot.data == 0 ?
           Container(
