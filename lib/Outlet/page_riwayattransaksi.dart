@@ -6,6 +6,7 @@ import 'dart:convert';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:hexcolor/hexcolor.dart';
@@ -32,20 +33,73 @@ class _RiwayatTransaksiOutlet extends State<RiwayatTransaksiOutlet> {
 
   List data;
   bool _isVisible = false;
+  bool _isvisiblefiltertanggal = false;
   void showToast(String msg, {int duration, int gravity}) {
     Toast.show(msg, context, duration: duration, gravity: gravity);
   }
 
   String limit = "30";
   int temp_limit;
-  String hariTransaksi = "Transaksi Hari Ini";
+  String filter2 = "harian";
+  String filter2_txt = "Transaksi Hari Ini";
   bool pemasukan = false;
   bool pengeluaran = false;
-  String pemasukan_filter = "";
-  String pengeluaran_filter = "";
+  String filter_lain = "";
   String tglFrom = "";
+  String tglTo = "";
+  String filter = "";
+
+  String valTanggalFix;
+  final dateFrom = TextEditingController();
+  final dateTo = TextEditingController();
+  DateTime selectedDate = DateTime.now();
+  DateTime selectedDate2 = DateTime.now();
+
+  _selectDate(BuildContext context) async {
+    final DateTime picked = await showDatePicker(
+      context: context,
+      initialDate: selectedDate, // Refer step 1
+      firstDate: DateTime(2020),
+      helpText: 'Pilih tanggal', // Can be used as title
+      cancelText: 'Keluar',
+      confirmText: 'Pilih',
+      lastDate: DateTime(2055),
+    );
+
+    setState(() {
+      selectedDate = picked;
+      if (picked != null && picked != selectedDate) {
+        dateFrom.text = new DateFormat("dd-MM-yyyy").format(picked);
+      } else {
+        dateFrom.text = new DateFormat("dd-MM-yyyy").format(selectedDate);
+      }
+
+    });
+  }
 
 
+
+  _selectDate2(BuildContext context) async {
+    final DateTime picked = await showDatePicker(
+      context: context,
+      initialDate: selectedDate2, // Refer step 1
+      firstDate: DateTime(2020),
+      helpText: 'Pilih tanggal', // Can be used as title
+      cancelText: 'Keluar',
+      confirmText: 'Pilih',
+      lastDate: DateTime(2055),
+    );
+
+    setState(() {
+      selectedDate2 = picked;
+      if (picked != null && picked != selectedDate2) {
+        dateTo.text = new DateFormat("dd-MM-yyyy").format(picked);
+      } else {
+        dateTo.text = new DateFormat("dd-MM-yyyy").format(selectedDate2);
+      }
+
+    });
+  }
   @override
   void initState() {
     super.initState();
@@ -58,10 +112,12 @@ class _RiwayatTransaksiOutlet extends State<RiwayatTransaksiOutlet> {
   }
 
 
-  String filter = "";
+
   getDataProduk() async {
     http.Response response = await http.get(
-        Uri.parse(applink+"api_model.php?act=getdata_outlettransaksi&id="+widget.idOutlet+"&filter="+filter+"&hariTransaksi="+hariTransaksi+"&pemasukan_filter="+pemasukan_filter+"&pengeluaran_filter="+pengeluaran_filter),
+        Uri.parse(applink+"api_model.php?act=getdata_outlettransaksi&id="+widget.idOutlet+""
+            "&filter2="+filter2+"&filter_lain="+filter_lain+"&tglFrom="+dateFrom.text+"&tglTo="
+            ""+dateTo.text+"&filter="+filter),
         headers: {
           "Accept":"application/json",
           "Content-Type": "application/json"}
@@ -72,7 +128,7 @@ class _RiwayatTransaksiOutlet extends State<RiwayatTransaksiOutlet> {
     Navigator.pop(context);
   }
 
-
+  int _radioValue = 0;
 
   @override
   Widget build(BuildContext context) {
@@ -112,12 +168,177 @@ class _RiwayatTransaksiOutlet extends State<RiwayatTransaksiOutlet> {
                               height: 28,
                               child :
                               OutlinedButton(
-                                child: Text(hariTransaksi,style: TextStyle(color: HexColor(main_color)),),
+                                child: Text(filter2_txt,style: TextStyle(color: HexColor(main_color)),),
                                 style: OutlinedButton.styleFrom(
                                   side: BorderSide(color: HexColor(main_color), width: 1),
                                 ),
                                 onPressed: (){
+                                  showModalBottomSheet(
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.only(
+                                        topLeft: Radius.circular(15),
+                                        topRight: Radius.circular(15),
+                                      ),
+                                    ),
+                                      context: context,
+                                      builder: (context) {
+                                            return Container(
+                                              height: 330,
+                                              child :
+                                                Padding(
+                                                    padding: const EdgeInsets.only(left: 5,right: 15,top: 15),
+                                                    child : Column(
+                                                      children: [
+                                                        Padding(padding : const EdgeInsets.only(left:10,top:10),
+                                                            child : Align(
+                                                              alignment: Alignment.centerLeft,
+                                                              child: Text("Filter Tanggal", style : GoogleFonts.varelaRound(
+                                                                  fontSize: 17, fontWeight: FontWeight.bold) ),
+                                                            )),
 
+                                                        Padding(padding: const EdgeInsets.only(top: 10,right: 25,left: 15),
+                                                          child: Row(
+                                                            mainAxisAlignment: MainAxisAlignment
+                                                                .spaceBetween,
+                                                            children: [
+                                                              Text("Hari Ini", style: GoogleFonts.varelaRound(
+                                                                  fontSize: 14, fontWeight: FontWeight.bold)
+                                                              ),
+                                                              Radio(
+                                                                value: 0,
+                                                                groupValue: _radioValue,
+                                                                activeColor: Colors.blue,
+                                                                onChanged: (value) {
+                                                                  setState(() {
+                                                                    _radioValue = value as int;
+                                                                     filter2 = "harian";
+                                                                     filter2_txt = "Transaksi Hari Ini";
+                                                                    dateFrom.text = "";
+                                                                    dateTo.text = "";
+                                                                     getDataProduk();
+                                                                     Navigator.pop(context);
+                                                                    //_radioVal = 'Check In';
+                                                                   // print(_radioVal);
+                                                                  });
+                                                                },
+                                                              )
+                                                            ],
+                                                          ),),
+                                                        Padding(padding : const EdgeInsets.only(left:15,right: 25), child : Divider(
+                                                          height: 5,
+                                                        )),
+                                                        Padding(padding: const EdgeInsets.only(right: 25,left: 15),
+                                                          child: Row(
+                                                            mainAxisAlignment: MainAxisAlignment
+                                                                .spaceBetween,
+                                                            children: [
+                                                              Text("Bulan Ini", style: GoogleFonts.varelaRound(
+                                                                  fontSize: 14, fontWeight: FontWeight.bold)
+                                                              ),
+                                                              Radio(
+                                                                value: 1,
+                                                                groupValue: _radioValue,
+                                                                activeColor: Colors.blue,
+                                                                onChanged: (value) {
+                                                                  setState(() {
+                                                                    _radioValue = value as int;
+                                                                    filter2 = "bulanan";
+                                                                    filter2_txt = "Transaksi Bulan Ini";
+                                                                    dateFrom.text = "";
+                                                                    dateTo.text = "";
+                                                                    getDataProduk();
+                                                                    Navigator.pop(context);
+                                                                  });
+                                                                },
+                                                              )
+                                                            ],
+                                                          ),),
+                                                        Padding(padding : const EdgeInsets.only(left:15,right: 25), child : Divider(
+                                                          height: 5,
+                                                        )),
+                                                        Padding(padding: const EdgeInsets.only(right: 25,left: 15,top:15),
+                                                          child: Row(
+                                                            mainAxisAlignment: MainAxisAlignment
+                                                                .spaceBetween,
+                                                            children: [
+                                                              Text("Pilih tanggal", style: GoogleFonts.varelaRound(
+                                                                  fontSize: 14, fontWeight: FontWeight.bold)
+                                                              ),
+                                                            ],
+                                                          ),),
+
+
+
+                                                        Padding(padding : const EdgeInsets.only(left : 15,right: 25),
+                                                            child: Container(
+                                                              height: 80,
+                                                              width : double.infinity,
+                                                              child : Row(
+                                                                mainAxisAlignment: MainAxisAlignment
+                                                                    .spaceBetween,
+                                                              children: [
+                                                                 Container(
+                                                                   height : 40,
+                                                                   width : 150,
+                                                                   child : TextField(
+                                                                     controller: dateFrom,
+                                                                     onTap: (){
+                                                                       FocusScope.of(context).requestFocus(FocusNode());
+                                                                       _selectDate(context);
+                                                                     },
+                                                                       decoration: InputDecoration(
+                                                                           border: OutlineInputBorder(),
+                                                                        labelText: 'Dari Tanggal',
+                                                                      ),
+                                                                   ),
+                                                                 ),
+                                                                Container(
+                                                                  height : 40,
+                                                                  width : 150,
+                                                                  child : TextField(
+                                                                    controller: dateTo,
+                                                                    onTap: (){
+                                                                      FocusScope.of(context).requestFocus(FocusNode());
+                                                                      _selectDate2(context);
+                                                                    },
+                                                                    decoration: InputDecoration(
+                                                                      border: OutlineInputBorder(),
+                                                                      labelText: 'Sampai Tanggal',
+                                                                    ),
+                                                                  ),
+                                                                )
+                                                              ],
+                                                            ),
+                                                            )
+                                                        ),
+                                                        Container(
+                                                          padding: const EdgeInsets.only(left: 15,right:25),
+                                                          width : double.infinity,
+                                                              child : Expanded(
+                                                                            child :
+                                                                            RaisedButton(
+                                                                            child : Text("Terapkan"),
+                                                                              onPressed: (){
+                                                                              setState(() {
+                                                                                filter2 = "pilih";
+                                                                                filter2_txt = "Transaksi Periode";
+                                                                                getDataProduk();
+                                                                                _radioValue = 3;
+                                                                                Navigator.pop(context);
+                                                                              });
+                                                                              },
+                                                                )
+                                                            )
+                                                        )
+
+
+
+                                                      ],
+                                                    )
+                                                )
+                                            );
+                                      }
+                                  );
                                 },
                               )
                           ),
@@ -127,12 +348,17 @@ class _RiwayatTransaksiOutlet extends State<RiwayatTransaksiOutlet> {
                                   height: 28,
                                   child :
                                   OutlinedButton(
-                                    child: Text("Pemasukan",style: TextStyle(color: Colors.black),),
+                                    child: Text("Pemasukan",style: TextStyle(color: pemasukan == false ? Colors.black : HexColor(main_color) ),),
                                     style: OutlinedButton.styleFrom(
-                                      side: BorderSide(color: HexColor("#DDDDDD"), width: 1),
+                                      side:  BorderSide(color: pemasukan == false ? HexColor("#DDDDDD") : HexColor(main_color) , width: 1) ,
                                     ),
                                     onPressed: (){
-
+                                      setState(() {
+                                        pemasukan = true;
+                                        pengeluaran = false;
+                                        filter_lain = "2";
+                                        getDataProduk();
+                                      });
                                     },
                                   )
                               )
@@ -143,12 +369,17 @@ class _RiwayatTransaksiOutlet extends State<RiwayatTransaksiOutlet> {
                                   height: 28,
                                   child :
                                   OutlinedButton(
-                                    child: Text("Pengeluaran",style: TextStyle(color: Colors.black),),
+                                    child: Text("Pengeluaran",style: TextStyle(color: pengeluaran == false ? Colors.black : HexColor(main_color) ),),
                                     style: OutlinedButton.styleFrom(
-                                      side: BorderSide(color: HexColor("#DDDDDD"), width: 1),
+                                      side:  BorderSide(color: pengeluaran == false ? HexColor("#DDDDDD") : HexColor(main_color) , width: 1) ,
                                     ),
                                     onPressed: (){
-
+                                      setState(() {
+                                        pemasukan = true;
+                                        pengeluaran = false;
+                                        filter_lain = "2";
+                                        getDataProduk();
+                                      });
                                     },
                                   )
                               )
@@ -201,7 +432,7 @@ class _RiwayatTransaksiOutlet extends State<RiwayatTransaksiOutlet> {
                                 child :CircularProgressIndicator()
                             );
                           } else {
-                            return snapshot.data == 0 ?
+                            return snapshot.data.length == 0 ?
                             Container(
                                 height: double.infinity, width : double.infinity,
                                 child: new
