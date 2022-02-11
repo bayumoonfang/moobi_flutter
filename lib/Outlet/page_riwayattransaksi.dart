@@ -168,7 +168,7 @@ class _RiwayatTransaksiOutlet extends State<RiwayatTransaksiOutlet> {
                               height: 28,
                               child :
                               OutlinedButton(
-                                child: Text(filter2_txt,style: TextStyle(color: HexColor(main_color)),),
+                                child: Text(filter2_txt,style: GoogleFonts.nunito(color: HexColor(main_color)) ),
                                 style: OutlinedButton.styleFrom(
                                   side: BorderSide(color: HexColor(main_color), width: 1),
                                 ),
@@ -196,7 +196,7 @@ class _RiwayatTransaksiOutlet extends State<RiwayatTransaksiOutlet> {
                                                                   fontSize: 17, fontWeight: FontWeight.bold) ),
                                                             )),
 
-                                                        Padding(padding: const EdgeInsets.only(top: 10,right: 25,left: 15),
+                                                        Padding(padding: const EdgeInsets.only(top: 10,right: 15,left: 15),
                                                           child: Row(
                                                             mainAxisAlignment: MainAxisAlignment
                                                                 .spaceBetween,
@@ -224,10 +224,10 @@ class _RiwayatTransaksiOutlet extends State<RiwayatTransaksiOutlet> {
                                                               )
                                                             ],
                                                           ),),
-                                                        Padding(padding : const EdgeInsets.only(left:15,right: 25), child : Divider(
+                                                        Padding(padding : const EdgeInsets.only(left:15,right: 15), child : Divider(
                                                           height: 5,
                                                         )),
-                                                        Padding(padding: const EdgeInsets.only(right: 25,left: 15),
+                                                        Padding(padding: const EdgeInsets.only(right: 15,left: 15),
                                                           child: Row(
                                                             mainAxisAlignment: MainAxisAlignment
                                                                 .spaceBetween,
@@ -253,10 +253,10 @@ class _RiwayatTransaksiOutlet extends State<RiwayatTransaksiOutlet> {
                                                               )
                                                             ],
                                                           ),),
-                                                        Padding(padding : const EdgeInsets.only(left:15,right: 25), child : Divider(
+                                                        Padding(padding : const EdgeInsets.only(left:15,right: 15), child : Divider(
                                                           height: 5,
                                                         )),
-                                                        Padding(padding: const EdgeInsets.only(right: 25,left: 15,top:15),
+                                                        Padding(padding: const EdgeInsets.only(right: 15,left: 15,top:15),
                                                           child: Row(
                                                             mainAxisAlignment: MainAxisAlignment
                                                                 .spaceBetween,
@@ -269,7 +269,7 @@ class _RiwayatTransaksiOutlet extends State<RiwayatTransaksiOutlet> {
 
 
 
-                                                        Padding(padding : const EdgeInsets.only(left : 15,right: 25),
+                                                        Padding(padding : const EdgeInsets.only(left : 15,right: 15),
                                                             child: Container(
                                                               height: 80,
                                                               width : double.infinity,
@@ -312,7 +312,7 @@ class _RiwayatTransaksiOutlet extends State<RiwayatTransaksiOutlet> {
                                                             )
                                                         ),
                                                         Container(
-                                                          padding: const EdgeInsets.only(left: 15,right:25),
+                                                          padding: const EdgeInsets.only(left: 15,right:15),
                                                           width : double.infinity,
                                                               child : Expanded(
                                                                             child :
@@ -348,7 +348,7 @@ class _RiwayatTransaksiOutlet extends State<RiwayatTransaksiOutlet> {
                                   height: 28,
                                   child :
                                   OutlinedButton(
-                                    child: Text("Pemasukan",style: TextStyle(color: pemasukan == false ? Colors.black : HexColor(main_color) ),),
+                                    child: Text("Pemasukan",style: GoogleFonts.nunito(color: pemasukan == false ? Colors.black : HexColor(main_color)) ),
                                     style: OutlinedButton.styleFrom(
                                       side:  BorderSide(color: pemasukan == false ? HexColor("#DDDDDD") : HexColor(main_color) , width: 1) ,
                                     ),
@@ -369,18 +369,18 @@ class _RiwayatTransaksiOutlet extends State<RiwayatTransaksiOutlet> {
                                   height: 28,
                                   child :
                                   OutlinedButton(
-                                    child: Text("Pengeluaran",style: TextStyle(color: pengeluaran == false ? Colors.black : HexColor(main_color) ),),
+                                    child: Text("Pengeluaran",style: GoogleFonts.nunito(color: pengeluaran == false ? Colors.black : HexColor(main_color)) ),
                                     style: OutlinedButton.styleFrom(
                                       side:  BorderSide(color: pengeluaran == false ? HexColor("#DDDDDD") : HexColor(main_color) , width: 1) ,
                                     ),
-                                    onPressed: (){
-                                      setState(() {
-                                        pemasukan = true;
-                                        pengeluaran = false;
-                                        filter_lain = "2";
-                                        getDataProduk();
-                                      });
-                                    },
+                                      onPressed: (){
+                                        setState(() {
+                                          pemasukan = false;
+                                          pengeluaran = true;
+                                          filter_lain = "2";
+                                          getDataProduk();
+                                        });
+                                      },
                                   )
                               )
                           )
@@ -462,15 +462,23 @@ class _RiwayatTransaksiOutlet extends State<RiwayatTransaksiOutlet> {
                                   return Column(
                                     children: [
                                       ListTile(
-                                          title: Column(
+                                          subtitle: Column(
                                             children: [
                                               Align(alignment: Alignment.centerLeft, child: Text(
                                                 snapshot.data[i]["i"]+" "+snapshot.data[i]["j"]+" "+snapshot.data[i]["f"],
                                                 style: TextStyle(
                                                     fontFamily: 'VarelaRound',
                                                     fontWeight: FontWeight.bold,
+                                                    color : Colors.black,
                                                     fontSize: 13),),),
                                               Padding(padding: const EdgeInsets.only(top: 7),
+                                                  child: Align(alignment: Alignment.centerLeft, child:
+                                                 Text("#"+snapshot.data[i]["b"]+" - "+snapshot.data[i]["c"],
+                                                        style: TextStyle(
+                                                            fontFamily: 'VarelaRound',
+                                                            fontSize: 12),)
+                                                    ,)),
+                                              Padding(padding: const EdgeInsets.only(top: 4),
                                                   child: Align(alignment: Alignment.centerLeft, child:
                                                   Opacity(
                                                       opacity: 0.7,
@@ -481,6 +489,7 @@ class _RiwayatTransaksiOutlet extends State<RiwayatTransaksiOutlet> {
                                                     ,))
                                             ],
                                           ),
+
                                           trailing:
                                           snapshot.data[i]["k"].toString().substring(0,1) == '-' ?
                                           Container(
