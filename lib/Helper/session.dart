@@ -28,5 +28,32 @@ class Session {
     return preferences.getInt("value");
   }
 
+  static Future<String> legalCode() async {
+    final SharedPreferences preferences = await _prefs;
+    return preferences.getString("legalCode");
+  }
+
+  static Future<String> legalName() async {
+    final SharedPreferences preferences = await _prefs;
+    return preferences.getString("legalName");
+  }
+  static Future<String> legalId() async {
+    final SharedPreferences preferences = await _prefs;
+    return preferences.getString("legalId");
+  }
+
+  static Future<String> namaUser() async {
+    final SharedPreferences preferences = await _prefs;
+    return preferences.getString("namaUser");
+  }
+  static Future<String> legalPhone() async {
+    final SharedPreferences preferences = await _prefs;
+    return preferences.getString("legalPhone");
+  }
+
+  static Future<String> userId() async {
+    final SharedPreferences preferences = await _prefs;
+    return preferences.getString("userId");
+  }
 
 }

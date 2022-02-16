@@ -62,13 +62,29 @@ class _LoginState extends State<Login> {
           headers: {"Accept":"application/json"});
       Map data = jsonDecode(response.body);
       setState(() {
-        int getValue = data["value"];
-        String getRole = data["role"];
+        String getEmail = data["email"];
+        String getNamaUser = data["nama_user"];
         String getLevel = data["level"];
+        String getUserId = data["id_user"];
+        String getLegalCode = data["legal_kode"];
+        String getLegalName = data["legal_name"];
+        String getLegalId = data["legal_id"];
+        String getLegalPhone = data["legal_phone"];
+        String getRole = data["legal_role"];
+
         if (data["message"].toString() == '1') {
-          savePref(1, parEmail, getRole, getLevel);
+          savePref(1, getEmail, getRole, getLevel, getLegalCode, getLegalName, getLegalId,
+              getNamaUser, getLegalPhone, getUserId);
           Navigator.pushReplacement(context, EnterPage(page: Home()));
           _googleSignIn.signOut();
+        }  else if (data["message"].toString() == '3') {
+          showToast("Mohon maaf status toko anda sudah non aktif, silahkan hubungi admin untuk info"
+              "lebih lanjut", gravity: Toast.CENTER, duration: Toast.LENGTH_LONG);
+          return;
+        }  else if (data["message"].toString() == '4') {
+          showToast("Mohon maaf status subscription akun anda sudah kadaluarsa, silahkan lakukan pembaharuan lisensi atau hubungi adminuntuk informasi lebih lanjut"
+              "lebih lanjut", gravity: Toast.CENTER, duration: Toast.LENGTH_LONG);
+          return;
         } else {
           _googleSignIn.signOut();
           showToast("Gagal Login", gravity: Toast.CENTER, duration: Toast.LENGTH_LONG);
@@ -100,11 +116,29 @@ class _LoginState extends State<Login> {
             headers: {"Accept":"application/json"});
         Map data = jsonDecode(response.body);
         setState(() {
-          String getRole = data["role"];
+          String getEmail = data["email"];
+          String getNamaUser = data["nama_user"];
           String getLevel = data["level"];
+          String getUserId = data["id_user"];
+          String getLegalCode = data["legal_kode"];
+          String getLegalName = data["legal_name"];
+          String getLegalId = data["legal_id"];
+          String getLegalPhone = data["legal_phone"];
+          String getRole = data["legal_role"];
+
           if (data["message"].toString() == '1') {
-            savePref(1, _username.text, getRole ,getLevel);
+            savePref(1, getEmail, getRole, getLevel, getLegalCode, getLegalName, getLegalId,
+                getNamaUser, getLegalPhone, getUserId);
             Navigator.pushReplacement(context, EnterPage(page: Home()));
+            _googleSignIn.signOut();
+          }  else if (data["message"].toString() == '3') {
+            showToast("Mohon maaf status toko anda sudah non aktif, silahkan hubungi admin untuk info"
+                "lebih lanjut", gravity: Toast.CENTER, duration: Toast.LENGTH_LONG);
+            return;
+          } else if (data["message"].toString() == '4') {
+            showToast("Mohon maaf status subscription akun anda sudah kadaluarsa, silahkan lakukan pembaharuan lisensi atau hubungi adminuntuk informasi lebih lanjut"
+                "lebih lanjut", gravity: Toast.CENTER, duration: Toast.LENGTH_LONG);
+            return;
           } else {
             showToast("Gagal Login", gravity: Toast.CENTER, duration: Toast.LENGTH_LONG);
             return;
@@ -113,13 +147,23 @@ class _LoginState extends State<Login> {
       }
   }
 
-    savePref(int value, String emailval, String roleVal, String levelVal) async {
+
+
+
+    savePref(int value, String emailval, String roleVal, String levelVal, String legalCodeVal
+        , String legalNameVal, String legalIdVal, String namaUserVal, String legalPhoneVal, String userId) async {
       SharedPreferences preferences = await SharedPreferences.getInstance();
       setState(() {
         preferences.setInt("value", value);
         preferences.setString("email", emailval);
         preferences.setString("role", roleVal);
         preferences.setString("level", levelVal);
+        preferences.setString("legalCode", legalCodeVal);
+        preferences.setString("legalName", legalNameVal);
+        preferences.setString("legalId", legalIdVal);
+        preferences.setString("namaUser", namaUserVal);
+        preferences.setString("legalPhone", legalPhoneVal);
+        preferences.setString("userId", userId);
         preferences.commit();
       });
     }

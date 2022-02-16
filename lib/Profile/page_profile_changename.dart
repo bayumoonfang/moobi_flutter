@@ -19,7 +19,13 @@ import 'package:toast/toast.dart';
 import 'package:http/http.dart' as http;
 import 'package:moobi_flutter/Helper/api_link.dart';
 
+import '../page_intoduction.dart';
+
 class ProfileUbahNama extends StatefulWidget {
+  final String getEmail;
+  final String getNamaUser;
+  final String getUserId;
+  const ProfileUbahNama(this.getEmail, this.getNamaUser, this.getUserId);
   @override
   ProfileUbahNamaState createState() => ProfileUbahNamaState();
 }
@@ -35,24 +41,33 @@ class ProfileUbahNamaState extends State<ProfileUbahNama> {
 
 
 
-  String getEmail = "...";
-  String getNama = "...";
+  _cekLegalandUser() async {
+    final response = await http.post(applink+"api_model.php?act=cek_legalanduser",
+        body: {"username": widget.getEmail.toString()},
+        headers: {"Accept":"application/json"});
+    Map data = jsonDecode(response.body);
+    setState(() {
+      if (data["message"].toString() == '2' || data["message"].toString() == '3') {
+        Navigator.pushReplacement(context, ExitPage(page: Introduction()));
+      }
+    });
+  }
+  //=============================================================================
   _startingVariable() async {
     await AppHelper().getConnect().then((value){if(value == 'ConnInterupted'){
       showToast("Koneksi terputus..", gravity: Toast.CENTER,duration:
       Toast.LENGTH_LONG);}});
-    await AppHelper().getSession().then((value){if(value[0] != 1) {
-      Navigator.pushReplacement(context, ExitPage(page: Login()));}else{setState(() {getEmail = value[1];});}});
-    await AppHelper().getDetailUser(getEmail.toString()).then((value){
-      setState(() {
-        getNama = value[4];
-      });
+    await AppHelper().getSession().then((value){
+      if(value[0] != 1) {
+        Navigator.pushReplacement(context, ExitPage(page: Login()));
+      }
     });
+    await _cekLegalandUser();
   }
 
   _prepare() async {
     await _startingVariable();
-    valNama.text = getNama;
+    valNama.text = widget.getNamaUser;
   }
 
   @override
@@ -64,7 +79,7 @@ class ProfileUbahNamaState extends State<ProfileUbahNama> {
   doSimpan() async {
     final response = await http.post(applink+"api_model.php?act=edit_namapengguna", body: {
       "valNama_edit": valNama.text,
-      "valEmail_edit" : getEmail.toString()
+      "valUserid_edit" : widget.getUserId.toString()
     });
     Map data = jsonDecode(response.body);
     setState(() {

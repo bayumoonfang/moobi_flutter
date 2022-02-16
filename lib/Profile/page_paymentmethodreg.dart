@@ -80,7 +80,7 @@ class _PaymentMethodRegistrationState extends State<PaymentMethodRegistration>{
           ),
           leading: Builder(
             builder: (context) => IconButton(
-                icon: new Icon(Icons.arrow_back),
+                icon: new FaIcon(FontAwesomeIcons.times),
                 color: Colors.white,
                 onPressed: () => {
                   Navigator.pop(context)
@@ -103,12 +103,12 @@ class _PaymentMethodRegistrationState extends State<PaymentMethodRegistration>{
     return FutureBuilder(
       future : getData(),
       builder: (context, snapshot) {
-        if (snapshot.data == null) {
+        if (snapshot.connectionState != ConnectionState.done) {
           return Center(
-              child: CircularProgressIndicator()
+              child :CircularProgressIndicator()
           );
         } else {
-          return snapshot.data == 0 ?
+          return snapshot.data.length == 0 ?
           Container(
               height: double.infinity, width : double.infinity,
               child: new
@@ -119,12 +119,12 @@ class _PaymentMethodRegistrationState extends State<PaymentMethodRegistration>{
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: <Widget>[
                       new Text(
-                        "Data tidak ditemukan",
+                        "Tidak ada data",
                         style: new TextStyle(
                             fontFamily: 'VarelaRound', fontSize: 18),
                       ),
                       new Text(
-                        "Silahkan lakukan input data",
+                        "Mohon menunggu sebentar atau kembali ke menu sebelumnya",
                         style: new TextStyle(
                             fontFamily: 'VarelaRound', fontSize: 12),
                       ),

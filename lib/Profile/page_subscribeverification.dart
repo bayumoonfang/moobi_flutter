@@ -17,11 +17,14 @@ import 'package:moobi_flutter/Helper/page_route.dart';
 import 'package:moobi_flutter/Helper/session.dart';
 import 'package:moobi_flutter/Helper/setting_apps.dart';
 import 'package:moobi_flutter/Profile/page_paymentloading.dart';
+import 'package:moobi_flutter/page_intoduction.dart';
 import 'package:moobi_flutter/page_login.dart';
 import 'package:toast/toast.dart';
 
 class SubscribeVerification extends StatefulWidget{
-
+  final String getEmail;
+  final String getLegalcode;
+  const SubscribeVerification(this.getEmail, this.getLegalcode);
   @override
   SubscribeVerificationState createState() => SubscribeVerificationState();
 }
@@ -69,18 +72,34 @@ class SubscribeVerificationState extends State<SubscribeVerification> {
       });
   }
 
-  String getEmail = "...";
-  String getNama = "...";
+
+  String val_legalcode = "0";
+  _cekLegalandUser() async {
+    final response = await http.post(applink+"api_model.php?act=cek_legalanduser",
+        body: {"username": widget.getEmail.toString()},
+        headers: {"Accept":"application/json"});
+    Map data = jsonDecode(response.body);
+    setState(() {
+      if (data["message"].toString() == '2' || data["message"].toString() == '3') {
+        Navigator.pushReplacement(context, ExitPage(page: Introduction()));
+      }
+    });
+  }
+  //=============================================================================
   _startingVariable() async {
     await AppHelper().getConnect().then((value){if(value == 'ConnInterupted'){
       showToast("Koneksi terputus..", gravity: Toast.CENTER,duration:
       Toast.LENGTH_LONG);}});
-    await AppHelper().getSession().then((value){if(value[0] != 1) {
-      Navigator.pushReplacement(context, ExitPage(page: Login()));}else{setState(() {getEmail = value[1];});}});
-    await AppHelper().getDetailUser(getEmail.toString()).then((value){
+    await AppHelper().getSession().then((value){
+      if(value[0] != 1) {
+        Navigator.pushReplacement(context, ExitPage(page: Login()));
+      }
+    });
+    await _cekLegalandUser();
+    AppHelper().getDetailUser(widget.getEmail.toString()).then((value){
       setState(() {
-        getNama = value[4];
-        valUserid.text = value[6];
+        val_legalcode = value[15];
+        valUserid.text = val_legalcode;
       });
     });
   }
@@ -261,7 +280,7 @@ class SubscribeVerificationState extends State<SubscribeVerification> {
                       children: [
                         Align(alignment: Alignment.centerLeft,child: Padding(
                           padding: const EdgeInsets.only(left: 0,top: 15),
-                          child: Text("User ID",style: TextStyle(fontWeight: FontWeight.bold,fontFamily: "VarelaRound",
+                          child: Text("Legal Code",style: TextStyle(fontWeight: FontWeight.bold,fontFamily: "VarelaRound",
                               fontSize: 12,color: HexColor("#0074D9")),),
                         ),),
                         Align(alignment: Alignment.centerLeft,child: Padding(

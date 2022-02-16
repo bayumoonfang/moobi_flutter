@@ -98,6 +98,9 @@ class _RegisterGoogleState extends State<RegisterGoogle> {
         } else if (getMessage == '2') {
           savePref(1, widget.parEmail);
           Navigator.pushReplacement(context, EnterPage(page: Home()));
+        } else if (getMessage == '3') {
+          showToast("Nomor anda sudah terdaftar", gravity: Toast.CENTER, duration: Toast.LENGTH_LONG);
+          return;
         } else {
           showToast(getMessage, gravity: Toast.CENTER, duration: Toast.LENGTH_LONG);
           return;

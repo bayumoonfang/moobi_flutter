@@ -111,6 +111,9 @@ class _RegisterState extends State<Register> {
               } else if (getMessage == '1') {
                 showToast("Email sudah terdaftar", gravity: Toast.CENTER, duration: Toast.LENGTH_LONG);
                 return;
+              } else if (getMessage == '3') {
+                showToast("Nomor anda sudah terdaftar", gravity: Toast.CENTER, duration: Toast.LENGTH_LONG);
+                return;
               } else if (getMessage == '2') {
                 Navigator.push(context, ExitPage(page: SuksesRegister(_email.text)));
               }

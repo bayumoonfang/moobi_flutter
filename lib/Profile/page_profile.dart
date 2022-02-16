@@ -8,6 +8,7 @@ import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:hexcolor/hexcolor.dart';
+import 'package:intl/intl.dart';
 import 'package:moobi_flutter/Helper/app_helper.dart';
 import 'package:moobi_flutter/Helper/check_connection.dart';
 import 'package:moobi_flutter/Helper/color_based.dart';
@@ -17,6 +18,7 @@ import 'package:moobi_flutter/Profile/page_ubahsandi.dart';
 import 'package:moobi_flutter/helper/api_link.dart';
 import 'package:moobi_flutter/helper/page_route.dart';
 import 'package:moobi_flutter/helper/session.dart';
+import 'package:moobi_flutter/page_intoduction.dart';
 import 'package:moobi_flutter/page_login.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
@@ -24,6 +26,9 @@ import 'dart:convert';
 
 import 'package:toast/toast.dart';
 class Profile extends StatefulWidget {
+  final String getEmail;
+  final String getUserId;
+  const Profile(this.getEmail, this.getUserId);
   @override
   _ProfileState createState() => _ProfileState();
 }
@@ -37,27 +42,45 @@ class _ProfileState extends State<Profile> {
   void showToast(String msg, {int duration, int gravity}) {
     Toast.show(msg, context, duration: duration, gravity: gravity);
   }
-
-  String getEmail = "...";
-  String getRole = "...";
-  String getUserId = "...";
-  String getRegisterDate = "...";
-  String getNama = "...";
+  String val_namauser = "...";
+  String val_subscription = "0";
+  String val_userno = "0";
+  String val_registerdate = "0";
+  String val_legalcode = "0";
+  _cekLegalandUser() async {
+    final response = await http.post(applink+"api_model.php?act=cek_legalanduser",
+        body: {"username": widget.getEmail.toString()},
+        headers: {"Accept":"application/json"});
+    Map data = jsonDecode(response.body);
+    setState(() {
+      if (data["message"].toString() == '2' || data["message"].toString() == '3') {
+        Navigator.pushReplacement(context, ExitPage(page: Introduction()));
+      }
+    });
+  }
+  //=============================================================================
   _startingVariable() async {
     await AppHelper().getConnect().then((value){if(value == 'ConnInterupted'){
       showToast("Koneksi terputus..", gravity: Toast.CENTER,duration:
       Toast.LENGTH_LONG);}});
-    await AppHelper().getSession().then((value){if(value[0] != 1) {
-      Navigator.pushReplacement(context, ExitPage(page: Login()));}else{setState(() {getEmail = value[1];});}});
-    await AppHelper().getDetailUser(getEmail.toString()).then((value){
+    await AppHelper().getSession().then((value){
+      if(value[0] != 1) {
+        Navigator.pushReplacement(context, ExitPage(page: Login()));
+      }
+    });
+    await _cekLegalandUser();
+    AppHelper().getDetailUser(widget.getEmail.toString()).then((value){
       setState(() {
-          getRole = value[5];
-          getUserId = value[6];
-          getRegisterDate = value[7];
-          getNama = value[4];
+        val_namauser = value[8];
+        val_subscription = value[13];
+        val_userno = value[14];
+        val_registerdate = value[11];
+        val_legalcode = value[15];
       });
     });
   }
+
+
 
   signOut() async {
     await googleSignIn.signOut();
@@ -88,17 +111,16 @@ class _ProfileState extends State<Profile> {
 
 
   FutureOr onGoBack(dynamic value) {
-     AppHelper().getDetailUser(getEmail.toString()).then((value){
+     AppHelper().getDetailUser(widget.getEmail.toString()).then((value){
       setState(() {
-        getRole = value[5];
-        getUserId = value[6];
-        getRegisterDate = value[7];
-        getNama = value[4];
+        val_namauser = value[8];
+        val_subscription = value[13];
+        val_userno = value[14];
+        val_registerdate = value[11];
       });
     });
     setState(() {});
   }
-
 
 
   @override
@@ -146,10 +168,10 @@ class _ProfileState extends State<Profile> {
                                 ),
                           title: Align(
                             alignment: Alignment.centerLeft,
-                            child: Text(getNama.toString(),style: TextStyle(fontFamily: 'VarelaRound',)),),
+                            child: Text(val_namauser.toString(),style: TextStyle(fontFamily: 'VarelaRound',)),),
                           subtitle: Align(
                             alignment: Alignment.centerLeft,
-                            child: Text(getEmail.toString(),style: TextStyle(fontFamily: 'VarelaRound')),),
+                            child: Text(widget.getEmail.toString(),style: TextStyle(fontFamily: 'VarelaRound')),),
                         ),
                     ),
                     Padding(padding: const EdgeInsets.only(left: 15,right: 15,top: 10),
@@ -164,17 +186,17 @@ class _ProfileState extends State<Profile> {
                             opacity: 0.6,
                             child: Align(
                               alignment: Alignment.centerLeft,
-                              child: Text("MOOBIE "+getRole.toString(),style: TextStyle(fontWeight: FontWeight.bold
+                              child: Text(val_subscription.toString() == "0" ? "MOOBI Trial" : "MOOBI Premier",style: TextStyle(fontWeight: FontWeight.bold
                                   , fontFamily: 'VarelaRound')),),
                           ),
                         trailing: Container(
                           height: 30,
                           child:
 
-                          getRole.toString() == 'Trial' ?
+                          val_subscription.toString() == '0' ?
                           RaisedButton(
                             onPressed: (){
-                              Navigator.push(context, ExitPage(page: Subscribe()));
+                              Navigator.push(context, ExitPage(page: Subscribe(widget.getEmail.toString(), val_legalcode)));
                             },
                             color: HexColor(main_color),
                             shape: RoundedRectangleBorder(side: BorderSide(
@@ -188,23 +210,7 @@ class _ProfileState extends State<Profile> {
                                   color: Colors.white, fontFamily: 'VarelaRound',fontSize: 13)),
                           )
 
-                          : getRole.toString() == 'Classic' ?
-                          RaisedButton(
-                            onPressed: (){
-
-                            },
-                            color: HexColor(main_color),
-                            shape: RoundedRectangleBorder(side: BorderSide(
-                                color: Colors.black,
-                                width: 0.1,
-                                style: BorderStyle.solid
-                            ),
-                              borderRadius: BorderRadius.circular(50.0),
-                            ),
-                            child: Text("Upgrade",style: TextStyle(
-                                color: Colors.white, fontFamily: 'VarelaRound',fontSize: 13)),
-                          )
-                              :
+                          :
                           RaisedButton(
                             color: HexColor(main_color),
                             shape: RoundedRectangleBorder(side: BorderSide(
@@ -231,7 +237,7 @@ class _ProfileState extends State<Profile> {
                     Padding(padding: const EdgeInsets.only(top: 20,left: 25),
                     child: Column(
                       children: [
-                        Align(alignment: Alignment.centerLeft,child: Text("MOOBIE ID",style: TextStyle(
+                        Align(alignment: Alignment.centerLeft,child: Text("MOOBI ID",style: TextStyle(
                             color: Colors.black, fontFamily: 'VarelaRound',fontSize: 16,
                             fontWeight: FontWeight.bold)),),
                         Padding(padding: const EdgeInsets.only(top: 10,right: 25),
@@ -246,7 +252,7 @@ class _ProfileState extends State<Profile> {
                                     fontFamily: 'VarelaRound',
                                     fontSize: 14),
                               ),
-                              Text(getUserId.toString(),
+                              Text( val_userno.toString(),
                                   style: TextStyle(
                                       fontFamily: 'VarelaRound',
                                       fontSize: 14)),
@@ -265,7 +271,7 @@ class _ProfileState extends State<Profile> {
                                     fontFamily: 'VarelaRound',
                                     fontSize: 14),
                               ),
-                              Text(getRegisterDate.toString(),
+                              Text(val_registerdate.toString(),
                                   style: TextStyle(
                                       fontFamily: 'VarelaRound',
                                       fontSize: 14)),
@@ -293,7 +299,7 @@ class _ProfileState extends State<Profile> {
                             child: InkWell(
                               child: ListTile(
                                 onTap: (){
-                                  Navigator.push(context, ExitPage(page: ProfileUbahNama())).then(onGoBack);
+                                  Navigator.push(context, ExitPage(page: ProfileUbahNama(widget.getEmail, val_namauser.toString(), widget.getUserId))).then(onGoBack);
                                 },
                                 leading: FaIcon(FontAwesomeIcons.user,color: HexColor(third_color),),
                                 title: Text("Ubah Nama",style: TextStyle(
@@ -309,7 +315,7 @@ class _ProfileState extends State<Profile> {
                               child: InkWell(
                                 child: ListTile(
                                   onTap: (){
-                                    Navigator.push(context, ExitPage(page: ProfileUbahSandi()));
+                                    Navigator.push(context, ExitPage(page: ProfileUbahSandi(widget.getUserId, widget.getEmail)));
                                   },
                                   leading: FaIcon(FontAwesomeIcons.lock,color: HexColor(third_color),),
                                   title: Text("Ubah Sandi Akun",style: TextStyle(

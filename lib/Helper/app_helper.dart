@@ -30,7 +30,13 @@ class AppHelper {
     String getEmail = await Session.getEmail();
     String getRole = await Session.getRole();
     String getLevel = await Session.getLevel();
-    return [value,getEmail,getRole,getLevel];
+    String getLegalCode = await Session.legalCode();
+    String getLegalName = await Session.legalName();
+    String getLegalId = await Session.legalId();
+    String getNamaUser = await Session.namaUser();
+    String getLegalPhone = await Session.legalPhone();
+    String getUserId = await Session.userId();
+    return [value,getEmail,getRole,getLevel,getLegalCode,getLegalName,getLegalId,getNamaUser,getLegalPhone, getUserId];
   }
 
 
@@ -47,14 +53,23 @@ class AppHelper {
     );
     var data = jsonDecode(response.body);
     return [
-      data["d"].toString(),
-      data["c"].toString(),
-      data["m"].toString(),
-      data["b"].toString(),
-      data["j"].toString(),
-      data["l"].toString(),
-      data["m"].toString(),
-      data["n"].toString()];
+      data["legal_nama"].toString(), //0
+      data["user_cabang"].toString(),//1
+      data["user_level"].toString(),//2
+      data["legal_alamat"].toString(),//3
+      data["legal_id"].toString(),//4
+      data["legal_kota"].toString(),//5
+      data["legal_phone"].toString(),//6
+      data["legal_status"].toString(),//7
+      data["user_nama"].toString(),//8
+      data["user_username"].toString(),//9
+      data["user_id"].toString(),//10
+      data["user_registerdate"].toString(),//11
+      data["legal_web"].toString(),//12
+      data["legal_subscription"].toString(),//13
+      data["user_userno"].toString(),//14
+      data["legal_code"].toString()//15
+    ];
   }
 
 }

@@ -19,7 +19,12 @@ import 'package:toast/toast.dart';
 import 'package:http/http.dart' as http;
 import 'package:moobi_flutter/Helper/api_link.dart';
 
+import '../page_intoduction.dart';
+
 class ProfileUbahSandi extends StatefulWidget {
+  final String getUserId;
+  final String getEmail;
+  const ProfileUbahSandi(this.getUserId, this.getEmail);
   @override
   ProfileUbahSandiState createState() => ProfileUbahSandiState();
 }
@@ -33,19 +38,29 @@ class ProfileUbahSandiState extends State<ProfileUbahSandi> {
     Toast.show(msg, context, duration: duration, gravity: gravity);
   }
 
-  String getEmail = "...";
-  String getNama = "...";
+
+  _cekLegalandUser() async {
+    final response = await http.post(applink+"api_model.php?act=cek_legalanduser",
+        body: {"username": widget.getEmail.toString()},
+        headers: {"Accept":"application/json"});
+    Map data = jsonDecode(response.body);
+    setState(() {
+      if (data["message"].toString() == '2' || data["message"].toString() == '3') {
+        Navigator.pushReplacement(context, ExitPage(page: Introduction()));
+      }
+    });
+  }
+  //=============================================================================
   _startingVariable() async {
     await AppHelper().getConnect().then((value){if(value == 'ConnInterupted'){
       showToast("Koneksi terputus..", gravity: Toast.CENTER,duration:
       Toast.LENGTH_LONG);}});
-    await AppHelper().getSession().then((value){if(value[0] != 1) {
-      Navigator.pushReplacement(context, ExitPage(page: Login()));}else{setState(() {getEmail = value[1];});}});
-    await AppHelper().getDetailUser(getEmail.toString()).then((value){
-      setState(() {
-        getNama = value[4];
-      });
+    await AppHelper().getSession().then((value){
+      if(value[0] != 1) {
+        Navigator.pushReplacement(context, ExitPage(page: Login()));
+      }
     });
+    await _cekLegalandUser();
   }
 
   _prepare() async {
@@ -61,8 +76,8 @@ class ProfileUbahSandiState extends State<ProfileUbahSandi> {
   doSimpan() async {
     final response = await http.post(applink+"api_model.php?act=edit_sandipengguna", body: {
       "valpassword_edit": valPassword.text,
-      "valemail_edit" : getNama.toString(),
-      "valnama_edit": getNama.toString()
+      "valemail_edit" : widget.getEmail.toString(),
+      "valuserid_edit": widget.getUserId.toString()
     });
     Map data = jsonDecode(response.body);
     setState(() {

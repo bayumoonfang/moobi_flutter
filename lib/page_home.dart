@@ -52,34 +52,57 @@ class _HomeState extends State<Home> {
 
   Future<bool> _onWillPop() async {}
 
+
+
   //=============================================================================
   String getEmail = '...';
-  String getMoobiIdentity = '...';
-  String getBranch = '...';
+  String getRole = '...';
+  String getLegalCode = '...';
+  String getLegalId = '...';
   String getUserID = '...';
   String getStorename = '...';
   String getNamaUser = '...';
+  String getSubscription = "0";
   _startingVariable() async {
     await AppHelper().getConnect().then((value){if(value == 'ConnInterupted'){
       showToast("Koneksi terputus..", gravity: Toast.CENTER,duration:
       Toast.LENGTH_LONG);}});
-    await AppHelper().getSession().then((value){if(value[0] != 1) {
-       Navigator.pushReplacement(context, ExitPage(page: Introduction()));} else{setState(() {getEmail = value[1];});}});
-    await AppHelper().getDetailUser(getEmail.toString()).then((value){
-      setState(() {
-        getMoobiIdentity = value[0];
-        getBranch = value[1];
-        getUserID = value[2];
-        getStorename = value[3];
-        getNamaUser = value[4];
-      });
+    await AppHelper().getSession().then((value){
+      if(value[0] != 1) {
+        Navigator.pushReplacement(context, ExitPage(page: Login()));
+      }else {
+        setState(() {
+          getEmail = value[1];
+          getLegalCode = value[4];
+          getLegalId = value[6];
+          getStorename = value[5];
+          getNamaUser = value[7];
+          getUserID = value[9];
+          getRole = value[2];
+        });
+      }
     });
   }
 
 
+  _cekLegalandUser() async {
+    final response = await http.post(applink+"api_model.php?act=cek_legalanduser",
+        body: {"username": getEmail},
+        headers: {"Accept":"application/json"});
+    Map data = jsonDecode(response.body);
+    setState(() {
+      if (data["message"].toString() == '2' || data["message"].toString() == '3') {
+        Navigator.pushReplacement(context, ExitPage(page: Introduction()));
+      } else {
+        getSubscription = data["legalsubs"].toString();
+      }
+    });
+  }
+
 
   void _loaddata() async {
     await _startingVariable();
+    await _cekLegalandUser();
   }
 
 
@@ -91,7 +114,7 @@ class _HomeState extends State<Home> {
 
   Future<List> getDataTotal() async {
     http.Response response = await http.get(
-        Uri.encodeFull(applink+"api_model.php?act=getdata_monthsalestotal&branch="+getBranch),
+        Uri.encodeFull(applink+"api_model.php?act=getdata_monthsalestotal&legalId="+getLegalId),
         headers: {"Accept":"application/json"}
     );
       return json.decode(response.body);
@@ -283,7 +306,7 @@ class _HomeState extends State<Home> {
                                       children: [
                                         InkWell(
                                           onTap: () {
-                                            Navigator.push(context, ExitPage(page: Profile()));
+                                            Navigator.push(context, ExitPage(page: Profile(getEmail.toString(), getUserID.toString())));
                                           },
                                           child:
                                           Column(
@@ -312,7 +335,7 @@ class _HomeState extends State<Home> {
 
                                         InkWell(
                                           onTap: () {
-                                            Navigator.push(context, ExitPage(page: Gudang(getBranch.toString(), getNamaUser.toString())));
+                                            Navigator.push(context, ExitPage(page: Gudang(getLegalCode.toString(), getNamaUser.toString())));
                                           },
                                           child:
                                         Column(
@@ -333,7 +356,7 @@ class _HomeState extends State<Home> {
                       padding: const EdgeInsets.only(top: 200,left: 25,right: 25),
                       child: Column(
                         children: [
-                          getMoobiIdentity == 'Classic' ?
+                          getSubscription.toString() == '0' ?
                           Container(
                             padding: const EdgeInsets.only(bottom: 30),
                               decoration: BoxDecoration(
@@ -355,7 +378,7 @@ class _HomeState extends State<Home> {
                           )
                           :
                           Container(),
-                          getMoobiIdentity == 'Classic' ?
+                          getSubscription.toString() == '0' ?
                           SizedBox(
                             height: 25,
                           )

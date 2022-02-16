@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:moobi_flutter/SplashScreen.dart';
 import 'package:moobi_flutter/page_home.dart';
 import 'package:moobi_flutter/page_index.dart';
+import 'package:moobi_flutter/page_intoduction.dart';
 void main() {
   runApp(MyApp());
 }

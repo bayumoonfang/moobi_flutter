@@ -7,6 +7,7 @@ import 'dart:convert';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:hexcolor/hexcolor.dart';
 import 'package:moobi_flutter/Helper/check_connection.dart';
 import 'package:moobi_flutter/Helper/color_based.dart';
@@ -23,6 +24,9 @@ import 'package:http/http.dart' as http;
 import 'package:moobi_flutter/Helper/api_link.dart';
 
 class Subscribe extends StatefulWidget {
+  final String getEmail;
+  final String getLegalcode;
+  const Subscribe(this.getEmail, this.getLegalcode);
   @override
   SubscribeState createState() => SubscribeState();
 }
@@ -45,7 +49,7 @@ class SubscribeState extends State<Subscribe> {
         appBar: new AppBar(
           backgroundColor: HexColor(main_color),
           title: Text(
-            "Subscribe Moobie",
+            "Subscribe Moobi",
             style: TextStyle(
                 color: Colors.white, fontFamily: 'VarelaRound', fontSize: 16),
           ),
@@ -71,17 +75,17 @@ class SubscribeState extends State<Subscribe> {
                         Align(alignment: Alignment.centerLeft,child: Padding(
                           padding: const EdgeInsets.only(left: 0,top: 15),
                           child:
-                          Text("Segera subscribe Moobie anda",
+                          Text("Segera subscribe Moobi anda",
                             style: TextStyle(fontWeight: FontWeight.bold,fontFamily: "VarelaRound",
                               fontSize: 16,color: Colors.black),),
                         ),),
                         Align(alignment: Alignment.centerLeft,child: Padding(
                           padding: const EdgeInsets.only(left: 0,top: 10, right: 35),
                           child:
-                          Text("Sudah nyaman dengan moobie ? yuk terus kembangkan bisnis kamu , dengan moobie. "
-                              "Segera dapatkan full version moobie dengan "
+                          Text("Sudah nyaman dengan moobie ? yuk terus kembangkan bisnis kamu , dengan moobi. "
+                              "Segera dapatkan full version moobi dengan "
                               "cara subscribe dan dapatkan keuntungan lainnya serta update "
-                              "terbaru yang keren habis dari moobie.",
+                              "terbaru yang keren habis dari moobi.",
                             style: TextStyle(fontFamily: "VarelaRound",
                                 fontSize: 12,color: Colors.black,height: 1.5),),
                         ),),
@@ -164,9 +168,10 @@ class SubscribeState extends State<Subscribe> {
                                               borderRadius: BorderRadius.circular(5),
                                             ),
                                             child: Text("List Rekening dan Payment Gateway",
-                                              style: TextStyle(color: HexColor("#4c4851"),fontSize: 13),),
+                                              style: GoogleFonts.nunito(color: HexColor("#4c4851"),fontSize: 13) ),
                                             onPressed: (){
-                                              Navigator.push(context, ExitPage(page: PaymentMethodRegistration()));
+                                              //Navigator.push(context, ExitPage(page: PaymentMethodRegistration()));
+                                              Navigator.push(context, MaterialPageRoute(builder: (context) => PaymentMethodRegistration()));
                                             },
                                             color: HexColor(fourth_color),
                                           )
@@ -250,7 +255,8 @@ class SubscribeState extends State<Subscribe> {
                 child: Text("Verifikasi",style: TextStyle(color: Colors.white),),
                 color: HexColor(main_color),
                 onPressed: (){
-                  Navigator.push(context, ExitPage(page: SubscribeVerification()));
+                  //Navigator.push(context, ExitPage(page: SubscribeVerification()));
+                  Navigator.push(context, MaterialPageRoute(builder: (context) => SubscribeVerification(widget.getEmail, widget.getLegalcode)));
                 },
               ),
             )
