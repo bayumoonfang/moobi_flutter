@@ -47,6 +47,7 @@ class _ProfileState extends State<Profile> {
   String val_userno = "0";
   String val_registerdate = "0";
   String val_legalcode = "0";
+  String val_pictuser = "";
   _cekLegalandUser() async {
     final response = await http.post(applink+"api_model.php?act=cek_legalanduser",
         body: {"username": widget.getEmail.toString()},
@@ -76,6 +77,7 @@ class _ProfileState extends State<Profile> {
         val_userno = value[14];
         val_registerdate = value[11];
         val_legalcode = value[15];
+        val_pictuser = value[16];
       });
     });
   }
@@ -87,10 +89,15 @@ class _ProfileState extends State<Profile> {
     SharedPreferences preferences = await SharedPreferences.getInstance();
     setState(() {
       preferences.setInt("value", null);
-      preferences.setString("username", null);
       preferences.setString("email", null);
       preferences.setString("role", null);
       preferences.setString("level", null);
+      preferences.setString("legalCode", null);
+      preferences.setString("legalName", null);
+      preferences.setString("legalId", null);
+      preferences.setString("namaUser", null);
+      preferences.setString("legalPhone", null);
+      preferences.setString("userId", null);
       preferences.commit();
       Navigator.pushReplacement(context, ExitPage(page: Login()));
     });
@@ -121,6 +128,46 @@ class _ProfileState extends State<Profile> {
     });
     setState(() {});
   }
+
+  alertLogOut() {
+    showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            //title: Text(),
+            content: Container(
+                width: double.infinity,
+                height: 178,
+                child: Column(
+                  children: [
+                    Align(alignment: Alignment.center, child:
+                    Text("Konfirmasi", style: TextStyle(fontFamily: 'VarelaRound', fontSize: 20,
+                        fontWeight: FontWeight.bold)),),
+                    Padding(padding: const EdgeInsets.only(top: 15), child:
+                    Align(alignment: Alignment.center, child: FaIcon(FontAwesomeIcons.signOutAlt,
+                      color: Colors.redAccent,size: 35,)),),
+                    Padding(padding: const EdgeInsets.only(top: 15), child:
+                    Align(alignment: Alignment.center, child:
+                    Text("Apakah anda yakin untuk keluar  dari aplikasi ini ? ",
+                        style: TextStyle(fontFamily: 'VarelaRound', fontSize: 12)),)),
+                    Padding(padding: const EdgeInsets.only(top: 25), child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      children: <Widget>[
+                        Expanded(child: OutlineButton(
+                          onPressed: () {Navigator.pop(context);}, child: Text("Tidak"),)),
+                        Expanded(child: OutlineButton(
+                          borderSide: BorderSide(width: 1.0, color: Colors.redAccent),
+                          onPressed: () {
+                            signOut();
+                          }, child: Text("Iya", style: TextStyle(color: Colors.red),),)),
+                      ],),)
+                  ],
+                )
+            ),
+          );
+        });
+  }
+
 
 
   @override
@@ -179,14 +226,15 @@ class _ProfileState extends State<Profile> {
                     Padding(padding: const EdgeInsets.only(left: 15,right: 15),
                       child: ListTile(
                         leading: Opacity(
-                          opacity: 0.6,
-                          child: FaIcon(FontAwesomeIcons.checkDouble,size: 20,),
+                          opacity: val_subscription.toString() == "0" ? 0.6 : 1,
+                          child: FaIcon(FontAwesomeIcons.checkDouble,size: 20, color : val_subscription.toString() == "0" ? Colors.black : Colors.black),
                         ),
                           title: Opacity(
-                            opacity: 0.6,
+                            opacity: val_subscription.toString() == "0" ? 0.6 : 1,
                             child: Align(
                               alignment: Alignment.centerLeft,
-                              child: Text(val_subscription.toString() == "0" ? "MOOBI Trial" : "MOOBI Premier",style: TextStyle(fontWeight: FontWeight.bold
+                              child: Text(val_subscription.toString() == "0" ? "MOOBI Trial" : "MOOBI Premier",
+                                  style: TextStyle(fontWeight: FontWeight.bold
                                   , fontFamily: 'VarelaRound')),),
                           ),
                         trailing: Container(
@@ -349,7 +397,7 @@ class _ProfileState extends State<Profile> {
                                 height: 40,
                                 child: RaisedButton(
                                   onPressed: (){
-                                    signOut();
+                                    alertLogOut();
                                   },
                                   color: HexColor(main_color),
                                   shape: RoundedRectangleBorder(side: BorderSide(

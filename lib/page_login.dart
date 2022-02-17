@@ -65,7 +65,7 @@ class _LoginState extends State<Login> {
         String getEmail = data["email"];
         String getNamaUser = data["nama_user"];
         String getLevel = data["level"];
-        String getUserId = data["id_user"];
+        String getUserId = data["user_id"];
         String getLegalCode = data["legal_kode"];
         String getLegalName = data["legal_name"];
         String getLegalId = data["legal_id"];
@@ -119,7 +119,7 @@ class _LoginState extends State<Login> {
           String getEmail = data["email"];
           String getNamaUser = data["nama_user"];
           String getLevel = data["level"];
-          String getUserId = data["id_user"];
+          String getUserId = data["user_id"];
           String getLegalCode = data["legal_kode"];
           String getLegalName = data["legal_name"];
           String getLegalId = data["legal_id"];

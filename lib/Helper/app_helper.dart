@@ -68,7 +68,8 @@ class AppHelper {
       data["legal_web"].toString(),//12
       data["legal_subscription"].toString(),//13
       data["user_userno"].toString(),//14
-      data["legal_code"].toString()//15
+      data["legal_code"].toString(),//15
+      data["user_pict"].toString()//16
     ];
   }
 

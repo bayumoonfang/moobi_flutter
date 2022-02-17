@@ -1,9 +1,11 @@
 
 
 
+import 'package:flushbar/flushbar.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:hexcolor/hexcolor.dart';
 import 'package:intl/intl.dart';
 import 'package:moobi_flutter/Helper/app_helper.dart';
@@ -46,7 +48,19 @@ class SubscribeVerificationState extends State<SubscribeVerification> {
   DateTime selectedDate = DateTime.now();
 
 
+  showFlushBarsuccess(BuildContext context, String stringme) => Flushbar(
+    // title:  "Hey Ninja",
+    message:  stringme,
+    shouldIconPulse: false,
+    duration:  Duration(seconds: 10),
+    backgroundColor: Colors.black,
+    flushbarPosition: FlushbarPosition.BOTTOM ,
+  )..show(context);
 
+  void showsuccess(String txtError){
+    showFlushBarsuccess(context, txtError);
+    return;
+  }
 
   _selectDate(BuildContext context) async {
     final DateTime picked = await showDatePicker(
@@ -119,7 +133,7 @@ class SubscribeVerificationState extends State<SubscribeVerification> {
 
   Future getBankUser() async {
     var response = await http.get(
-        Uri.encodeFull(applink+"api_model.php?act=getdata_bankuser"));
+        Uri.encodeFull(applink+"api_model.php?act=getdata_bankuser&legalid="+widget.getLegalcode));
     if (response.statusCode == 200) {
       var jsonData = json.decode(response.body);
       setState(() {
@@ -148,6 +162,8 @@ class SubscribeVerificationState extends State<SubscribeVerification> {
 
 
   doSimpan() async {
+    //Navigator.pop(context);
+    //showsuccess("Mohon menunggu sebentar , dan tidak keluar dari aplikasi");
     final response = await http.post(applink+"api_model.php?act=add_pembayaranreg", body: {
       "pembayaran_userid": valUserid.text,
       "pembayaran_type" : valType,
@@ -156,12 +172,11 @@ class SubscribeVerificationState extends State<SubscribeVerification> {
       "pembayaran_status": "Unverified",
       "pembayaran_paymentvendor" : selectedTransferKe,
       "pembayaran_bankuser" : selectedBankUser,
-      "pembayaran_tglbayar" : valTanggalFix,
-      "pembayaran_an" : valNamaUserPembayaran.text
+      "pembayaran_tglbayar" : valTanggalFix
+      //"pembayaran_an" : valNamaUserPembayaran.text
     });
     Map data = jsonDecode(response.body);
     setState(() {
-        Navigator.pop(context);
         Navigator.pushReplacement(context, ExitPage(page: PaymentLoading()));
     });
   }
@@ -175,7 +190,7 @@ class SubscribeVerificationState extends State<SubscribeVerification> {
       return false;
     }
 
-    if (valUserid.text == "" || valNamaUserPembayaran.text == "" || valTanggal.text == "") {
+    if (valUserid.text == "" || valTanggal.text == "") {
       showToast("Form tidak boleh kosong ", gravity: Toast.BOTTOM,
           duration: Toast.LENGTH_LONG);
       return false;
@@ -222,8 +237,10 @@ class SubscribeVerificationState extends State<SubscribeVerification> {
                         Expanded(child: OutlineButton(
                           borderSide: BorderSide(width: 1.0, color: Colors.redAccent),
                           onPressed: () {
-                            doSimpan();
                             Navigator.pop(context);
+                            showsuccess("Mohon menunggu sebentar , dan tidak keluar dari aplikasi");
+                            doSimpan();
+                            //Navigator.pop(context);
                           }, child: Text("Sudah", style: TextStyle(color: Colors.red),),)),
                       ],),)
                   ],
@@ -333,8 +350,14 @@ class SubscribeVerificationState extends State<SubscribeVerification> {
                               value: selectedTransferKe,
                               items: itemList.map((myitem){
                                 return DropdownMenuItem(
-                                    value: myitem['NAMA'],
-                                    child: Text(myitem['NAMA'])
+                                    value: myitem['ID'],
+                                    child: Row(
+                                      children: [
+                                        Text(myitem['NAMA'],style: GoogleFonts.nunito(fontWeight: FontWeight.bold,fontSize: 16)),
+                                        Padding(padding: const EdgeInsets.only(left: 5)),
+                                        Text(myitem['NOPAYMENT'],style: GoogleFonts.nunito(fontSize: 13))
+                                      ],
+                                    )
                                 );
                               }).toList(),
                               onChanged: (value) {
@@ -373,8 +396,30 @@ class SubscribeVerificationState extends State<SubscribeVerification> {
                                 value: selectedBankUser,
                                 items: bankUserList.map((myitem){
                                   return DropdownMenuItem(
-                                      value: myitem['DATA'],
-                                      child: Text(myitem['DATA'])
+                                      value: myitem['bank_id'],
+                                      child: Row(
+                                        children: [
+                                          Text(myitem['bank_nama'],style: GoogleFonts.nunito(fontWeight: FontWeight.bold,fontSize: 16)),
+                                          Padding(padding: const EdgeInsets.only(left: 5)),
+                                          Text(myitem['bank_norek'],style: GoogleFonts.nunito(fontSize: 13))
+                                        ],
+                                      )
+                                     /* child: Column(
+                                        children: [
+                                          Align(alignment: Alignment.bottomLeft,child :
+                                          Padding(padding : const EdgeInsets.only(top: 5), child :
+                                          Text(myitem['bank_nama'], style: GoogleFonts.nunito(fontWeight: FontWeight.bold,fontSize: 16),))),
+                                          Align(alignment: Alignment.bottomLeft,child :
+                                          Padding(padding : const EdgeInsets.only(top: 3), child :
+                                          Text(myitem['bank_norek'], style: GoogleFonts.nunito(fontSize: 14),))),
+                                          Align(alignment: Alignment.bottomLeft,child :
+                                          Padding(padding : const EdgeInsets.only(top: 3), child :
+                                          Text("a.n "+myitem['bank_pemilik'], style: GoogleFonts.nunito(fontSize: 12),))),
+                                          Padding(padding : const EdgeInsets.only(top: 5), child :
+                                          Divider(height: 4,)),
+
+                                        ],
+                                      )*/
                                   );
                                 }).toList(),
                                 onChanged: (value) {
@@ -391,7 +436,7 @@ class SubscribeVerificationState extends State<SubscribeVerification> {
                 ),
 
 
-
+/*
                 Padding(padding: const EdgeInsets.only(left: 15,top: 10,right: 15),
                     child: Column(
                       children: [
@@ -425,7 +470,7 @@ class SubscribeVerificationState extends State<SubscribeVerification> {
                         ),),
                       ],
                     )
-                ),
+                ),*/
 
 
 

@@ -3,6 +3,7 @@
 
 
 import 'package:badges/badges.dart';
+import 'package:flushbar/flushbar.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
@@ -19,6 +20,7 @@ import 'package:moobi_flutter/Outlet/page_outlet.dart';
 import 'package:moobi_flutter/Produk/page_produk.dart';
 import 'package:moobi_flutter/Produk/page_produkhome.dart';
 import 'package:moobi_flutter/Profile/page_profile.dart';
+import 'package:moobi_flutter/Profile/page_subscibe.dart';
 import 'package:moobi_flutter/Setting/page_settinghome.dart';
 import 'package:moobi_flutter/Setting/page_legalentites.dart';
 import 'package:moobi_flutter/Laporan/page_laporanhome.dart';
@@ -47,6 +49,22 @@ class _HomeState extends State<Home> {
 
   void showToast(String msg, {int duration, int gravity}) {
     Toast.show(msg, context, duration: duration, gravity: gravity);
+  }
+
+  showFlushBarsuccess(BuildContext context, String stringme) => Flushbar(
+    // title:  "Hey Ninja",
+    //message:  stringme,
+    shouldIconPulse: false,
+    duration:  Duration(seconds: 10),
+    backgroundColor: Colors.red,
+    messageText: Text(stringme, style : TextStyle(color: Colors.white)),
+    flushbarPosition: FlushbarPosition.BOTTOM ,
+  )..show(context);
+
+
+  void showsuccessshowsuccess(String txtError){
+    showFlushBarsuccess(context, txtError);
+    return;
   }
 
 
@@ -124,7 +142,7 @@ class _HomeState extends State<Home> {
 
   Future<List> getDataTotalNotif() async {
     http.Response response = await http.get(
-        Uri.encodeFull(applink+"api_model.php?act=getdata_totalnotif&userid="+getUserID.toString()),
+        Uri.encodeFull(applink+"api_model.php?act=getdata_totalnotif&userid="+getUserID.toString()+"&legalid="+getLegalId),
         headers: {"Accept":"application/json"}
     );
    return json.decode(response.body);
@@ -156,14 +174,14 @@ class _HomeState extends State<Home> {
                           return snapshot.data[i]["a"] == "0" ?
                           InkWell(
                               onTap: (){
-                                Navigator.push(context, ExitPage(page: NotificationPage()));
+                                Navigator.push(context, ExitPage(page: NotificationPage(getEmail.toString(),getUserID.toString(),getLegalId.toString())));
                               },
                               child:
                               FaIcon(FontAwesomeIcons.solidBell, size: 20,))
                               :
                        InkWell(
                          onTap: (){
-                           Navigator.push(context, ExitPage(page: NotificationPage()));
+                           Navigator.push(context, ExitPage(page: NotificationPage(getEmail.toString(),getUserID.toString(),getLegalId.toString())));
                          },
                          child: Badge(
                            badgeContent: Text(snapshot.data[i]["a"].toString(),
@@ -192,7 +210,7 @@ class _HomeState extends State<Home> {
               title:
               Padding(
                   padding: const EdgeInsets.only(left: 10),
-                  child:   Text("Moobi", style: TextStyle(color: Colors.white,
+                  child:   Text(getSubscription.toString() == '0' ? "Moobi" : "Moobi Premier", style: TextStyle(color: Colors.white,
                       fontFamily: 'VarelaRound', fontSize: 24,
                       fontWeight: FontWeight.bold),)
               ),
@@ -357,25 +375,30 @@ class _HomeState extends State<Home> {
                       child: Column(
                         children: [
                           getSubscription.toString() == '0' ?
-                          Container(
-                            padding: const EdgeInsets.only(bottom: 30),
-                              decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(10),
-                                color: HexColor("#e8fcfb"),
-                              ),
-                              width: double.infinity,
-                              height: 70,
-                              child: ListTile(
-                                title:
-                                Text("Subscribe ke MOOBIE Premier", style: TextStyle(
-                                    fontFamily: 'VarelaRound',fontWeight: FontWeight.bold,
-                                    fontSize: 14,color: HexColor("#025f64"))),
-                                subtitle:
-                                Text("Nikmati fitur lengkapnya", style: TextStyle(fontFamily: 'VarelaRound'
-                                    ,fontSize: 12,color: HexColor("#025f64"))),
-                                trailing: FaIcon(FontAwesomeIcons.angleRight,color: HexColor("#025f64")),
-                              )
-                          )
+                  InkWell(
+                    child:  Container(
+                        padding: const EdgeInsets.only(bottom: 30),
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(10),
+                          color: HexColor("#e8fcfb"),
+                        ),
+                        width: double.infinity,
+                        height: 70,
+                        child: ListTile(
+                          title:
+                          Text("Subscribe ke MOOBIE Premier", style: TextStyle(
+                              fontFamily: 'VarelaRound',fontWeight: FontWeight.bold,
+                              fontSize: 14,color: HexColor("#025f64"))),
+                          subtitle:
+                          Text("Nikmati fitur lengkapnya", style: TextStyle(fontFamily: 'VarelaRound'
+                              ,fontSize: 12,color: HexColor("#025f64"))),
+                          trailing: FaIcon(FontAwesomeIcons.angleRight,color: HexColor("#025f64")),
+                        )
+                    ),
+                    onTap: () {
+                      Navigator.push(context, ExitPage(page: Subscribe(getEmail.toString(), getLegalCode)));
+                    },
+                  )
                           :
                           Container(),
                           getSubscription.toString() == '0' ?
