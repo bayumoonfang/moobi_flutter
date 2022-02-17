@@ -3,6 +3,7 @@
 
 import 'dart:ui';
 
+import 'package:flushbar/flushbar.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/painting.dart';
@@ -141,6 +142,90 @@ class DetailNotifikasiTransaksiState extends State<DetailNotifikasiTransaksi> {
   }
 
 
+  showFlushBarsuccess(BuildContext context, String stringme) => Flushbar(
+    // title:  "Hey Ninja",
+    message:  stringme,
+    shouldIconPulse: false,
+    duration:  Duration(seconds: 10),
+    backgroundColor: Colors.black,
+    flushbarPosition: FlushbarPosition.BOTTOM ,
+  )..show(context);
+
+  void showsuccess(String txtError){
+    showFlushBarsuccess(context, txtError);
+    return;
+  }
+
+
+
+  _doBatal() async {
+    //Navigator.pop(context);
+    //showsuccess("Mohon menunggu sebentar , dan tidak keluar dari aplikasi");
+    final response = await http.post(applink+"api_model.php?act=batal_pembayaranreg",
+        body: {
+      "batalinv_noinv": noNoTrans
+    });
+    Map data = jsonDecode(response.body);
+    setState(() {
+      if(data["message"].toString() == '2') {
+        showsuccess("Invoice anda tidak bisa dibatalkan, kemungkinan status sudah berubah");
+        _prepare();
+        return ;
+      }else {
+        showsuccess("Invoice Berhasil dibatalkan");
+        _prepare();
+      }
+
+      //Navigator.pop(context);
+      //Navigator.pushReplacement(context, ExitPage(page: PaymentLoading()));
+    });
+  }
+
+
+  _askbatal() {
+    showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            //title: Text(),
+            content: Container(
+                width: double.infinity,
+                height: 180,
+                child: Column(
+                  children: [
+                    Align(alignment: Alignment.center, child:
+                    Text("Konfirmasi", style: TextStyle(fontFamily: 'VarelaRound', fontSize: 20,
+                        fontWeight: FontWeight.bold)),),
+                    Padding(padding: const EdgeInsets.only(top: 15), child:
+                    Align(alignment: Alignment.center, child: FaIcon(FontAwesomeIcons.trashAlt,
+                      color: Colors.redAccent,size: 35,)),),
+                    Padding(padding: const EdgeInsets.only(top: 15), child:
+                    Align(alignment: Alignment.center, child:
+                    Text("Apakah anda ingin membatalkan invoice ini ? ",
+                        style: TextStyle(fontFamily: 'VarelaRound', fontSize: 12)),)),
+                    Padding(padding: const EdgeInsets.only(top: 25), child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      children: <Widget>[
+                        Expanded(child: OutlineButton(
+                          onPressed: () {Navigator.pop(context);}, child: Text("Tidak"),)),
+                        Expanded(child: OutlineButton(
+                          borderSide: BorderSide(width: 1.0, color: Colors.redAccent),
+                          onPressed: () {
+                            Navigator.pop(context);
+                            showsuccess("Mohon menunggu sebentar , dan tidak keluar dari aplikasi");
+                            _doBatal();
+                            //Navigator.pop(context);
+                          }, child: Text("Iya", style: TextStyle(color: Colors.red),),)),
+                      ],),)
+                  ],
+                )
+            ),
+          );
+        });
+  }
+
+
+
   @override
   Widget build(BuildContext context) {
     return WillPopScope(
@@ -273,13 +358,23 @@ class DetailNotifikasiTransaksiState extends State<DetailNotifikasiTransaksi> {
             ],
           )
         ),
-        bottomNavigationBar: Container(
-          width: double.infinity,
-          height: 45,
-          child: RaisedButton(
-            child: Text("Batalkan Invoice"),
+        bottomNavigationBar: Visibility(
+          visible: getStatusInv == 'Unverified' ? true : false,
+          child: Container(
+            color: HexColor("#fe5c83"),
+            width: double.infinity,
+            height: 45,
+            child: RaisedButton(
+              color: HexColor("#fe5c83"),
+              child: Text("Batalkan Invoice",style: GoogleFonts.varelaRound(color:Colors.white),),
+              onPressed: (){
+                //Navigator.pop(context);
+                //showsuccess("Mohon menunggu sebentar , dan tidak keluar dari aplikasi");
+                _askbatal();
+              },
+            ),
           ),
-        ),
+        )
       ),
     );
 
