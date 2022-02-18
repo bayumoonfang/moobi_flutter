@@ -1,5 +1,6 @@
 
 
+import 'package:flushbar/flushbar.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
@@ -17,67 +18,94 @@ import 'package:toast/toast.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 
+import '../page_intoduction.dart';
+
 
 class UbahKeteranganToko extends StatefulWidget {
-  final String varKode;
-  const UbahKeteranganToko(this.varKode);
+  final String getEmail;
+  final String getLegalCode;
+  const UbahKeteranganToko(this.getEmail, this.getLegalCode);
   @override
   UbahKeteranganTokoState createState() => UbahKeteranganTokoState();
 }
 
 class UbahKeteranganTokoState extends State<UbahKeteranganToko> {
   TextEditingController valAlamat = TextEditingController();
-  TextEditingController valTelpon = TextEditingController();
   TextEditingController valWebsite = TextEditingController();
   TextEditingController valKota = TextEditingController();
 
 
   Future<bool> _onWillPop() async {
-    Navigator.pushReplacement(context, EnterPage(page: Toko()));
+    Navigator.pop(context);
   }
   void showToast(String msg, {int duration, int gravity}) {
     Toast.show(msg, context, duration: duration, gravity: gravity);
   }
 
 
-  String getEmail = "...";
+  String getStorename = "-";
+  String getStoreAddress = "-";
+  String getIDToko = "-";
+  String getCityToko = "-";
+  String getStatusToko = '-';
+  String getWebsiteToko = '-';
+
+  _cekLegalandUser() async {
+    final response = await http.post(applink+"api_model.php?act=cek_legalanduser",
+        body: {"username": widget.getEmail.toString()},
+        headers: {"Accept":"application/json"});
+    Map data = jsonDecode(response.body);
+    setState(() {
+      if (data["message"].toString() == '2' || data["message"].toString() == '3') {
+        Navigator.pushReplacement(context, ExitPage(page: Introduction()));
+      }
+    });
+  }
+  //=============================================================================
   _startingVariable() async {
     await AppHelper().getConnect().then((value){if(value == 'ConnInterupted'){
       showToast("Koneksi terputus..", gravity: Toast.CENTER,duration:
       Toast.LENGTH_LONG);}});
-    await AppHelper().getSession().then((value){if(value[0] != 1) {
-      Navigator.pushReplacement(context, ExitPage(page: Login()));}else{setState(() {getEmail = value[1];});}});
+    await AppHelper().getSession().then((value){
+      if(value[0] != 1) {
+        Navigator.pushReplacement(context, ExitPage(page: Login()));
+      }
+    });
+    await _cekLegalandUser();
+    AppHelper().getDetailUser(widget.getEmail.toString()).then((value){
+      setState(() {
+        getStorename = value[0];
+        getStoreAddress = value[3];
+        getIDToko = value[15];
+        getWebsiteToko = value[12];
+        getCityToko = value[5];
+        getStatusToko = value[7];
+        valAlamat.text = getStoreAddress.toString();
+        valWebsite.text = getWebsiteToko.toString();
+        valKota.text = getCityToko.toString();
+
+      });
+    });
   }
 
 
-  String getStoreAddress = "-";
-  String getIDToko = "-";
-  String getPhoneToko = "-";
-  String getCityToko = "-";
-  String getWebsiteToko = '-';
-  _userDetail() async {
-    final response = await http.get(
-        applink+"api_model.php?act=userdetail&id="+getEmail.toString());
-    Map data = jsonDecode(response.body);
-    setState(() {
-      getStoreAddress = data["e"].toString();
-      getIDToko = data["f"].toString();
-      getPhoneToko = data["h"].toString();
-      getCityToko = data["g"].toString();
-      getWebsiteToko = data["o"].toString();
-    });
+  showFlushBarsuccess(BuildContext context, String stringme) => Flushbar(
+    // title:  "Hey Ninja",
+    message:  stringme,
+    shouldIconPulse: false,
+    duration:  Duration(seconds: 3),
+    backgroundColor: Colors.black,
+    flushbarPosition: FlushbarPosition.BOTTOM ,
+  )..show(context);
+
+  void showsuccess(String txtError){
+    showFlushBarsuccess(context, txtError);
+    return;
   }
 
 
   _prepare() async {
     await _startingVariable();
-    await _userDetail();
-    setState(() {
-      valAlamat.text = getStoreAddress.toString();
-      valTelpon.text = getPhoneToko.toString();
-      valWebsite.text = getWebsiteToko.toString();
-      valKota.text = getCityToko.toString();
-    });
   }
 
 
@@ -92,25 +120,21 @@ class UbahKeteranganTokoState extends State<UbahKeteranganToko> {
   doSimpan() async {
     final response = await http.post(applink+"api_model.php?act=edit_keterangantoko", body: {
       "valalamat_edit": valAlamat.text,
-      "valtelpon_edit": valTelpon.text,
       "valwebsite_edit": valWebsite.text,
       "valkota_edit": valKota.text,
-      "valID_edit" : getIDToko.toString()
+      "valID_edit" : widget.getLegalCode
     });
     Map data = jsonDecode(response.body);
     setState(() {
       if (data["message"].toString() == '1') {
-        showToast("Legal Entities berhasil diubah ", gravity: Toast.BOTTOM,
-            duration: Toast.LENGTH_LONG);
-        Navigator.pop(context);
-        return false;
+        showsuccess("Legal Entities berhasil diubah");
        }
     });
   }
 
 
   alertSimpan() {
-    if (valAlamat.text == "" || valTelpon.text == "" || valKota.text == "") {
+    if (valAlamat.text == "" || valKota.text == "") {
       showToast("Form tidak boleh kosong ", gravity: Toast.BOTTOM,
           duration: Toast.LENGTH_LONG);
       return false;
@@ -143,6 +167,7 @@ class UbahKeteranganTokoState extends State<UbahKeteranganToko> {
                         Expanded(child: OutlineButton(
                           borderSide: BorderSide(width: 1.0, color: Colors.redAccent),
                           onPressed: () {
+                            Navigator.pop(context);
                             doSimpan();
                           }, child: Text("Simpan", style: TextStyle(color: Colors.red),),)),
                       ],),)
@@ -171,7 +196,7 @@ class UbahKeteranganTokoState extends State<UbahKeteranganToko> {
                 icon: new Icon(Icons.arrow_back),
                 color: Colors.white,
                 onPressed: () => {
-                  Navigator.pushReplacement(context, EnterPage(page: Toko()))
+                  Navigator.pop(context)
                 }),
           ),
           actions: [
@@ -227,34 +252,7 @@ class UbahKeteranganTokoState extends State<UbahKeteranganToko> {
                           ),
                         ),),
 
-                        Align(alignment: Alignment.centerLeft,child: Padding(
-                          padding: const EdgeInsets.only(left: 0,top: 25),
-                          child: Text("Telpon",style: TextStyle(fontWeight: FontWeight.bold,fontFamily: "VarelaRound",
-                              fontSize: 12,color: HexColor("#0074D9")),),
-                        ),),
-                        Align(alignment: Alignment.centerLeft,child: Padding(
-                          padding: const EdgeInsets.only(left: 0),
-                          child: TextFormField(
-                            controller: valTelpon,
-                            textCapitalization: TextCapitalization.sentences,
-                            decoration: InputDecoration(
-                              contentPadding: const EdgeInsets.only(top:2),
-                              hintText: 'Telpon...',
-                              labelText: '',
-                              floatingLabelBehavior: FloatingLabelBehavior.always,
-                              hintStyle: TextStyle(fontFamily: "VarelaRound", color: HexColor("#c4c4c4")),
-                              enabledBorder: UnderlineInputBorder(
-                                borderSide: BorderSide(color: HexColor("#DDDDDD")),
-                              ),
-                              focusedBorder: UnderlineInputBorder(
-                                borderSide: BorderSide(color: HexColor("#8c8989")),
-                              ),
-                              border: UnderlineInputBorder(
-                                borderSide: BorderSide(color: HexColor("#DDDDDD")),
-                              ),
-                            ),
-                          ),
-                        ),),
+
 
 
                         Align(alignment: Alignment.centerLeft,child: Padding(

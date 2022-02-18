@@ -1,6 +1,8 @@
 
 
 
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:hexcolor/hexcolor.dart';
@@ -15,27 +17,23 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 
 import 'package:toast/toast.dart';
-class Toko extends StatefulWidget {
+
+import '../page_intoduction.dart';
+class LegalEntities extends StatefulWidget {
+  final String getEmail;
+  final String getLegalCode;
+  const LegalEntities(this.getEmail, this.getLegalCode);
   @override
-  _TokoState createState() => _TokoState();
+  _LegalEntities createState() => _LegalEntities();
 }
 
 
-class _TokoState extends State<Toko> {
+class _LegalEntities extends State<LegalEntities> {
   Future<bool> _onWillPop() async {
     Navigator.pop(context);
   }
   void showToast(String msg, {int duration, int gravity}) {
     Toast.show(msg, context, duration: duration, gravity: gravity);
-  }
-
-  String getEmail = "...";
-  _startingVariable() async {
-    await AppHelper().getConnect().then((value){if(value == 'ConnInterupted'){
-      showToast("Koneksi terputus..", gravity: Toast.CENTER,duration:
-      Toast.LENGTH_LONG);}});
-    await AppHelper().getSession().then((value){if(value[0] != 1) {
-      Navigator.pushReplacement(context, ExitPage(page: Login()));}else{setState(() {getEmail = value[1];});}});
   }
 
   String getStorename = "-";
@@ -45,24 +43,59 @@ class _TokoState extends State<Toko> {
   String getCityToko = "-";
   String getStatusToko = '-';
   String getWebsiteToko = '-';
-  _userDetail() async {
-    final response = await http.get(
-        applink+"api_model.php?act=userdetail&id="+getEmail.toString());
+
+  _cekLegalandUser() async {
+    final response = await http.post(applink+"api_model.php?act=cek_legalanduser",
+        body: {"username": widget.getEmail.toString()},
+        headers: {"Accept":"application/json"});
     Map data = jsonDecode(response.body);
     setState(() {
-      getStorename = data["b"].toString();
-      getStoreAddress = data["e"].toString();
-      getIDToko = data["f"].toString();
-      getPhoneToko = data["h"].toString();
-      getCityToko = data["g"].toString();
-      getStatusToko = data["i"].toString();
-      getWebsiteToko = data["o"].toString();
+      if (data["message"].toString() == '2' || data["message"].toString() == '3') {
+        Navigator.pushReplacement(context, ExitPage(page: Introduction()));
+      }
     });
+  }
+  //=============================================================================
+  _startingVariable() async {
+    await AppHelper().getConnect().then((value){if(value == 'ConnInterupted'){
+      showToast("Koneksi terputus..", gravity: Toast.CENTER,duration:
+      Toast.LENGTH_LONG);}});
+    await AppHelper().getSession().then((value){
+      if(value[0] != 1) {
+        Navigator.pushReplacement(context, ExitPage(page: Login()));
+      }
+    });
+    await _cekLegalandUser();
+    AppHelper().getDetailUser(widget.getEmail.toString()).then((value){
+      setState(() {
+        getStorename = value[0];
+        getStoreAddress = value[3];
+        getIDToko = value[15];
+        getPhoneToko = value[6];
+        getWebsiteToko = value[12];
+        getCityToko = value[5];
+        getStatusToko = value[7];
+      });
+    });
+  }
+
+  FutureOr onGoBack(dynamic value) {
+    AppHelper().getDetailUser(widget.getEmail.toString()).then((value){
+      setState(() {
+        getStorename = value[0];
+        getStoreAddress = value[3];
+        getIDToko = value[15];
+        getPhoneToko = value[6];
+        getWebsiteToko = value[12];
+        getCityToko = value[5];
+        getStatusToko = value[7];
+      });
+    });
+    setState(() {});
   }
 
   loadData() async {
     await _startingVariable();
-    await _userDetail();
   }
 
 
@@ -174,7 +207,7 @@ class _TokoState extends State<Toko> {
                                     fontFamily: 'VarelaRound',
                                     fontSize: 14),
                               ),
-                              Text(getEmail.toString(),
+                              Text(widget.getEmail.toString(),
                                   style: TextStyle(
                                       fontFamily: 'VarelaRound',
                                       fontSize: 14)),
@@ -284,7 +317,7 @@ class _TokoState extends State<Toko> {
                             child: InkWell(
                               child: ListTile(
                                 onTap: (){
-                                  Navigator.pushReplacement(context, ExitPage(page: UbahKeteranganToko(getIDToko.toString())));
+                                  Navigator.push(context, ExitPage(page: UbahKeteranganToko(widget.getEmail, widget.getLegalCode))).then(onGoBack);
                                 },
                                 leading: FaIcon(FontAwesomeIcons.edit,color: HexColor("#594d75"),),
                                 title: Text("Ubah Keterangan",style: TextStyle(

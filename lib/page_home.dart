@@ -202,7 +202,7 @@ class _HomeState extends State<Home> {
                   hoverColor: Colors.transparent,
                   child : FaIcon(FontAwesomeIcons.cog, size: 20,),
                   onTap: () {
-                    Navigator.push(context, ExitPage(page: SettingHome()));
+                    Navigator.push(context, ExitPage(page: SettingHome(getEmail, getLegalCode)));
                   },
                 )
                 ),

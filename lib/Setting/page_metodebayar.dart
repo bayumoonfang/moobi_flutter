@@ -22,8 +22,13 @@ import 'package:moobi_flutter/page_login.dart';
 import 'package:toast/toast.dart';
 import 'package:http/http.dart' as http;
 
+import '../page_intoduction.dart';
+
 
 class MetodeBayar extends StatefulWidget{
+  final String getEmail;
+  final String getLegalCode;
+  const MetodeBayar(this.getEmail, this.getLegalCode);
   @override
   _MetodeBayar createState() => _MetodeBayar();
 }
@@ -36,19 +41,29 @@ class _MetodeBayar extends State<MetodeBayar> {
   void showToast(String msg, {int duration, int gravity}) {
     Toast.show(msg, context, duration: duration, gravity: gravity);}
 
-  String getEmail = "...";
-  String getBranch = "...";
+
+  _cekLegalandUser() async {
+    final response = await http.post(applink+"api_model.php?act=cek_legalanduser",
+        body: {"username": widget.getEmail.toString()},
+        headers: {"Accept":"application/json"});
+    Map data = jsonDecode(response.body);
+    setState(() {
+      if (data["message"].toString() == '2' || data["message"].toString() == '3') {
+        Navigator.pushReplacement(context, ExitPage(page: Introduction()));
+      }
+    });
+  }
+  //=============================================================================
   _startingVariable() async {
     await AppHelper().getConnect().then((value){if(value == 'ConnInterupted'){
       showToast("Koneksi terputus..", gravity: Toast.CENTER,duration:
       Toast.LENGTH_LONG);}});
-    await AppHelper().getSession().then((value){if(value[0] != 1) {
-      Navigator.pushReplacement(context, ExitPage(page: Login()));}else{setState(() {getEmail = value[1];});}});
-    await AppHelper().getDetailUser(getEmail.toString()).then((value){
-      setState(() {
-        getBranch = value[1];
-      });
+    await AppHelper().getSession().then((value){
+      if(value[0] != 1) {
+        Navigator.pushReplacement(context, ExitPage(page: Login()));
+      }
     });
+    await _cekLegalandUser();
   }
 
   Future<bool> _onWillPop() async {
@@ -82,7 +97,7 @@ class _MetodeBayar extends State<MetodeBayar> {
   Future<List> getData() async {
     http.Response response = await http.get(
         Uri.encodeFull(applink+"api_model.php?act=getdata_metodebayar&"
-            "branch="+getBranch+
+            "branch="+widget.getLegalCode+
             "&filter="+filter),
         headers: {"Accept":"application/json"});
     return json.decode(response.body);
@@ -90,12 +105,9 @@ class _MetodeBayar extends State<MetodeBayar> {
 
   String getMessage = "...";
   _doHapus (String valueParse2) {
-    http.get(applink+"api_model.php?act=action_hapusmetodebayar&id="+valueParse2.toString()
-        +"&branch="+getBranch);
-    showToast("Metode Bayar berhasil dihapus", gravity: Toast.BOTTOM,duration: Toast.LENGTH_LONG);
-    setState(() {
-      getData();
-    });
+    _prepare();
+    http.get(applink+"api_model.php?act=action_hapusmetodebayar&id="+valueParse2.toString());
+    getData();
   }
 
   _showDelete(String valueParse) {
@@ -200,13 +212,34 @@ class _MetodeBayar extends State<MetodeBayar> {
                     child: FutureBuilder(
                       future: getData(),
                       builder: (context, snapshot){
-                      if (snapshot.hasData) {
                         if (snapshot.data == null) {
-                                    return Center(
-                                        child: CircularProgressIndicator()
-                                    );
-                                  } else {
-                                    return
+                          return Center(
+                              child: CircularProgressIndicator()
+                          );
+                        } else {
+                          return snapshot.data == 0 ?
+                          Container(
+                              height: double.infinity, width : double.infinity,
+                              child: new
+                              Center(
+                                  child :
+                                  Column(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    crossAxisAlignment: CrossAxisAlignment.center,
+                                    children: <Widget>[
+                                      new Text(
+                                        "Tidak ada data",
+                                        style: new TextStyle(
+                                            fontFamily: 'VarelaRound', fontSize: 18),
+                                      ),
+                                      new Text(
+                                        "Silahkan lakukan input data",
+                                        style: new TextStyle(
+                                            fontFamily: 'VarelaRound', fontSize: 12),
+                                      ),
+                                    ],
+                                  )))
+                              :
                                       ListView.builder(
                                         itemCount: snapshot.data == null ? 0 : snapshot.data.length,
                                         padding: const EdgeInsets.only(left: 10,right: 15),
@@ -245,11 +278,7 @@ class _MetodeBayar extends State<MetodeBayar> {
                                         },
                                       );
                                   }
-                                } else {
-                                      return Center(
-                                          child: CircularProgressIndicator()
-                                      );
-                                  }
+
                       },
                     )
                 ),
@@ -261,7 +290,7 @@ class _MetodeBayar extends State<MetodeBayar> {
             child: FloatingActionButton(
               onPressed: (){
                 FocusScope.of(context).requestFocus(FocusNode());
-                Navigator.push(context, ExitPage(page: MetodeBayarInsert()));
+                Navigator.push(context, ExitPage(page: MetodeBayarInsert(widget.getEmail, widget.getLegalCode)));
               },
               child: FaIcon(FontAwesomeIcons.plus),
             ),

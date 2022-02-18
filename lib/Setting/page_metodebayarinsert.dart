@@ -2,6 +2,7 @@
 
 import 'dart:convert';
 
+import 'package:flushbar/flushbar.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
@@ -15,9 +16,13 @@ import 'package:moobi_flutter/page_login.dart';
 import 'package:toast/toast.dart';
 import 'package:http/http.dart' as http;
 
+import '../page_intoduction.dart';
+
 
 class MetodeBayarInsert extends StatefulWidget{
-
+  final String getEmail;
+  final String getLegalCode;
+  const MetodeBayarInsert(this.getEmail, this.getLegalCode);
   @override
   _MetodeBayarInsert createState() => _MetodeBayarInsert();
 }
@@ -27,25 +32,36 @@ class _MetodeBayarInsert extends State<MetodeBayarInsert> {
 
   final _valNama = TextEditingController();
   final _valDetail = TextEditingController();
+  final _valNamaPemilik = TextEditingController();
   void showToast(String msg, {int duration, int gravity}) {
     Toast.show(msg, context, duration: duration, gravity: gravity);
   }
 
   String selectedType;
   List typeList = List();
-  String getEmail = "...";
-  String getBranch = "...";
+
+  _cekLegalandUser() async {
+    final response = await http.post(applink+"api_model.php?act=cek_legalanduser",
+        body: {"username": widget.getEmail.toString()},
+        headers: {"Accept":"application/json"});
+    Map data = jsonDecode(response.body);
+    setState(() {
+      if (data["message"].toString() == '2' || data["message"].toString() == '3') {
+        Navigator.pushReplacement(context, ExitPage(page: Introduction()));
+      }
+    });
+  }
+  //=============================================================================
   _startingVariable() async {
     await AppHelper().getConnect().then((value){if(value == 'ConnInterupted'){
       showToast("Koneksi terputus..", gravity: Toast.CENTER,duration:
       Toast.LENGTH_LONG);}});
-    await AppHelper().getSession().then((value){if(value[0] != 1) {
-      Navigator.pushReplacement(context, ExitPage(page: Login()));}else{setState(() {getEmail = value[1];});}});
-    await AppHelper().getDetailUser(getEmail.toString()).then((value){
-      setState(() {
-        getBranch = value[1];
-      });
+    await AppHelper().getSession().then((value){
+      if(value[0] != 1) {
+        Navigator.pushReplacement(context, ExitPage(page: Login()));
+      }
     });
+    await _cekLegalandUser();
   }
 
   Future getTypeBayar() async {
@@ -58,6 +74,21 @@ class _MetodeBayarInsert extends State<MetodeBayarInsert> {
       });
     }
     //print(itemList);
+  }
+
+
+  showFlushBarsuccess(BuildContext context, String stringme) => Flushbar(
+    // title:  "Hey Ninja",
+    message:  stringme,
+    shouldIconPulse: false,
+    duration:  Duration(seconds: 3),
+    backgroundColor: Colors.black,
+    flushbarPosition: FlushbarPosition.BOTTOM ,
+  )..show(context);
+
+  void showsuccess(String txtError){
+    showFlushBarsuccess(context, txtError);
+    return;
   }
 
 
@@ -79,19 +110,18 @@ class _MetodeBayarInsert extends State<MetodeBayarInsert> {
       "paymentmethod_nama": _valNama.text,
       "paymentmethod_type" : selectedType,
       "paymentmethod_detail" : _valDetail.text,
-      "paymentmethod_branch" : getBranch
+      "paymentmethod_an" : _valNamaPemilik.text,
+      "paymentmethod_branch" : widget.getLegalCode
     });
     Map data = jsonDecode(response.body);
     setState(() {
       if (data["message"].toString() == '0') {
-        showToast("Metode Bayar sudah ada", gravity: Toast.BOTTOM,
-            duration: Toast.LENGTH_LONG);
+        showsuccess("Metode Bayar sudah ada");
         return false;
       } else {
         _valNama.clear();
         _valDetail.clear();
-        showToast("Metode Bayar berhasil ditambah", gravity: Toast.BOTTOM,
-            duration: Toast.LENGTH_LONG);
+        showsuccess("Metode Bayar berhasil ditambah");
         return false;
       }
     });
@@ -100,7 +130,7 @@ class _MetodeBayarInsert extends State<MetodeBayarInsert> {
 
   _showAlert() {
     FocusScope.of(context).requestFocus(FocusNode());
-    if (_valNama.text == "" || _valDetail.text == "" || selectedType == "") {
+    if (_valNama.text == "" || _valDetail.text == "" || selectedType == "" || _valNamaPemilik.text == "") {
       showToast("Form tidak boleh kosong", gravity: Toast.BOTTOM,
           duration: Toast.LENGTH_LONG);
       return false;
@@ -134,8 +164,8 @@ class _MetodeBayarInsert extends State<MetodeBayarInsert> {
                         Expanded(child: OutlineButton(
                           borderSide: BorderSide(width: 1.0, color: Colors.redAccent),
                           onPressed: () {
-                            doSimpan();
                             Navigator.pop(context);
+                            doSimpan();
                           }, child: Text("Simpan", style: TextStyle(color: Colors.red),),)),
                       ],),)
                   ],
@@ -190,7 +220,7 @@ class _MetodeBayarInsert extends State<MetodeBayarInsert> {
                       children: [
                         Align(alignment: Alignment.centerLeft,child: Padding(
                           padding: const EdgeInsets.only(left: 0,top: 15),
-                          child: Text("Nama Pembayaran",style: TextStyle(fontWeight: FontWeight.bold,fontFamily: "VarelaRound",
+                          child: Text("Nama Bank/Pembayaran",style: TextStyle(fontWeight: FontWeight.bold,fontFamily: "VarelaRound",
                               fontSize: 12,color: HexColor("#0074D9")),),
                         ),),
                         Align(alignment: Alignment.centerLeft,child: Padding(
@@ -201,6 +231,41 @@ class _MetodeBayarInsert extends State<MetodeBayarInsert> {
                             decoration: InputDecoration(
                               contentPadding: const EdgeInsets.only(top:2),
                               hintText: 'Contoh : Bank BCA, Bank BRI',
+                              labelText: '',
+                              floatingLabelBehavior: FloatingLabelBehavior.always,
+                              hintStyle: TextStyle(fontFamily: "VarelaRound", color: HexColor("#c4c4c4")),
+                              enabledBorder: UnderlineInputBorder(
+                                borderSide: BorderSide(color: HexColor("#DDDDDD")),
+                              ),
+                              focusedBorder: UnderlineInputBorder(
+                                borderSide: BorderSide(color: HexColor("#8c8989")),
+                              ),
+                              border: UnderlineInputBorder(
+                                borderSide: BorderSide(color: HexColor("#DDDDDD")),
+                              ),
+                            ),
+                          ),
+                        ),),
+                      ],
+                    )
+                ),
+
+                Padding(padding: const EdgeInsets.only(left: 15,top: 10,right: 15),
+                    child: Column(
+                      children: [
+                        Align(alignment: Alignment.centerLeft,child: Padding(
+                          padding: const EdgeInsets.only(left: 0,top: 15),
+                          child: Text("Nama Pemilik",style: TextStyle(fontWeight: FontWeight.bold,fontFamily: "VarelaRound",
+                              fontSize: 12,color: HexColor("#0074D9")),),
+                        ),),
+                        Align(alignment: Alignment.centerLeft,child: Padding(
+                          padding: const EdgeInsets.only(left: 0),
+                          child: TextFormField(
+                            controller: _valNamaPemilik,
+                            textCapitalization: TextCapitalization.sentences,
+                            decoration: InputDecoration(
+                              contentPadding: const EdgeInsets.only(top:2),
+                              hintText: 'Contoh : Ragil Bayu Respati',
                               labelText: '',
                               floatingLabelBehavior: FloatingLabelBehavior.always,
                               hintStyle: TextStyle(fontFamily: "VarelaRound", color: HexColor("#c4c4c4")),

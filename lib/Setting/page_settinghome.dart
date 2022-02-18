@@ -11,6 +11,9 @@ import 'package:moobi_flutter/Setting/page_servcharge.dart';
 import 'package:moobi_flutter/Setting/page_legalentites.dart';
 
 class SettingHome extends StatefulWidget{
+  final String getEmail;
+  final String getLegalCode;
+  const SettingHome(this.getEmail, this.getLegalCode);
   @override
   SettingHomeState createState() => SettingHomeState();
 }
@@ -51,7 +54,7 @@ class SettingHomeState extends State<SettingHome> {
               children: [
                 InkWell(
                   child: ListTile(
-                    onTap: (){Navigator.push(context, ExitPage(page: Toko()));},
+                    onTap: (){Navigator.push(context, ExitPage(page: LegalEntities(widget.getEmail, widget.getLegalCode)));},
                     title: Text("Legal Entities",style: TextStyle(
                         color: Colors.black, fontFamily: 'VarelaRound',fontSize: 15,
                         fontWeight: FontWeight.bold)),
@@ -65,7 +68,7 @@ class SettingHomeState extends State<SettingHome> {
 
                 InkWell(
                   child: ListTile(
-                    onTap: (){Navigator.push(context, ExitPage(page: MetodeBayar()));},
+                    onTap: (){Navigator.push(context, ExitPage(page: MetodeBayar(widget.getEmail, widget.getLegalCode)));},
                     title: Text("Metode Pembayaran",style: TextStyle(
                         color: Colors.black, fontFamily: 'VarelaRound',fontSize: 15,
                         fontWeight: FontWeight.bold)),
