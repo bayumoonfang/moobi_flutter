@@ -2,6 +2,7 @@
 
 import 'dart:convert';
 
+import 'package:flushbar/flushbar.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
@@ -15,7 +16,12 @@ import 'package:toast/toast.dart';
 import 'package:http/http.dart' as http;
 import 'package:moobi_flutter/Helper/api_link.dart';
 
+import '../page_intoduction.dart';
+
 class SettingPPN extends StatefulWidget {
+  final String getEmail;
+  final String getLegalCode;
+  const SettingPPN(this.getEmail, this.getLegalCode);
   @override
   SettingPPNState createState() => SettingPPNState();
 }
@@ -30,41 +36,59 @@ class SettingPPNState extends State<SettingPPN> {
   }
 
 
-  String getEmail = "...";
-  String getBranch = "...";
+  _cekLegalandUser() async {
+    final response = await http.post(applink+"api_model.php?act=cek_legalanduser",
+        body: {"username": widget.getEmail.toString()},
+        headers: {"Accept":"application/json"});
+    Map data = jsonDecode(response.body);
+    setState(() {
+      if (data["message"].toString() == '2' || data["message"].toString() == '3') {
+        Navigator.pushReplacement(context, ExitPage(page: Introduction()));
+      }
+    });
+  }
+
+  //=============================================================================
   _startingVariable() async {
     await AppHelper().getConnect().then((value){if(value == 'ConnInterupted'){
       showToast("Koneksi terputus..", gravity: Toast.CENTER,duration:
       Toast.LENGTH_LONG);}});
-    await AppHelper().getSession().then((value){if(value[0] != 1) {
-      Navigator.pushReplacement(context, ExitPage(page: Login()));}else{setState(() {getEmail = value[1];});}});
-    await AppHelper().getDetailUser(getEmail.toString()).then((value){
-      setState(() {
-        getBranch = value[1];
-
-      });
+    await AppHelper().getSession().then((value){
+      if(value[0] != 1) {
+        Navigator.pushReplacement(context, ExitPage(page: Login()));
+      }
     });
+    await _cekLegalandUser();
+
   }
 
+  showFlushBarsuccess(BuildContext context, String stringme) => Flushbar(
+    // title:  "Hey Ninja",
+    message:  stringme,
+    shouldIconPulse: false,
+    duration:  Duration(seconds: 3),
+    backgroundColor: Colors.black,
+    flushbarPosition: FlushbarPosition.BOTTOM ,
+  )..show(context);
+
+  void showsuccess(String txtError){
+    showFlushBarsuccess(context, txtError);
+    return;
+  }
 
   String getTax = '...';
   _getDetail() async {
-    final response = await http.get(applink+"api_model.php?act=getdata_tax2&id="+getBranch);
+    final response = await http.get(applink+"api_model.php?act=getdata_tax2&id="+widget.getLegalCode);
     Map data = jsonDecode(response.body);
     setState(() {
       getTax = data["a"].toString();
       valTax.text = getTax;
     });
   }
-
-
-
   _prepare() async {
     await _startingVariable();
     await _getDetail();
   }
-
-
 
   @override
   void initState() {
@@ -73,20 +97,18 @@ class SettingPPNState extends State<SettingPPN> {
   }
 
   doSimpan() async {
+    Navigator.pop(context);
     final response = await http.post(applink+"api_model.php?act=edit_tax", body: {
       "valTax_edit": valTax.text,
-      "branch" : getBranch
+      "branch" : widget.getLegalCode
     });
     Map data = jsonDecode(response.body);
     setState(() {
       if (data["message"].toString() == '0') {
-        showToast("Tax tidak boleh kurang dari 0", gravity: Toast.BOTTOM,
-            duration: Toast.LENGTH_LONG);
+        showsuccess("Tax tidak boleh kurang dari 0");
         return false;
       } else {
-        Navigator.pop(context);
-        showToast("Tax berhasil diedit", gravity: Toast.BOTTOM,
-            duration: Toast.LENGTH_LONG);
+        showsuccess("Tax berhasil diedit");
         return false;
       }
     });
@@ -95,8 +117,7 @@ class SettingPPNState extends State<SettingPPN> {
 
   alertSimpan() {
     if (valTax.text == "" ) {
-      showToast("Form tidak boleh kosong ", gravity: Toast.BOTTOM,
-          duration: Toast.LENGTH_LONG);
+      showsuccess("Form tidak boleh kosong");
       return false;
     }
     showDialog(

@@ -8,6 +8,7 @@ import 'dart:convert';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:hexcolor/hexcolor.dart';
 import 'package:moobi_flutter/Helper/api_link.dart';
 import 'package:moobi_flutter/Helper/app_helper.dart';
@@ -263,10 +264,10 @@ class _MetodeBayar extends State<MetodeBayar> {
                                                       children: [
                                                         Padding(padding: const EdgeInsets.only(top: 5),
                                                             child:Align(alignment: Alignment.centerLeft,
-                                                              child: Text(snapshot.data[i]["d"].toString(), style: TextStyle(fontFamily: 'VarelaRound')),)),
+                                                              child: Text(snapshot.data[i]["d"].toString()+" - "+snapshot.data[i]["e"].toString(), style: GoogleFonts.varelaRound(fontSize: 14,color: Colors.black)),)),
                                                         Padding(padding: const EdgeInsets.only(top: 5),
                                                           child: Align(alignment: Alignment.centerLeft,
-                                                            child: Text(snapshot.data[i]["e"].toString(), style: TextStyle(fontFamily: 'VarelaRound')),),)
+                                                            child: Text("a.n "+snapshot.data[i]["j"].toString(), style: GoogleFonts.varelaRound(fontSize: 12,color: Colors.black)),),)
                                                       ],
                                                     ),
                                                   ),

@@ -118,6 +118,7 @@ class UbahKeteranganTokoState extends State<UbahKeteranganToko> {
 
 
   doSimpan() async {
+    Navigator.pop(context);
     final response = await http.post(applink+"api_model.php?act=edit_keterangantoko", body: {
       "valalamat_edit": valAlamat.text,
       "valwebsite_edit": valWebsite.text,
@@ -167,7 +168,6 @@ class UbahKeteranganTokoState extends State<UbahKeteranganToko> {
                         Expanded(child: OutlineButton(
                           borderSide: BorderSide(width: 1.0, color: Colors.redAccent),
                           onPressed: () {
-                            Navigator.pop(context);
                             doSimpan();
                           }, child: Text("Simpan", style: TextStyle(color: Colors.red),),)),
                       ],),)

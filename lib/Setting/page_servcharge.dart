@@ -2,6 +2,7 @@
 
 import 'dart:convert';
 
+import 'package:flushbar/flushbar.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
@@ -15,7 +16,12 @@ import 'package:toast/toast.dart';
 import 'package:http/http.dart' as http;
 import 'package:moobi_flutter/Helper/api_link.dart';
 
+import '../page_intoduction.dart';
+
 class SettingServCharge extends StatefulWidget {
+  final String getEmail;
+  final String getLegalCode;
+  const SettingServCharge(this.getEmail, this.getLegalCode);
   @override
   SettingServChargeState createState() => SettingServChargeState();
 }
@@ -30,32 +36,58 @@ class SettingServChargeState extends State<SettingServCharge> {
   }
 
 
-  String getEmail = "...";
-  String getBranch = "...";
+  _cekLegalandUser() async {
+    final response = await http.post(applink+"api_model.php?act=cek_legalanduser",
+        body: {"username": widget.getEmail.toString()},
+        headers: {"Accept":"application/json"});
+    Map data = jsonDecode(response.body);
+    setState(() {
+      if (data["message"].toString() == '2' || data["message"].toString() == '3') {
+        Navigator.pushReplacement(context, ExitPage(page: Introduction()));
+      }
+    });
+  }
+
+
+
+  //=============================================================================
   _startingVariable() async {
     await AppHelper().getConnect().then((value){if(value == 'ConnInterupted'){
       showToast("Koneksi terputus..", gravity: Toast.CENTER,duration:
       Toast.LENGTH_LONG);}});
-    await AppHelper().getSession().then((value){if(value[0] != 1) {
-      Navigator.pushReplacement(context, ExitPage(page: Login()));}else{setState(() {getEmail = value[1];});}});
-    await AppHelper().getDetailUser(getEmail.toString()).then((value){
-      setState(() {
-        getBranch = value[1];
-
-      });
+    await AppHelper().getSession().then((value){
+      if(value[0] != 1) {
+        Navigator.pushReplacement(context, ExitPage(page: Login()));
+      }
     });
+    await _cekLegalandUser();
+
   }
+
+  showFlushBarsuccess(BuildContext context, String stringme) => Flushbar(
+    // title:  "Hey Ninja",
+    message:  stringme,
+    shouldIconPulse: false,
+    duration:  Duration(seconds: 3),
+    backgroundColor: Colors.black,
+    flushbarPosition: FlushbarPosition.BOTTOM ,
+  )..show(context);
+
+  void showsuccess(String txtError){
+    showFlushBarsuccess(context, txtError);
+    return;
+  }
+
 
   String getVal = '...';
   _getDetail() async {
-    final response = await http.get(applink+"api_model.php?act=getdata_servcharge&id="+getBranch);
+    final response = await http.get(applink+"api_model.php?act=getdata_servcharge&id="+widget.getLegalCode);
     Map data = jsonDecode(response.body);
     setState(() {
       getVal = data["a"].toString();
       valInput.text = getVal;
     });
   }
-
 
 
   _prepare() async {
@@ -69,21 +101,21 @@ class SettingServChargeState extends State<SettingServCharge> {
     _prepare();
   }
 
+
+
   doSimpan() async {
+    Navigator.pop(context);
     final response = await http.post(applink+"api_model.php?act=edit_servcharge", body: {
       "val_edit": valInput.text,
-      "branch" : getBranch
+      "branch" : widget.getLegalCode
     });
     Map data = jsonDecode(response.body);
     setState(() {
       if (data["message"].toString() == '0') {
-        showToast("Isian tidak boleh kurang dari 0", gravity: Toast.BOTTOM,
-            duration: Toast.LENGTH_LONG);
+        showsuccess("Isian tidak boleh kurang dari 0");
         return false;
       } else {
-        Navigator.pop(context);
-        showToast("Service Charge berhasil diedit", gravity: Toast.BOTTOM,
-            duration: Toast.LENGTH_LONG);
+        showsuccess("Service Charge berhasil diedit");
         return false;
       }
     });
@@ -92,8 +124,7 @@ class SettingServChargeState extends State<SettingServCharge> {
 
   alertSimpan() {
     if (valInput.text == "" ) {
-      showToast("Form tidak boleh kosong ", gravity: Toast.BOTTOM,
-          duration: Toast.LENGTH_LONG);
+      showsuccess("Form tidak boleh kosong");
       return false;
     }
     showDialog(

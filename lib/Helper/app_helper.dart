@@ -36,7 +36,19 @@ class AppHelper {
     String getNamaUser = await Session.namaUser();
     String getLegalPhone = await Session.legalPhone();
     String getUserId = await Session.userId();
-    return [value,getEmail,getRole,getLevel,getLegalCode,getLegalName,getLegalId,getNamaUser,getLegalPhone, getUserId];
+    String getLegalIdCode = await Session.legalIdCode();
+    return [value,//0
+      getEmail,//1
+      getRole,//2
+      getLevel,//3
+      getLegalCode,//4
+      getLegalName,//5
+      getLegalId,//6
+      getNamaUser,//7
+      getLegalPhone, //8
+      getUserId,//9
+      getLegalIdCode//10
+    ];
   }
 
 
@@ -69,7 +81,8 @@ class AppHelper {
       data["legal_subscription"].toString(),//13
       data["user_userno"].toString(),//14
       data["legal_code"].toString(),//15
-      data["user_pict"].toString()//16
+      data["user_pict"].toString(),//16
+      data["legal_idcode"].toString()//17
     ];
   }
 

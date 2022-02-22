@@ -71,10 +71,11 @@ class _LoginState extends State<Login> {
         String getLegalId = data["legal_id"];
         String getLegalPhone = data["legal_phone"];
         String getRole = data["legal_role"];
+        String getLegalIdCode =  data["legal_idcode"];
 
         if (data["message"].toString() == '1') {
           savePref(1, getEmail, getRole, getLevel, getLegalCode, getLegalName, getLegalId,
-              getNamaUser, getLegalPhone, getUserId);
+              getNamaUser, getLegalPhone, getUserId, getLegalIdCode);
           Navigator.pushReplacement(context, EnterPage(page: Home()));
           _googleSignIn.signOut();
         }  else if (data["message"].toString() == '3') {
@@ -125,10 +126,11 @@ class _LoginState extends State<Login> {
           String getLegalId = data["legal_id"];
           String getLegalPhone = data["legal_phone"];
           String getRole = data["legal_role"];
+          String getLegalIdCode =  data["legal_idcode"];
 
           if (data["message"].toString() == '1') {
             savePref(1, getEmail, getRole, getLevel, getLegalCode, getLegalName, getLegalId,
-                getNamaUser, getLegalPhone, getUserId);
+                getNamaUser, getLegalPhone, getUserId, getLegalIdCode);
             Navigator.pushReplacement(context, EnterPage(page: Home()));
             _googleSignIn.signOut();
           }  else if (data["message"].toString() == '3') {
@@ -151,7 +153,7 @@ class _LoginState extends State<Login> {
 
 
     savePref(int value, String emailval, String roleVal, String levelVal, String legalCodeVal
-        , String legalNameVal, String legalIdVal, String namaUserVal, String legalPhoneVal, String userId) async {
+        , String legalNameVal, String legalIdVal, String namaUserVal, String legalPhoneVal, String userId, String legalIdCode) async {
       SharedPreferences preferences = await SharedPreferences.getInstance();
       setState(() {
         preferences.setInt("value", value);
@@ -164,6 +166,7 @@ class _LoginState extends State<Login> {
         preferences.setString("namaUser", namaUserVal);
         preferences.setString("legalPhone", legalPhoneVal);
         preferences.setString("userId", userId);
+        preferences.setString("legalIdCode", legalIdCode);
         preferences.commit();
       });
     }

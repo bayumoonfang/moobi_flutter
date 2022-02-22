@@ -105,7 +105,7 @@ class _MetodeBayarInsert extends State<MetodeBayarInsert> {
   }
 
   doSimpan() async {
-    FocusScope.of(context).requestFocus(FocusNode());
+    Navigator.pop(context);
     final response = await http.post(applink+"api_model.php?act=add_paymentmethod", body: {
       "paymentmethod_nama": _valNama.text,
       "paymentmethod_type" : selectedType,
@@ -129,7 +129,6 @@ class _MetodeBayarInsert extends State<MetodeBayarInsert> {
 
 
   _showAlert() {
-    FocusScope.of(context).requestFocus(FocusNode());
     if (_valNama.text == "" || _valDetail.text == "" || selectedType == "" || _valNamaPemilik.text == "") {
       showToast("Form tidak boleh kosong", gravity: Toast.BOTTOM,
           duration: Toast.LENGTH_LONG);
@@ -164,7 +163,6 @@ class _MetodeBayarInsert extends State<MetodeBayarInsert> {
                         Expanded(child: OutlineButton(
                           borderSide: BorderSide(width: 1.0, color: Colors.redAccent),
                           onPressed: () {
-                            Navigator.pop(context);
                             doSimpan();
                           }, child: Text("Simpan", style: TextStyle(color: Colors.red),),)),
                       ],),)
@@ -199,6 +197,7 @@ class _MetodeBayarInsert extends State<MetodeBayarInsert> {
           actions: [
             InkWell(
               onTap: () {
+                FocusScope.of(context).requestFocus(FocusNode());
                 _showAlert();
               },
               child: Padding(

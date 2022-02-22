@@ -4,6 +4,7 @@
 
 import 'dart:convert';
 
+import 'package:flushbar/flushbar.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
@@ -39,7 +40,19 @@ class ProfileUbahNamaState extends State<ProfileUbahNama> {
     Toast.show(msg, context, duration: duration, gravity: gravity);
   }
 
+  showFlushBarsuccess(BuildContext context, String stringme) => Flushbar(
+    // title:  "Hey Ninja",
+    message:  stringme,
+    shouldIconPulse: false,
+    duration:  Duration(seconds: 3),
+    backgroundColor: Colors.black,
+    flushbarPosition: FlushbarPosition.BOTTOM ,
+  )..show(context);
 
+  void showsuccess(String txtError){
+    showFlushBarsuccess(context, txtError);
+    return;
+  }
 
   _cekLegalandUser() async {
     final response = await http.post(applink+"api_model.php?act=cek_legalanduser",
@@ -84,9 +97,8 @@ class ProfileUbahNamaState extends State<ProfileUbahNama> {
     Map data = jsonDecode(response.body);
     setState(() {
       if (data["message"].toString() == '1') {
-        showToast("Nama berhasil diganti", gravity: Toast.BOTTOM,
-            duration: Toast.LENGTH_LONG);
         Navigator.pop(context);
+        showsuccess("Nama berhasil diganti");
         return false;
       }
     });
@@ -95,8 +107,7 @@ class ProfileUbahNamaState extends State<ProfileUbahNama> {
 
   alertSimpan() {
     if (valNama.text == "" ) {
-      showToast("Form tidak boleh kosong ", gravity: Toast.BOTTOM,
-          duration: Toast.LENGTH_LONG);
+      showsuccess("Form tidak boleh kosong");
       return false;
     }
     showDialog(

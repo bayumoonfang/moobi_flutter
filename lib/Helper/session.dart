@@ -56,4 +56,9 @@ class Session {
     return preferences.getString("userId");
   }
 
+  static Future<String> legalIdCode() async {
+    final SharedPreferences preferences = await _prefs;
+    return preferences.getString("legalIdCode");
+  }
+
 }

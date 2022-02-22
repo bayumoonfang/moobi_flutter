@@ -84,7 +84,7 @@ class SettingHomeState extends State<SettingHome> {
 
                 InkWell(
                   child: ListTile(
-                    onTap: (){Navigator.push(context, ExitPage(page: SettingPPN()));},
+                    onTap: (){Navigator.push(context, ExitPage(page: SettingPPN(widget.getEmail, widget.getLegalCode)));},
                     title: Text("Tax / PPN",style: TextStyle(
                         color: Colors.black, fontFamily: 'VarelaRound',fontSize: 15,
                         fontWeight: FontWeight.bold)),
@@ -98,7 +98,7 @@ class SettingHomeState extends State<SettingHome> {
 
                 InkWell(
                   child: ListTile(
-                    onTap: (){Navigator.push(context, ExitPage(page: SettingServCharge()));},
+                    onTap: (){Navigator.push(context, ExitPage(page: SettingServCharge(widget.getEmail, widget.getLegalCode)));},
                     title: Text("Service Charge",style: TextStyle(
                         color: Colors.black, fontFamily: 'VarelaRound',fontSize: 15,
                         fontWeight: FontWeight.bold)),

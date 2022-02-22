@@ -92,7 +92,7 @@ class _HomeState extends State<Home> {
         setState(() {
           getEmail = value[1];
           getLegalCode = value[4];
-          getLegalId = value[6];
+          getLegalId = value[10];
           getStorename = value[5];
           getNamaUser = value[7];
           getUserID = value[9];
@@ -338,7 +338,7 @@ class _HomeState extends State<Home> {
                                         ),
                                         InkWell(
                                           onTap: () {
-                                            Navigator.push(context, ExitPage(page: Outlet()));
+                                            Navigator.push(context, ExitPage(page: Outlet(getEmail.toString(), getLegalCode.toString(), getLegalId.toString())));
                                           },
                                           child:
                                         Column(

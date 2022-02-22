@@ -2,6 +2,7 @@
 
 import 'dart:convert';
 
+import 'package:flushbar/flushbar.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -16,9 +17,13 @@ import 'package:moobi_flutter/page_login.dart';
 import 'package:toast/toast.dart';
 import 'package:http/http.dart' as http;
 
+import '../page_intoduction.dart';
+
 
 class OutletInsert extends StatefulWidget{
-
+  final String getEmail;
+  final String getLegalCode;
+  const OutletInsert(this.getEmail, this.getLegalCode);
   @override
   _OutletInsert createState() => _OutletInsert();
 }
@@ -36,19 +41,48 @@ class _OutletInsert extends State<OutletInsert> {
 
   String selectedType;
   List typeList = List();
-  String getEmail = "...";
-  String getBranch = "...";
+
+
+  _cekLegalandUser() async {
+    final response = await http.post(applink+"api_model.php?act=cek_legalanduser",
+        body: {"username": widget.getEmail.toString()},
+        headers: {"Accept":"application/json"});
+    Map data = jsonDecode(response.body);
+    setState(() {
+      if (data["message"].toString() == '2' || data["message"].toString() == '3') {
+        Navigator.pushReplacement(context, ExitPage(page: Introduction()));
+      }
+    });
+  }
+
+
+
+  //=============================================================================
   _startingVariable() async {
     await AppHelper().getConnect().then((value){if(value == 'ConnInterupted'){
       showToast("Koneksi terputus..", gravity: Toast.CENTER,duration:
       Toast.LENGTH_LONG);}});
-    await AppHelper().getSession().then((value){if(value[0] != 1) {
-      Navigator.pushReplacement(context, ExitPage(page: Login()));}else{setState(() {getEmail = value[1];});}});
-    await AppHelper().getDetailUser(getEmail.toString()).then((value){
-      setState(() {
-        getBranch = value[1];
-      });
+    await AppHelper().getSession().then((value){
+      if(value[0] != 1) {
+        Navigator.pushReplacement(context, ExitPage(page: Login()));
+      }
     });
+    await _cekLegalandUser();
+
+  }
+
+  showFlushBarsuccess(BuildContext context, String stringme) => Flushbar(
+    // title:  "Hey Ninja",
+    message:  stringme,
+    shouldIconPulse: false,
+    duration:  Duration(seconds: 3),
+    backgroundColor: Colors.black,
+    flushbarPosition: FlushbarPosition.BOTTOM ,
+  )..show(context);
+
+  void showsuccess(String txtError){
+    showFlushBarsuccess(context, txtError);
+    return;
   }
 
   Future getTypeBayar() async {
@@ -77,27 +111,25 @@ class _OutletInsert extends State<OutletInsert> {
   }
 
   doSimpan() async {
-    FocusScope.of(context).requestFocus(FocusNode());
+    Navigator.pop(context);
     final response = await http.post(applink+"api_model.php?act=add_outlet", body: {
       "outlet_nama": _valNama.text,
       "outlet_alamat" : _valAlamat.text,
       "outlet_kota" : _valKota.text,
       "outlet_telpon" : _valTelpon.text,
-      "outlet_branch" : getBranch
+      "outlet_branch" : widget.getLegalCode
     });
     Map data = jsonDecode(response.body);
     setState(() {
       if (data["message"].toString() == '0') {
-        showToast("Outlet Bayar sudah ada", gravity: Toast.BOTTOM,
-            duration: Toast.LENGTH_LONG);
+        showsuccess("Outlet Bayar sudah ada");
         return false;
       } else {
         _valNama.clear();
         _valAlamat.clear();
         _valKota.clear();
         _valTelpon.clear();
-        showToast("Outlet berhasil ditambah", gravity: Toast.BOTTOM,
-            duration: Toast.LENGTH_LONG);
+        showsuccess("Outlet berhasil ditambah");
         return false;
       }
     });
@@ -105,10 +137,8 @@ class _OutletInsert extends State<OutletInsert> {
 
 
   _showAlert() {
-    FocusScope.of(context).requestFocus(FocusNode());
     if (_valNama.text == "" || _valAlamat.text == "" || _valKota.text == "" || _valTelpon.text == "") {
-      showToast("Form tidak boleh kosong", gravity: Toast.BOTTOM,
-          duration: Toast.LENGTH_LONG);
+      showsuccess("Form tidak boleh kosong");
       return false;
     }
 
@@ -141,7 +171,6 @@ class _OutletInsert extends State<OutletInsert> {
                           borderSide: BorderSide(width: 1.0, color: Colors.redAccent),
                           onPressed: () {
                             doSimpan();
-                            Navigator.pop(context);
                           }, child: Text("Simpan", style: TextStyle(color: Colors.red),),)),
                       ],),)
                   ],
@@ -175,6 +204,7 @@ class _OutletInsert extends State<OutletInsert> {
           actions: [
             InkWell(
               onTap: () {
+                FocusScope.of(context).requestFocus(FocusNode());
                 _showAlert();
               },
               child: Padding(
