@@ -19,8 +19,11 @@ import 'package:toast/toast.dart';
 
 
 class RiwayatTransaksiOutlet extends StatefulWidget {
+  final String getEmail;
+  final String getLegalCode;
   final String idOutlet;
-  const RiwayatTransaksiOutlet(this.idOutlet);
+
+  const RiwayatTransaksiOutlet(this.getEmail, this.getLegalCode,this.idOutlet);
   @override
   _RiwayatTransaksiOutlet createState() => _RiwayatTransaksiOutlet();
 }
@@ -464,13 +467,16 @@ class _RiwayatTransaksiOutlet extends State<RiwayatTransaksiOutlet> {
                                       ListTile(
                                           subtitle: Column(
                                             children: [
-                                              Align(alignment: Alignment.centerLeft, child: Text(
-                                                snapshot.data[i]["i"]+" "+snapshot.data[i]["j"]+" "+snapshot.data[i]["f"],
-                                                style: TextStyle(
-                                                    fontFamily: 'VarelaRound',
-                                                    fontWeight: FontWeight.bold,
-                                                    color : Colors.black,
-                                                    fontSize: 13),),),
+                                    Padding(
+                                      padding: const EdgeInsets.only(top: 5),
+                                      child:           Align(alignment: Alignment.centerLeft, child: Text(
+                                        snapshot.data[i]["i"]+" "+snapshot.data[i]["j"]+" "+snapshot.data[i]["f"],
+                                        style: TextStyle(
+                                            fontFamily: 'VarelaRound',
+                                            fontWeight: FontWeight.bold,
+                                            color : Colors.black,
+                                            fontSize: 13),),),
+                                    ),
                                               Padding(padding: const EdgeInsets.only(top: 7),
                                                   child: Align(alignment: Alignment.centerLeft, child:
                                                  Text("#"+snapshot.data[i]["b"]+" - "+snapshot.data[i]["c"],
@@ -478,11 +484,11 @@ class _RiwayatTransaksiOutlet extends State<RiwayatTransaksiOutlet> {
                                                             fontFamily: 'VarelaRound',
                                                             fontSize: 12),)
                                                     ,)),
-                                              Padding(padding: const EdgeInsets.only(top: 4),
+                                              Padding(padding: const EdgeInsets.only(top: 4,bottom: 5),
                                                   child: Align(alignment: Alignment.centerLeft, child:
                                                   Opacity(
                                                       opacity: 0.7,
-                                                      child: Text("#"+snapshot.data[i]["b"]+" - "+snapshot.data[i]["c"],
+                                                      child: Text(snapshot.data[i]["l"],
                                                         style: TextStyle(
                                                             fontFamily: 'VarelaRound',
                                                             fontSize: 12),))

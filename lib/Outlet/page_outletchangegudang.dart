@@ -4,6 +4,7 @@
 import 'dart:async';
 import 'dart:convert';
 
+import 'package:flushbar/flushbar.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
@@ -18,9 +19,14 @@ import 'package:toast/toast.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 
+import '../page_intoduction.dart';
+
 class OutletChangeGudang extends StatefulWidget{
+  final String getEmail;
+  final String getLegalCode;
   final String idOutlet;
-  const OutletChangeGudang(this.idOutlet);
+
+  const OutletChangeGudang(this.getEmail, this.getLegalCode,this.idOutlet);
   _OutletChangeGudang createState() => _OutletChangeGudang();
 }
 
@@ -30,19 +36,44 @@ class _OutletChangeGudang extends State<OutletChangeGudang> {
   void showToast(String msg, {int duration, int gravity}) {
     Toast.show(msg, context, duration: duration, gravity: gravity);}
 
-  String getEmail = "...";
-  String getBranch = "...";
+  _cekLegalandUser() async {
+    final response = await http.post(applink+"api_model.php?act=cek_legalanduser",
+        body: {"username": widget.getEmail.toString()},
+        headers: {"Accept":"application/json"});
+    Map data = jsonDecode(response.body);
+    setState(() {
+      if (data["message"].toString() == '2' || data["message"].toString() == '3') {
+        Navigator.pushReplacement(context, ExitPage(page: Introduction()));
+      }
+    });
+  }
+
+  //=============================================================================
   _startingVariable() async {
     await AppHelper().getConnect().then((value){if(value == 'ConnInterupted'){
       showToast("Koneksi terputus..", gravity: Toast.CENTER,duration:
       Toast.LENGTH_LONG);}});
-    await AppHelper().getSession().then((value){if(value[0] != 1) {
-      Navigator.pushReplacement(context, ExitPage(page: Login()));}else{setState(() {getEmail = value[1];});}});
-    await AppHelper().getDetailUser(getEmail.toString()).then((value){
-      setState(() {
-        getBranch = value[1];
-      });
+    await AppHelper().getSession().then((value){
+      if(value[0] != 1) {
+        Navigator.pushReplacement(context, ExitPage(page: Login()));
+      }
     });
+    await _cekLegalandUser();
+
+  }
+
+  showFlushBarsuccess(BuildContext context, String stringme) => Flushbar(
+    // title:  "Hey Ninja",
+    message:  stringme,
+    shouldIconPulse: false,
+    duration:  Duration(seconds: 3),
+    backgroundColor: Colors.black,
+    flushbarPosition: FlushbarPosition.BOTTOM ,
+  )..show(context);
+
+  void showsuccess(String txtError){
+    showFlushBarsuccess(context, txtError);
+    return;
   }
 
   _prepare() async {
@@ -62,7 +93,7 @@ class _OutletChangeGudang extends State<OutletChangeGudang> {
   Future<dynamic> getDataGudang() async {
     http.Response response = await client.get(
         Uri.parse(applink+"api_model.php?act=getdata_gudangall&id="
-            +getBranch),
+            +widget.getLegalCode),
         headers: {
           "Accept":"application/json",
           "Content-Type": "application/json"}
@@ -90,14 +121,11 @@ class _OutletChangeGudang extends State<OutletChangeGudang> {
     Map showdata = jsonDecode(response.body);
     getMessage = showdata["message"].toString();
     if(getMessage == '0') {
-      showToast(valNamaGudang+" sudah terpakai", gravity: Toast.BOTTOM,
-          duration: Toast.LENGTH_LONG);
+      showsuccess(valNamaGudang+" sudah terpakai");
     } else {
-      showToast("Gudang default berhasil diganti ke "+valNamaGudang, gravity: Toast.BOTTOM,
-          duration: Toast.LENGTH_LONG);
+      showsuccess("Gudang default berhasil diganti ke "+valNamaGudang);
       setState(() {
         getDataGudang();
-
       });
     }
 
@@ -120,7 +148,7 @@ class _OutletChangeGudang extends State<OutletChangeGudang> {
           ),
           leading: Builder(
             builder: (context) => IconButton(
-                icon: new Icon(Icons.arrow_back),
+                icon: new FaIcon(FontAwesomeIcons.times),
                 color: Colors.white,
                 onPressed: () => {
                     //Navigator.pushReplacement(context, EnterPage(page: DetailOutlet(widget.idOutlet)))
@@ -134,41 +162,71 @@ class _OutletChangeGudang extends State<OutletChangeGudang> {
           child: FutureBuilder(
             future: getDataGudang(),
             builder: (context, snapshot) {
-              return ListView.builder(
-                itemCount: snapshot.data == null ? 0 : snapshot.data.length,
-                itemBuilder: (context, i) {
-                  return Padding(padding: const EdgeInsets.only(left: 10,right: 10,top: 5),
-                  child:
-                  snapshot.data[i]["d"] == '0' ?
+              if (snapshot.data == null) {
+                return Center(
+                    child: CircularProgressIndicator()
+                );
+              } else {
+                return snapshot.data == 0 ?
+                Container(
+                    height: double.infinity, width : double.infinity,
+                    child: new
+                    Center(
+                        child :
+                        Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: <Widget>[
+                            new Text(
+                              "Tidak ada data",
+                              style: new TextStyle(
+                                  fontFamily: 'VarelaRound', fontSize: 18),
+                            ),
+                            new Text(
+                              "Silahkan lakukan input data",
+                              style: new TextStyle(
+                                  fontFamily: 'VarelaRound', fontSize: 12),
+                            ),
+                          ],
+                        )))
+                    :
+
+                ListView.builder(
+                  itemCount: snapshot.data == null ? 0 : snapshot.data.length,
+                  itemBuilder: (context, i) {
+                    return Padding(padding: const EdgeInsets.only(left: 10,right: 10,top: 5),
+                      child:
+                      snapshot.data[i]["d"] == '0' ?
                       InkWell(
                           onTap: () {
                             changeGudang(snapshot.data[i]["a"].toString(), snapshot.data[i]["b"].toString(), widget.idOutlet);
                           },
-                        child :
-                  Card(
-                     child: ListTile(
-                       leading: FaIcon(FontAwesomeIcons.warehouse, size: 18,),
-                       title: Text(snapshot.data[i]["b"],style: TextStyle(
-                           color: Colors.black, fontFamily: 'VarelaRound',fontSize: 15)),
-                     ),
-                   ))
+                          child :
+                          Card(
+                            child: ListTile(
+                              leading: FaIcon(FontAwesomeIcons.warehouse, size: 18,),
+                              title: Text(snapshot.data[i]["b"],style: TextStyle(
+                                  color: Colors.black, fontFamily: 'VarelaRound',fontSize: 15)),
+                            ),
+                          ))
 
-                  :
-                  Opacity(
-                    opacity: 0.5,
-                    child: Card(
-                      color: HexColor("#DDDDDD"),
-                      child: ListTile(
-                        leading: FaIcon(FontAwesomeIcons.warehouse, size: 18,),
-                        title: Text(snapshot.data[i]["b"],style: TextStyle(
-                            color: Colors.black, fontFamily: 'VarelaRound',fontSize: 15)),
-                      ),
-                    ),
-                  )
+                          :
+                      Opacity(
+                        opacity: 0.5,
+                        child: Card(
+                          color: HexColor("#DDDDDD"),
+                          child: ListTile(
+                            leading: FaIcon(FontAwesomeIcons.warehouse, size: 18,),
+                            title: Text(snapshot.data[i]["b"],style: TextStyle(
+                                color: Colors.black, fontFamily: 'VarelaRound',fontSize: 15)),
+                          ),
+                        ),
+                      )
 
-                    ,);
-                },
-              );
+                      ,);
+                  },
+                );
+              }
             },
           ),
         ),

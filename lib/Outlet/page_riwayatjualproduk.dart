@@ -5,20 +5,29 @@
 import 'dart:async';
 import 'dart:convert';
 
+import 'package:flushbar/flushbar.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:hexcolor/hexcolor.dart';
 import 'package:intl/intl.dart';
 import 'package:moobi_flutter/Helper/api_link.dart';
+import 'package:moobi_flutter/Helper/app_helper.dart';
 import 'package:moobi_flutter/Helper/color_based.dart';
+import 'package:moobi_flutter/Helper/page_route.dart';
 import 'package:toast/toast.dart';
 import 'package:http/http.dart' as http;
 
+import '../page_intoduction.dart';
+import '../page_login.dart';
+
 
 class RiwayatJualProduk extends StatefulWidget{
+  final String getEmail;
+  final String getLegalCode;
   final String idOutlet;
-  const RiwayatJualProduk(this.idOutlet);
+
+  const RiwayatJualProduk(this.getEmail, this.getLegalCode,this.idOutlet);
   @override
   _RiwayatJualProduk createState() => _RiwayatJualProduk();
 }
@@ -32,6 +41,49 @@ class _RiwayatJualProduk extends State<RiwayatJualProduk> {
   void showToast(String msg, {int duration, int gravity}) {
     Toast.show(msg, context, duration: duration, gravity: gravity);
   }
+
+
+
+  _cekLegalandUser() async {
+    final response = await http.post(applink+"api_model.php?act=cek_legalanduser",
+        body: {"username": widget.getEmail.toString()},
+        headers: {"Accept":"application/json"});
+    Map data = jsonDecode(response.body);
+    setState(() {
+      if (data["message"].toString() == '2' || data["message"].toString() == '3') {
+        Navigator.pushReplacement(context, ExitPage(page: Introduction()));
+      }
+    });
+  }
+
+  //=============================================================================
+  _startingVariable() async {
+    await AppHelper().getConnect().then((value){if(value == 'ConnInterupted'){
+      showToast("Koneksi terputus..", gravity: Toast.CENTER,duration:
+      Toast.LENGTH_LONG);}});
+    await AppHelper().getSession().then((value){
+      if(value[0] != 1) {
+        Navigator.pushReplacement(context, ExitPage(page: Login()));
+      }
+    });
+    await _cekLegalandUser();
+
+  }
+
+  showFlushBarsuccess(BuildContext context, String stringme) => Flushbar(
+    // title:  "Hey Ninja",
+    message:  stringme,
+    shouldIconPulse: false,
+    duration:  Duration(seconds: 3),
+    backgroundColor: Colors.black,
+    flushbarPosition: FlushbarPosition.BOTTOM ,
+  )..show(context);
+
+  void showsuccess(String txtError){
+    showFlushBarsuccess(context, txtError);
+    return;
+  }
+
 
   String limit = "13";
   int temp_limit;
@@ -181,19 +233,31 @@ class _RiwayatJualProduk extends State<RiwayatJualProduk> {
                                   ListTile(
                                       title: Column(
                                         children: [
-                                          Align(alignment: Alignment.centerLeft, child: Text(
-                                            getDatas[index]["i"],
-                                            overflow: TextOverflow.ellipsis,
-                                            //getDatas[index]["l"]+" "+getDatas[index]["m"]+" "+getDatas[index]["j"],
-                                            style: TextStyle(
-                                                fontFamily: 'VarelaRound',
-                                                fontWeight: FontWeight.bold,
-                                                fontSize: 13),),),
-                                          Padding(padding: const EdgeInsets.only(top: 7),
+                                          Padding(
+                                            padding: const EdgeInsets.only(top: 5),
+                                            child : Align(alignment: Alignment.centerLeft, child: Text(
+                                              getDatas[index]["i"],
+                                              overflow: TextOverflow.ellipsis,
+                                              //getDatas[index]["l"]+" "+getDatas[index]["m"]+" "+getDatas[index]["j"],
+                                              style: TextStyle(
+                                                  fontFamily: 'VarelaRound',
+                                                  fontWeight: FontWeight.bold,
+                                                  fontSize: 13),),),
+                                          ),
+                                          Padding(padding: const EdgeInsets.only(top: 5),
                                               child: Align(alignment: Alignment.centerLeft, child:
                                               Opacity(
                                                   opacity: 0.7,
                                                   child: Text("#"+getDatas[index]["l"]+" "+getDatas[index]["m"]+" "+getDatas[index]["j"]+" - "+getDatas[index]["e"],
+                                                    style: TextStyle(
+                                                        fontFamily: 'VarelaRound',
+                                                        fontSize: 12),))
+                                                ,)),
+                                          Padding(padding: const EdgeInsets.only(top: 5,bottom: 5),
+                                              child: Align(alignment: Alignment.centerLeft, child:
+                                              Opacity(
+                                                  opacity: 0.7,
+                                                  child: Text(getDatas[index]["f"],
                                                     style: TextStyle(
                                                         fontFamily: 'VarelaRound',
                                                         fontSize: 12),))

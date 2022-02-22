@@ -13,6 +13,7 @@ import 'package:hexcolor/hexcolor.dart';
 import 'package:intl/intl.dart';
 import 'package:moobi_flutter/Gudang/page_gudangproduk.dart';
 import 'package:moobi_flutter/Gudang/page_gudangubahnama.dart';
+import 'package:moobi_flutter/Gudang/page_riwayatmutasi.dart';
 import 'package:moobi_flutter/Helper/api_link.dart';
 import 'package:moobi_flutter/Helper/app_helper.dart';
 import 'package:moobi_flutter/Helper/color_based.dart';
@@ -193,6 +194,8 @@ class _GudangDetail extends State<GudangDetail> {
                           ),
                           InkWell(
                             onTap:() {
+                              Navigator.push(context, MaterialPageRoute(builder: (context) => RiwayatMutasi(widget.idGudang)));
+
                               //Navigator.push(context, ExitPage(page: RiwayatTransaksiOutlet(widget.idOutlet)));
                              // Navigator.push(context, MaterialPageRoute(builder: (context) => RiwayatTransaksiOutlet(widget.idOutlet)));
                             },

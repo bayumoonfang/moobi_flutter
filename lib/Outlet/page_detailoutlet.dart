@@ -139,12 +139,12 @@ class _DetailOutlet extends State<DetailOutlet> {
 
 
   doHapus(String IDq) {
+    Navigator.pop(context);
     http.post(applink+"api_model.php?act=hapus_outlet", body: {
-      "id" : IDq
+      "id" : widget.idOutlet,
+      "legal_id" : widget.getLegalId
     });
     Navigator.pop(context);
-    Navigator.pop(context);
-   // return false;
   }
 
 
@@ -249,13 +249,12 @@ class _DetailOutlet extends State<DetailOutlet> {
     var url = applink+"api_model.php?act=action_changestatustoko";
     http.post(url,
         body: {
-          "id": getStoreID
+          "id": widget.idOutlet
         });
-    showToast("Status Toko berhasil dirubah", gravity: Toast.BOTTOM,
-        duration: Toast.LENGTH_LONG);
-   setState(() {
-     _outletDetail();
-   });
+    showsuccess("Status Toko berhasil dirubah");
+     setState(() {
+       _prepare();
+     });
   }
 
 
@@ -358,8 +357,10 @@ class _DetailOutlet extends State<DetailOutlet> {
                       ),
                       InkWell(
                               onTap:() {
+                                Navigator.push(context, MaterialPageRoute(builder: (context) => RiwayatTransaksiOutlet(widget.getEmail, widget.getLegalCode, widget.idOutlet)));
+
                                 //Navigator.push(context, ExitPage(page: RiwayatTransaksiOutlet(widget.idOutlet)));
-                                Navigator.push(context, MaterialPageRoute(builder: (context) => RiwayatTransaksiOutlet(widget.idOutlet)));
+
 
                               },
                       child :
@@ -429,7 +430,7 @@ class _DetailOutlet extends State<DetailOutlet> {
                       InkWell(
                         onTap:() {
                           //Navigator.push(context, ExitPage(page: RiwayatJualProduk(widget.idOutlet)));
-                          Navigator.push(context, MaterialPageRoute(builder: (context) => RiwayatJualProduk(widget.idOutlet)));
+                          Navigator.push(context, MaterialPageRoute(builder: (context) => RiwayatJualProduk(widget.getEmail, widget.getLegalCode, widget.idOutlet)));
                         },
                         child :
                           Text("Lihat Riwayat",
@@ -492,7 +493,10 @@ class _DetailOutlet extends State<DetailOutlet> {
                   child: InkWell(
                     child: ListTile(
                       onTap: (){
-                        Navigator.push(context, ExitPage(page: OutletChangeGudang(getStoreID))).then(onGoBack);
+                        Navigator.push(
+                            context,
+                            MaterialPageRoute(builder: (context) => OutletChangeGudang(widget.getEmail,widget.getLegalCode,widget.idOutlet))).then(onGoBack);
+                       // Navigator.push(context, ExitPage(page: OutletChangeGudang(widget.getEmail,widget.getLegalCode,widget.idOutlet))).then(onGoBack);
                       },
                       title: Column(
                         children: [
@@ -533,7 +537,10 @@ class _DetailOutlet extends State<DetailOutlet> {
                   child: InkWell(
                     child: ListTile(
                       onTap: (){
-                        Navigator.push(context, ExitPage(page: UbahOutlet(getStoreID))).then(onGoBack);
+                        Navigator.push(
+                            context,
+                            MaterialPageRoute(builder: (context) => UbahOutlet(widget.getEmail,widget.getLegalCode,widget.idOutlet))).then(onGoBack);
+                        //Navigator.push(context, ExitPage(page: UbahOutlet(getStoreID))).then(onGoBack);
                       },
                       title: Text("Ubah Keterangan Toko",style: TextStyle(
                           color: Colors.black, fontFamily: 'VarelaRound',fontSize: 15)),

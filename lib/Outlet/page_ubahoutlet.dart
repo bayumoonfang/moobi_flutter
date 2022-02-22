@@ -3,6 +3,7 @@
 
 import 'dart:convert';
 
+import 'package:flushbar/flushbar.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
@@ -15,10 +16,15 @@ import 'package:moobi_flutter/page_login.dart';
 import 'package:toast/toast.dart';
 import 'package:http/http.dart' as http;
 
+import '../page_intoduction.dart';
+
 
 class UbahOutlet extends StatefulWidget{
+  final String getEmail;
+  final String getLegalCode;
   final String idOutlet;
-  const UbahOutlet(this.idOutlet);
+
+  const UbahOutlet(this.getEmail, this.getLegalCode,this.idOutlet);
   _UbahOutlet createState() => _UbahOutlet();
 }
 
@@ -31,19 +37,44 @@ class _UbahOutlet extends State<UbahOutlet> {
   void showToast(String msg, {int duration, int gravity}) {
     Toast.show(msg, context, duration: duration, gravity: gravity);}
 
-  String getEmail = "...";
-  String getBranch = "...";
+  _cekLegalandUser() async {
+    final response = await http.post(applink+"api_model.php?act=cek_legalanduser",
+        body: {"username": widget.getEmail.toString()},
+        headers: {"Accept":"application/json"});
+    Map data = jsonDecode(response.body);
+    setState(() {
+      if (data["message"].toString() == '2' || data["message"].toString() == '3') {
+        Navigator.pushReplacement(context, ExitPage(page: Introduction()));
+      }
+    });
+  }
+
+  //=============================================================================
   _startingVariable() async {
     await AppHelper().getConnect().then((value){if(value == 'ConnInterupted'){
       showToast("Koneksi terputus..", gravity: Toast.CENTER,duration:
       Toast.LENGTH_LONG);}});
-    await AppHelper().getSession().then((value){if(value[0] != 1) {
-      Navigator.pushReplacement(context, ExitPage(page: Login()));}else{setState(() {getEmail = value[1];});}});
-    await AppHelper().getDetailUser(getEmail.toString()).then((value){
-      setState(() {
-        getBranch = value[1];
-      });
+    await AppHelper().getSession().then((value){
+      if(value[0] != 1) {
+        Navigator.pushReplacement(context, ExitPage(page: Login()));
+      }
     });
+    await _cekLegalandUser();
+
+  }
+
+  showFlushBarsuccess(BuildContext context, String stringme) => Flushbar(
+    // title:  "Hey Ninja",
+    message:  stringme,
+    shouldIconPulse: false,
+    duration:  Duration(seconds: 3),
+    backgroundColor: Colors.black,
+    flushbarPosition: FlushbarPosition.BOTTOM ,
+  )..show(context);
+
+  void showsuccess(String txtError){
+    showFlushBarsuccess(context, txtError);
+    return;
   }
 
   String getOutletName = "...";
@@ -87,6 +118,7 @@ class _UbahOutlet extends State<UbahOutlet> {
   }
 
   doSimpan() async {
+    Navigator.pop(context);
     final response = await http.post(applink+"api_model.php?act=edit_keteranganoutlet", body: {
       "valnama_edit": valNama.text,
       "valalamat_edit": valAlamat.text,
@@ -96,14 +128,10 @@ class _UbahOutlet extends State<UbahOutlet> {
     Map data = jsonDecode(response.body);
     setState(() {
       if (data["message"].toString() == '1') {
-        showToast("Data outlet berhasil diubah ", gravity: Toast.BOTTOM,
-            duration: Toast.LENGTH_LONG);
-        Navigator.pop(context);
+        showsuccess("Data outlet berhasil diubah");
         return false;
       } else {
-        showToast("Nama outlet sudah ada , silahkan gunakan nama lain", gravity: Toast.BOTTOM,
-            duration: Toast.LENGTH_LONG);
-        Navigator.pop(context);
+        showsuccess("Nama outlet sudah ada , silahkan gunakan nama lain");
         return false;
       }
     });

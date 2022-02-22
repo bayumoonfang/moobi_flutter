@@ -133,8 +133,10 @@ class _Outlet extends State<Outlet> {
 
 
   FutureOr onGoBack(dynamic value) {
-    getData();
-    setState(() {});
+
+    setState(() {
+      getData();
+    });
   }
 
 
