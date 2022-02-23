@@ -6,6 +6,7 @@
 import 'dart:async';
 import 'dart:convert';
 
+import 'package:flushbar/flushbar.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
@@ -22,12 +23,20 @@ import 'package:moobi_flutter/page_login.dart';
 import 'package:toast/toast.dart';
 import 'package:http/http.dart' as http;
 
+import '../page_intoduction.dart';
+
 
 class GudangDetail extends StatefulWidget {
+  final String getEmail;
+  final String getLegalCode;
+  final String getLegalId;
   final String idGudang;
+  const GudangDetail(this.getEmail, this.getLegalCode, this.getLegalId, this.idGudang);
+
+  /*final String idGudang;
   final String valNamaUser;
   final String valBranch;
-  const GudangDetail(this.idGudang, this.valNamaUser, this.valBranch);
+  const GudangDetail(this.idGudang, this.valNamaUser, this.valBranch);*/
   @override
   _GudangDetail createState() => _GudangDetail();
 }
@@ -38,6 +47,47 @@ class _GudangDetail extends State<GudangDetail> {
 
   void showToast(String msg, {int duration, int gravity}) {
     Toast.show(msg, context, duration: duration, gravity: gravity);}
+
+  _cekLegalandUser() async {
+    final response = await http.post(applink+"api_model.php?act=cek_legalanduser",
+        body: {"username": widget.getEmail.toString()},
+        headers: {"Accept":"application/json"});
+    Map data = jsonDecode(response.body);
+    setState(() {
+      if (data["message"].toString() == '2' || data["message"].toString() == '3') {
+        Navigator.pushReplacement(context, ExitPage(page: Introduction()));
+      }
+    });
+  }
+
+  //=============================================================================
+  _startingVariable() async {
+    await AppHelper().getConnect().then((value){if(value == 'ConnInterupted'){
+      showToast("Koneksi terputus..", gravity: Toast.CENTER,duration:
+      Toast.LENGTH_LONG);}});
+    await AppHelper().getSession().then((value){
+      if(value[0] != 1) {
+        Navigator.pushReplacement(context, ExitPage(page: Login()));
+      }
+    });
+    await _cekLegalandUser();
+
+  }
+
+  showFlushBarsuccess(BuildContext context, String stringme) => Flushbar(
+    // title:  "Hey Ninja",
+    message:  stringme,
+    shouldIconPulse: false,
+    duration:  Duration(seconds: 3),
+    backgroundColor: Colors.black,
+    flushbarPosition: FlushbarPosition.BOTTOM ,
+  )..show(context);
+
+  void showsuccess(String txtError){
+    showFlushBarsuccess(context, txtError);
+    return;
+  }
+
 
 
   String getWarehouseName = "...";
@@ -76,6 +126,7 @@ class _GudangDetail extends State<GudangDetail> {
 
 
   _prepare() async {
+    await _startingVariable();
     await _outletDetail();
     await _warehouseTrans();
   }
@@ -260,7 +311,7 @@ class _GudangDetail extends State<GudangDetail> {
                     child: ListTile(
                       onTap: (){
                         //Navigator.push(context, ExitPage(page: GudangProduk(widget.idGudang, getCodeWarehouse )));
-                        Navigator.push(context, MaterialPageRoute(builder: (context) => GudangProduk(widget.idGudang, getCodeWarehouse, widget.valNamaUser, widget.valBranch)));
+                        //Navigator.push(context, MaterialPageRoute(builder: (context) => GudangProduk(widget.idGudang, getCodeWarehouse, widget.valNamaUser, widget.valBranch)));
                       },
                       title: Padding(padding: const EdgeInsets.only(top: 10),
                         child: Column(

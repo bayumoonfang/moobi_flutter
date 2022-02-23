@@ -67,6 +67,8 @@ class DetailNotifikasiTransaksiState extends State<DetailNotifikasiTransaksi> {
     });
     await _cekLegalandUser();
   }
+
+
   Future<bool> _onWillPop() async {
     Navigator.pop(context);
   }

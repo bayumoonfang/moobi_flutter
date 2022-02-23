@@ -3,6 +3,7 @@
 
 import 'dart:convert';
 
+import 'package:flushbar/flushbar.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
@@ -14,8 +15,14 @@ import 'package:moobi_flutter/page_login.dart';
 import 'package:toast/toast.dart';
 import 'package:http/http.dart' as http;
 
+import '../page_intoduction.dart';
+
 
 class GudangInsert extends StatefulWidget{
+  final String getEmail;
+  final String getLegalCode;
+  final String getLegalId;
+  const GudangInsert(this.getEmail, this.getLegalCode, this.getLegalId);
   _GudangInsert createState() => _GudangInsert();
 }
 
@@ -26,19 +33,44 @@ class _GudangInsert extends State<GudangInsert> {
     Toast.show(msg, context, duration: duration, gravity: gravity);
   }
 
-  String getEmail = "...";
-  String getBranch = "...";
+  _cekLegalandUser() async {
+    final response = await http.post(applink+"api_model.php?act=cek_legalanduser",
+        body: {"username": widget.getEmail.toString()},
+        headers: {"Accept":"application/json"});
+    Map data = jsonDecode(response.body);
+    setState(() {
+      if (data["message"].toString() == '2' || data["message"].toString() == '3') {
+        Navigator.pushReplacement(context, ExitPage(page: Introduction()));
+      }
+    });
+  }
+
+  //=============================================================================
   _startingVariable() async {
     await AppHelper().getConnect().then((value){if(value == 'ConnInterupted'){
       showToast("Koneksi terputus..", gravity: Toast.CENTER,duration:
       Toast.LENGTH_LONG);}});
-    await AppHelper().getSession().then((value){if(value[0] != 1) {
-      Navigator.pushReplacement(context, ExitPage(page: Login()));}else{setState(() {getEmail = value[1];});}});
-    await AppHelper().getDetailUser(getEmail.toString()).then((value){
-      setState(() {
-        getBranch = value[1];
-      });
+    await AppHelper().getSession().then((value){
+      if(value[0] != 1) {
+        Navigator.pushReplacement(context, ExitPage(page: Login()));
+      }
     });
+    await _cekLegalandUser();
+
+  }
+
+  showFlushBarsuccess(BuildContext context, String stringme) => Flushbar(
+    // title:  "Hey Ninja",
+    message:  stringme,
+    shouldIconPulse: false,
+    duration:  Duration(seconds: 3),
+    backgroundColor: Colors.black,
+    flushbarPosition: FlushbarPosition.BOTTOM ,
+  )..show(context);
+
+  void showsuccess(String txtError){
+    showFlushBarsuccess(context, txtError);
+    return;
   }
 
   _prepare() async {
@@ -53,31 +85,27 @@ class _GudangInsert extends State<GudangInsert> {
   }
 
   doSimpan() async {
-    FocusScope.of(context).requestFocus(FocusNode());
+    Navigator.pop(context);
     final response = await http.post(applink+"api_model.php?act=add_gudang", body: {
       "gudang_nama": _valInsert.text,
-      "gudang_branch" : getBranch
+      "gudang_branch" : widget.getLegalCode
     });
     Map data = jsonDecode(response.body);
     setState(() {
       if (data["message"].toString() == '0') {
-        showToast("Gudang sudah ada", gravity: Toast.BOTTOM,
-            duration: Toast.LENGTH_LONG);
+        showsuccess("Gudang sudah ada");
         return false;
       } else {
         _valInsert.clear();
-        showToast("Gudang berhasil ditambah", gravity: Toast.BOTTOM,
-            duration: Toast.LENGTH_LONG);
+        showsuccess("Gudang berhasil ditambah");
         return false;
       }
     });
   }
 
   _showAlert() {
-    FocusScope.of(context).requestFocus(FocusNode());
     if (_valInsert.text == "") {
-      showToast("Nama Gudang tidak boleh kosong", gravity: Toast.BOTTOM,
-          duration: Toast.LENGTH_LONG);
+      showsuccess("Nama Gudang tidak boleh kosong");
       return false;
     }
 
@@ -110,7 +138,6 @@ class _GudangInsert extends State<GudangInsert> {
                           borderSide: BorderSide(width: 1.0, color: Colors.redAccent),
                           onPressed: () {
                             doSimpan();
-                            Navigator.pop(context);
                           }, child: Text("Simpan", style: TextStyle(color: Colors.red),),)),
                       ],),)
                   ],
@@ -144,6 +171,7 @@ class _GudangInsert extends State<GudangInsert> {
           actions: [
             InkWell(
               onTap: () {
+                FocusScope.of(context).requestFocus(FocusNode());
                 _showAlert();
               },
               child: Padding(
