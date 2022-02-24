@@ -33,13 +33,16 @@ import 'package:moobi_flutter/page_login.dart';
 import 'package:toast/toast.dart';
 import 'package:http/http.dart' as http;
 
+import '../page_intoduction.dart';
+
 
 class GudangProduk extends StatefulWidget{
   final String idGudang;
   final String kodeGudang;
-  final String valNamaUser;
-  final String valBranch;
-  const GudangProduk(this.idGudang, this.kodeGudang, this.valNamaUser, this.valBranch);
+  final String getEmail;
+  final String getLegalCode;
+  final String getNamaUser;
+  const GudangProduk(this.idGudang, this.kodeGudang, this.getEmail, this.getLegalCode, this.getNamaUser);
   @override
   _GudangProduk createState() => _GudangProduk();
 }
@@ -48,6 +51,45 @@ class GudangProduk extends StatefulWidget{
 class _GudangProduk extends State<GudangProduk> {
   List data;
   bool _isvisible = true;
+
+
+  _cekLegalandUser() async {
+    final response = await http.post(applink+"api_model.php?act=cek_legalanduser",
+        body: {"username": widget.getEmail.toString()},
+        headers: {"Accept":"application/json"});
+    Map data = jsonDecode(response.body);
+    setState(() {
+      if (data["message"].toString() == '2' || data["message"].toString() == '3') {
+        Navigator.pushReplacement(context, ExitPage(page: Introduction()));
+      }
+    });
+  }
+
+  //=============================================================================
+  _startingVariable() async {
+    await AppHelper().getConnect().then((value){if(value == 'ConnInterupted'){
+      showToast("Koneksi terputus..", gravity: Toast.CENTER,duration:
+      Toast.LENGTH_LONG);}});
+    await AppHelper().getSession().then((value){
+      if(value[0] != 1) {
+        Navigator.pushReplacement(context, ExitPage(page: Login()));
+      }
+    });
+    await _cekLegalandUser();
+
+  }
+
+
+  _prepare() async {
+    await _startingVariable();
+  }
+
+
+  @override
+  void initState() {
+    super.initState();
+    _prepare();
+  }
 
 
   showFlushBar(BuildContext context, String stringme) => Flushbar(
@@ -123,7 +165,7 @@ class _GudangProduk extends State<GudangProduk> {
   String getMessage = "...";
   _doHapus (String valueParse2) {
     http.get(applink+"api_model.php?act=action_hapusgudangproduk&id="+valueParse2.toString()
-        +"&branch="+widget.valBranch);
+        +"&branch="+widget.getLegalCode);
 
     setState(() {
       getData();
@@ -140,7 +182,7 @@ class _GudangProduk extends State<GudangProduk> {
         "buangKeterangan" : buangKeterangan.text,
         "buangJumlah" : buangJumlah.text,
         "kodeGudang" : widget.kodeGudang,
-        "namaUser" : widget.valNamaUser},
+        "namaUser" : widget.getNamaUser},
         headers: {"Accept":"application/json"});
     FocusScope.of(context).requestFocus(FocusNode());
     setState(() {
@@ -161,7 +203,7 @@ class _GudangProduk extends State<GudangProduk> {
           "tambahKeterangan" : tambahKeterangan.text,
           "tambahJumlah" : tambahJumlah.text,
           "kodeGudang" : widget.kodeGudang,
-          "namaUser" : widget.valNamaUser},
+          "namaUser" : widget.getNamaUser},
         headers: {"Accept":"application/json"});
     FocusScope.of(context).requestFocus(FocusNode());
     setState(() {
@@ -845,7 +887,7 @@ class _GudangProduk extends State<GudangProduk> {
             child: FloatingActionButton(
               onPressed: (){
                 FocusScope.of(context).requestFocus(FocusNode());
-                Navigator.push(context, MaterialPageRoute(builder: (context) => TambahProdukGudang(widget.kodeGudang, widget.valBranch, widget.valNamaUser)));
+                Navigator.push(context, MaterialPageRoute(builder: (context) => TambahProdukGudang(widget.kodeGudang, widget.getEmail,  widget.getLegalCode, widget.getNamaUser)));
 
               },
               child: FaIcon(FontAwesomeIcons.plus),

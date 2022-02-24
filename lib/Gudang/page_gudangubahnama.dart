@@ -4,6 +4,7 @@
 
 import 'dart:convert';
 
+import 'package:flushbar/flushbar.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
@@ -19,10 +20,15 @@ import 'package:toast/toast.dart';
 import 'package:http/http.dart' as http;
 import 'package:moobi_flutter/Helper/api_link.dart';
 
+import '../page_intoduction.dart';
+
 class GudangUbahNama extends StatefulWidget {
+  final String getEmail;
+  final String getLegalCode;
   final String idGudang;
   final String namaGudang;
-  const GudangUbahNama(this.idGudang, this.namaGudang);
+  const GudangUbahNama(this.getEmail, this.getLegalCode,this.idGudang, this.namaGudang);
+
   @override
   GudangUbahNamaState createState() => GudangUbahNamaState();
 }
@@ -37,15 +43,44 @@ class GudangUbahNamaState extends State<GudangUbahNama> {
   }
 
 
+  _cekLegalandUser() async {
+    final response = await http.post(applink+"api_model.php?act=cek_legalanduser",
+        body: {"username": widget.getEmail.toString()},
+        headers: {"Accept":"application/json"});
+    Map data = jsonDecode(response.body);
+    setState(() {
+      if (data["message"].toString() == '2' || data["message"].toString() == '3') {
+        Navigator.pushReplacement(context, ExitPage(page: Introduction()));
+      }
+    });
+  }
 
-  String getEmail = "...";
-  String getNama = "...";
+  //=============================================================================
   _startingVariable() async {
     await AppHelper().getConnect().then((value){if(value == 'ConnInterupted'){
       showToast("Koneksi terputus..", gravity: Toast.CENTER,duration:
       Toast.LENGTH_LONG);}});
-    await AppHelper().getSession().then((value){if(value[0] != 1) {
-      Navigator.pushReplacement(context, ExitPage(page: Login()));}else{setState(() {getEmail = value[1];});}});
+    await AppHelper().getSession().then((value){
+      if(value[0] != 1) {
+        Navigator.pushReplacement(context, ExitPage(page: Login()));
+      }
+    });
+    await _cekLegalandUser();
+
+  }
+
+  showFlushBarsuccess(BuildContext context, String stringme) => Flushbar(
+    // title:  "Hey Ninja",
+    message:  stringme,
+    shouldIconPulse: false,
+    duration:  Duration(seconds: 3),
+    backgroundColor: Colors.black,
+    flushbarPosition: FlushbarPosition.BOTTOM ,
+  )..show(context);
+
+  void showsuccess(String txtError){
+    showFlushBarsuccess(context, txtError);
+    return;
   }
 
   _prepare() async {
@@ -60,6 +95,7 @@ class GudangUbahNamaState extends State<GudangUbahNama> {
   }
 
   doSimpan() async {
+    Navigator.pop(context);
     final response = await http.post(applink+"api_model.php?act=edit_namagudang", body: {
       "valNama_edit": valNama.text,
       "valID_edit" : widget.idGudang
@@ -67,9 +103,10 @@ class GudangUbahNamaState extends State<GudangUbahNama> {
     Map data = jsonDecode(response.body);
     setState(() {
       if (data["message"].toString() == '1') {
-        showToast("Nama Gudang berhasil diganti", gravity: Toast.BOTTOM,
-            duration: Toast.LENGTH_LONG);
-        Navigator.pop(context);
+        showsuccess("Nama Gudang berhasil diganti");
+        return false;
+      } else {
+        showsuccess("Nama Gudang sudah ada");
         return false;
       }
     });
@@ -78,8 +115,7 @@ class GudangUbahNamaState extends State<GudangUbahNama> {
 
   alertSimpan() {
     if (valNama.text == "" ) {
-      showToast("Form tidak boleh kosong ", gravity: Toast.BOTTOM,
-          duration: Toast.LENGTH_LONG);
+      showsuccess("Form tidak boleh kosong");
       return false;
     }
     showDialog(

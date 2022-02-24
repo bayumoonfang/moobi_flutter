@@ -32,7 +32,8 @@ class Gudang extends StatefulWidget{
   final String getEmail;
   final String getLegalCode;
   final String getLegalId;
-  const Gudang(this.getEmail, this.getLegalCode, this.getLegalId);
+  final String getNamaUser;
+  const Gudang(this.getEmail, this.getLegalCode, this.getLegalId, this.getNamaUser);
   @override
   _GudangState createState() => _GudangState();
 }
@@ -273,7 +274,8 @@ class _GudangState extends State<Gudang> {
                                       FocusScope.of(context).requestFocus(FocusNode());
                                         Navigator.push(
                           context,
-                          MaterialPageRoute(builder: (context) => GudangDetail(widget.getEmail, widget.getLegalCode, widget.getLegalId, snapshot.data[i]["c"].toString())));
+                          MaterialPageRoute(builder: (context) => GudangDetail(widget.getEmail, widget.getLegalCode, widget.getLegalId, snapshot.data[i]["c"].toString(), snapshot.data[i]["b"].toString(),
+                          widget.getNamaUser)));
                       //Navigator.push(context, ExitPage(page: GudangDetail(snapshot.data[i]["c"].toString())));*/
                                     },
                                     child: ListTile(

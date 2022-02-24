@@ -31,7 +31,9 @@ class GudangDetail extends StatefulWidget {
   final String getLegalCode;
   final String getLegalId;
   final String idGudang;
-  const GudangDetail(this.getEmail, this.getLegalCode, this.getLegalId, this.idGudang);
+  final String kodeGudang;
+  final String getNamaUser;
+  const GudangDetail(this.getEmail, this.getLegalCode, this.getLegalId, this.idGudang, this.kodeGudang, this.getNamaUser);
 
   /*final String idGudang;
   final String valNamaUser;
@@ -111,7 +113,7 @@ class _GudangDetail extends State<GudangDetail> {
   String getWarehouseTrans = '0';
   _warehouseTrans() async {
     final response = await http.get(
-        applink+"api_model.php?act=warehouse_trans&id="+widget.idGudang);
+        applink+"api_model.php?act=warehouse_trans&id="+widget.kodeGudang);
     Map data = jsonDecode(response.body);
     setState(() {
       getWarehouseTrans = data["a"].toString();
@@ -310,7 +312,7 @@ class _GudangDetail extends State<GudangDetail> {
                   child: InkWell(
                     child: ListTile(
                       onTap: (){
-                        //Navigator.push(context, ExitPage(page: GudangProduk(widget.idGudang, getCodeWarehouse )));
+                        Navigator.push(context, ExitPage(page: GudangProduk(widget.idGudang, widget.kodeGudang, widget.getEmail, widget.getLegalCode, widget.getNamaUser)));
                         //Navigator.push(context, MaterialPageRoute(builder: (context) => GudangProduk(widget.idGudang, getCodeWarehouse, widget.valNamaUser, widget.valBranch)));
                       },
                       title: Padding(padding: const EdgeInsets.only(top: 10),
@@ -336,11 +338,22 @@ class _GudangDetail extends State<GudangDetail> {
 
 
               Padding(padding: const EdgeInsets.only(top: 5,left: 9,right: 25),
-                  child: InkWell(
+                  child:
+                  getWarehouseName != 'Gudang Besar' ?
+                  InkWell(
+                    onTap: (){
+                      Navigator.push(context, ExitPage(page: GudangUbahNama(widget.getEmail, widget.getLegalCode,widget.idGudang, getWarehouseName.toString()))).then(onGoBack);
+                    },
                     child: ListTile(
-                      onTap: (){
-                        Navigator.push(context, ExitPage(page: GudangUbahNama(widget.idGudang, getWarehouseName.toString()))).then(onGoBack);
-                      },
+                      title: Text("Ubah Nama Gudang",style: TextStyle(
+                          color: Colors.black, fontFamily: 'VarelaRound',fontSize: 15)),
+                      trailing: FaIcon(FontAwesomeIcons.angleRight,color: HexColor(third_color),),
+                    ),
+                  )
+                      :
+                  Opacity(
+                    opacity: 0.4,
+                    child : ListTile(
                       title: Text("Ubah Nama Gudang",style: TextStyle(
                           color: Colors.black, fontFamily: 'VarelaRound',fontSize: 15)),
                       trailing: FaIcon(FontAwesomeIcons.angleRight,color: HexColor(third_color),),

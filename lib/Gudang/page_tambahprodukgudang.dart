@@ -13,15 +13,22 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:hexcolor/hexcolor.dart';
 import 'package:moobi_flutter/Helper/api_link.dart';
 import 'package:http/http.dart' as http;
+import 'package:moobi_flutter/Helper/app_helper.dart';
 import 'package:moobi_flutter/Helper/color_based.dart';
+import 'package:moobi_flutter/Helper/page_route.dart';
+import 'package:toast/toast.dart';
+
+import '../page_intoduction.dart';
+import '../page_login.dart';
 
 
 
 class TambahProdukGudang extends StatefulWidget {
   final String kodeGudang;
-  final String valBranch;
-  final String valNamaUser;
-  const TambahProdukGudang(this.kodeGudang, this.valBranch, this.valNamaUser);
+  final String getEmail;
+  final String getLegalCode;
+  final String getNamaUser;
+  const TambahProdukGudang(this.kodeGudang, this.getEmail, this.getLegalCode, this.getNamaUser);
   @override
   _TambahProdukGudang createState() => _TambahProdukGudang();
 }
@@ -31,6 +38,50 @@ class _TambahProdukGudang extends State<TambahProdukGudang> {
 
   List data;
   bool _isvisible = true;
+
+
+
+  _cekLegalandUser() async {
+    final response = await http.post(applink+"api_model.php?act=cek_legalanduser",
+        body: {"username": widget.getEmail.toString()},
+        headers: {"Accept":"application/json"});
+    Map data = jsonDecode(response.body);
+    setState(() {
+      if (data["message"].toString() == '2' || data["message"].toString() == '3') {
+        Navigator.pushReplacement(context, ExitPage(page: Introduction()));
+      }
+    });
+  }
+
+  //=============================================================================
+  _startingVariable() async {
+    await AppHelper().getConnect().then((value){if(value == 'ConnInterupted'){
+      showToast("Koneksi terputus..", gravity: Toast.CENTER,duration:
+      Toast.LENGTH_LONG);}});
+    await AppHelper().getSession().then((value){
+      if(value[0] != 1) {
+        Navigator.pushReplacement(context, ExitPage(page: Login()));
+      }
+    });
+    await _cekLegalandUser();
+
+  }
+
+  void showToast(String msg, {int duration, int gravity}) {
+    Toast.show(msg, context, duration: duration, gravity: gravity);}
+
+
+  _prepare() async {
+    await _startingVariable();
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _prepare();
+  }
+
+
   showFlushBarsuccess(BuildContext context, String stringme) => Flushbar(
     // title:  "Hey Ninja",
     message:  stringme,
@@ -53,9 +104,9 @@ class _TambahProdukGudang extends State<TambahProdukGudang> {
   String sortme = "0";
   Future<List> getData() async {
     http.Response response = await http.get(
-        Uri.encodeFull(applink+"api_model.php?act=getdata_produk&"
+        Uri.encodeFull(applink+"api_model.php?act=getdata_produkadd_gudang&"
             "filter="+filter+
-            "&sort="+sortme+"&id="+widget.valBranch),
+            "&id="+widget.getLegalCode),
         headers: {"Accept":"application/json"});
     return json.decode(response.body);
   }
@@ -88,6 +139,7 @@ class _TambahProdukGudang extends State<TambahProdukGudang> {
 
 
   _doAddStockAwal (String valueParse2) async {
+    Navigator.pop(context);
     if (addJumlahawal.text == "") {
       showerror("Keterangan atau Jumlah tidak boleh kosong");
     }
@@ -95,11 +147,26 @@ class _TambahProdukGudang extends State<TambahProdukGudang> {
         body: {"id": valueParse2,
           "addJumlahawal" : addJumlahawal.text,
           "kodeGudang" : widget.kodeGudang,
-          "branch" : widget.valBranch,
-        "namaUser" : widget.valNamaUser},
+          "branch" : widget.getLegalCode,
+        "namaUser" : widget.getNamaUser},
         headers: {"Accept":"application/json"});
-    FocusScope.of(context).requestFocus(FocusNode());
+    showsuccess("Produk berhasil ditambahkan ke gudang "+widget.kodeGudang+"");
+  }
+
+
+  _doAddStockAwal2 () async {
     Navigator.pop(context);
+    if (addJumlahawal.text == "") {
+      showerror("Keterangan atau Jumlah tidak boleh kosong");
+    }
+    final response = await http.post(applink+"api_model.php?act=action_addprodukgudang",
+        body: {"id": "",
+          "addJumlahawal" : addJumlahawal.text,
+          "kodeGudang" : widget.kodeGudang,
+          "branch" : widget.getLegalCode,
+          "namaUser" : widget.getNamaUser},
+        headers: {"Accept":"application/json"});
+    Map data = jsonDecode(response.body);
     showsuccess("Produk berhasil ditambahkan ke gudang "+widget.kodeGudang+"");
   }
 
@@ -189,6 +256,73 @@ class _TambahProdukGudang extends State<TambahProdukGudang> {
   }
 
 
+
+  _showadd2() {
+    showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            //title: Text(),
+            content: Container(
+                width: double.infinity,
+                height: 230,
+                child: Column(
+                  children: [
+                    Align(alignment: Alignment.center, child:
+                    Text("Tambah Ke Gudang", style: TextStyle(fontFamily: 'VarelaRound', fontSize: 20,
+                        fontWeight: FontWeight.bold)),),
+                    Padding(padding: const EdgeInsets.only(top: 15), child:
+                    Align(alignment: Alignment.center, child:
+                    Text("Menambah semua produk baru ke gudang "+widget.kodeGudang+ ", produk yang sudah ada tidak akan dimasukkan",
+                      style: TextStyle(fontFamily: 'VarelaRound', fontSize: 12),textAlign: TextAlign.center,),)),
+                    Padding(padding: const EdgeInsets.only(top: 15), child:
+                    Align(alignment: Alignment.center, child:
+                    Container(
+                      child : TextFormField(
+                        keyboardType: TextInputType.number,
+                        style: TextStyle(
+                            fontFamily: 'VarelaRound', fontSize: 14),
+                        controller: addJumlahawal,
+                        decoration: InputDecoration(
+                          contentPadding: EdgeInsets.only(left:15,top:5,bottom:5,right: 15),
+                          hintText: "Stock Awal",
+                          focusedBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(15.0),
+                            borderSide: BorderSide(
+                              color: HexColor("#602d98"),
+                            ),
+                          ),
+                          enabledBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(15.0),
+                            borderSide: BorderSide(
+                              color: HexColor("#dbd0ea"),
+                              width: 1.0,
+                            ),
+                          ),
+
+                        ),
+                      ),
+                    )
+                    )),
+                    Padding(padding: const EdgeInsets.only(top: 25), child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      children: <Widget>[
+                        Expanded(child: OutlineButton(
+                          onPressed: () {Navigator.pop(context);}, child: Text("Tutup"),)),
+                        Expanded(child: RaisedButton(
+                          color: HexColor(main_color),
+                          onPressed: () {
+                            _doAddStockAwal2();
+                          }, child: Text("Post", style: TextStyle(color: Colors.white),),)),
+                      ],),)
+                  ],
+                )
+            ),
+          );
+        });
+  }
+
+
   @override
   Widget build(BuildContext context) {
       return WillPopScope(
@@ -209,6 +343,20 @@ class _TambahProdukGudang extends State<TambahProdukGudang> {
                       Navigator.pop(context)
                     }),
               ),
+              actions: [
+                InkWell(
+                  onTap: () {
+                    FocusScope.of(context).requestFocus(FocusNode());
+                    _showadd2();
+                  },
+                  child: Padding(
+                    padding: const EdgeInsets.only(right: 27,top : 14),
+                    child: FaIcon(
+                        FontAwesomeIcons.plusSquare
+                    ),
+                  ),
+                )
+              ],
             ),
             body : Container(
               child: Column(
@@ -355,7 +503,7 @@ class _TambahProdukGudang extends State<TambahProdukGudang> {
                                                   snapshot.data[i]["d"] == '' ?
                                                   applink+"photo/nomage.jpg"
                                                       :
-                                                  applink+"photo/"+widget.valBranch+"/"+snapshot.data[i]["d"],
+                                                  applink+"photo/"+widget.getLegalCode+"/"+snapshot.data[i]["d"],
                                                   progressIndicatorBuilder: (context, url,
                                                       downloadProgress) =>
                                                       CircularProgressIndicator(value:
@@ -382,6 +530,14 @@ class _TambahProdukGudang extends State<TambahProdukGudang> {
                                                       style: GoogleFonts.varelaRound(fontSize: 14,fontWeight: FontWeight.bold,
                                                           color: Colors.black))),
                                                 ),
+                                                Align(
+                                                  alignment: Alignment.centerLeft,
+                                                  child: Padding(padding: const EdgeInsets.only(top:2), child :
+                                                          Text(snapshot.data[i]["b"].toString(),
+                                                          style: GoogleFonts.varelaRound(fontSize: 12,
+                                                          color: Colors.black))
+                                                  ),
+                                                )
                                               ],
                                             ),
                                           ),
