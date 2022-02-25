@@ -36,6 +36,8 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import 'Jualan/page_jualanhome.dart';
+
 class Home extends StatefulWidget {
 
   @override
@@ -411,7 +413,9 @@ class _HomeState extends State<Home> {
                                 runSpacing: 30,
                                 children: [
                                   InkWell(
-                                    onTap: (){Navigator.push(context, ExitPage(page: Jualan()));},
+                                    onTap: (){
+                                      Navigator.push(context, ExitPage(page: JualanHome(getEmail.toString(),getLegalCode.toString(),getLegalId.toString(), getNamaUser.toString())));
+                                      },
                                     child:Column(
                                       children: [
                                         Container(

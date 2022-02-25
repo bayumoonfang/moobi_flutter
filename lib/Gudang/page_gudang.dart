@@ -275,7 +275,7 @@ class _GudangState extends State<Gudang> {
                                         Navigator.push(
                           context,
                           MaterialPageRoute(builder: (context) => GudangDetail(widget.getEmail, widget.getLegalCode, widget.getLegalId, snapshot.data[i]["c"].toString(), snapshot.data[i]["b"].toString(),
-                          widget.getNamaUser)));
+                          widget.getNamaUser))).then(onGoBack);
                       //Navigator.push(context, ExitPage(page: GudangDetail(snapshot.data[i]["c"].toString())));*/
                                     },
                                     child: ListTile(

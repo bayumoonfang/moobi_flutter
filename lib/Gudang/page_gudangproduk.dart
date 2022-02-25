@@ -177,15 +177,18 @@ class _GudangProduk extends State<GudangProduk> {
     if (buangKeterangan.text == ""  || buangJumlah.text == "") {
       showerror("Keterangan atau Jumlah tidak boleh kosong");
     }
+
     final response = await http.post(applink+"api_model.php?act=action_buangstock",
         body: {"id": valueParse2,
         "buangKeterangan" : buangKeterangan.text,
         "buangJumlah" : buangJumlah.text,
         "kodeGudang" : widget.kodeGudang,
-        "namaUser" : widget.getNamaUser},
+        "namaUser" : widget.getNamaUser,
+        "branch" : widget.getLegalCode},
         headers: {"Accept":"application/json"});
-    FocusScope.of(context).requestFocus(FocusNode());
+    //FocusScope.of(context).requestFocus(FocusNode());
     setState(() {
+      Navigator.pop(context);
       buangKeterangan.text = "";
       buangJumlah.text = "";
       showsuccess("Adjustment stock berhasil diposting");
@@ -203,10 +206,12 @@ class _GudangProduk extends State<GudangProduk> {
           "tambahKeterangan" : tambahKeterangan.text,
           "tambahJumlah" : tambahJumlah.text,
           "kodeGudang" : widget.kodeGudang,
-          "namaUser" : widget.getNamaUser},
+          "namaUser" : widget.getNamaUser,
+          "branch" : widget.getLegalCode},
         headers: {"Accept":"application/json"});
     FocusScope.of(context).requestFocus(FocusNode());
     setState(() {
+      Navigator.pop(context);
       tambahKeterangan.text = "";
       tambahJumlah.text = "";
       showsuccess("Adjustment stock berhasil diposting");
@@ -865,7 +870,7 @@ class _GudangProduk extends State<GudangProduk> {
 
                                   Container(
                                     width: double.infinity,
-                                    height: 15,
+                                    height: 8,
                                     child :Divider(
                                       height: 5,
                                     ),

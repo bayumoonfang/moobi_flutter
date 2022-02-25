@@ -555,7 +555,7 @@ class _TambahProdukGudang extends State<TambahProdukGudang> {
                                     ),
                                     Container(
                                       width: double.infinity,
-                                      height: 5,
+                                      height: 8,
                                       child :Divider(
                                         height: 5,
                                       ),

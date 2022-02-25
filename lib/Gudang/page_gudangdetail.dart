@@ -148,6 +148,60 @@ class _GudangDetail extends State<GudangDetail> {
     _prepare();
   }
 
+
+
+  doHapus(String IDq) {
+    Navigator.pop(context);
+    http.post(applink+"api_model.php?act=hapus_gudang", body: {
+      "id" : widget.idGudang,
+      "legal_id" : widget.getLegalId,
+      "kodeGudang" : widget.kodeGudang
+    });
+    Navigator.pop(context);
+  }
+
+
+
+  alertHapus(String IDProduk) {
+    showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            //title: Text(),
+            content: Container(
+                width: double.infinity,
+                height: 205,
+                child: Column(
+                  children: [
+                    Align(alignment: Alignment.center, child:
+                    Text("Konfirmasi", style: TextStyle(fontFamily: 'VarelaRound', fontSize: 20,
+                        fontWeight: FontWeight.bold)),),
+                    Padding(padding: const EdgeInsets.only(top: 15), child:
+                    Align(alignment: Alignment.center, child: FaIcon(FontAwesomeIcons.trash,
+                      color: Colors.redAccent,size: 35,)),),
+                    Padding(padding: const EdgeInsets.only(top: 15), child:
+                    Align(alignment: Alignment.center, child:
+                    Text("Apakah anda yakin menghapus gudang ini ? Menghapus akan membersihkan semua history gudang ini. ",
+                      style: TextStyle(fontFamily: 'VarelaRound', fontSize: 12),textAlign: TextAlign.center,),)),
+                    Padding(padding: const EdgeInsets.only(top: 25), child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      children: <Widget>[
+                        Expanded(child: OutlineButton(
+                          onPressed: () {Navigator.pop(context);}, child: Text("Tidak"),)),
+                        Expanded(child: OutlineButton(
+                          borderSide: BorderSide(width: 1.0, color: Colors.redAccent),
+                          onPressed: () {
+                           doHapus(IDProduk);
+                          }, child: Text("Hapus", style: TextStyle(color: Colors.red),),)),
+                      ],),)
+                  ],
+                )
+            ),
+          );
+        });
+  }
+
+
   @override
   Widget build(BuildContext context) {
     return WillPopScope(
@@ -169,10 +223,11 @@ class _GudangDetail extends State<GudangDetail> {
                 }),
           ),
           actions: [
+            getWarehouseName != 'Gudang Besar' ?
             InkWell(
               onTap: () {
                 FocusScope.of(context).requestFocus(FocusNode());
-                //alertSimpan();
+                alertHapus(widget.idGudang);
               },
               child: Padding(
                 padding: const EdgeInsets.only(right: 30,top : 19),
@@ -181,6 +236,8 @@ class _GudangDetail extends State<GudangDetail> {
                 ),
               ),
             )
+                :
+                Container()
           ],
         ),
         body: Container(
@@ -247,7 +304,7 @@ class _GudangDetail extends State<GudangDetail> {
                           ),
                           InkWell(
                             onTap:() {
-                              Navigator.push(context, MaterialPageRoute(builder: (context) => RiwayatMutasi(widget.idGudang)));
+                              Navigator.push(context, MaterialPageRoute(builder: (context) => RiwayatMutasi(widget.getEmail, widget.getLegalId, widget.kodeGudang )));
 
                               //Navigator.push(context, ExitPage(page: RiwayatTransaksiOutlet(widget.idOutlet)));
                              // Navigator.push(context, MaterialPageRoute(builder: (context) => RiwayatTransaksiOutlet(widget.idOutlet)));
