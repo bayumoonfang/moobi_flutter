@@ -21,17 +21,16 @@ import 'dart:convert';
 
 import '../page_intoduction.dart';
 
-class OutletChangeGudang extends StatefulWidget{
+class JualanUbahWarehouse extends StatefulWidget{
   final String getEmail;
   final String getLegalCode;
-  final String idOutlet;
-
-  const OutletChangeGudang(this.getEmail, this.getLegalCode,this.idOutlet);
-  _OutletChangeGudang createState() => _OutletChangeGudang();
+  final String getStoreId;
+  const JualanUbahWarehouse(this.getEmail, this.getLegalCode, this.getStoreId);
+  _JualanUbahWarehouse createState() => _JualanUbahWarehouse();
 }
 
 
-class _OutletChangeGudang extends State<OutletChangeGudang> {
+class _JualanUbahWarehouse extends State<JualanUbahWarehouse> {
   List data;
   void showToast(String msg, {int duration, int gravity}) {
     Toast.show(msg, context, duration: duration, gravity: gravity);}
@@ -90,14 +89,16 @@ class _OutletChangeGudang extends State<OutletChangeGudang> {
   }
 
   var client = http.Client();
-  Future<dynamic> getDataGudang() async {
+  Future<dynamic> getDataStore() async {
     http.Response response = await client.get(
-        Uri.parse(applink+"api_model.php?act=getdata_gudangall&id="
+        Uri.parse(applink+"api_model.php?act=getdata_warehousesett_sales&username="
+            +widget.getEmail+"&branch="
             +widget.getLegalCode),
         headers: {
           "Accept":"application/json",
           "Content-Type": "application/json"}
     );
+
     return json.decode(response.body);
   }
 
@@ -110,25 +111,21 @@ class _OutletChangeGudang extends State<OutletChangeGudang> {
 
 
   String getMessage;
-  void changeGudang(String valGudang, String valNamaGudang, String valIDOutlet) async {
-    final response = await http.post(applink+"api_model.php?act=action_changegudangdefault",
+  void changeWarehouse(String validWarehouse) async {
+    final response = await http.post(applink+"api_model.php?act=action_changewarehouse_sales",
         body: {
-          "idGudang": valGudang,
-          "namaGudang" :valNamaGudang,
-          "idOutlet":valIDOutlet,
+          "idWarehouse":validWarehouse,
           "getUser":widget.getEmail,
-          "getBranch":widget.getLegalCode
+          "getBranch":widget.getLegalCode,
+          "getStoreId":widget.getStoreId
         },
         headers: {"Accept":"application/json"});
     Map showdata = jsonDecode(response.body);
     getMessage = showdata["message"].toString();
     if(getMessage == '0') {
-      showsuccess(valNamaGudang+" sudah terpakai");
+      showsuccess("Gagal Update");
     } else {
-      showsuccess("Gudang default berhasil diganti ke "+valNamaGudang);
-      setState(() {
-        getDataGudang();
-      });
+      Navigator.pop(context);
     }
 
   }
@@ -142,27 +139,27 @@ class _OutletChangeGudang extends State<OutletChangeGudang> {
       onWillPop: _onWillPop,
       child: Scaffold(
         appBar: new AppBar(
-          backgroundColor: HexColor(main_color),
-          title: Text(
-            "Ubah Gudang Default",
-            style: TextStyle(
-                color: Colors.white, fontFamily: 'VarelaRound', fontSize: 16),
-          ),
-          leading: Builder(
-            builder: (context) => IconButton(
-                icon: new FaIcon(FontAwesomeIcons.times),
-                color: Colors.white,
-                onPressed: () => {
+            backgroundColor: HexColor(main_color),
+            title: Text(
+              "Ubah Store Default",
+              style: TextStyle(
+                  color: Colors.white, fontFamily: 'VarelaRound', fontSize: 16),
+            ),
+            leading: Builder(
+              builder: (context) => IconButton(
+                  icon: new FaIcon(FontAwesomeIcons.times),
+                  color: Colors.white,
+                  onPressed: () => {
                     //Navigator.pushReplacement(context, EnterPage(page: DetailOutlet(widget.idOutlet)))
-                Navigator.pop(context)
-                }),
-          )
+                    Navigator.pop(context)
+                  }),
+            )
         ),
         body: Container(
           height: double.infinity,
           width: double.infinity,
           child: FutureBuilder(
-            future: getDataGudang(),
+            future: getDataStore(),
             builder: (context, snapshot) {
               if (snapshot.data == null) {
                 return Center(
@@ -198,10 +195,10 @@ class _OutletChangeGudang extends State<OutletChangeGudang> {
                   itemBuilder: (context, i) {
                     return Padding(padding: const EdgeInsets.only(left: 10,right: 10,top: 5),
                       child:
-                      snapshot.data[i]["d"] == '0' ?
                       InkWell(
                           onTap: () {
-                            changeGudang(snapshot.data[i]["a"].toString(), snapshot.data[i]["b"].toString(), widget.idOutlet);
+                            changeWarehouse(snapshot.data[i]["a"].toString());
+
                           },
                           child :
                           Card(
@@ -211,20 +208,6 @@ class _OutletChangeGudang extends State<OutletChangeGudang> {
                                   color: Colors.black, fontFamily: 'VarelaRound',fontSize: 15)),
                             ),
                           ))
-
-                          :
-                      Opacity(
-                        opacity: 0.5,
-                        child: Card(
-                          color: HexColor("#DDDDDD"),
-                          child: ListTile(
-                            leading: FaIcon(FontAwesomeIcons.warehouse, size: 18,),
-                            title: Text(snapshot.data[i]["b"],style: TextStyle(
-                                color: Colors.black, fontFamily: 'VarelaRound',fontSize: 15)),
-                          ),
-                        ),
-                      )
-
                       ,);
                   },
                 );

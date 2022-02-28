@@ -2,17 +2,21 @@
 
 
 
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:flushbar/flushbar.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:hexcolor/hexcolor.dart';
 import 'package:moobi_flutter/Helper/api_link.dart';
 import 'package:moobi_flutter/Helper/app_helper.dart';
 import 'package:moobi_flutter/Helper/color_based.dart';
 import 'package:moobi_flutter/Helper/page_route.dart';
+import 'package:moobi_flutter/Jualan/page_jualanubahstore.dart';
+import 'package:moobi_flutter/Jualan/page_jualanubahwarehouse.dart';
 import 'package:toast/toast.dart';
 import 'package:http/http.dart' as http;
 import '../page_intoduction.dart';
@@ -48,31 +52,22 @@ class _JualanHome extends State<JualanHome>{
     });
   }
 
-  String getTokoDefault = "...";
-  String getStore_Id = "...";
+  String getNamaToko = "...";
+  String getWarehouse = "...";
+  String getStoreId = "...";
+  String getWarehouseId = "...";
   _tokoDefault() async {
     final response = await http.get(
-        applink+"api_model.php?act=gettoko_default&id="+widget.getEmail);
+        applink+"api_model.php?act=getsetting_salesdefault&username="+widget.getEmail+"&branch="+widget.getLegalCode);
     Map data = jsonDecode(response.body);
     setState(() {
-      getTokoDefault = data["store_nama"].toString();
-      getStore_Id = data["store_id"].toString();
+      getNamaToko = data["store_nama"].toString();
+      getWarehouse = data["warehouse_name"].toString();
+      getStoreId = data["store_id"].toString();
+      getWarehouseId = data["warehouse_id"].toString();
     });
   }
 
-  String getGudangDefault = "...";
-  String getGudang_Id = "...";
-  _gudangDefault() async {
-    final response = await http.get(
-        applink+"api_model.php?act=getgudang_default&id="+getStore_Id.toString());
-    Map data = jsonDecode(response.body);
-    setState(() {
-      print(
-          applink+"api_model.php?act=getgudang_default&id="+getStore_Id.toString());
-      getGudangDefault = data["gudang_nama"].toString();
-      getGudang_Id = data["gudang_id"].toString();
-    });
-  }
 
 
   //=============================================================================
@@ -87,7 +82,7 @@ class _JualanHome extends State<JualanHome>{
     });
     await _cekLegalandUser();
     await _tokoDefault();
-    await _gudangDefault();
+
 
   }
 
@@ -118,6 +113,12 @@ class _JualanHome extends State<JualanHome>{
   void initState() {
     super.initState();
     _prepare();
+  }
+
+
+  FutureOr onGoBack(dynamic value) {
+    _prepare();
+    setState(() {});
   }
 
 
@@ -168,9 +169,10 @@ class _JualanHome extends State<JualanHome>{
                       child: InkWell(
                         child: ListTile(
                           onTap: (){
-                           // Navigator.push(context,MaterialPageRoute(builder: (context) => OutletChangeGudang(widget.getEmail,widget.getLegalCode,widget.idOutlet))).then(onGoBack);
-                            // Navigator.push(context, ExitPage(page: OutletChangeGudang(widget.getEmail,widget.getLegalCode,widget.idOutlet))).then(onGoBack);
-                          },
+                            Navigator.push(
+                                context,
+                                MaterialPageRoute(builder: (context) => JualanUbahStore(widget.getEmail,widget.getLegalCode,getWarehouseId.toString()))).then(onGoBack);
+                            },
                           title: Column(
                             children: [
                               Align(alignment: Alignment.centerLeft,
@@ -182,7 +184,7 @@ class _JualanHome extends State<JualanHome>{
                                   padding: const EdgeInsets.only(top:5 ),
                                   height: 25,
                                   child: Align(alignment: Alignment.centerLeft,
-                                      child: Text(getTokoDefault, style: TextStyle(
+                                      child: Text(getNamaToko, style: TextStyle(
                                         fontFamily: 'VarelaRound',
                                         fontSize: 15,fontWeight: FontWeight.bold)))
                                 ),
@@ -196,12 +198,13 @@ class _JualanHome extends State<JualanHome>{
                   Padding(padding: const EdgeInsets.only(top: 5,left: 25,right: 25),
                     child: Divider(height: 3,),),
 
-                  Padding(padding: const EdgeInsets.only(top: 25,left: 9,right: 25),
+                  Padding(padding: const EdgeInsets.only(top: 15,left: 9,right: 25),
                       child: InkWell(
                         child: ListTile(
                           onTap: (){
-                            // Navigator.push(context,MaterialPageRoute(builder: (context) => OutletChangeGudang(widget.getEmail,widget.getLegalCode,widget.idOutlet))).then(onGoBack);
-                            // Navigator.push(context, ExitPage(page: OutletChangeGudang(widget.getEmail,widget.getLegalCode,widget.idOutlet))).then(onGoBack);
+                            Navigator.push(
+                                context,
+                                MaterialPageRoute(builder: (context) => JualanUbahWarehouse(widget.getEmail,widget.getLegalCode, getStoreId.toString()))).then(onGoBack);
                           },
                           title: Column(
                             children: [
@@ -214,7 +217,7 @@ class _JualanHome extends State<JualanHome>{
                                     padding: const EdgeInsets.only(top:5 ),
                                     height: 25,
                                     child: Align(alignment: Alignment.centerLeft,
-                                        child: Text(getGudangDefault, style: TextStyle(
+                                        child: Text(getWarehouse, style: TextStyle(
                                             fontFamily: 'VarelaRound',
                                             fontSize: 15,fontWeight: FontWeight.bold)))
                                 ),
@@ -226,6 +229,24 @@ class _JualanHome extends State<JualanHome>{
                       )
                   ),
                 ],
+              ),
+            ),
+            bottomNavigationBar: Container(
+              width: double.infinity,
+              height: 50,
+              child:
+              getNamaToko == '...' || getWarehouse == '...' ?
+              RaisedButton(
+                  color: HexColor(main_color),
+                  child :Text("Lanjut Jualan",style: GoogleFonts.varelaRound(color:Colors.black),),
+              )
+              :
+                RaisedButton(
+                color: HexColor(main_color),
+                child :Text("Lanjut Jualan",style: GoogleFonts.varelaRound(color:Colors.white),),
+                onPressed: (){
+
+                },
               ),
             ),
           ),

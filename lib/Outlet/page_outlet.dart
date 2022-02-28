@@ -126,7 +126,7 @@ class _Outlet extends State<Outlet> {
   String getMessage = "...";
   _doHapus (String valueParse2) {
     http.get(applink+"api_model.php?act=action_hapusoutlet&id="+valueParse2.toString()
-        +"&branch="+widget.getLegalCode);
+        +"&branch="+widget.getLegalCode+"&username="+widget.getEmail);
     getData();
     setState(() {});
   }
