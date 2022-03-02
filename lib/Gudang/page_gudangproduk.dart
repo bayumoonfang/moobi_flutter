@@ -612,6 +612,8 @@ class _GudangProduk extends State<GudangProduk> {
                                                        child:  SingleChildScrollView(
                                                          scrollDirection: Axis.horizontal,
                                                          child :
+
+                                           snapshot.data[i]["k"].toString() == 'Product' ?
                                                          Row(
                                                            mainAxisAlignment: MainAxisAlignment.center,
                                                            children: <Widget>[
@@ -671,7 +673,9 @@ class _GudangProduk extends State<GudangProduk> {
                                                              )
 
                                                            ],
-                                                         ),
+                                                         )
+                                               :
+                                               Container()
                                                        )
                                                      )
                                                  )
@@ -724,38 +728,51 @@ class _GudangProduk extends State<GudangProduk> {
                                            Align(
                                              alignment: Alignment.centerLeft,
                                              child: Padding(padding: const EdgeInsets.only(top:2), child :
-                                             Row(
-                                               children: [
-                                                 Text("Stock :", style: GoogleFonts.varelaRound(fontSize: 12),),
+                                            snapshot.data[i]['k'] == 'Service' ?
+                                            Container(
+                                              decoration: BoxDecoration(
+                                                borderRadius: BorderRadius.circular(6),
+                                                color: HexColor(color_9),
+                                              ),
+                                              child: Padding(padding : const EdgeInsets.only(left: 5,right: 5,top: 2,bottom: 1),
+                                                child: Text("Service",
+                                                    style: TextStyle(fontFamily: "VarelaRound",
+                                                        color: Colors.white,
+                                                        fontSize: 11)),),
+                                            )
+                                                :
+                                            Row(
+                                              children: [
+                                                Text("Stock :", style: GoogleFonts.varelaRound(fontSize: 12),),
 
-                                                 snapshot.data[i]["e"].toString().substring(0,1) == '-' ?
-                                                 Container(
-                                                   decoration: BoxDecoration(
-                                                     borderRadius: BorderRadius.circular(6),
-                                                     color: HexColor("#fe5c83"),
-                                                   ),
-                                                   child: Padding(padding : const EdgeInsets.only(left: 5,right: 5,top: 2,bottom: 1),
-                                                     child: Text(snapshot.data[i]["e"].toString(),
-                                                         style: TextStyle(fontFamily: "VarelaRound",
-                                                             color: Colors.white,
-                                                             fontSize: 11)),),
-                                                 )
+                                                snapshot.data[i]["e"].toString().substring(0,1) == '-' ?
+                                                Container(
+                                                  decoration: BoxDecoration(
+                                                    borderRadius: BorderRadius.circular(6),
+                                                    color: HexColor("#fe5c83"),
+                                                  ),
+                                                  child: Padding(padding : const EdgeInsets.only(left: 5,right: 5,top: 2,bottom: 1),
+                                                    child: Text(snapshot.data[i]["e"].toString(),
+                                                        style: TextStyle(fontFamily: "VarelaRound",
+                                                            color: Colors.white,
+                                                            fontSize: 11)),),
+                                                )
 
-                                                     :
-                                                 Container(
-                                                   decoration: BoxDecoration(
-                                                     borderRadius: BorderRadius.circular(6),
-                                                     color: HexColor("#00aa5b"),
-                                                   ),
-                                                   child: Padding(padding : const EdgeInsets.only(left: 5,right: 5,top: 2,bottom: 1),
-                                                     child: Text(snapshot.data[i]["e"].toString(),
-                                                         style: TextStyle(fontFamily: "VarelaRound",
-                                                             color: Colors.white,
-                                                             fontSize: 11)),),
-                                                 )
+                                                    :
+                                                Container(
+                                                  decoration: BoxDecoration(
+                                                    borderRadius: BorderRadius.circular(6),
+                                                    color: HexColor("#00aa5b"),
+                                                  ),
+                                                  child: Padding(padding : const EdgeInsets.only(left: 5,right: 5,top: 2,bottom: 1),
+                                                    child: Text(snapshot.data[i]["e"].toString(),
+                                                        style: TextStyle(fontFamily: "VarelaRound",
+                                                            color: Colors.white,
+                                                            fontSize: 11)),),
+                                                )
 
-                                               ],
-                                             )
+                                              ],
+                                            )
 
                                              ),
                                            )

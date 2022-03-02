@@ -80,7 +80,8 @@ class _RiwayatMutasi extends State<RiwayatMutasi> {
   String tglFrom = "";
   String tglTo = "";
   String filter = "";
-
+  String dateFromval = '...';
+  String dateToval = '...';
   String valTanggalFix;
   final dateFrom = TextEditingController();
   final dateTo = TextEditingController();
@@ -102,8 +103,10 @@ class _RiwayatMutasi extends State<RiwayatMutasi> {
       selectedDate = picked;
       if (picked != null && picked != selectedDate) {
         dateFrom.text = new DateFormat("dd-MM-yyyy").format(picked);
+        dateFromval = new DateFormat("yyyy-MM-dd").format(picked);
       } else {
         dateFrom.text = new DateFormat("dd-MM-yyyy").format(selectedDate);
+        dateFromval = new DateFormat("yyyy-MM-dd").format(selectedDate);
       }
 
     });
@@ -126,8 +129,10 @@ class _RiwayatMutasi extends State<RiwayatMutasi> {
       selectedDate2 = picked;
       if (picked != null && picked != selectedDate2) {
         dateTo.text = new DateFormat("dd-MM-yyyy").format(picked);
+        dateToval = new DateFormat("yyyy-MM-dd").format(picked);
       } else {
         dateTo.text = new DateFormat("dd-MM-yyyy").format(selectedDate2);
+        dateToval = new DateFormat("yyyy-MM-dd").format(selectedDate2);
       }
 
     });
@@ -173,8 +178,8 @@ class _RiwayatMutasi extends State<RiwayatMutasi> {
   getDataProduk() async {
     http.Response response = await http.get(
         Uri.parse(applink+"api_model.php?act=getdata_gudangmutasi&kodeGudang="+widget.kodeGudang+""
-            "&filter2="+filter2+"&tglFrom="+dateFrom.text+"&tglTo="
-            ""+dateTo.text+"&filter="+filter+"&branch="+widget.getLegalId),
+            "&filter2="+filter2+"&tglFrom="+dateFromval+"&tglTo="
+            ""+dateToval+"&filter="+filter+"&branch="+widget.getLegalId),
         headers: {
           "Accept":"application/json",
           "Content-Type": "application/json"}
@@ -479,6 +484,11 @@ class _RiwayatMutasi extends State<RiwayatMutasi> {
                                                           Padding(
                                                             padding: const EdgeInsets.only(top: 5),
                                                             child : Align(alignment: Alignment.centerLeft, child: Text(
+                                                              snapshot.data[i]["c"].toString().substring(0,2) == 'IJ' ?
+                                                                  snapshot.data[i]["l"]+" "+snapshot.data[i]["m"]+" "+snapshot.data[i]["j"]+ " - (ADJ)"
+                                                              : snapshot.data[i]["c"].toString().substring(0,2) == 'BB' ?
+                                                                  snapshot.data[i]["l"]+" "+snapshot.data[i]["m"]+" "+snapshot.data[i]["j"]+ " - (BB)"
+                                                                  :
                                                               snapshot.data[i]["l"]+" "+snapshot.data[i]["m"]+" "+snapshot.data[i]["j"]
                                                               ,
                                                               overflow: TextOverflow.ellipsis,

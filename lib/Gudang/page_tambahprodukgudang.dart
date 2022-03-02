@@ -533,9 +533,36 @@ class _TambahProdukGudang extends State<TambahProdukGudang> {
                                                 Align(
                                                   alignment: Alignment.centerLeft,
                                                   child: Padding(padding: const EdgeInsets.only(top:2), child :
-                                                          Text(snapshot.data[i]["b"].toString(),
-                                                          style: GoogleFonts.varelaRound(fontSize: 12,
-                                                          color: Colors.black))
+                                               Row(
+                                                 children: [
+                                                   Container(
+                                                     decoration: BoxDecoration(
+                                                       borderRadius: BorderRadius.circular(6),
+                                                       color: HexColor(color_9),
+                                                     ),
+                                                     child: Padding(padding : const EdgeInsets.only(left: 5,right: 5,top: 2,bottom: 1),
+                                                       child: Text(snapshot.data[i]["k"],
+                                                           style: TextStyle(fontFamily: "VarelaRound",
+                                                               color: Colors.white,
+                                                               fontSize: 11)),),
+                                                   ),
+
+                                                   Padding(
+                                                     padding : const EdgeInsets.only(left: 5),
+                                                     child : Container(
+                                                       decoration: BoxDecoration(
+                                                         borderRadius: BorderRadius.circular(6),
+                                                         color: HexColor(color_9),
+                                                       ),
+                                                       child: Padding(padding : const EdgeInsets.only(left: 5,right: 5,top: 2,bottom: 1),
+                                                         child: Text(snapshot.data[i]["b"],
+                                                             style: TextStyle(fontFamily: "VarelaRound",
+                                                                 color: Colors.white,
+                                                                 fontSize: 11)),),
+                                                     ),
+                                                   )
+                                                 ],
+                                               )
                                                   ),
                                                 )
                                               ],

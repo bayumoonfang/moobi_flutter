@@ -80,7 +80,8 @@ class _RiwayatJualProduk extends State<RiwayatJualProduk> {
   String tglFrom = "";
   String tglTo = "";
   String filter = "";
-
+  String dateFromval = '...';
+  String dateToval = '...';
   String valTanggalFix;
   final dateFrom = TextEditingController();
   final dateTo = TextEditingController();
@@ -102,8 +103,10 @@ class _RiwayatJualProduk extends State<RiwayatJualProduk> {
       selectedDate = picked;
       if (picked != null && picked != selectedDate) {
         dateFrom.text = new DateFormat("dd-MM-yyyy").format(picked);
+        dateFromval = new DateFormat("yyyy-MM-dd").format(picked);
       } else {
         dateFrom.text = new DateFormat("dd-MM-yyyy").format(selectedDate);
+        dateFromval = new DateFormat("yyyy-MM-dd").format(selectedDate);
       }
 
     });
@@ -126,8 +129,10 @@ class _RiwayatJualProduk extends State<RiwayatJualProduk> {
       selectedDate2 = picked;
       if (picked != null && picked != selectedDate2) {
         dateTo.text = new DateFormat("dd-MM-yyyy").format(picked);
+        dateToval = new DateFormat("yyyy-MM-dd").format(picked);
       } else {
         dateTo.text = new DateFormat("dd-MM-yyyy").format(selectedDate2);
+        dateToval = new DateFormat("yyyy-MM-dd").format(selectedDate2);
       }
 
     });
@@ -173,8 +178,8 @@ class _RiwayatJualProduk extends State<RiwayatJualProduk> {
   getDataProduk() async {
     http.Response response = await http.get(
         Uri.parse(applink+"api_model.php?act=getdata_outletjualproduk&id="+widget.idOutlet+""
-            "&filter2="+filter2+"&tglFrom="+dateFrom.text+"&tglTo="
-            ""+dateTo.text+"&filter="+filter),
+            "&filter2="+filter2+"&tglFrom="+dateFromval+"&tglTo="
+            ""+dateToval+"&filter="+filter),
         headers: {
           "Accept":"application/json",
           "Content-Type": "application/json"}
@@ -505,14 +510,14 @@ class _RiwayatJualProduk extends State<RiwayatJualProduk> {
                                                         ],
                                                       ),
                                                       trailing:
-                                                      snapshot.data[i]["d"].toString().substring(0,1) == '-' ?
+                                                      snapshot.data[i]["d"].toString().substring(0,1) != '-' ?
                                                       Container(
                                                         height: 22,
                                                         child: RaisedButton(
                                                           onPressed: (){},
                                                           color: HexColor("#fe5c83"),
                                                           elevation: 0,
-                                                          child: Text(snapshot.data[i]["d"].toString(),style: TextStyle(
+                                                          child: Text("-"+snapshot.data[i]["d"].toString(),style: TextStyle(
                                                               color: HexColor("#f9fffd"), fontFamily: 'Nunito',fontSize: 12,fontWeight: FontWeight.bold)),
                                                         ),
                                                       )
@@ -523,7 +528,7 @@ class _RiwayatJualProduk extends State<RiwayatJualProduk> {
                                                           onPressed: (){},
                                                           color: HexColor("#00aa5b"),
                                                           elevation: 0,
-                                                          child: Text(snapshot.data[i]["d"].toString(),style: TextStyle(
+                                                          child: Text(snapshot.data[i]["d"].toString().substring(1),style: TextStyle(
                                                               color: HexColor("#f9fffd"), fontFamily: 'Nunito',fontSize: 12,fontWeight: FontWeight.bold)),
                                                         ),
                                                       )

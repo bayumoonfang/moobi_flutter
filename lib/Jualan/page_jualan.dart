@@ -6,11 +6,14 @@ import 'dart:convert';
 
 import 'package:badges/badges.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:flushbar/flushbar.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:hexcolor/hexcolor.dart';
 import 'package:intl/intl.dart';
+import 'package:moobi_flutter/Helper/app_helper.dart';
 import 'package:moobi_flutter/Helper/check_connection.dart';
 import 'package:moobi_flutter/Helper/color_based.dart';
 import 'package:moobi_flutter/Helper/page_route.dart';
@@ -22,8 +25,17 @@ import 'package:toast/toast.dart';
 import 'package:http/http.dart' as http;
 import 'package:moobi_flutter/helper/api_link.dart';
 
+import '../page_intoduction.dart';
+
 
 class Jualan extends StatefulWidget{
+  final String getEmail;
+  final String getLegalCode;
+  final String getLegalId;
+  final String getStoreId;
+  final String getWarehouseKode;
+  final String getUserNama;
+  const Jualan(this.getEmail, this.getLegalCode,this.getLegalId,this.getStoreId,this.getWarehouseKode, this.getUserNama);
   @override
   JualanState createState() => JualanState();
 }
@@ -31,116 +43,101 @@ class Jualan extends StatefulWidget{
 
 class JualanState extends State<Jualan> {
   List data;
-  List data2;
-  List data3;
+  String selectedCust;
+  List customerList = List();
+
+
+  Future<bool> _onWillPop() async {
+    Navigator.pop(context);
+  }
   FocusNode myFocusNode;
   void showToast(String msg, {int duration, int gravity}) {
     Toast.show(msg, context, duration: duration, gravity: gravity);
   }
 
 
-  bool _isvisible = true;
-
   TextEditingController _tambahanNama = TextEditingController();
   TextEditingController _tambahanBiaya = TextEditingController();
-  String getEmail = '...';
-  _session() async {
-    int value = await Session.getValue();
-    getEmail = await Session.getEmail();
-    if (value != 1) {
-      Navigator.pushReplacement(context, ExitPage(page: Login()));
-    }
-  }
-  _connect() async {
-    Checkconnection().check().then((internet){
-      if (internet != null && internet) {
-        // Internet Present Case
-      } else {
-        showToast("Koneksi terputus..", gravity: Toast.CENTER,
-            duration: Toast.LENGTH_LONG);
+
+  _cekLegalandUser() async {
+    final response = await http.post(applink+"api_model.php?act=cek_legalanduser",
+        body: {"username": widget.getEmail.toString()},
+        headers: {"Accept":"application/json"});
+    Map data = jsonDecode(response.body);
+    setState(() {
+      if (data["message"].toString() == '2' || data["message"].toString() == '3') {
+        Navigator.pushReplacement(context, ExitPage(page: Introduction()));
       }
     });
   }
 
-  String getBranchVal = '';
-  String getNamaUser = '';
-  _getBranch() async {
-    final response = await http.get(
-        applink+"api_model.php?act=userdetail&id="+getEmail.toString(),
-        headers: {"Accept":"application/json","Content-Type": "application/json"}).
-        timeout(Duration(seconds: 10),
-        onTimeout: () {
-          showToast("Connection Timeout", gravity: Toast.CENTER,
-              duration: Toast.LENGTH_LONG);
-          return;
-        });
-    Map data = jsonDecode(response.body);
-    setState(() {
-      getBranchVal = data["c"].toString();
-      getNamaUser = data["j"].toString();
+  //=============================================================================
+  _startingVariable() async {
+    await AppHelper().getConnect().then((value){if(value == 'ConnInterupted'){
+      showToast("Koneksi terputus..", gravity: Toast.CENTER,duration:
+      Toast.LENGTH_LONG);}});
+    await AppHelper().getSession().then((value){
+      if(value[0] != 1) {
+        Navigator.pushReplacement(context, ExitPage(page: Login()));
+      }
     });
+    await _cekLegalandUser();
+
   }
 
 
-  String filter = "";
+  showFlushBarsuccess(BuildContext context, String stringme) => Flushbar(
+    // title:  "Hey Ninja",
+    message:  stringme,
+    shouldIconPulse: false,
+    duration:  Duration(seconds: 3),
+    backgroundColor: Colors.black,
+    flushbarPosition: FlushbarPosition.BOTTOM ,
+  )..show(context);
+
+  void showsuccess(String txtError){
+    showFlushBarsuccess(context, txtError);
+    return;
+  }
+
+  String filter = "Semua";
   String sortby = '0';
   Future<List> getData() async {
     http.Response response = await http.get(
-        Uri.encodeFull(applink+"api_model.php?act=getdata_produk&id="+getBranchVal+""
-            "&filter="+filter
-            +"&sort="+sortby),
-        headers: {"Accept":"application/json","Content-Type": "application/json"}
+        Uri.encodeFull(applink+"api_model.php?act=getdata_produk_jual&"
+            "branch="+widget.getLegalCode+""
+            "&warehouse_kode="+widget.getWarehouseKode+""
+            "&store_id="+widget.getStoreId+""
+            "&filter="+filter+""
+            "&sort="+sortby),
+        headers: {"Accept":"application/json"}
     );
-    setState((){
-      data = json.decode(response.body);
-    });
+    return json.decode(response.body);
+
   }
+
+
+  Future getCustomer() async {
+    var response = await http.get(
+        Uri.encodeFull(applink+"api_model.php?act=get_customer&legalid="+widget.getLegalCode));
+    if (response.statusCode == 200) {
+      var jsonData = json.decode(response.body);
+      setState(() {
+        customerList = jsonData;
+      });
+    }
+    //print(bankUserList);
+  }
+
 
   Future<List> getDataOrderPending() async {
     http.Response response = await http.get(
         Uri.encodeFull(applink+"api_model.php?act=getdata_countorderpending&branch="
-            +getBranchVal+"&namauser="+getNamaUser),
+            +widget.getLegalCode+"&namauser="+widget.getUserNama),
         headers: {"Accept":"application/json","Content-Type": "application/json"}
     );
-    setState((){
-      data2 = json.decode(response.body);
-    });
+    return json.decode(response.body);
   }
-
-  Future<List> getDataKategori() async {
-    http.Response response = await http.get(
-        Uri.encodeFull(applink+"api_model.php?act=getdata_kategori&branch="
-            +getBranchVal+"&filter="),
-        headers: {"Accept":"application/json","Content-Type": "application/json"}
-    );
-    setState((){
-      data3 = json.decode(response.body);
-    });
-  }
-
-  _prepare() async {
-    await _connect();
-    await _session();
-    await _getBranch();
-  }
-
-  startSCreen() async {
-    var duration = const Duration(seconds: 1);
-    return Timer(duration, () {
-      setState(() {
-        _isvisible = true;
-      });
-    });
-  }
-
-
-
-  @override
-  void initState() {
-    super.initState();
-    _prepare();
-  }
-
 
   int valJumlahq = 1;
   TextEditingController _transcomment = TextEditingController();
@@ -156,34 +153,41 @@ class JualanState extends State<Jualan> {
     });
   }
 
+  _prepare() async {
+    await _startingVariable();
+    await getCustomer();
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _prepare();
+  }
+
 
   addKeranjang2(String valProduk) async {
     final response = await http.post(applink+"api_model.php?act=add_keranjang2",
         body: {
-            "produk_id": valProduk,
-            "emailuser" : getEmail,
-            "produk_branch" : getBranchVal,
-            "trans_comment" : _transcomment.text,
-            "trans_jumlah" : valJumlahq.toString()
+          "produk_id": valProduk,
+          "emailuser" : widget.getEmail,
+          "produk_branch" : widget.getLegalCode,
+          "trans_comment" : _transcomment.text,
+          "trans_jumlah" : valJumlahq.toString()
         }).timeout(Duration(seconds: 10),
         onTimeout: () {
-          showToast("Connection Timeout", gravity: Toast.CENTER,
-              duration: Toast.LENGTH_LONG);
+          showsuccess("Connection Timeout");
           return;
         });
     Map data = jsonDecode(response.body);
     setState(() {
       if (data["message"].toString() == '0') {
-        showToast("Mohon maaf produk tidak aktif", gravity: Toast.BOTTOM,
-            duration: Toast.LENGTH_LONG);
+        showsuccess("Mohon maaf produk tidak aktif");
         return false;
       } else if (data["message"].toString() == '1') {
-        showToast("Mohon maaf stock habis", gravity: Toast.BOTTOM,
-            duration: Toast.LENGTH_LONG);
+        showsuccess("Mohon maaf stock habis");
         return false;
       } else if (data["message"].toString() == '2') {
-        showToast("Mohon maaf stock tidak mencukupi", gravity: Toast.BOTTOM,
-            duration: Toast.LENGTH_LONG);
+        showsuccess("Mohon maaf stock tidak mencukupi");
         return false;
       }
     });
@@ -195,27 +199,24 @@ class JualanState extends State<Jualan> {
   addKeranjang(String valProduk) async {
     final response = await http.post(applink+"api_model.php?act=add_keranjang", body: {
       "produk_id": valProduk,
-      "emailuser" : getEmail,
-      "produk_branch" : getBranchVal
+      "emailuser" : widget.getEmail,
+      "produk_branch" : widget.getLegalCode,
+      "warehouse" : widget.getWarehouseKode
     }).timeout(Duration(seconds: 10),
         onTimeout: () {
-          showToast("Connection Timeout", gravity: Toast.CENTER,
-              duration: Toast.LENGTH_LONG);
+          showsuccess("Connection Timeout");
           return;
         });
     Map data = jsonDecode(response.body);
     setState(() {
       if (data["message"].toString() == '0') {
-        showToast("Stock tidak bisa digunakan", gravity: Toast.BOTTOM,
-            duration: Toast.LENGTH_LONG);
+        showsuccess("Produk tidak aktif");
         return false;
       } else if (data["message"].toString() == '1') {
-        showToast("Mohon maaf stock habis", gravity: Toast.BOTTOM,
-            duration: Toast.LENGTH_LONG);
+        showsuccess("Mohon maaf stock habis");
         return false;
       } else if (data["message"].toString() == '2') {
-        showToast("Mohon maaf stock tidak mencukupi", gravity: Toast.BOTTOM,
-            duration: Toast.LENGTH_LONG);
+        showsuccess("Mohon maaf stock tidak mencukupi");
         return false;
       }
     });
@@ -225,14 +226,13 @@ class JualanState extends State<Jualan> {
   addKeranjangLain() async {
     final response = await http.post(applink+"api_model.php?act=add_keranjanglain",
         body: {
-            "emailuser" : getEmail,
-            "produk_branch" : getBranchVal,
-            "produk_name" : _tambahanNama.text,
-            "produk_harga" : _tambahanBiaya.text
-          }).timeout(Duration(seconds: 10),
+          "emailuser" : widget.getEmail,
+          "produk_branch" : widget.getLegalCode,
+          "produk_name" : _tambahanNama.text,
+          "produk_harga" : _tambahanBiaya.text
+        }).timeout(Duration(seconds: 10),
         onTimeout: () {
-          showToast("Connection Timeout", gravity: Toast.CENTER,
-              duration: Toast.LENGTH_LONG);
+          showsuccess("Connection Timeout");
           return;
         });
     Map data = jsonDecode(response.body);
@@ -249,122 +249,15 @@ class JualanState extends State<Jualan> {
   hapus_trans() async {
     final response = await http.post(applink+"api_model.php?act=hapus_trans",
         body: {
-      "emailuser" : getEmail,
-      "produk_branch" : getBranchVal
-    }).timeout(Duration(seconds: 10),
+          "emailuser" : widget.getEmail,
+          "produk_branch" : widget.getLegalCode
+        }).timeout(Duration(seconds: 10),
         onTimeout: () {
-          showToast("Connection Timeout", gravity: Toast.CENTER,
-              duration: Toast.LENGTH_LONG);
+          showsuccess("Connection Timeout");
           return;
         });
     Map data = jsonDecode(response.body);
   }
-
-
-
-  void _filterMe() {
-    showDialog(
-        context: context,
-        builder: (BuildContext context) {
-          return AlertDialog(
-              content:
-              Container(
-                  height: 125,
-                  child: Scrollbar(
-                      isAlwaysShown: true,
-                      child :
-                      SingleChildScrollView(
-                        child :
-                        Column(
-                          children: [
-                            InkWell(
-                              onTap: (){
-                                setState(() {
-                                  sortby = '0';
-                                  _isvisible = false;
-                                  startSCreen();
-                                  Navigator.pop(context);
-                                });
-                              },
-                              child: Align(alignment: Alignment.centerLeft,
-                                child:    Text(
-                                  "Semua",
-                                  textAlign: TextAlign.left,
-                                  style: TextStyle(
-                                      fontFamily: 'VarelaRound',
-                                      fontSize: 15),
-                                ),),
-                            ),
-                            Padding(padding: const EdgeInsets.only(top:15,
-                                bottom: 15,left: 4,right: 4),
-                              child: Divider(height: 5,),),
-                            InkWell(
-                              onTap: (){
-                                setState(() {
-                                  sortby = '1';
-                                  _isvisible = false;
-                                  startSCreen();
-                                  Navigator.pop(context);
-                                });
-                              },
-                              child: Align(alignment: Alignment.centerLeft,
-                                child:    Text(
-                                  "Harga Terendah",
-                                  textAlign: TextAlign.left,
-                                  style: TextStyle(
-                                      fontFamily: 'VarelaRound',
-                                      fontSize: 15),
-                                ),),
-                            ),
-                            Padding(padding: const EdgeInsets.only(top:15,bottom: 15,
-                                left: 4,right: 4),
-                              child: Divider(height: 5,),),
-                            InkWell(
-                              onTap: (){
-                                setState(() {
-                                  sortby = '2';
-                                  _isvisible = false;
-                                  startSCreen();
-                                  Navigator.pop(context);
-                                });
-                              },
-                              child: Align(alignment: Alignment.centerLeft,
-                                child:    Text(
-                                  "Harga Tertinggi",
-                                  textAlign: TextAlign.left,
-                                  style: TextStyle(
-                                      fontFamily: 'VarelaRound',
-                                      fontSize: 15),
-                                ),),
-                            ),
-                            Padding(padding: const EdgeInsets.only(top:15,bottom: 15,
-                                left: 4,right: 4),
-                              child: Divider(height: 5,),),
-                            InkWell(
-                              onTap: (){
-                                setState(() {
-                                  sortby = '3';
-                                  _isvisible = false;
-                                  startSCreen();
-                                  Navigator.pop(context);
-                                });
-                              },
-                              child: Align(alignment: Alignment.centerLeft,
-                                child:    Text(
-                                  "Produk Diskon",
-                                  textAlign: TextAlign.left,
-                                  style: TextStyle(
-                                      fontFamily: 'VarelaRound',
-                                      fontSize: 15),
-                                ),),
-                            )
-                          ],
-                        ),
-                      )))
-          );
-        });
-  }
-
 
 
   dialogAdd(String valNama, String valID) {
@@ -439,19 +332,19 @@ class JualanState extends State<Jualan> {
                         )),
                         Padding(padding: const EdgeInsets.only(top: 20),
                           child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                          children: <Widget>[
-                            Expanded(child: OutlineButton(
-                              onPressed: () {Navigator.pop(context);},
-                              child: Text("Tutup"),)),
-                            Expanded(child: OutlineButton(
-                              borderSide: BorderSide(width: 1.0, color:
-                              Colors.redAccent),
-                              onPressed: () {
-                                addKeranjang2(valID);
-                              }, child: Text("Add to Chart",
-                              style: TextStyle(color: Colors.red),),)),
-                          ],),)
+                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                            children: <Widget>[
+                              Expanded(child: OutlineButton(
+                                onPressed: () {Navigator.pop(context);},
+                                child: Text("Tutup"),)),
+                              Expanded(child: OutlineButton(
+                                borderSide: BorderSide(width: 1.0, color:
+                                Colors.redAccent),
+                                onPressed: () {
+                                  addKeranjang2(valID);
+                                }, child: Text("Add to Chart",
+                                style: TextStyle(color: Colors.red),),)),
+                            ],),)
                       ],
                     )
                 ),
@@ -460,6 +353,68 @@ class JualanState extends State<Jualan> {
           );
         });
   }
+
+
+
+
+  changeCustomer() {
+    showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return StatefulBuilder(
+            builder: (context, setState) {
+              return AlertDialog(
+                //title: Text(),
+                content: ResponsiveContainer(
+                    widthPercent: 100,
+                    heightPercent: 26.5,
+                    child: Column(
+                      children: [
+                       Align(
+                         alignment : Alignment.centerLeft,
+                         child : DropdownButton(
+                           itemHeight: null,
+                           isExpanded: true,
+                           hint: Text("Pilih Customer anda",style: TextStyle(
+                               fontFamily: "VarelaRound", fontSize: 14
+                           )),
+                           value: selectedCust,
+                           items: customerList.map((myitem){
+                             return DropdownMenuItem(
+                                 value: myitem['cust_no'],
+                                 child:
+                                 Expanded(
+                                     child: Wrap(
+                                         children: [
+                                           Text(myitem['cust_nama'],style: GoogleFonts.nunito(fontWeight: FontWeight.bold,fontSize: 16,),
+                                             overflow: TextOverflow.ellipsis,
+                                             softWrap: false,),
+                                         Padding(padding: const EdgeInsets.only(left: 5)),
+                                         Text(myitem['cust_no'],style: GoogleFonts.nunito(fontSize: 13))
+                                         ],
+                                       )
+                                 ),
+
+                             );
+                           }).toList(),
+                           onChanged: (value) {
+                             setState(() {
+                               FocusScope.of(context).requestFocus(FocusNode());
+                               selectedCust = value;
+                             });
+                           },
+                         ),
+                       )
+                      ],
+                    )
+                ),
+              );
+            },
+          );
+        });
+  }
+
+
 
 
   TambahBiayaAdd() {
@@ -478,8 +433,8 @@ class JualanState extends State<Jualan> {
                         Padding(padding: const EdgeInsets.only(top: 8), child:
                         Align(alignment: Alignment.center,
                             child: Text("Tambah Biaya Lainnya",
-                            style: TextStyle(fontFamily: 'ProximaNova',
-                                fontSize: 16, fontWeight: FontWeight.bold))
+                                style: TextStyle(fontFamily: 'ProximaNova',
+                                    fontSize: 16, fontWeight: FontWeight.bold))
                         ),),
                         Padding(padding: const EdgeInsets.only(top: 15), child:
                         Align(alignment: Alignment.center, child:
@@ -562,18 +517,122 @@ class JualanState extends State<Jualan> {
   }
 
 
+  void _filterMe() {
+    showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+              content:
+              Container(
+                  height: 125,
+                  child: Scrollbar(
+                      isAlwaysShown: true,
+                      child :
+                      SingleChildScrollView(
+                        child :
+                        Column(
+                          children: [
+                            InkWell(
+                              onTap: (){
+                                setState(() {
+                                  sortby = '0';
+                                  //_isvisible = false;
+                                  //startSCreen();
+                                  Navigator.pop(context);
+                                });
+                              },
+                              child: Align(alignment: Alignment.centerLeft,
+                                child:    Text(
+                                  "Semua",
+                                  textAlign: TextAlign.left,
+                                  style: TextStyle(
+                                      fontFamily: 'VarelaRound',
+                                      fontSize: 15),
+                                ),),
+                            ),
+                            Padding(padding: const EdgeInsets.only(top:15,
+                                bottom: 15,left: 4,right: 4),
+                              child: Divider(height: 5,),),
+                            InkWell(
+                              onTap: (){
+                                setState(() {
+                                  sortby = '1';
+                                  //_isvisible = false;
+                                  //startSCreen();
+                                  Navigator.pop(context);
+                                });
+                              },
+                              child: Align(alignment: Alignment.centerLeft,
+                                child:    Text(
+                                  "Harga Terendah",
+                                  textAlign: TextAlign.left,
+                                  style: TextStyle(
+                                      fontFamily: 'VarelaRound',
+                                      fontSize: 15),
+                                ),),
+                            ),
+                            Padding(padding: const EdgeInsets.only(top:15,bottom: 15,
+                                left: 4,right: 4),
+                              child: Divider(height: 5,),),
+                            InkWell(
+                              onTap: (){
+                                setState(() {
+                                  sortby = '2';
+                                  //_isvisible = false;
+                                 //startSCreen();
+                                  Navigator.pop(context);
+                                });
+                              },
+                              child: Align(alignment: Alignment.centerLeft,
+                                child:    Text(
+                                  "Harga Tertinggi",
+                                  textAlign: TextAlign.left,
+                                  style: TextStyle(
+                                      fontFamily: 'VarelaRound',
+                                      fontSize: 15),
+                                ),),
+                            ),
+                            Padding(padding: const EdgeInsets.only(top:15,bottom: 15,
+                                left: 4,right: 4),
+                              child: Divider(height: 5,),),
+                            InkWell(
+                              onTap: (){
+                                setState(() {
+                                  sortby = '3';
+                                  //_isvisible = false;
+                                 // startSCreen();
+                                  Navigator.pop(context);
+                                });
+                              },
+                              child: Align(alignment: Alignment.centerLeft,
+                                child:    Text(
+                                  "Produk Diskon",
+                                  textAlign: TextAlign.left,
+                                  style: TextStyle(
+                                      fontFamily: 'VarelaRound',
+                                      fontSize: 15),
+                                ),),
+                            )
+                          ],
+                        ),
+                      )))
+          );
+        });
+  }
+
 
   @override
   Widget build(BuildContext context) {
-    return WillPopScope(
-      child: Scaffold(
+     return WillPopScope(
+       onWillPop: _onWillPop,
+        child : Scaffold(
           appBar: new AppBar(
             elevation: 0.5,
             backgroundColor: Colors.white,
             leadingWidth: 38, // <-- Use this
             centerTitle: false,
             title: Text(
-              "Transaksi Baru",
+              "Jualan",
               style: TextStyle(
                   color: Colors.black,
                   fontFamily: 'Nunito',
@@ -597,10 +656,28 @@ class JualanState extends State<Jualan> {
                 focusColor: Colors.transparent,
                 highlightColor: Colors.transparent,
                 onTap: () {
-                  TambahBiayaAdd();
+                  //_filterMe();
+                  changeCustomer();
                 },
                 child: Padding(
-                  padding: const EdgeInsets.only(right: 25,top : 16),
+                  padding: const EdgeInsets.only(right: 35,top : 16),
+                  child: FaIcon(
+                    FontAwesomeIcons.user,
+                    color: HexColor("#6b727c"),
+                    size: 18,
+                  ),
+                ),
+              ),
+              InkWell(
+                hoverColor: Colors.transparent,
+                splashColor: Colors.transparent,
+                focusColor: Colors.transparent,
+                highlightColor: Colors.transparent,
+                onTap: () {
+                 TambahBiayaAdd();
+                },
+                child: Padding(
+                  padding: const EdgeInsets.only(right: 35,top : 16),
                   child: FaIcon(
                     FontAwesomeIcons.plus,
                     color: HexColor("#6b727c"),
@@ -617,7 +694,7 @@ class JualanState extends State<Jualan> {
                   _filterMe();
                 },
                 child: Padding(
-                  padding: const EdgeInsets.only(right: 25,top : 16),
+                  padding: const EdgeInsets.only(right: 35,top : 16),
                   child: FaIcon(
                     FontAwesomeIcons.sortAmountDown,
                     color: HexColor("#6b727c"),
@@ -634,7 +711,7 @@ class JualanState extends State<Jualan> {
                   hapus_trans();
                 },
                 child: Padding(
-                  padding: const EdgeInsets.only(right: 27,top : 16),
+                  padding: const EdgeInsets.only(right: 35,top : 16),
                   child: FaIcon(
                     FontAwesomeIcons.trashAlt,
                     color: HexColor("#6b727c"),
@@ -656,9 +733,9 @@ class JualanState extends State<Jualan> {
                         enableInteractiveSelection: false,
                         onChanged: (text) {
                           setState(() {
-                            filter = text;
-                            _isvisible = false;
-                            startSCreen();
+                           // filter = text;
+                            //_isvisible = false;
+                            //startSCreen();
                           });
                         },
                         style: TextStyle(fontFamily: "ProximaNova",fontSize: 15),
@@ -686,214 +763,211 @@ class JualanState extends State<Jualan> {
                       ),
                     )
                 ),
+
                 Padding(padding: const EdgeInsets.only(top: 10),),
-                Visibility(
-                    visible: _isvisible,
-                    child :
-                    Expanded(child: _dataField())
-                ),
-                Padding(padding: const EdgeInsets.only(bottom: 10),),
-                //
+                Expanded(
+                  child: FutureBuilder(
+                    future: getData(),
+                    builder: (context, snapshot){
+                      if (snapshot.data == null) {
+                        return Center(
+                            child: CircularProgressIndicator()
+                        );
+                      } else {
+                        return snapshot.data == 0 ?
+                        Container(
+                            height: double.infinity, width : double.infinity,
+                            child: new
+                            Center(
+                                child :
+                                Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  crossAxisAlignment: CrossAxisAlignment.center,
+                                  children: <Widget>[
+                                    new Text(
+                                      "Tidak ada data",
+                                      style: new TextStyle(
+                                          fontFamily: 'VarelaRound', fontSize: 18),
+                                    ),
+                                    new Text(
+                                      "Silahkan lakukan input data",
+                                      style: new TextStyle(
+                                          fontFamily: 'VarelaRound', fontSize: 12),
+                                    ),
+                                  ],
+                                )))
+                            :
+                                new ListView.builder(
+                                itemCount: snapshot.data == null ? 0 : snapshot.data.length,
+                                padding: const EdgeInsets.only(top: 2,bottom: 80),
+                                itemBuilder: (context, i)
+                                    {
+                                            return Column(
+                                              children: [
+                                                    InkWell(
+                                                onTap: () {
+                                                  snapshot.data[i]["j"].toString() == '0' ? ''
+                                                      : snapshot.data[i]["j"].toString().substring(0,1) == '-' ? '' :
+                                                  addKeranjang(snapshot.data[i]["i"].toString());
+                                                  FocusScope.of(context).requestFocus(FocusNode());
+
+                                                },
+                                                onLongPress: (){
+                                                  snapshot.data[i]["j"].toString() == '0' ? ''
+                                                      : snapshot.data[i]["j"].toString().substring(0,1) == '-' ? '' :
+                                                    setState(() {
+                                                      valJumlahq = 1;
+                                                      _transcomment.text = "";
+                                                    });
+                                                    FocusScope.of(context).requestFocus(FocusNode());
+                                                    dialogAdd(snapshot.data[i]["a"], data[i]["i"].toString());
+                                                    //myFocusNode.requestFocus();
+                                                },
+                                                      child :
+                                                        Opacity(
+                                                          opacity :
+                                                          snapshot.data[i]["j"].toString() == '0' ? 0.5
+                                                              : snapshot.data[i]["j"].toString().substring(0,1) == '-' ? 0.5 :1,
+                                                          child :ListTile(
+                                                            leading:
+                                                            snapshot.data[i]["e"] != 0 ?
+                                                            Badge(
+                                                                badgeContent: Text(snapshot.data[i]["e"].toString(),
+                                                                  style: TextStyle(color: Colors.white,fontSize: 12),),
+                                                                child:  SizedBox(
+                                                                    width: 60,
+                                                                    height: 100,
+                                                                    child: ClipRRect(
+                                                                      borderRadius: BorderRadius.circular(6.0),
+                                                                      child : CachedNetworkImage(
+                                                                        fit: BoxFit.cover,
+                                                                        imageUrl:
+                                                                        snapshot.data[i]["d"] == '' ?
+                                                                        applink+"photo/nomage.jpg"
+                                                                            :
+                                                                        applink+"photo/"+widget.getLegalCode+"/"+snapshot.data[i]["d"],
+                                                                        progressIndicatorBuilder: (context, url,
+                                                                            downloadProgress) =>
+                                                                            CircularProgressIndicator(value:
+                                                                            downloadProgress.progress),
+                                                                        errorWidget: (context, url, error) =>
+                                                                            Icon(Icons.error),
+                                                                      ),
+                                                                    ))
+                                                            )
+
+                                                                :
+                                                            SizedBox(
+                                                                width: 60,
+                                                                height: 100,
+                                                                child: ClipRRect(
+                                                                  borderRadius: BorderRadius.circular(6.0),
+                                                                  child : CachedNetworkImage(
+                                                                    fit: BoxFit.cover,
+                                                                    imageUrl:
+                                                                    snapshot.data[i]["d"] == '' ?
+                                                                    applink+"photo/nomage.jpg"
+                                                                        :
+                                                                    applink+"photo/"+widget.getLegalCode+"/"+snapshot.data[i]["d"],
+                                                                    progressIndicatorBuilder: (context, url,
+                                                                        downloadProgress) =>
+                                                                        CircularProgressIndicator(value:
+                                                                        downloadProgress.progress),
+                                                                    errorWidget: (context, url, error) => Icon(Icons.error),
+                                                                  ),
+                                                                )),
+                                                            title: Align(alignment: Alignment.centerLeft,
+                                                              child: Text(snapshot.data[i]["a"],
+                                                                  style: TextStyle(fontFamily: "VarelaRound",
+                                                                      fontSize: 13,fontWeight: FontWeight.bold)),),
+                                                            subtitle: Align(alignment: Alignment.centerLeft,
+                                                                child:
+                                                                snapshot.data[i]["e"] != 0 ?
+                                                                ResponsiveContainer(
+                                                                  widthPercent: 45,
+                                                                  heightPercent: 2,
+                                                                  child: Row(
+                                                                    mainAxisAlignment: MainAxisAlignment.start,
+                                                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                                                    children: [
+                                                                      Text("Rp "+
+                                                                          NumberFormat.currency(
+                                                                              locale: 'id', decimalDigits: 0, symbol: '').
+                                                                          format(
+                                                                              snapshot.data[i]["c"]), style: new TextStyle(
+                                                                          decoration: TextDecoration.lineThrough,
+                                                                          fontFamily: 'VarelaRound',fontSize: 12),),
+                                                                      Padding(padding: const EdgeInsets.only(left: 5),child:
+                                                                      Text("Rp "+
+                                                                          NumberFormat.currency(
+                                                                              locale: 'id', decimalDigits: 0, symbol: '').
+                                                                          format(
+                                                                              snapshot.data[i]["c"] - double.parse(snapshot.data[i]["f"])),
+                                                                        style: new TextStyle(
+                                                                            fontFamily: 'VarelaRound',fontSize: 12),),)
+                                                                    ],
+                                                                  ),
+                                                                )
+                                                                    :
+                                                                Text("Rp "+
+                                                                    NumberFormat.currency(
+                                                                        locale: 'id', decimalDigits: 0, symbol: '').format(
+                                                                        snapshot.data[i]["c"]), style: new TextStyle(
+                                                                    fontFamily: 'VarelaRound',fontSize: 12),)
+                                                            ),
+                                                          )
+                                                        )
+                                                    ),
+                                                Padding(padding: const EdgeInsets.only(top :5))
+                                              ],
+                                            );
+                                    }
+                                );
+
+                      }
+                    }
+
+                  ),
+                )
               ],
             ),
           ),
-          floatingActionButton:
-          Container(
-            height: 65,
-            width: 65,
-            child: FutureBuilder(
-                future: getDataOrderPending(),
-                builder: (context, snapshot) {
-                  return ListView.builder(
-                      itemCount: data2 == null ? 0 : data2.length,
-                      itemBuilder: (context, i) {
-                        return  FittedBox(
-                            child: Badge(
-                              badgeContent: Text(
-                                data2[i]["a"].toString() == "null" ? "0" :
-                                data2[i]["a"].toString()
-                                ,style: TextStyle(color: Colors.white,fontSize: 14),),
-                              position: BadgePosition(end: 0,top: 0),
-                              child: FloatingActionButton(
-                                backgroundColor: HexColor(main_color),
-                                onPressed: () {
-                                  data2[i]["a"].toString() == "null" ?
-                                  FocusScope.of(context).requestFocus(FocusNode())
-                                      :
-                                  Navigator.push(context, ExitPage(page: Checkout()));
-                                },
-                                child: FaIcon(FontAwesomeIcons.shoppingBasket),
-                              ),
-                            )
-                        );
-                      });
-                }
-            ),
-
-          )
-
-
-      ),
-    );
-
-  }
-
-
-
-  Widget _dataField() {
-    return FutureBuilder(
-      future : getData(),
-      builder: (context, snapshot) {
-        if (data == null) {
-          return Center(
-              child: Image.asset(
-                "assets/loadingq.gif",
-                width: 110.0,
-              )
-          );
-        } else {
-          return data == 0 ?
-          Container(
-              height: double.infinity, width : double.infinity,
-              child: new
-              Center(
-                  child :
-                  Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: <Widget>[
-                      new Text(
-                        "Data tidak ditemukan",
-                        style: new TextStyle(
-                            fontFamily: 'VarelaRound', fontSize: 18),
-                      ),
-                      new Text(
-                        "Silahkan lakukan input data",
-                        style: new TextStyle(
-                            fontFamily: 'VarelaRound', fontSize: 12),
-                      ),
-                    ],
-                  )))
-              :
-          new ListView.builder(
-            itemCount: data == null ? 0 : data.length,
-            padding: const EdgeInsets.only(top: 2,bottom: 80),
-            itemBuilder: (context, i) {
-              return Column(
-                children: <Widget>[
-                  InkWell(
-                    onTap: () {
-                      addKeranjang(data[i]["i"].toString());
-                      FocusScope.of(context).requestFocus(FocusNode());
-                    },
-                    onLongPress: (){
-                      setState(() {
-                        valJumlahq = 1;
-                        _transcomment.text = "";
-                      });
-                      FocusScope.of(context).requestFocus(FocusNode());
-                      dialogAdd(data[i]["a"], data[i]["i"].toString());
-                      //myFocusNode.requestFocus();
-                    }
-                    ,
-                    child: ListTile(
-                      leading:
-                      data[i]["e"] != 0 ?
-                      Badge(
-                          badgeContent: Text(data[i]["e"].toString(),
-                            style: TextStyle(color: Colors.white,fontSize: 12),),
-                          child:  SizedBox(
-                              width: 60,
-                              height: 100,
-                              child: ClipRRect(
-                                borderRadius: BorderRadius.circular(6.0),
-                                child : CachedNetworkImage(
-                                  fit: BoxFit.cover,
-                                  imageUrl:
-                                  data[i]["d"] == '' ?
-                                  applink+"photo/nomage.jpg"
-                                      :
-                                  applink+"photo/"+getBranchVal+"/"+data[i]["d"],
-                                  progressIndicatorBuilder: (context, url,
-                                      downloadProgress) =>
-                                      CircularProgressIndicator(value:
-                                      downloadProgress.progress),
-                                  errorWidget: (context, url, error) =>
-                                      Icon(Icons.error),
+            floatingActionButton:
+            Container(
+              height: 65,
+              width: 65,
+              child: FutureBuilder(
+                  future: getDataOrderPending(),
+                  builder: (context, snapshot) {
+                    return ListView.builder(
+                        itemCount: snapshot.data == null ? 0 : snapshot.data.length,
+                        itemBuilder: (context, i) {
+                          return  FittedBox(
+                              child: Badge(
+                                badgeContent: Text(
+                                  snapshot.data[i]["a"].toString() == "null" ? "0" :
+                                  snapshot.data[i]["a"].toString()
+                                  ,style: TextStyle(color: Colors.white,fontSize: 14),),
+                                position: BadgePosition(end: 0,top: 0),
+                                child: FloatingActionButton(
+                                  backgroundColor: HexColor(main_color),
+                                  onPressed: () {
+                                    snapshot.data[i]["a"].toString() == "null" ?
+                                    FocusScope.of(context).requestFocus(FocusNode())
+                                        :
+                                    Navigator.push(context, ExitPage(page: Checkout()));
+                                  },
+                                  child: FaIcon(FontAwesomeIcons.shoppingBasket),
                                 ),
-                              ))
-                      )
+                              )
+                          );
+                        });
+                  }
+              ),
 
-                          :
-                      SizedBox(
-                          width: 60,
-                          height: 100,
-                          child: ClipRRect(
-                            borderRadius: BorderRadius.circular(6.0),
-                            child : CachedNetworkImage(
-                              fit: BoxFit.cover,
-                              imageUrl:
-                              data[i]["d"] == '' ?
-                              applink+"photo/nomage.jpg"
-                                  :
-                              applink+"photo/"+getBranchVal+"/"+data[i]["d"],
-                              progressIndicatorBuilder: (context, url,
-                                  downloadProgress) =>
-                                  CircularProgressIndicator(value:
-                                  downloadProgress.progress),
-                              errorWidget: (context, url, error) => Icon(Icons.error),
-                            ),
-                          )),
-                      title: Align(alignment: Alignment.centerLeft,
-                        child: Text(data[i]["a"],
-                            style: TextStyle(fontFamily: "VarelaRound",
-                                fontSize: 13,fontWeight: FontWeight.bold)),),
-                      subtitle: Align(alignment: Alignment.centerLeft,
-                          child:
-                          data[i]["e"] != 0 ?
-                          ResponsiveContainer(
-                            widthPercent: 45,
-                            heightPercent: 2,
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.start,
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text("Rp "+
-                                    NumberFormat.currency(
-                                        locale: 'id', decimalDigits: 0, symbol: '').
-                                    format(
-                                        data[i]["c"]), style: new TextStyle(
-                                    decoration: TextDecoration.lineThrough,
-                                    fontFamily: 'VarelaRound',fontSize: 12),),
-                                Padding(padding: const EdgeInsets.only(left: 5),child:
-                                Text("Rp "+
-                                    NumberFormat.currency(
-                                        locale: 'id', decimalDigits: 0, symbol: '').
-                                    format(
-                                        data[i]["c"] - double.parse(data[i]["f"])),
-                                  style: new TextStyle(
-                                    fontFamily: 'VarelaRound',fontSize: 12),),)
-                              ],
-                            ),
-                          )
-                              :
-                          Text("Rp "+
-                              NumberFormat.currency(
-                                  locale: 'id', decimalDigits: 0, symbol: '').format(
-                                  data[i]["c"]), style: new TextStyle(
-                              fontFamily: 'VarelaRound',fontSize: 12),)
-                      ),
-                    ),
-                  ),
-                  Padding(padding: const EdgeInsets.only(top :10 ))
-                ],
-              );
-            },
-          );
-        }
-      },
-    );
+            )
+        )
+     );
   }
-
 
 }

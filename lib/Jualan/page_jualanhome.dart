@@ -15,6 +15,7 @@ import 'package:moobi_flutter/Helper/api_link.dart';
 import 'package:moobi_flutter/Helper/app_helper.dart';
 import 'package:moobi_flutter/Helper/color_based.dart';
 import 'package:moobi_flutter/Helper/page_route.dart';
+import 'package:moobi_flutter/Jualan/page_jualan.dart';
 import 'package:moobi_flutter/Jualan/page_jualanubahstore.dart';
 import 'package:moobi_flutter/Jualan/page_jualanubahwarehouse.dart';
 import 'package:toast/toast.dart';
@@ -56,6 +57,7 @@ class _JualanHome extends State<JualanHome>{
   String getWarehouse = "...";
   String getStoreId = "...";
   String getWarehouseId = "...";
+  String getWarehouseKode = "...";
   _tokoDefault() async {
     final response = await http.get(
         applink+"api_model.php?act=getsetting_salesdefault&username="+widget.getEmail+"&branch="+widget.getLegalCode);
@@ -65,6 +67,7 @@ class _JualanHome extends State<JualanHome>{
       getWarehouse = data["warehouse_name"].toString();
       getStoreId = data["store_id"].toString();
       getWarehouseId = data["warehouse_id"].toString();
+      getWarehouseKode = data["warehouse_kode"].toString();
     });
   }
 
@@ -245,7 +248,10 @@ class _JualanHome extends State<JualanHome>{
                 color: HexColor(main_color),
                 child :Text("Lanjut Jualan",style: GoogleFonts.varelaRound(color:Colors.white),),
                 onPressed: (){
-
+                  Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => Jualan(widget.getEmail,widget.getLegalCode, widget.getLegalId,
+                      getStoreId, getWarehouseKode, widget.getNamaUser )));
                 },
               ),
             ),

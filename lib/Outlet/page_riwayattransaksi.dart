@@ -85,7 +85,8 @@ class _RiwayatTransaksiOutlet extends State<RiwayatTransaksiOutlet> {
   String tglFrom = "";
   String tglTo = "";
   String filter = "";
-
+  String dateFromval = '...';
+  String dateToval = '...';
   String valTanggalFix;
   final dateFrom = TextEditingController();
   final dateTo = TextEditingController();
@@ -107,8 +108,10 @@ class _RiwayatTransaksiOutlet extends State<RiwayatTransaksiOutlet> {
       selectedDate = picked;
       if (picked != null && picked != selectedDate) {
         dateFrom.text = new DateFormat("dd-MM-yyyy").format(picked);
+        dateFromval = new DateFormat("yyyy-MM-dd").format(picked);
       } else {
         dateFrom.text = new DateFormat("dd-MM-yyyy").format(selectedDate);
+        dateFromval = new DateFormat("yyyy-MM-dd").format(selectedDate);
       }
 
     });
@@ -131,8 +134,10 @@ class _RiwayatTransaksiOutlet extends State<RiwayatTransaksiOutlet> {
       selectedDate2 = picked;
       if (picked != null && picked != selectedDate2) {
         dateTo.text = new DateFormat("dd-MM-yyyy").format(picked);
+        dateToval = new DateFormat("yyyy-MM-dd").format(picked);
       } else {
         dateTo.text = new DateFormat("dd-MM-yyyy").format(selectedDate2);
+        dateToval = new DateFormat("yyyy-MM-dd").format(selectedDate2);
       }
 
     });
@@ -162,12 +167,15 @@ class _RiwayatTransaksiOutlet extends State<RiwayatTransaksiOutlet> {
   getDataProduk() async {
     http.Response response = await http.get(
         Uri.parse(applink+"api_model.php?act=getdata_outlettransaksi&id="+widget.idOutlet+""
-            "&filter2="+filter2+"&filter_lain="+filter_lain+"&tglFrom="+dateFrom.text+"&tglTo="
-            ""+dateTo.text+"&filter="+filter),
+            "&filter2="+filter2+"&filter_lain="+filter_lain+"&tglFrom="+dateFromval+"&tglTo="
+            ""+dateToval+"&filter="+filter),
         headers: {
           "Accept":"application/json",
           "Content-Type": "application/json"}
     );
+    print(applink+"api_model.php?act=getdata_outlettransaksi&id="+widget.idOutlet+""
+        "&filter2="+filter2+"&filter_lain="+filter_lain+"&tglFrom="+dateFromval+"&tglTo="
+        ""+dateToval+"&filter="+filter);
     return json.decode(response.body);
   }
   Future<bool> _onWillPop() async {
