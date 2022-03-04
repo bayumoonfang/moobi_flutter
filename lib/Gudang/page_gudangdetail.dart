@@ -96,7 +96,7 @@ class _GudangDetail extends State<GudangDetail> {
   String getOutletName = "...";
   String getCodeWarehouse = "...";
   String getOutletCode = "...";
-
+  String getDescription = "...";
   _outletDetail() async {
     final response = await http.get(
         applink+"api_model.php?act=gudangdetail&id="+widget.idGudang);
@@ -106,6 +106,7 @@ class _GudangDetail extends State<GudangDetail> {
       getOutletName = data["b"].toString();
       getCodeWarehouse = data["c"].toString();
       getOutletCode = data["d"].toString();
+      getDescription = data["e"].toString();
     });
   }
 
@@ -246,15 +247,15 @@ class _GudangDetail extends State<GudangDetail> {
               Padding(padding: const EdgeInsets.only(left: 15,top: 20),
                 child: Align(alignment: Alignment.centerLeft,child: Text(getWarehouseName,style: TextStyle(
                     color: Colors.black, fontFamily: 'VarelaRound',fontWeight: FontWeight.bold,fontSize: 20)),),),
-              Padding(padding: const EdgeInsets.only(left: 15,top: 5),
+              Padding(padding: const EdgeInsets.only(left: 17,top: 5),
                 child: Align(alignment: Alignment.centerLeft,
                   child:
-                  getOutletName.toString() != 'null' ?
+
                   Row(
                     children: [
-                      Text("Used In",style: TextStyle(
+                      Text(getDescription.toString(),style: TextStyle(
                           color: Colors.black, fontFamily: 'VarelaRound',fontSize: 12)),
-                      Padding(padding: const EdgeInsets.only(right: 10)),
+                    /*  Padding(padding: const EdgeInsets.only(right: 10)),
                       Container(
                         height: 20,
                         child: RaisedButton(
@@ -264,16 +265,16 @@ class _GudangDetail extends State<GudangDetail> {
                           child: Text(getOutletName,style: TextStyle(
                               color: HexColor("#00ac48"), fontFamily: 'VarelaRound',fontSize: 9)),
                         ),
-                      )
+                      )*/
                     ],
-                  ) :
-      Padding(padding: const EdgeInsets.only(left: 1),
+                  )
+    /*  Padding(padding: const EdgeInsets.only(left: 1),
       child:             Row(
         children: [
           Text("(Gudang masih belum terpakai)",style: TextStyle(
               color: Colors.black, fontFamily: 'VarelaRound',fontSize: 12)),
         ],
-      ),)
+      ),)*/
 
 
                 ),),

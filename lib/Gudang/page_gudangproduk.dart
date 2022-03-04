@@ -529,7 +529,7 @@ class _GudangProduk extends State<GudangProduk> {
                               child: CircularProgressIndicator()
                           );
                         } else {
-                          return snapshot.data == 0 ?
+                          return snapshot.data == 0  || snapshot.data.length == 0 ?
                           Container(
                               height: double.infinity, width : double.infinity,
                               child: new
@@ -612,8 +612,6 @@ class _GudangProduk extends State<GudangProduk> {
                                                        child:  SingleChildScrollView(
                                                          scrollDirection: Axis.horizontal,
                                                          child :
-
-                                           snapshot.data[i]["k"].toString() == 'Product' ?
                                                          Row(
                                                            mainAxisAlignment: MainAxisAlignment.center,
                                                            children: <Widget>[
@@ -674,8 +672,6 @@ class _GudangProduk extends State<GudangProduk> {
 
                                                            ],
                                                          )
-                                               :
-                                               Container()
                                                        )
                                                      )
                                                  )
@@ -698,7 +694,7 @@ class _GudangProduk extends State<GudangProduk> {
                                              snapshot.data[i]["c"] == '' ?
                                              applink+"photo/nomage.jpg"
                                                  :
-                                             applink+"photo/"+snapshot.data[i]["f"]+"/"+snapshot.data[i]["c"],
+                                             applink+"photo/"+widget.getLegalCode+"/"+snapshot.data[i]["c"],
                                              progressIndicatorBuilder: (context, url,
                                                  downloadProgress) =>
                                                  CircularProgressIndicator(value:
@@ -813,7 +809,7 @@ class _GudangProduk extends State<GudangProduk> {
                                                   snapshot.data[i]["c"] == '' ?
                                                   applink+"photo/nomage.jpg"
                                                       :
-                                                  applink+"photo/"+snapshot.data[i]["f"]+"/"+snapshot.data[i]["c"],
+                                                  applink+"photo/"+widget.getLegalCode+"/"+snapshot.data[i]["c"],
                                                   progressIndicatorBuilder: (context, url,
                                                       downloadProgress) =>
                                                       CircularProgressIndicator(value:

@@ -340,7 +340,7 @@ class _HomeState extends State<Home> {
                                         ),
                                         InkWell(
                                           onTap: () {
-                                            Navigator.push(context, ExitPage(page: Outlet(getEmail.toString(), getLegalCode.toString(), getLegalId.toString())));
+                                            Navigator.push(context, ExitPage(page: Outlet(getEmail.toString(), getLegalCode.toString(), getLegalId.toString(),getNamaUser.toString())));
                                           },
                                           child:
                                         Column(

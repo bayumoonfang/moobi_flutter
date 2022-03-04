@@ -13,7 +13,10 @@ import 'package:moobi_flutter/Helper/api_link.dart';
 import 'package:moobi_flutter/Helper/app_helper.dart';
 import 'package:moobi_flutter/Helper/color_based.dart';
 import 'package:moobi_flutter/Helper/page_route.dart';
+import 'package:moobi_flutter/Outlet/page_gudangoutlet.dart';
 import 'package:moobi_flutter/Outlet/page_outletchangegudang.dart';
+import 'package:moobi_flutter/Outlet/page_outletproduk.dart';
+import 'package:moobi_flutter/Outlet/page_outletservice.dart';
 import 'package:moobi_flutter/Outlet/page_riwayatjualproduk.dart';
 import 'package:moobi_flutter/Outlet/page_riwayattransaksi.dart';
 import 'package:moobi_flutter/Outlet/page_ubahoutlet.dart';
@@ -29,7 +32,8 @@ class DetailOutlet extends StatefulWidget {
   final String getLegalCode;
   final String idOutlet;
   final String getLegalId;
-  const DetailOutlet(this.getEmail, this.getLegalCode,this.idOutlet,this.getLegalId);
+  final String NamaUser;
+  const DetailOutlet(this.getEmail, this.getLegalCode,this.idOutlet,this.getLegalId, this.NamaUser);
   @override
   _DetailOutlet createState() => _DetailOutlet();
 }
@@ -467,8 +471,113 @@ class _DetailOutlet extends State<DetailOutlet> {
               ),
 
 
-              Padding(padding: const EdgeInsets.only(top: 10,left: 25,right: 25),
-              child: Divider(height: 5,),),
+              Padding(padding: const EdgeInsets.only(top:35,left: 25,right: 25),
+                child:  Row(
+                  mainAxisAlignment: MainAxisAlignment
+                      .spaceBetween,
+                  children: [
+                    Text(
+                      "PERSEDIAAN",
+                      textAlign: TextAlign.left,
+                      style: TextStyle(
+                          fontFamily: 'VarelaRound',
+                          color: HexColor("#73767d"),
+                          fontWeight: FontWeight.bold,
+                          fontSize: 13),
+                    ),
+                  ],
+                ),),
+
+
+              Padding(padding: const EdgeInsets.only(top: 15,left: 9,right: 25),
+                  child: InkWell(
+                    child: ListTile(
+                      onTap: (){
+                        Navigator.push(
+                            context,
+                            MaterialPageRoute(builder: (context) => OutletProduk(widget.getEmail,widget.getLegalCode,widget.NamaUser,widget.idOutlet))).then(onGoBack);
+                        //Navigator.push(context, ExitPage(page: UbahOutlet(getStoreID))).then(onGoBack);
+                      },
+                      title: Column(
+                        children: [
+                          Align(alignment: Alignment.centerLeft,child:
+                          Text("Daftar Produk", style: TextStyle(
+                            fontFamily: 'VarelaRound',fontSize: 15,)),),
+                          Padding(padding: const EdgeInsets.only(top: 5),
+                            child:    Align(alignment: Alignment.centerLeft,child:
+                            Text("Daftar produk yang dijual di outlet ini",
+                                style: TextStyle(fontFamily: 'VarelaRound',fontSize: 13,color: HexColor("#72757a"),)),),)
+                        ],
+                      ),
+                      trailing: FaIcon(FontAwesomeIcons.angleRight,color: HexColor(third_color),),
+                    ),
+                  )
+              ),
+              Padding(padding: const EdgeInsets.only(top: 5,left: 25,right: 25),
+                child: Divider(height: 5,),),
+
+
+              Padding(padding: const EdgeInsets.only(top: 5,left: 9,right: 25),
+                  child: InkWell(
+                    child: ListTile(
+                      onTap: (){
+                        Navigator.push(
+                            context,
+                            MaterialPageRoute(builder: (context) => OutletService(widget.getEmail,widget.getLegalCode,widget.NamaUser,widget.idOutlet))).then(onGoBack);
+                        //Navigator.push(context, ExitPage(page: UbahOutlet(getStoreID))).then(onGoBack);
+                      },
+                      title: Column(
+                        children: [
+                          Align(alignment: Alignment.centerLeft,child:
+                          Text("Daftar Jasa", style: TextStyle(
+                            fontFamily: 'VarelaRound',fontSize: 15,)),),
+                          Padding(padding: const EdgeInsets.only(top: 5),
+                            child:    Align(alignment: Alignment.centerLeft,child:
+                            Text("Daftar jasa yang dijual di outlet ini",
+                                style: TextStyle(fontFamily: 'VarelaRound',fontSize: 13,color: HexColor("#72757a"),)),),)
+                        ],
+                      ),
+                      trailing: FaIcon(FontAwesomeIcons.angleRight,color: HexColor(third_color),),
+                    ),
+                  )
+              ),
+
+              Padding(padding: const EdgeInsets.only(top: 5,left: 25,right: 25),
+                child: Divider(height: 5,),),
+
+
+              Padding(padding: const EdgeInsets.only(top: 5,left: 9,right: 25),
+                  child: InkWell(
+                    child: ListTile(
+                      onTap: (){
+                        Navigator.push(
+                            context,
+                            MaterialPageRoute(builder: (context) => GudangOutlet(widget.getEmail,widget.getLegalCode,widget.NamaUser,widget.idOutlet, widget.getLegalId))).then(onGoBack);
+                        //Navigator.push(context, ExitPage(page: UbahOutlet(getStoreID))).then(onGoBack);
+                      },
+                      title: Column(
+                        children: [
+                          Align(alignment: Alignment.centerLeft,child:
+                          Text("Daftar Gudang", style: TextStyle(
+                            fontFamily: 'VarelaRound',fontSize: 15,)),),
+                          Padding(padding: const EdgeInsets.only(top: 5),
+                            child:    Align(alignment: Alignment.centerLeft,child:
+                            Text("Daftar gudang yang ada di outlet ini",
+                                style: TextStyle(fontFamily: 'VarelaRound',fontSize: 13,color: HexColor("#72757a"),)),),)
+                        ],
+                      ),
+                      trailing: FaIcon(FontAwesomeIcons.angleRight,color: HexColor(third_color),),
+                    ),
+                  )
+              ),
+
+
+              Padding(padding: const EdgeInsets.only(top: 20),
+                  child: Container(
+                    height: 8,
+                    width: double.infinity,
+                    color: HexColor("#f0f3f8"),
+                  )),
 
               Padding(padding: const EdgeInsets.only(top:35,left: 25,right: 25),
               child:  Row(
@@ -489,7 +598,7 @@ class _DetailOutlet extends State<DetailOutlet> {
                 ],
               ),),
 
-              Padding(padding: const EdgeInsets.only(top: 10,left: 9,right: 25),
+             /* Padding(padding: const EdgeInsets.only(top: 10,left: 9,right: 25),
                   child: InkWell(
                     child: ListTile(
                       onTap: (){
@@ -531,7 +640,9 @@ class _DetailOutlet extends State<DetailOutlet> {
                   )
               ),
               Padding(padding: const EdgeInsets.only(top: 5,left: 25,right: 25),
-                child: Divider(height: 3,),),
+                child: Divider(height: 3,),),*/
+
+
 
               Padding(padding: const EdgeInsets.only(top: 5,left: 9,right: 25),
                   child: InkWell(
@@ -594,6 +705,8 @@ class _DetailOutlet extends State<DetailOutlet> {
                   ),
               Padding(padding: const EdgeInsets.only(top: 5,left: 25,right: 25),
                 child: Divider(height: 3,),),
+
+              Container(height:40)
 
             ],
           )),

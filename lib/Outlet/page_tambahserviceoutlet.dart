@@ -23,18 +23,18 @@ import '../page_login.dart';
 
 
 
-class TambahProdukGudang extends StatefulWidget {
-  final String kodeGudang;
+class TambahSerivceOutlet extends StatefulWidget {
+  final String idOutlet;
   final String getEmail;
   final String getLegalCode;
   final String getNamaUser;
-  const TambahProdukGudang(this.kodeGudang, this.getEmail, this.getLegalCode, this.getNamaUser);
+  const TambahSerivceOutlet(this.idOutlet, this.getEmail, this.getLegalCode, this.getNamaUser);
   @override
-  _TambahProdukGudang createState() => _TambahProdukGudang();
+  _TambahSerivceOutlet createState() => _TambahSerivceOutlet();
 }
 
 
-class _TambahProdukGudang extends State<TambahProdukGudang> {
+class _TambahSerivceOutlet extends State<TambahSerivceOutlet> {
 
   List data;
   bool _isvisible = true;
@@ -98,14 +98,15 @@ class _TambahProdukGudang extends State<TambahProdukGudang> {
 
   Future<bool> _onWillPop() async {
     Navigator.pop(context);}
-  final addJumlahawal = TextEditingController();
+  final addHarga = TextEditingController();
 
   String filter = "";
   String sortme = "0";
   Future<List> getData() async {
     http.Response response = await http.get(
-        Uri.encodeFull(applink+"api_model.php?act=getdata_produkadd_gudang&"
+        Uri.encodeFull(applink+"api_model.php?act=getdata_produkadd_outlet&"
             "filter="+filter+
+            "&filtermedude=Service"
             "&id="+widget.getLegalCode),
         headers: {"Accept":"application/json"});
     return json.decode(response.body);
@@ -138,50 +139,41 @@ class _TambahProdukGudang extends State<TambahProdukGudang> {
 
 
 
-  _doAddStockAwal (String valueParse2) async {
+  _doAddHarga (String valueParse2) async {
     Navigator.pop(context);
-    if (addJumlahawal.text == "") {
-      showerror("Keterangan atau Jumlah tidak boleh kosong");
+    if (addHarga.text == "") {
+      showerror("Harga tidak boleh kosong");
     }
-    final response = await http.post(applink+"api_model.php?act=action_addprodukgudang",
-        body: {"id": valueParse2,
-          "addJumlahawal" : addJumlahawal.text,
-          "kodeGudang" : widget.kodeGudang,
-          "branch" : widget.getLegalCode,
-        "namaUser" : widget.getNamaUser},
-        headers: {"Accept":"application/json"});
-    showsuccess("Produk berhasil ditambahkan ke gudang "+widget.kodeGudang+"");
-  }
-
-
-  _doAddStockAwal2 () async {
-    Navigator.pop(context);
-    if (addJumlahawal.text == "") {
-      showerror("Keterangan atau Jumlah tidak boleh kosong");
-    }
-    final response = await http.post(applink+"api_model.php?act=action_addprodukgudang",
-        body: {"id": "",
-          "addJumlahawal" : addJumlahawal.text,
-          "kodeGudang" : widget.kodeGudang,
+    http.post(applink+"api_model.php?act=action_addprodukoutlet",
+        body: {
+          "id": valueParse2,
+          "addHarga" : addHarga.text,
+          "idOutlet" : widget.idOutlet,
           "branch" : widget.getLegalCode,
           "namaUser" : widget.getNamaUser},
         headers: {"Accept":"application/json"});
-    Map data = jsonDecode(response.body);
-    showsuccess("Produk berhasil ditambahkan ke gudang "+widget.kodeGudang+"");
+    showsuccess("Service berhasil ditambahkan ke outlet ");
+    setState(() {
+      getData();
+    });
   }
+
 
 
 
   _cekProduk (String valueParse2) async {
-    final response = await http.post(applink+"api_model.php?act=action_cekaddprodukgudang",
-        body: {"id": valueParse2, "kodeGudang" : widget.kodeGudang},
+    final response = await http.post(applink+"api_model.php?act=action_cekaddprodukoutlet",
+        body: {
+          "id": valueParse2,
+          "kodeOutlet" : widget.idOutlet
+        },
         headers: {"Accept":"application/json"});
     Map data = jsonDecode(response.body);
     setState(() {
       if (data["message"].toString() == '2') {
         _showadd(valueParse2);
       } else {
-        showerror("Produk sudah ada di gudang ini, silahkan cari produk yang lain");
+        showerror("Service sudah ada di outlet ini, silahkan cari produk yang lain");
       }
     });
   }
@@ -202,11 +194,11 @@ class _TambahProdukGudang extends State<TambahProdukGudang> {
                 child: Column(
                   children: [
                     Align(alignment: Alignment.center, child:
-                    Text("Tambah Ke Gudang", style: TextStyle(fontFamily: 'VarelaRound', fontSize: 20,
+                    Text("Tambah Ke Outlet", style: TextStyle(fontFamily: 'VarelaRound', fontSize: 20,
                         fontWeight: FontWeight.bold)),),
                     Padding(padding: const EdgeInsets.only(top: 15), child:
                     Align(alignment: Alignment.center, child:
-                    Text("Menambah produk baru ke gudang "+widget.kodeGudang,
+                    Text("Menambah service baru ke outlet ",
                       style: TextStyle(fontFamily: 'VarelaRound', fontSize: 12),textAlign: TextAlign.center,),)),
                     Padding(padding: const EdgeInsets.only(top: 15), child:
                     Align(alignment: Alignment.center, child:
@@ -215,10 +207,10 @@ class _TambahProdukGudang extends State<TambahProdukGudang> {
                         keyboardType: TextInputType.number,
                         style: TextStyle(
                             fontFamily: 'VarelaRound', fontSize: 14),
-                        controller: addJumlahawal,
+                        controller: addHarga,
                         decoration: InputDecoration(
                           contentPadding: EdgeInsets.only(left:15,top:5,bottom:5,right: 15),
-                          hintText: "Stock Awal",
+                          hintText: "Harga Jual",
                           focusedBorder: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(15.0),
                             borderSide: BorderSide(
@@ -245,8 +237,8 @@ class _TambahProdukGudang extends State<TambahProdukGudang> {
                         Expanded(child: RaisedButton(
                           color: HexColor(main_color),
                           onPressed: () {
-                            _doAddStockAwal(valueParse);
-                          }, child: Text("Post", style: TextStyle(color: Colors.white),),)),
+                            _doAddHarga(valueParse);
+                          }, child: Text("Tambah", style: TextStyle(color: Colors.white),),)),
                       ],),)
                   ],
                 )
@@ -257,70 +249,6 @@ class _TambahProdukGudang extends State<TambahProdukGudang> {
 
 
 
-  _showadd2() {
-    showDialog(
-        context: context,
-        builder: (BuildContext context) {
-          return AlertDialog(
-            //title: Text(),
-            content: Container(
-                width: double.infinity,
-                height: 230,
-                child: Column(
-                  children: [
-                    Align(alignment: Alignment.center, child:
-                    Text("Tambah Ke Gudang", style: TextStyle(fontFamily: 'VarelaRound', fontSize: 20,
-                        fontWeight: FontWeight.bold)),),
-                    Padding(padding: const EdgeInsets.only(top: 15), child:
-                    Align(alignment: Alignment.center, child:
-                    Text("Menambah semua produk baru ke gudang "+widget.kodeGudang+ ", produk yang sudah ada tidak akan dimasukkan",
-                      style: TextStyle(fontFamily: 'VarelaRound', fontSize: 12),textAlign: TextAlign.center,),)),
-                    Padding(padding: const EdgeInsets.only(top: 15), child:
-                    Align(alignment: Alignment.center, child:
-                    Container(
-                      child : TextFormField(
-                        keyboardType: TextInputType.number,
-                        style: TextStyle(
-                            fontFamily: 'VarelaRound', fontSize: 14),
-                        controller: addJumlahawal,
-                        decoration: InputDecoration(
-                          contentPadding: EdgeInsets.only(left:15,top:5,bottom:5,right: 15),
-                          hintText: "Stock Awal",
-                          focusedBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(15.0),
-                            borderSide: BorderSide(
-                              color: HexColor("#602d98"),
-                            ),
-                          ),
-                          enabledBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(15.0),
-                            borderSide: BorderSide(
-                              color: HexColor("#dbd0ea"),
-                              width: 1.0,
-                            ),
-                          ),
-
-                        ),
-                      ),
-                    )
-                    )),
-                    Padding(padding: const EdgeInsets.only(top: 25), child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                      children: <Widget>[
-                        Expanded(child: OutlineButton(
-                          onPressed: () {Navigator.pop(context);}, child: Text("Tutup"),)),
-                        Expanded(child: RaisedButton(
-                          color: HexColor(main_color),
-                          onPressed: () {
-                            _doAddStockAwal2();
-                          }, child: Text("Post", style: TextStyle(color: Colors.white),),)),
-                      ],),)
-                  ],
-                )
-            ),
-          );
-        });
-  }
 
 
   @override
@@ -331,7 +259,7 @@ class _TambahProdukGudang extends State<TambahProdukGudang> {
             appBar: new AppBar(
               backgroundColor: HexColor("#602d98"),
               title: Text(
-                "Tambah produk ke gudang",
+                "Tambah service ke outlet",
                 style: TextStyle(
                     color: Colors.white, fontFamily: 'VarelaRound', fontSize: 16),
               ),
@@ -343,20 +271,6 @@ class _TambahProdukGudang extends State<TambahProdukGudang> {
                       Navigator.pop(context)
                     }),
               ),
-              actions: [
-                InkWell(
-                  onTap: () {
-                    FocusScope.of(context).requestFocus(FocusNode());
-                    _showadd2();
-                  },
-                  child: Padding(
-                    padding: const EdgeInsets.only(right: 27,top : 14),
-                    child: FaIcon(
-                        FontAwesomeIcons.plusSquare
-                    ),
-                  ),
-                )
-              ],
             ),
             body : Container(
               child: Column(
@@ -394,7 +308,7 @@ class _TambahProdukGudang extends State<TambahProdukGudang> {
                                   width: 1.0),
                               borderRadius: BorderRadius.circular(5.0),
                             ),
-                            hintText: 'Cari Produk...',
+                            hintText: 'Cari Service...',
                           ),
                         ),
                       )
@@ -404,7 +318,7 @@ class _TambahProdukGudang extends State<TambahProdukGudang> {
                       child: FutureBuilder(
                         future: getData(),
                         builder: (context, snapshot){
-                          if (snapshot.data == null) {
+                          if (snapshot.data == null ) {
                             return Center(
                                 child: CircularProgressIndicator()
                             );
@@ -535,20 +449,9 @@ class _TambahProdukGudang extends State<TambahProdukGudang> {
                                                   child: Padding(padding: const EdgeInsets.only(top:2), child :
                                                Row(
                                                  children: [
-
                                                    Padding(
-                                                     padding : const EdgeInsets.only(left: 0),
-                                                     child : Container(
-                                                       decoration: BoxDecoration(
-                                                         borderRadius: BorderRadius.circular(6),
-                                                         color: HexColor(color_9),
-                                                       ),
-                                                       child: Padding(padding : const EdgeInsets.only(left: 5,right: 5,top: 2,bottom: 1),
-                                                         child: Text(snapshot.data[i]["b"],
-                                                             style: TextStyle(fontFamily: "VarelaRound",
-                                                                 color: Colors.white,
-                                                                 fontSize: 11)),),
-                                                     ),
+                                                     padding : const EdgeInsets.only(left:0),
+                                                     child : Text(snapshot.data[i]["b"].toString(), style: GoogleFonts.varelaRound(fontSize: 12),),
                                                    )
                                                  ],
                                                )
