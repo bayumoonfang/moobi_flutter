@@ -117,6 +117,7 @@ class _OutletProduk extends State<OutletProduk> {
   final buangJumlah = TextEditingController();
   final tambahKeterangan = TextEditingController();
   final tambahJumlah = TextEditingController();
+  final hargaVal = TextEditingController();
 
 
   void showerror(String txtError){
@@ -166,12 +167,18 @@ class _OutletProduk extends State<OutletProduk> {
 
 
   String getMessage = "...";
-  _doHapus (String valueParse2) {
-    http.get(applink+"api_model.php?act=action_hapusoutletproduk&id="+valueParse2.toString()
+  _doHapus (String valueParse2) async {
+    final response = await http.get(applink+"api_model.php?act=action_hapusoutletproduk&id="+valueParse2.toString()
         +"&branch="+widget.getLegalCode);
-
+    Map data = jsonDecode(response.body);
     setState(() {
-      getData();
+      if (data["message"].toString() == '1') {
+        setState(() {
+          getData();
+        });
+      } else {
+        showerror("Gagal");
+      }
     });
   }
 
@@ -225,7 +232,90 @@ class _OutletProduk extends State<OutletProduk> {
         });
   }
 
+  _doEditHarga (String valueParse, String valueParse2) async {
+    Navigator.pop(context);
+    if (hargaVal.text == "") {
+      showerror("Harga tidak boleh kosong");
+    }
+    final response = await http.post(applink+"api_model.php?act=action_gantihargaoutlet",
+        body: {
+          "idPrice": valueParse.toString(),
+          "addHarga" : hargaVal.text},
+        headers: {"Accept":"application/json"});
+    Map data = jsonDecode(response.body);
+    setState(() {
+      if (data["message"].toString() == '1') {
+        showsuccess("Harga "+valueParse2+" berhasil diganti");
+      } else {
+        showerror("Gagal");
+      }
+    });
+  }
 
+  _editpriceDialog(String valueParse,  String valueParse2) {
+    showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            //title: Text(),
+            content: Container(
+                width: double.infinity,
+                height: 200,
+                child: Column(
+                  children: [
+                    Align(alignment: Alignment.center, child:
+                    Text("Edit Harga", style: TextStyle(fontFamily: 'VarelaRound', fontSize: 20,
+                        fontWeight: FontWeight.bold)),),
+                    Padding(padding: const EdgeInsets.only(top: 15), child:
+                    Align(alignment: Alignment.center, child:
+                    Text("Edit Harga "+valueParse2,
+                      style: TextStyle(fontFamily: 'VarelaRound', fontSize: 12),textAlign: TextAlign.center,),)),
+                    Padding(padding: const EdgeInsets.only(top: 15), child:
+                    Align(alignment: Alignment.center, child:
+                    Container(
+                      child : TextFormField(
+                        keyboardType: TextInputType.number,
+                        style: TextStyle(
+                            fontFamily: 'VarelaRound', fontSize: 14),
+                        controller: hargaVal,
+                        decoration: InputDecoration(
+                          contentPadding: EdgeInsets.only(left:15,top:5,bottom:5,right: 15),
+                          hintText: "Harga Jual",
+                          focusedBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(15.0),
+                            borderSide: BorderSide(
+                              color: HexColor("#602d98"),
+                            ),
+                          ),
+                          enabledBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(15.0),
+                            borderSide: BorderSide(
+                              color: HexColor("#dbd0ea"),
+                              width: 1.0,
+                            ),
+                          ),
+
+                        ),
+                      ),
+                    )
+                    )),
+                    Padding(padding: const EdgeInsets.only(top: 25), child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      children: <Widget>[
+                        Expanded(child: OutlineButton(
+                          onPressed: () {Navigator.pop(context);}, child: Text("Tutup"),)),
+                        Expanded(child: RaisedButton(
+                          color: HexColor(main_color),
+                          onPressed: () {
+                            _doEditHarga(valueParse, valueParse2);
+                          }, child: Text("Post", style: TextStyle(color: Colors.white),),)),
+                      ],),)
+                  ],
+                )
+            ),
+          );
+        });
+  }
 
 
   @override
@@ -333,7 +423,11 @@ class _OutletProduk extends State<OutletProduk> {
                                  InkWell(
                                    onTap: () {
                                      FocusScope.of(context).requestFocus(FocusNode());
-                                     showModalBottomSheet(
+                                     _editpriceDialog(snapshot.data[i]["g"].toString(), snapshot.data[i]["b"].toString());
+                                     setState(() {
+                                       hargaVal.text = snapshot.data[i]["e"].toString();
+                                     });
+                                    /* showModalBottomSheet(
                                          shape: RoundedRectangleBorder(
                                            borderRadius: BorderRadius.only(
                                                topLeft: Radius.circular(15),
@@ -381,7 +475,7 @@ class _OutletProduk extends State<OutletProduk> {
                                                ],
                                              )
                                            );
-                                         });
+                                         });*/
                                    },
                                    child : ListTile(
                                      leading: SizedBox(

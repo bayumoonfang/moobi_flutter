@@ -355,14 +355,15 @@ class _HomeState extends State<Home> {
 
                                         InkWell(
                                           onTap: () {
-                                            Navigator.push(context, ExitPage(page: Gudang(getEmail.toString(), getLegalCode.toString(), getLegalId.toString(), getNamaUser.toString())));
+                                            //Navigator.push(context, ExitPage(page: Gudang(getEmail.toString(), getLegalCode.toString(), getLegalId.toString(), getNamaUser.toString())));
+                                            Navigator.push(context, ExitPage(page: ProdukHome(getEmail.toString(), getLegalCode.toString())));
                                           },
                                           child:
                                         Column(
                                           children: [
-                                            FaIcon(FontAwesomeIcons.warehouse,color: HexColor(second_color)),
+                                            FaIcon(FontAwesomeIcons.box,color: HexColor(second_color)),
                                             Padding(padding: const EdgeInsets.only(top:8),
-                                              child: Text("Gudang", style: TextStyle(fontFamily: 'VarelaRound',
+                                              child: Text("Produk", style: TextStyle(fontFamily: 'VarelaRound',
                                                   fontSize: 12,color: HexColor(second_color))),)
                                           ],
                                         )),
@@ -436,7 +437,7 @@ class _HomeState extends State<Home> {
 
                                   InkWell(
                                     onTap: () {
-                                      Navigator.push(context, ExitPage(page: ProdukHome()));
+                                      //Navigator.push(context, ExitPage(page: ProdukHome()));
                                     },
                                     child:Column(
                                       children: [

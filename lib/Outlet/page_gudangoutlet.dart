@@ -10,6 +10,7 @@ import 'package:hexcolor/hexcolor.dart';
 import 'package:moobi_flutter/Gudang/page_gudangdetail.dart';
 import 'package:moobi_flutter/Gudang/page_gudanginsert.dart';
 import 'package:moobi_flutter/Helper/app_helper.dart';
+import 'package:moobi_flutter/Outlet/page_gudangoutletdetail.dart';
 import 'package:moobi_flutter/Outlet/page_gudangoutletinsert.dart';
 import 'package:moobi_flutter/helper/api_link.dart';
 
@@ -127,13 +128,20 @@ class _GudangOutlet extends State<GudangOutlet> {
     setState(() {});
   }
 
-  _doHapus (String valueParse2) {
+  _doHapus (String valueParse2) async {
     Navigator.pop(context);
-    http.get(applink+"api_model.php?act=action_hapusgudang&id="+valueParse2.toString()
+    final response = await http.get(applink+"api_model.php?act=action_hapusgudang&id="+valueParse2.toString()
         +"&branch="+widget.getLegalCode);
-    //showToast("Gudang berhasil dihapus", gravity: Toast.BOTTOM,duration: Toast.LENGTH_LONG);
-    getData();
-    setState(() {});
+    Map data = jsonDecode(response.body);
+    setState(() {
+      if (data["message"].toString() == '1') {
+        setState(() {
+          getData();
+        });
+      } else {
+        //showerror("Product sudah ada di outlet ini, silahkan cari produk yang lain");
+      }
+    });
   }
 
 
@@ -280,8 +288,14 @@ class _GudangOutlet extends State<GudangOutlet> {
                                       FocusScope.of(context).requestFocus(FocusNode());
                                         Navigator.push(
                           context,
-                          MaterialPageRoute(builder: (context) => GudangDetail(widget.getEmail, widget.getLegalCode, widget.getLegalId, snapshot.data[i]["c"].toString(), snapshot.data[i]["b"].toString(),
-                          widget.getNamaUser))).then(onGoBack);
+                          MaterialPageRoute(builder: (context) => GudangOutletDetail(
+                              widget.getEmail,
+                              widget.getLegalCode,
+                              widget.getLegalId,
+                              snapshot.data[i]["c"].toString(),
+                              snapshot.data[i]["b"].toString(),
+                              widget.getNamaUser,
+                              widget.getidOutlet))).then(onGoBack);
                       //Navigator.push(context, ExitPage(page: GudangDetail(snapshot.data[i]["c"].toString())));*/
                                     },
                                     child: ListTile(

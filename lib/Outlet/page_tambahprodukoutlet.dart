@@ -144,17 +144,23 @@ class _TambahProdukOutlet extends State<TambahProdukOutlet> {
     if (addHarga.text == "") {
       showerror("Harga tidak boleh kosong");
     }
-    http.post(applink+"api_model.php?act=action_addprodukoutlet",
+    final response = await http.post(applink+"api_model.php?act=action_addprodukoutlet",
         body: {
           "id": valueParse2,
           "addHarga" : addHarga.text,
           "idOutlet" : widget.idOutlet,
           "branch" : widget.getLegalCode,
-          "namaUser" : widget.getNamaUser},
+          "namaUser" : widget.getNamaUser,
+          "tipe" : "Product"},
         headers: {"Accept":"application/json"});
-    showsuccess("Produk berhasil ditambahkan ke outlet ");
+    Map data = jsonDecode(response.body);
     setState(() {
-      getData();
+      if (data["message"].toString() == '1') {
+        showsuccess("Product berhasil ditambahkan ke outlet ");
+        //Navigator.pop(context);
+      } else {
+        showerror("Product sudah ada di outlet ini, silahkan cari produk yang lain");
+      }
     });
   }
 
@@ -250,6 +256,64 @@ class _TambahProdukOutlet extends State<TambahProdukOutlet> {
 
 
 
+  _doAddHarga2 () async {
+    Navigator.pop(context);
+    final response = await http.post(applink+"api_model.php?act=action_addprodukoutlet",
+        body: {
+          "id": "",
+          "addHarga" : addHarga.text,
+          "idOutlet" : widget.idOutlet,
+          "branch" : widget.getLegalCode,
+          "namaUser" : widget.getNamaUser,
+          "tipe" : "Product"},
+        headers: {"Accept":"application/json"});
+    Map data = jsonDecode(response.body);
+    setState(() {
+      if (data["message"].toString() == '1') {
+        showsuccess("Product berhasil ditambahkan ke outlet ");
+      } else {
+        showerror("Product sudah ada di outlet ini, silahkan cari produk yang lain");
+      }
+    });
+  }
+
+
+  _showadd2() {
+    showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            //title: Text(),
+            content: Container(
+                width: double.infinity,
+                height: 150,
+                child: Column(
+                  children: [
+                    Align(alignment: Alignment.center, child:
+                    Text("Tambah Ke Outlet", style: TextStyle(fontFamily: 'VarelaRound', fontSize: 20,
+                        fontWeight: FontWeight.bold)),),
+                    Padding(padding: const EdgeInsets.only(top: 15), child:
+                    Align(alignment: Alignment.center, child:
+                    Text("Menambah semua produk baru ke outlet ",
+                      style: TextStyle(fontFamily: 'VarelaRound', fontSize: 12),textAlign: TextAlign.center,),)),
+                    Padding(padding: const EdgeInsets.only(top: 15)),
+                    Padding(padding: const EdgeInsets.only(top: 25), child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      children: <Widget>[
+                        Expanded(child: OutlineButton(
+                          onPressed: () {Navigator.pop(context);}, child: Text("Tutup"),)),
+                        Expanded(child: RaisedButton(
+                          color: HexColor(main_color),
+                          onPressed: () {
+                            _doAddHarga2();
+                          }, child: Text("Tambah", style: TextStyle(color: Colors.white),),)),
+                      ],),)
+                  ],
+                )
+            ),
+          );
+        });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -271,6 +335,20 @@ class _TambahProdukOutlet extends State<TambahProdukOutlet> {
                       Navigator.pop(context)
                     }),
               ),
+              actions: [
+                InkWell(
+                  onTap: () {
+                    FocusScope.of(context).requestFocus(FocusNode());
+                    _showadd2();
+                  },
+                  child: Padding(
+                    padding: const EdgeInsets.only(right: 27,top : 14),
+                    child: FaIcon(
+                        FontAwesomeIcons.plusSquare
+                    ),
+                  ),
+                )
+              ],
             ),
             body : Container(
               child: Column(

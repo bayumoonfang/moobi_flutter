@@ -125,11 +125,24 @@ class _Outlet extends State<Outlet> {
   }
 
   String getMessage = "...";
-  _doHapus (String valueParse2) {
-    http.get(applink+"api_model.php?act=action_hapusoutlet&id="+valueParse2.toString()
-        +"&branch="+widget.getLegalCode+"&username="+widget.getEmail);
-    getData();
-    setState(() {});
+  _doHapus (String valueParse2) async {
+    final response = await http.get(applink+"api_model.php?act=action_hapusoutlet&id="+valueParse2.toString()
+        +""
+            "&branch="+widget.getLegalCode+""
+            "&legalid="+widget.getLegalId+""
+            "&username="+widget.getEmail);
+    Map data = jsonDecode(response.body);
+    setState(() {
+      if (data["message"].toString() == '1') {
+        setState(() {
+          getData();
+        });
+      } else {
+        //showerror("Product sudah ada di outlet ini, silahkan cari produk yang lain");
+      }
+    });
+
+
   }
 
 

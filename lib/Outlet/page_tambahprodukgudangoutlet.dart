@@ -23,18 +23,19 @@ import '../page_login.dart';
 
 
 
-class TambahSerivceOutlet extends StatefulWidget {
-  final String idOutlet;
+class TambahProdukGudangOutlet extends StatefulWidget {
+  final String kodeGudang;
   final String getEmail;
   final String getLegalCode;
   final String getNamaUser;
-  const TambahSerivceOutlet(this.idOutlet, this.getEmail, this.getLegalCode, this.getNamaUser);
+  final String getIdOutlet;
+  const TambahProdukGudangOutlet(this.kodeGudang, this.getEmail, this.getLegalCode, this.getNamaUser, this.getIdOutlet);
   @override
-  _TambahSerivceOutlet createState() => _TambahSerivceOutlet();
+  _TambahProdukGudangOutlet createState() => _TambahProdukGudangOutlet();
 }
 
 
-class _TambahSerivceOutlet extends State<TambahSerivceOutlet> {
+class _TambahProdukGudangOutlet extends State<TambahProdukGudangOutlet> {
 
   List data;
   bool _isvisible = true;
@@ -98,17 +99,18 @@ class _TambahSerivceOutlet extends State<TambahSerivceOutlet> {
 
   Future<bool> _onWillPop() async {
     Navigator.pop(context);}
-  final addHarga = TextEditingController();
+  final addJumlahawal = TextEditingController();
 
   String filter = "";
   String sortme = "0";
   Future<List> getData() async {
     http.Response response = await http.get(
-        Uri.encodeFull(applink+"api_model.php?act=getdata_produkadd_outlet&"
+        Uri.encodeFull(applink+"api_model.php?act=getdata_produkadd_gudang&"
             "filter="+filter+
-            "&filtermedude=Service"
+            "&store_id="+widget.getIdOutlet+
             "&id="+widget.getLegalCode),
         headers: {"Accept":"application/json"});
+
     return json.decode(response.body);
   }
 
@@ -139,66 +141,66 @@ class _TambahSerivceOutlet extends State<TambahSerivceOutlet> {
 
 
 
-  _doAddHarga (String valueParse2) async {
+  _doAddStockAwal (String valueParse2) async {
     Navigator.pop(context);
-    if (addHarga.text == "") {
-      showerror("Harga tidak boleh kosong");
+    if (addJumlahawal.text == "") {
+      showerror("Keterangan atau Jumlah tidak boleh kosong");
     }
-    final response = await http.post(applink+"api_model.php?act=action_addprodukoutlet",
-        body: {
-          "id": valueParse2,
-          "addHarga" : addHarga.text,
-          "idOutlet" : widget.idOutlet,
+    final response = await http.post(applink+"api_model.php?act=action_addprodukgudang",
+        body: {"id": valueParse2,
+          "addJumlahawal" : addJumlahawal.text,
+          "kodeGudang" : widget.kodeGudang,
           "branch" : widget.getLegalCode,
-          "namaUser" : widget.getNamaUser,
-          "tipe" : "Service"},
+        "namaUser" : widget.getNamaUser,
+        "storeId" : widget.getIdOutlet},
         headers: {"Accept":"application/json"});
     Map data = jsonDecode(response.body);
     setState(() {
       if (data["message"].toString() == '1') {
-        showsuccess("Service berhasil ditambahkan ke outlet ");
+        showsuccess("Produk berhasil ditambahkan ke gudang "+widget.kodeGudang+"");
       } else {
-        showerror("Service sudah ada di outlet ini, silahkan cari produk yang lain");
+        //showerror("Product sudah ada di outlet ini, silahkan cari produk yang lain");
       }
     });
+
   }
 
 
-  _doAddHarga2 () async {
+  _doAddStockAwal2 () async {
     Navigator.pop(context);
-    final response = await http.post(applink+"api_model.php?act=action_addprodukoutlet",
-        body: {
-          "id": "",
-          "addHarga" : addHarga.text,
-          "idOutlet" : widget.idOutlet,
+    if (addJumlahawal.text == "") {
+      showerror("Keterangan atau Jumlah tidak boleh kosong");
+    }
+    final response = await http.post(applink+"api_model.php?act=action_addprodukgudang",
+        body: {"id": "",
+          "addJumlahawal" : addJumlahawal.text,
+          "kodeGudang" : widget.kodeGudang,
           "branch" : widget.getLegalCode,
           "namaUser" : widget.getNamaUser,
-          "tipe" : "Service"},
+          "storeId" : widget.getIdOutlet},
         headers: {"Accept":"application/json"});
     Map data = jsonDecode(response.body);
     setState(() {
       if (data["message"].toString() == '1') {
-        showsuccess("Service berhasil ditambahkan ke outlet ");
+        showsuccess("Produk berhasil ditambahkan ke gudang "+widget.kodeGudang+"");
       } else {
-        showerror("Service sudah ada di outlet ini, silahkan cari produk yang lain");
+        //showerror("Product sudah ada di outlet ini, silahkan cari produk yang lain");
       }
     });
   }
+
 
 
   _cekProduk (String valueParse2) async {
-    final response = await http.post(applink+"api_model.php?act=action_cekaddprodukoutlet",
-        body: {
-          "id": valueParse2,
-          "kodeOutlet" : widget.idOutlet
-        },
+    final response = await http.post(applink+"api_model.php?act=action_cekaddprodukgudang",
+        body: {"id": valueParse2, "kodeGudang" : widget.kodeGudang},
         headers: {"Accept":"application/json"});
     Map data = jsonDecode(response.body);
     setState(() {
       if (data["message"].toString() == '2') {
         _showadd(valueParse2);
       } else {
-        showerror("Service sudah ada di outlet ini, silahkan cari produk yang lain");
+        showerror("Produk sudah ada di gudang ini, silahkan cari produk yang lain");
       }
     });
   }
@@ -219,11 +221,11 @@ class _TambahSerivceOutlet extends State<TambahSerivceOutlet> {
                 child: Column(
                   children: [
                     Align(alignment: Alignment.center, child:
-                    Text("Tambah Ke Outlet", style: TextStyle(fontFamily: 'VarelaRound', fontSize: 20,
+                    Text("Tambah Ke Gudang", style: TextStyle(fontFamily: 'VarelaRound', fontSize: 20,
                         fontWeight: FontWeight.bold)),),
                     Padding(padding: const EdgeInsets.only(top: 15), child:
                     Align(alignment: Alignment.center, child:
-                    Text("Menambah service baru ke outlet ",
+                    Text("Menambah produk baru ke gudang "+widget.kodeGudang,
                       style: TextStyle(fontFamily: 'VarelaRound', fontSize: 12),textAlign: TextAlign.center,),)),
                     Padding(padding: const EdgeInsets.only(top: 15), child:
                     Align(alignment: Alignment.center, child:
@@ -232,10 +234,10 @@ class _TambahSerivceOutlet extends State<TambahSerivceOutlet> {
                         keyboardType: TextInputType.number,
                         style: TextStyle(
                             fontFamily: 'VarelaRound', fontSize: 14),
-                        controller: addHarga,
+                        controller: addJumlahawal,
                         decoration: InputDecoration(
                           contentPadding: EdgeInsets.only(left:15,top:5,bottom:5,right: 15),
-                          hintText: "Harga Jual",
+                          hintText: "Stock Awal",
                           focusedBorder: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(15.0),
                             borderSide: BorderSide(
@@ -262,8 +264,8 @@ class _TambahSerivceOutlet extends State<TambahSerivceOutlet> {
                         Expanded(child: RaisedButton(
                           color: HexColor(main_color),
                           onPressed: () {
-                            _doAddHarga(valueParse);
-                          }, child: Text("Tambah", style: TextStyle(color: Colors.white),),)),
+                            _doAddStockAwal(valueParse);
+                          }, child: Text("Post", style: TextStyle(color: Colors.white),),)),
                       ],),)
                   ],
                 )
@@ -271,7 +273,6 @@ class _TambahSerivceOutlet extends State<TambahSerivceOutlet> {
           );
         });
   }
-
 
 
 
@@ -283,17 +284,45 @@ class _TambahSerivceOutlet extends State<TambahSerivceOutlet> {
             //title: Text(),
             content: Container(
                 width: double.infinity,
-                height: 150,
+                height: 230,
                 child: Column(
                   children: [
                     Align(alignment: Alignment.center, child:
-                    Text("Tambah Ke Outlet", style: TextStyle(fontFamily: 'VarelaRound', fontSize: 20,
+                    Text("Tambah Ke Gudang", style: TextStyle(fontFamily: 'VarelaRound', fontSize: 20,
                         fontWeight: FontWeight.bold)),),
                     Padding(padding: const EdgeInsets.only(top: 15), child:
                     Align(alignment: Alignment.center, child:
-                    Text("Menambah semua service baru ke outlet ",
+                    Text("Menambah semua produk baru ke gudang "+widget.kodeGudang+ ", produk yang sudah ada tidak akan dimasukkan",
                       style: TextStyle(fontFamily: 'VarelaRound', fontSize: 12),textAlign: TextAlign.center,),)),
-                    Padding(padding: const EdgeInsets.only(top: 15)),
+                    Padding(padding: const EdgeInsets.only(top: 15), child:
+                    Align(alignment: Alignment.center, child:
+                    Container(
+                      child : TextFormField(
+                        keyboardType: TextInputType.number,
+                        style: TextStyle(
+                            fontFamily: 'VarelaRound', fontSize: 14),
+                        controller: addJumlahawal,
+                        decoration: InputDecoration(
+                          contentPadding: EdgeInsets.only(left:15,top:5,bottom:5,right: 15),
+                          hintText: "Stock Awal",
+                          focusedBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(15.0),
+                            borderSide: BorderSide(
+                              color: HexColor("#602d98"),
+                            ),
+                          ),
+                          enabledBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(15.0),
+                            borderSide: BorderSide(
+                              color: HexColor("#dbd0ea"),
+                              width: 1.0,
+                            ),
+                          ),
+
+                        ),
+                      ),
+                    )
+                    )),
                     Padding(padding: const EdgeInsets.only(top: 25), child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                       children: <Widget>[
@@ -302,8 +331,8 @@ class _TambahSerivceOutlet extends State<TambahSerivceOutlet> {
                         Expanded(child: RaisedButton(
                           color: HexColor(main_color),
                           onPressed: () {
-                            _doAddHarga2();
-                          }, child: Text("Tambah", style: TextStyle(color: Colors.white),),)),
+                            _doAddStockAwal2();
+                          }, child: Text("Post", style: TextStyle(color: Colors.white),),)),
                       ],),)
                   ],
                 )
@@ -311,6 +340,7 @@ class _TambahSerivceOutlet extends State<TambahSerivceOutlet> {
           );
         });
   }
+
 
   @override
   Widget build(BuildContext context) {
@@ -320,7 +350,7 @@ class _TambahSerivceOutlet extends State<TambahSerivceOutlet> {
             appBar: new AppBar(
               backgroundColor: HexColor("#602d98"),
               title: Text(
-                "Tambah service ke outlet",
+                "Tambah produk ke gudang",
                 style: TextStyle(
                     color: Colors.white, fontFamily: 'VarelaRound', fontSize: 16),
               ),
@@ -383,7 +413,7 @@ class _TambahSerivceOutlet extends State<TambahSerivceOutlet> {
                                   width: 1.0),
                               borderRadius: BorderRadius.circular(5.0),
                             ),
-                            hintText: 'Cari Service...',
+                            hintText: 'Cari Produk...',
                           ),
                         ),
                       )
@@ -393,7 +423,7 @@ class _TambahSerivceOutlet extends State<TambahSerivceOutlet> {
                       child: FutureBuilder(
                         future: getData(),
                         builder: (context, snapshot){
-                          if (snapshot.data == null ) {
+                          if (snapshot.data == null) {
                             return Center(
                                 child: CircularProgressIndicator()
                             );
@@ -524,9 +554,20 @@ class _TambahSerivceOutlet extends State<TambahSerivceOutlet> {
                                                   child: Padding(padding: const EdgeInsets.only(top:2), child :
                                                Row(
                                                  children: [
+
                                                    Padding(
-                                                     padding : const EdgeInsets.only(left:0),
-                                                     child : Text(snapshot.data[i]["b"].toString(), style: GoogleFonts.varelaRound(fontSize: 12),),
+                                                     padding : const EdgeInsets.only(left: 0),
+                                                     child : Container(
+                                                       decoration: BoxDecoration(
+                                                         borderRadius: BorderRadius.circular(6),
+                                                         color: HexColor(color_9),
+                                                       ),
+                                                       child: Padding(padding : const EdgeInsets.only(left: 5,right: 5,top: 2,bottom: 1),
+                                                         child: Text(snapshot.data[i]["b"],
+                                                             style: TextStyle(fontFamily: "VarelaRound",
+                                                                 color: Colors.white,
+                                                                 fontSize: 11)),),
+                                                     ),
                                                    )
                                                  ],
                                                )

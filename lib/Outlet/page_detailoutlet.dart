@@ -142,13 +142,21 @@ class _DetailOutlet extends State<DetailOutlet> {
   }
 
 
-  doHapus(String IDq) {
+  doHapus(String IDq) async {
     Navigator.pop(context);
-    http.post(applink+"api_model.php?act=hapus_outlet", body: {
+    final response = await http.post(applink+"api_model.php?act=hapus_outlet", body: {
       "id" : widget.idOutlet,
       "legal_id" : widget.getLegalId
     });
-    Navigator.pop(context);
+    Map data = jsonDecode(response.body);
+    setState(() {
+      if (data["message"].toString() == '1') {
+        Navigator.pop(context);
+      } else {
+        //showerror("Product sudah ada di outlet ini, silahkan cari produk yang lain");
+      }
+    });
+
   }
 
 

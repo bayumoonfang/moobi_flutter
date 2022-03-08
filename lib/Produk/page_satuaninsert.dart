@@ -2,6 +2,7 @@
 
 import 'dart:convert';
 
+import 'package:flushbar/flushbar.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
@@ -15,9 +16,15 @@ import 'package:moobi_flutter/page_login.dart';
 import 'package:toast/toast.dart';
 import 'package:http/http.dart' as http;
 
+import '../page_intoduction.dart';
+
 
 class ProdukSatuanInsert extends StatefulWidget{
+  final String getEmail;
+  final String getLegalCode;
 
+  const ProdukSatuanInsert(this.getEmail, this.getLegalCode);
+  @override
   @override
   _ProdukSatuanInsertState createState() => _ProdukSatuanInsertState();
 }
@@ -27,25 +34,48 @@ class _ProdukSatuanInsertState extends State<ProdukSatuanInsert> {
 
   final _deskripsisatuan = TextEditingController();
   final _satuan = TextEditingController();
+
   void showToast(String msg, {int duration, int gravity}) {
-    Toast.show(msg, context, duration: duration, gravity: gravity);
+    Toast.show(msg, context, duration: duration, gravity: gravity);}
+
+  _cekLegalandUser() async {
+    final response = await http.post(applink+"api_model.php?act=cek_legalanduser",
+        body: {"username": widget.getEmail.toString()},
+        headers: {"Accept":"application/json"});
+    Map data = jsonDecode(response.body);
+    setState(() {
+      if (data["message"].toString() == '2' || data["message"].toString() == '3') {
+        Navigator.pushReplacement(context, ExitPage(page: Introduction()));
+      }
+    });
   }
 
-
-
-  String getEmail = "...";
-  String getBranch = "...";
+  //=============================================================================
   _startingVariable() async {
     await AppHelper().getConnect().then((value){if(value == 'ConnInterupted'){
       showToast("Koneksi terputus..", gravity: Toast.CENTER,duration:
       Toast.LENGTH_LONG);}});
-    await AppHelper().getSession().then((value){if(value[0] != 1) {
-      Navigator.pushReplacement(context, ExitPage(page: Login()));}else{setState(() {getEmail = value[1];});}});
-    await AppHelper().getDetailUser(getEmail.toString()).then((value){
-      setState(() {
-        getBranch = value[1];
-      });
+    await AppHelper().getSession().then((value){
+      if(value[0] != 1) {
+        Navigator.pushReplacement(context, ExitPage(page: Login()));
+      }
     });
+    await _cekLegalandUser();
+
+  }
+
+  showFlushBarsuccess(BuildContext context, String stringme) => Flushbar(
+    // title:  "Hey Ninja",
+    message:  stringme,
+    shouldIconPulse: false,
+    duration:  Duration(seconds: 3),
+    backgroundColor: Colors.black,
+    flushbarPosition: FlushbarPosition.BOTTOM ,
+  )..show(context);
+
+  void showsuccess(String txtError){
+    showFlushBarsuccess(context, txtError);
+    return;
   }
 
 
@@ -65,19 +95,18 @@ class _ProdukSatuanInsertState extends State<ProdukSatuanInsert> {
     final response = await http.post(applink+"api_model.php?act=add_satuan", body: {
       "satuan_deskripsi": _deskripsisatuan.text,
       "satuan" : _satuan.text,
-      "satuan_branch" : getBranch
+      "satuan_branch" : widget.getLegalCode
     });
     Map data = jsonDecode(response.body);
     setState(() {
       if (data["message"].toString() == '0') {
-        showToast("Satuan sudah ada", gravity: Toast.BOTTOM,
-            duration: Toast.LENGTH_LONG);
+        showsuccess("Satuan sudah ada");
+
         return false;
       } else {
         _deskripsisatuan.clear();
         _satuan.clear();
-        showToast("Satuan berhasil ditambah", gravity: Toast.BOTTOM,
-            duration: Toast.LENGTH_LONG);
+        showsuccess("Satuan berhasil ditambah");
         return false;
       }
     });

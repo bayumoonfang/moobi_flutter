@@ -1,6 +1,7 @@
 
 
 
+
 import 'dart:convert';
 
 import 'package:flushbar/flushbar.dart';
@@ -8,32 +9,41 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:hexcolor/hexcolor.dart';
-import 'package:moobi_flutter/Helper/api_link.dart';
 import 'package:moobi_flutter/Helper/app_helper.dart';
+import 'package:moobi_flutter/Helper/check_connection.dart';
+import 'package:moobi_flutter/Helper/color_based.dart';
 import 'package:moobi_flutter/Helper/page_route.dart';
+import 'package:moobi_flutter/Helper/session.dart';
+import 'package:moobi_flutter/Profile/page_profile.dart';
 import 'package:moobi_flutter/page_login.dart';
 import 'package:toast/toast.dart';
 import 'package:http/http.dart' as http;
+import 'package:moobi_flutter/Helper/api_link.dart';
 
 import '../page_intoduction.dart';
 
-
-class GudangOutletInsert extends StatefulWidget{
+class GudangOutletUbahNama extends StatefulWidget {
   final String getEmail;
   final String getLegalCode;
-  final String getLegalId;
-  final String getOutletId;
-  const GudangOutletInsert(this.getEmail, this.getLegalCode, this.getLegalId, this.getOutletId);
-  _GudangOutletInsert createState() => _GudangOutletInsert();
+  final String idGudang;
+  final String namaGudang;
+  final String getDeskripsiGudang;
+  const GudangOutletUbahNama(this.getEmail, this.getLegalCode,this.idGudang, this.namaGudang, this.getDeskripsiGudang);
+
+  @override
+  GudangOutletUbahNamaState createState() => GudangOutletUbahNamaState();
 }
 
-
-class _GudangOutletInsert extends State<GudangOutletInsert> {
-  final _valInsert = TextEditingController();
-  final _valInsert2 = TextEditingController();
+class GudangOutletUbahNamaState extends State<GudangOutletUbahNama> {
+  TextEditingController valNama = TextEditingController();
+  TextEditingController valDeskripsi = TextEditingController();
+  Future<bool> _onWillPop() async {
+    Navigator.pop(context);
+  }
   void showToast(String msg, {int duration, int gravity}) {
     Toast.show(msg, context, duration: duration, gravity: gravity);
   }
+
 
   _cekLegalandUser() async {
     final response = await http.post(applink+"api_model.php?act=cek_legalanduser",
@@ -77,46 +87,41 @@ class _GudangOutletInsert extends State<GudangOutletInsert> {
 
   _prepare() async {
     await _startingVariable();
+    valNama.text = widget.namaGudang;
+    valDeskripsi.text = widget.getDeskripsiGudang;
   }
 
   @override
-  void initState(){
+  void initState() {
     super.initState();
     _prepare();
-
   }
 
   doSimpan() async {
     Navigator.pop(context);
-    final response = await http.post(applink+"api_model.php?act=add_gudang", body: {
-      "gudang_nama": _valInsert.text,
-      "gudang_branch" : widget.getLegalCode,
-      "gudang_store" : widget.getOutletId,
-      "gudang_deskripsi" : _valInsert2.text
+    final response = await http.post(applink+"api_model.php?act=edit_namagudang", body: {
+      "valNama_edit": valNama.text,
+      "valID_edit" : widget.idGudang,
+      "valdeskripsi" : valDeskripsi.text
     });
     Map data = jsonDecode(response.body);
     setState(() {
-      if (data["message"].toString() == '0') {
-        showsuccess("Gudang sudah ada");
+      if (data["message"].toString() == '1') {
+        showsuccess("Keterangan gudang berhasil diganti");
         return false;
       } else {
-        _valInsert.clear();
-        _valInsert2.clear();
-        showsuccess("Gudang berhasil ditambah");
+        showsuccess("Keterangan gudang berhasil diganti");
         return false;
       }
     });
   }
 
-  _showAlert() {
-    if (_valInsert.text == "") {
-      showsuccess("Nama Gudang tidak boleh kosong");
-      return false;
-    } else if (_valInsert2.text == "") {
-      showsuccess("Dekskripsi Gudang tidak boleh kosong");
+
+  alertSimpan() {
+    if (valNama.text == "" || valDeskripsi.text == "") {
+      showsuccess("Form tidak boleh kosong");
       return false;
     }
-
     showDialog(
         context: context,
         builder: (BuildContext context) {
@@ -156,15 +161,15 @@ class _GudangOutletInsert extends State<GudangOutletInsert> {
   }
 
 
-
   @override
   Widget build(BuildContext context) {
     return WillPopScope(
+      onWillPop: _onWillPop,
       child: Scaffold(
         appBar: new AppBar(
-          backgroundColor: HexColor("#602d98"),
+          backgroundColor: HexColor(main_color),
           title: Text(
-            "Tambah Gudang ",
+            "Ubah Nama Gudang",
             style: TextStyle(
                 color: Colors.white, fontFamily: 'VarelaRound', fontSize: 16),
           ),
@@ -180,7 +185,7 @@ class _GudangOutletInsert extends State<GudangOutletInsert> {
             InkWell(
               onTap: () {
                 FocusScope.of(context).requestFocus(FocusNode());
-                _showAlert();
+                alertSimpan();
               },
               child: Padding(
                 padding: const EdgeInsets.only(right: 27,top : 14),
@@ -207,11 +212,11 @@ class _GudangOutletInsert extends State<GudangOutletInsert> {
                         Align(alignment: Alignment.centerLeft,child: Padding(
                           padding: const EdgeInsets.only(left: 0),
                           child: TextFormField(
-                            controller: _valInsert,
+                            controller: valNama,
                             textCapitalization: TextCapitalization.sentences,
                             decoration: InputDecoration(
                               contentPadding: const EdgeInsets.only(top:2),
-                              hintText: 'Contoh : Gudang Penjualan, Gudang Penerimaan, dll',
+                              hintText: 'Nama gudang...',
                               labelText: '',
                               floatingLabelBehavior: FloatingLabelBehavior.always,
                               hintStyle: TextStyle(fontFamily: "VarelaRound", color: HexColor("#c4c4c4")),
@@ -230,18 +235,18 @@ class _GudangOutletInsert extends State<GudangOutletInsert> {
 
 
                         Align(alignment: Alignment.centerLeft,child: Padding(
-                          padding: const EdgeInsets.only(left: 0,top:25),
-                          child: Text("Deskripsi",style: TextStyle(fontWeight: FontWeight.bold,fontFamily: "VarelaRound",
+                          padding: const EdgeInsets.only(left: 0,top: 25),
+                          child: Text("Deskripsi Gudang",style: TextStyle(fontWeight: FontWeight.bold,fontFamily: "VarelaRound",
                               fontSize: 12,color: HexColor("#0074D9")),),
                         ),),
                         Align(alignment: Alignment.centerLeft,child: Padding(
                           padding: const EdgeInsets.only(left: 0),
                           child: TextFormField(
-                            controller: _valInsert2,
+                            controller: valDeskripsi,
                             textCapitalization: TextCapitalization.sentences,
                             decoration: InputDecoration(
                               contentPadding: const EdgeInsets.only(top:2),
-                              hintText: 'Contoh : Gudang untuk penjualan , dll',
+                              hintText: 'Deskripsi gudang...',
                               labelText: '',
                               floatingLabelBehavior: FloatingLabelBehavior.always,
                               hintStyle: TextStyle(fontFamily: "VarelaRound", color: HexColor("#c4c4c4")),
@@ -268,6 +273,7 @@ class _GudangOutletInsert extends State<GudangOutletInsert> {
         ),
       ),
     );
+
 
   }
 }
