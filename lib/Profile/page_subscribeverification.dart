@@ -273,6 +273,7 @@ class SubscribeVerificationState extends State<SubscribeVerification> {
                 }),
           ),
           actions: [
+            val_legalcode != '0' ?
             InkWell(
               onTap: () {
                 FocusScope.of(context).requestFocus(FocusNode());
@@ -285,6 +286,8 @@ class SubscribeVerificationState extends State<SubscribeVerification> {
                 ),
               ),
             )
+                :
+                Container()
           ],
         ),
         body: Container(

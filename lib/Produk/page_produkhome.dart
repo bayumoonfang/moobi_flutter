@@ -125,7 +125,7 @@ class _ProdukHomeState extends State<ProdukHome> {
               children: [
                 InkWell(
                   child: ListTile(
-                    onTap: (){Navigator.push(context, ExitPage(page: Produk()));},
+                    onTap: (){Navigator.push(context, ExitPage(page: Produk(widget.getEmail, widget.getLegalCode)));},
                     title: Text("Produk",style: TextStyle(
                         color: Colors.black, fontFamily: 'VarelaRound',fontSize: 15,
                         fontWeight: FontWeight.bold)),

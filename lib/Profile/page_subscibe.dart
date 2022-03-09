@@ -161,7 +161,7 @@ class SubscribeState extends State<Subscribe> {
                                           ),
                                           RaisedButton(
                                             shape: RoundedRectangleBorder(side: BorderSide(
-                                                color: HexColor(fourth_color),
+                                                color: HexColor("#622df7"),
                                                 width: 0.1,
                                                 style: BorderStyle.solid
                                             ),

@@ -201,7 +201,7 @@ class _GudangOutlet extends State<GudangOutlet> {
             ),
             leading: Builder(
               builder: (context) => IconButton(
-                  icon: new Icon(Icons.arrow_back),
+                  icon: new FaIcon(FontAwesomeIcons.times,size: 20,),
                   color: Colors.white,
                   onPressed: () => {
                     Navigator.pop(context)

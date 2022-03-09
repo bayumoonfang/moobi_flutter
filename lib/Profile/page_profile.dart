@@ -6,6 +6,7 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:hexcolor/hexcolor.dart';
 import 'package:intl/intl.dart';
@@ -248,7 +249,7 @@ class _ProfileState extends State<Profile> {
                             },
                             color: HexColor(main_color),
                             shape: RoundedRectangleBorder(side: BorderSide(
-                                color: Colors.black,
+                                color: HexColor("#ff7a0b"),
                                 width: 0.1,
                                 style: BorderStyle.solid
                             ),
@@ -288,7 +289,7 @@ class _ProfileState extends State<Profile> {
                         Align(alignment: Alignment.centerLeft,child: Text("MOOBI ID",style: TextStyle(
                             color: Colors.black, fontFamily: 'VarelaRound',fontSize: 16,
                             fontWeight: FontWeight.bold)),),
-                        Padding(padding: const EdgeInsets.only(top: 10,right: 25),
+                        Padding(padding: const EdgeInsets.only(top: 20,right: 25),
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment
                                 .spaceBetween,
@@ -296,14 +297,10 @@ class _ProfileState extends State<Profile> {
                               Text(
                                 "User ID",
                                 textAlign: TextAlign.left,
-                                style: TextStyle(
-                                    fontFamily: 'VarelaRound',
-                                    fontSize: 14),
+                                style: GoogleFonts.varelaRound(),
                               ),
                               Text( val_userno.toString(),
-                                  style: TextStyle(
-                                      fontFamily: 'VarelaRound',
-                                      fontSize: 14)),
+                                  style: GoogleFonts.varelaRound()),
                             ],
                           ),),
 
@@ -315,14 +312,10 @@ class _ProfileState extends State<Profile> {
                               Text(
                                 "Register Date",
                                 textAlign: TextAlign.left,
-                                style: TextStyle(
-                                    fontFamily: 'VarelaRound',
-                                    fontSize: 14),
+                                style: GoogleFonts.varelaRound(),
                               ),
                               Text(val_registerdate.toString(),
-                                  style: TextStyle(
-                                      fontFamily: 'VarelaRound',
-                                      fontSize: 14)),
+                                  style: GoogleFonts.varelaRound()),
                             ],
                           ),),
                       ],
@@ -346,35 +339,51 @@ class _ProfileState extends State<Profile> {
                           Padding(padding: const EdgeInsets.only(top: 10),
                             child: InkWell(
                               child: ListTile(
+                                dense: true,
+                                minLeadingWidth: 20,
+                                horizontalTitleGap: 20,
+                                contentPadding: EdgeInsets.all(1),
                                 onTap: (){
                                   Navigator.push(context, ExitPage(page: ProfileUbahNama(widget.getEmail, val_namauser.toString(), widget.getUserId))).then(onGoBack);
                                 },
-                                leading: FaIcon(FontAwesomeIcons.user,color: HexColor(third_color),),
+                                leading: FaIcon(FontAwesomeIcons.user,color: HexColor("#ffa528"),size: 19,),
                                 title: Text("Ubah Nama",style: TextStyle(
-                                    color: Colors.black, fontFamily: 'VarelaRound',fontSize: 16,
-                                    fontWeight: FontWeight.bold)),
-                                trailing: FaIcon(FontAwesomeIcons.angleRight,color: HexColor(third_color),),
+                                    color: Colors.black, fontFamily: 'VarelaRound',fontSize: 14)),
+                                trailing: Opacity(
+                                  opacity : 0.5,
+                                  child : FaIcon(FontAwesomeIcons.angleRight,color: HexColor(third_color),),
+                                )
                               ),
                             )
                           ),
-                          Padding(padding: const EdgeInsets.only(top: 5),
-                          child: Divider(height: 3,),),
-                          Padding(padding: const EdgeInsets.only(top: 10),
+                          Divider(height: 3,),
+                          Padding(padding: const EdgeInsets.only(top: 1),
                               child: InkWell(
                                 child: ListTile(
+                                  dense: true,
+                                  minLeadingWidth: 20,
+                                  horizontalTitleGap: 20,
+                                  contentPadding: EdgeInsets.all(1),
                                   onTap: (){
                                     Navigator.push(context, ExitPage(page: ProfileUbahSandi(widget.getUserId, widget.getEmail)));
                                   },
-                                  leading: FaIcon(FontAwesomeIcons.lock,color: HexColor(third_color),),
-                                  title: Text("Ubah Sandi Akun",style: TextStyle(
-                                      color: Colors.black, fontFamily: 'VarelaRound',fontSize: 16,
-                                      fontWeight: FontWeight.bold)),
-                                  trailing: FaIcon(FontAwesomeIcons.angleRight,color: HexColor(third_color),),
+                                  leading: FaIcon(FontAwesomeIcons.lock,color: HexColor("#fe6e66"),size: 19,),
+                                  title: Align(
+                                    alignment: Alignment.centerLeft,
+                                    child: Padding(
+                                      padding: const EdgeInsets.only(left: 1,top: 4),
+                                      child: Text("Ubah Sandi Akun",style: TextStyle(
+                                          color: Colors.black, fontFamily: 'VarelaRound',fontSize: 14)),
+                                    ),
+                                  ),
+                                  trailing: Opacity(
+                                    opacity : 0.5,
+                                    child : FaIcon(FontAwesomeIcons.angleRight,color: HexColor(third_color),),
+                                  )
                                 ),
                               )
                           ),
-                          Padding(padding: const EdgeInsets.only(top: 5),
-                            child: Divider(height: 3,),),
+                          Padding(padding: const EdgeInsets.only(top: 15)),
 
 
                         ],
@@ -399,9 +408,9 @@ class _ProfileState extends State<Profile> {
                                   onPressed: (){
                                     alertLogOut();
                                   },
-                                  color: HexColor(main_color),
+                                  color: HexColor("#fe6e66"),
                                   shape: RoundedRectangleBorder(side: BorderSide(
-                                      color: Colors.black,
+                                      color: HexColor("#fe6e66"),
                                       width: 0.1,
                                       style: BorderStyle.solid
                                   ),

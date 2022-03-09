@@ -2,6 +2,7 @@
 
 import 'package:badges/badges.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:flushbar/flushbar.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
@@ -23,8 +24,14 @@ import 'package:intl/intl.dart';
 import 'package:responsive_container/responsive_container.dart';
 import 'package:toast/toast.dart';
 
+import '../page_intoduction.dart';
+
 
 class Produk extends StatefulWidget{
+  final String getEmail;
+  final String getLegalCode;
+
+  const Produk(this.getEmail, this.getLegalCode);
   @override
   _ProdukState createState() => _ProdukState();
 }
@@ -34,25 +41,50 @@ class _ProdukState extends State<Produk> {
   List data;
   String getFilter = '';
   FocusNode focusNode;
-  var client = http.Client();
-  void showToast(String msg, {int duration, int gravity}) {
-    Toast.show(msg, context, duration: duration, gravity: gravity);
-  }
 
   bool _isVisible = true;
-  String getEmail = "...";
-  String getBranch = "...";
+
+  void showToast(String msg, {int duration, int gravity}) {
+    Toast.show(msg, context, duration: duration, gravity: gravity);}
+
+  _cekLegalandUser() async {
+    final response = await http.post(applink+"api_model.php?act=cek_legalanduser",
+        body: {"username": widget.getEmail.toString()},
+        headers: {"Accept":"application/json"});
+    Map data = jsonDecode(response.body);
+    setState(() {
+      if (data["message"].toString() == '2' || data["message"].toString() == '3') {
+        Navigator.pushReplacement(context, ExitPage(page: Introduction()));
+      }
+    });
+  }
+
+  //=============================================================================
   _startingVariable() async {
     await AppHelper().getConnect().then((value){if(value == 'ConnInterupted'){
       showToast("Koneksi terputus..", gravity: Toast.CENTER,duration:
       Toast.LENGTH_LONG);}});
-    await AppHelper().getSession().then((value){if(value[0] != 1) {
-      Navigator.pushReplacement(context, ExitPage(page: Login()));}else{setState(() {getEmail = value[1];});}});
-    await AppHelper().getDetailUser(getEmail.toString()).then((value){
-      setState(() {
-        getBranch = value[1];
-      });
+    await AppHelper().getSession().then((value){
+      if(value[0] != 1) {
+        Navigator.pushReplacement(context, ExitPage(page: Login()));
+      }
     });
+    await _cekLegalandUser();
+
+  }
+
+  showFlushBarsuccess(BuildContext context, String stringme) => Flushbar(
+    // title:  "Hey Ninja",
+    message:  stringme,
+    shouldIconPulse: false,
+    duration:  Duration(seconds: 3),
+    backgroundColor: Colors.black,
+    flushbarPosition: FlushbarPosition.BOTTOM ,
+  )..show(context);
+
+  void showsuccess(String txtError){
+    showFlushBarsuccess(context, txtError);
+    return;
   }
 
   startSCreen() async {
@@ -67,14 +99,15 @@ class _ProdukState extends State<Produk> {
   String filter = "Semua";
   String filterq = "";
   Future<dynamic> getDataProduk() async {
-    http.Response response = await client.get(
-        Uri.parse(applink+"api_model.php?act=getdata_produk_jual&id="
-            +getBranch+""
+    http.Response response = await http.get(
+        Uri.parse(applink+"api_model.php?act=getdata_produk_all&branch="
+            +widget.getLegalCode+""
             "&filter="+filter+"&filterq="+filterq),
         headers: {
           "Accept":"application/json",
           "Content-Type": "application/json"}
     );
+
     return json.decode(response.body);
   }
 
@@ -342,7 +375,30 @@ class _ProdukState extends State<Produk> {
               child: CircularProgressIndicator()
           );
         } else {
-          return ListView.builder(
+          return snapshot.data == 0  || snapshot.data.length == 0 ?
+          Container(
+              height: double.infinity, width : double.infinity,
+              child: new
+              Center(
+                  child :
+                  Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: <Widget>[
+                      new Text(
+                        "Tidak ada data",
+                        style: new TextStyle(
+                            fontFamily: 'VarelaRound', fontSize: 18),
+                      ),
+                      new Text(
+                        "Silahkan lakukan input data",
+                        style: new TextStyle(
+                            fontFamily: 'VarelaRound', fontSize: 12),
+                      ),
+                    ],
+                  )))
+              :
+           ListView.builder(
             itemCount: snapshot.data == null ? 0 : snapshot.data.length,
             padding: const EdgeInsets.only(top: 10,bottom: 80),
             itemBuilder: (context, i) {
@@ -370,7 +426,7 @@ class _ProdukState extends State<Produk> {
                                 snapshot.data[i]["d"] == '' ?
                                 applink+"photo/nomage.jpg"
                                     :
-                                applink+"photo/"+getBranch+"/"+snapshot.data[i]["d"],
+                                applink+"photo/"+widget.getLegalCode+"/"+snapshot.data[i]["d"],
                                 progressIndicatorBuilder: (context, url,
                                     downloadProgress) =>
                                     CircularProgressIndicator(value:
@@ -391,7 +447,7 @@ class _ProdukState extends State<Produk> {
                               snapshot.data[i]["d"] == '' ?
                               applink+"photo/nomage.jpg"
                                   :
-                              applink+"photo/"+getBranch+"/"+snapshot.data[i]["d"],
+                              applink+"photo/"+widget.getLegalCode+"/"+snapshot.data[i]["d"],
                               progressIndicatorBuilder: (context, url,
                                   downloadProgress) =>
                                   CircularProgressIndicator(value:

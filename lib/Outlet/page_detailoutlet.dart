@@ -656,11 +656,7 @@ class _DetailOutlet extends State<DetailOutlet> {
                   child: InkWell(
                     child: ListTile(
                       onTap: (){
-                        Navigator.push(
-                            context,
-                            MaterialPageRoute(builder: (context) => UbahOutlet(widget.getEmail,widget.getLegalCode,widget.idOutlet))).then(onGoBack);
-                        //Navigator.push(context, ExitPage(page: UbahOutlet(getStoreID))).then(onGoBack);
-                      },
+                        Navigator.push(context, ExitPage(page: UbahOutlet(widget.getEmail,widget.getLegalCode,widget.idOutlet))).then(onGoBack);},
                       title: Text("Ubah Keterangan Toko",style: TextStyle(
                           color: Colors.black, fontFamily: 'VarelaRound',fontSize: 15)),
                       trailing: FaIcon(FontAwesomeIcons.angleRight,color: HexColor(third_color),),
