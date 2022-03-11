@@ -303,8 +303,8 @@ class _OutletProduk extends State<OutletProduk> {
                       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                       children: <Widget>[
                         Expanded(child: OutlineButton(
-                          onPressed: () {Navigator.pop(context);}, child: Text("Tutup"),)),
-                        Expanded(child: RaisedButton(
+                          onPressed: () {Navigator.pop(context);}, child: Text("Tutup"),))
+                        , Expanded(child: RaisedButton(
                           color: HexColor(main_color),
                           onPressed: () {
                             _doEditHarga(valueParse, valueParse2);

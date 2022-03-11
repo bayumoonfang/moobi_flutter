@@ -13,7 +13,6 @@ import 'package:moobi_flutter/Helper/app_helper.dart';
 import 'package:moobi_flutter/Helper/page_route.dart';
 import 'package:moobi_flutter/Produk/page_produk.dart';
 import 'package:moobi_flutter/Produk/page_kategori.dart';
-import 'package:moobi_flutter/Produk/page_produkstok.dart';
 import 'package:moobi_flutter/Produk/page_satuan.dart';
 import 'package:toast/toast.dart';
 import 'package:http/http.dart' as http;
@@ -126,7 +125,7 @@ class _ProdukHomeState extends State<ProdukHome> {
                 InkWell(
                   child: ListTile(
                     onTap: (){Navigator.push(context, ExitPage(page: Produk(widget.getEmail, widget.getLegalCode)));},
-                    title: Text("Produk",style: TextStyle(
+                    title: Text("Master Data Produk",style: TextStyle(
                         color: Colors.black, fontFamily: 'VarelaRound',fontSize: 15,
                         fontWeight: FontWeight.bold)),
                     subtitle: Text("Kelola produk toko anda dengan mudah disini",style: TextStyle(

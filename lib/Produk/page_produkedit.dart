@@ -138,7 +138,7 @@ class _ProdukEdit extends State<ProdukEdit> {
 
 
   Future<bool> _onWillPop() async {
-    Navigator.pushReplacement(context, EnterPage(page: ProdukDetail(widget.idItem)));
+    //Navigator.pushReplacement(context, EnterPage(page: ProdukDetail(widget.idItem)));
   }
 
 
@@ -233,7 +233,7 @@ class _ProdukEdit extends State<ProdukEdit> {
                     icon: new Icon(Icons.arrow_back,size: 20,),
                     color: Colors.white,
                     onPressed: () => {
-                        Navigator.pushReplacement(context, EnterPage(page: ProdukDetail(widget.idItem)))
+                       // Navigator.pushReplacement(context, EnterPage(page: ProdukDetail(widget.idItem)))
                     }),
               ),
               title: Text(

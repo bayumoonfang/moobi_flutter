@@ -6,6 +6,7 @@ import 'package:flushbar/flushbar.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:hexcolor/hexcolor.dart';
 import 'package:moobi_flutter/Helper/app_helper.dart';
 import 'package:moobi_flutter/Helper/page_route.dart';
@@ -88,15 +89,16 @@ class _ProdukState extends State<Produk> {
   }
 
   startSCreen() async {
-    Timer.periodic(Duration(seconds: 5), (timer) {
+    Timer.periodic(Duration(milliseconds: 600), (timer) {
       setState(() {
-        getDataProduk();
+        //getDataProduk();
+        _isVisible = true;
       });
     });
   }
 
 
-  String filter = "Semua";
+  String filter = "";
   String filterq = "";
   Future<dynamic> getDataProduk() async {
     http.Response response = await http.get(
@@ -111,6 +113,20 @@ class _ProdukState extends State<Produk> {
     return json.decode(response.body);
   }
 
+
+  Future<dynamic> getKategori() async {
+    http.Response response = await http.get(
+        Uri.parse(applink+"api_model.php?act=getdata_kategori&branch="
+            +widget.getLegalCode),
+        headers: {
+          "Accept":"application/json",
+          "Content-Type": "application/json"}
+    );
+    return json.decode(response.body);
+  }
+
+
+
   _prepare() async {
       await _startingVariable();
   }
@@ -122,6 +138,15 @@ class _ProdukState extends State<Produk> {
     //startSCreen ();
   }
 
+
+
+  FutureOr onGoBack(dynamic value) {
+    setState(() {
+      getDataProduk();
+    });
+  }
+
+
   void _filterMe() {
     showDialog(
         context: context,
@@ -129,85 +154,91 @@ class _ProdukState extends State<Produk> {
           return AlertDialog(
             content:
             Container(
-              height: 125,
+              height: 160,
+              width: double.infinity,
               child:
-              SingleChildScrollView(
-                child :
-              Column(
-                children: [
-                  InkWell(
-                    onTap: (){
-                        setState(() {
-                          filter = 'Semua';
-                          Navigator.pop(context);
-                        });
-                    },
-                    child: Align(alignment: Alignment.centerLeft,
-                    child:    Text(
-                      "Nama Produk",
-                      textAlign: TextAlign.left,
-                      style: TextStyle(
-                          fontFamily: 'VarelaRound',
-                          fontSize: 15),
-                    ),),
-                  ),
-                  Padding(padding: const EdgeInsets.only(top:15,bottom: 15,left: 4,right: 4),
-                  child: Divider(height: 5,),),
-                  InkWell(
-                    onTap: (){
-                      setState(() {
-                        filter = 'Termurah';
-                        Navigator.pop(context);
-                      });
-                    },
-                    child: Align(alignment: Alignment.centerLeft,
-                      child:    Text(
-                        "Harga Termurah",
-                        textAlign: TextAlign.left,
-                        style: TextStyle(
-                            fontFamily: 'VarelaRound',
-                            fontSize: 15),
-                      ),),
-                  ),
-                  Padding(padding: const EdgeInsets.only(top:15,bottom: 15,left: 4,right: 4),
-                    child: Divider(height: 5,),),
-                  InkWell(
-                    onTap: (){
-                      setState(() {
-                        filter = 'Termahal';
-                        Navigator.pop(context);
-                      });
-                    },
-                    child: Align(alignment: Alignment.centerLeft,
-                      child:    Text(
-                        "Harga Tertinggi",
-                        textAlign: TextAlign.left,
-                        style: TextStyle(
-                            fontFamily: 'VarelaRound',
-                            fontSize: 15),
-                      ),),
-                  ),
-                  Padding(padding: const EdgeInsets.only(top:15,bottom: 15,left: 4,right: 4),
-                    child: Divider(height: 5,),),
-                  InkWell(
-                    onTap: (){
-                      setState(() {
-                        filter = 'Diskon';
-                        Navigator.pop(context);
-                      });
-                    },
-                    child: Align(alignment: Alignment.centerLeft,
-                      child:    Text(
-                        "Produk Diskon",
-                        textAlign: TextAlign.left,
-                        style: TextStyle(
-                            fontFamily: 'VarelaRound',
-                            fontSize: 15),
-                      ),),
-                  )
-                ],
-              ),
-            ))
+              FutureBuilder(
+                future : getKategori(),
+                builder: (context, snapshot) {
+                  if (snapshot.data == null) {
+                    return Center(
+                        child: CircularProgressIndicator()
+                    );
+                  } else {
+                    return snapshot.data == 0 || snapshot.data.length == 0 ?
+                    Container(
+                        height: double.infinity, width : double.infinity,
+                        child: new
+                        Center(
+                            child :
+                            Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              children: <Widget>[
+                                new Text(
+                                  "Tidak ada data",
+                                  style: new TextStyle(
+                                      fontFamily: 'VarelaRound', fontSize: 18),
+                                )
+                              ],
+                            )))
+                        :
+                  Column(
+                       crossAxisAlignment: CrossAxisAlignment.stretch,
+                       children: [
+                         Container(
+                             width: 100,
+                             height: 160,
+                             child : ListView.builder(
+                                 itemCount: snapshot.data == null ? 0 : snapshot.data.length,
+                                 itemBuilder: (context, i) {
+                                   return SingleChildScrollView(
+                                       child : Column(
+                                         children: [
+                                           Align(
+                                             alignment : Alignment.centerLeft,
+                                             child : Padding(padding: const EdgeInsets.only(top:15),
+                                               child : InkWell(
+                                                   onTap: (){
+                                                     setState(() {
+                                                       filter = snapshot.data[i]["b"].toString();
+                                                       Navigator.pop(context);
+                                                       _isVisible = false;
+                                                       startSCreen();
+                                                     });
+                                                   },
+                                                   child : Row(
+                                                     children: [
+                                                       FaIcon(FontAwesomeIcons.circle,size: 8,color: Colors.black,),
+                                                       Padding(
+                                                           padding: const EdgeInsets.only(left : 10),
+                                                           child : Text(snapshot.data[i]["b"].toString(),
+                                                               style : GoogleFonts.varelaRound(
+
+                                                               ))
+                                                       )
+                                                     ],
+                                                   )
+                                               ),
+                                             ),
+                                           ),
+                                           Padding(padding: const EdgeInsets.only(top:15),
+                                               child : Divider(height : 5)),
+
+                                         ],
+                                       )
+                                   );
+                                 }
+                             )
+                         )
+                       ],
+
+                   );
+                  }
+                },
+
+              )
+            )
           );
         });
   }
@@ -286,7 +317,7 @@ class _ProdukState extends State<Produk> {
                   ),
                 ),
                 title: Text(
-                  "Produk Saya",
+                  "Master Data Produk",
                   style: TextStyle(
                       color: Colors.white,
                       fontFamily: 'VarelaRound',
@@ -345,6 +376,35 @@ class _ProdukState extends State<Produk> {
                           )
                       ),
                       Padding(padding: const EdgeInsets.only(top: 10),),
+                      filter != '' ?
+                      Padding(padding: const EdgeInsets.only(left: 20,top: 2,right: 15, bottom : 15),
+                      child :
+                            Align(
+                              alignment: Alignment.centerLeft,
+                              child :  FittedBox(
+                                  fit: BoxFit.none,
+                                  child :
+                                RaisedButton(child :
+                                  Row(
+                                    children: [
+                                      Text(filter.toString(), style: GoogleFonts.varelaRound(fontSize: 13),),
+                                      Padding(padding : const EdgeInsets.only(left  :10),
+                                      child : FaIcon(FontAwesomeIcons.times,size: 12,))
+                                    ],
+                                  ),
+                                  elevation: 0,
+                                  onPressed: (){
+                                      setState(() {
+                                         filter = "";
+                                         _isVisible = false;
+                                         startSCreen();
+                                      });
+                                  },
+                              ))
+                            )
+
+                      )
+                      :Container(),
                       Visibility(
                           visible: _isVisible,
                           child: Expanded(child: _dataField()))//
@@ -398,26 +458,88 @@ class _ProdukState extends State<Produk> {
                     ],
                   )))
               :
-           ListView.builder(
+          new ListView.builder(
             itemCount: snapshot.data == null ? 0 : snapshot.data.length,
-            padding: const EdgeInsets.only(top: 10,bottom: 80),
+            padding: const EdgeInsets.only(top: 2,bottom: 80,left: 5,right: 5),
             itemBuilder: (context, i) {
               return Column(
                 children: [
+
                   InkWell(
-                    onLongPress: (){alertHapus(snapshot.data[i]["i"].toString());},
-                    onTap: () {
-                      Navigator.push(context, ExitPage(page: ProdukDetail(snapshot.data[i]["i"].toString())));
-                    },
-                    child: ListTile(
-                      leading:
-                      snapshot.data[i]["e"] != 0 ?
-                      Badge(
-                        badgeContent: Text(snapshot.data[i]["e"].toString(),
-                            style: TextStyle(color: Colors.white,fontSize: 12)),
-                        child: SizedBox(
-                            width: 60,
-                            height: 100,
+                      onTap: () {
+                        FocusScope.of(context).requestFocus(FocusNode());
+                        Navigator.push(
+                            context,
+                            MaterialPageRoute(builder: (context) => ProdukDetail(widget.getEmail, widget.getLegalCode,snapshot.data[i]["g"].toString()))).then(onGoBack);
+                      },
+                      child :
+                      snapshot.data[i]['j'] == 'Tidak Aktif' ?
+                          Opacity(
+                            opacity : 0.4,
+                            child : ListTile(
+                              leading: SizedBox(
+                                  width: 45,
+                                  height: 45,
+                                  child: ClipRRect(
+                                    borderRadius: BorderRadius.circular(6.0),
+                                    child : CachedNetworkImage(
+                                      fit: BoxFit.cover,
+                                      imageUrl:
+                                      snapshot.data[i]["d"] == '' ?
+                                      applink+"photo/nomage.jpg"
+                                          :
+                                      applink+"photo/"+widget.getLegalCode+"/"+snapshot.data[i]["d"],
+                                      progressIndicatorBuilder: (context, url,
+                                          downloadProgress) =>
+                                          CircularProgressIndicator(value:
+                                          downloadProgress.progress),
+                                      errorWidget: (context, url, error) =>
+                                          Icon(Icons.error),
+                                    ),
+                                  )),
+                              title: Align(alignment: Alignment.centerLeft,
+                                child: Opacity(
+                                    opacity: 0.8,
+                                    child : Text("#"+snapshot.data[i]["g"],
+                                        style: GoogleFonts.varelaRound(fontSize: 12))
+                                ),
+                              ),
+                              subtitle: Align(
+                                alignment: Alignment.centerLeft,
+                                child: Column(
+                                  children: [
+                                    Align(
+                                      alignment: Alignment.centerLeft,
+                                      child: Padding(padding: const EdgeInsets.only(top:2), child :
+                                      Text(snapshot.data[i]["a"].toString(),
+                                          style: GoogleFonts.varelaRound(fontSize: 14,fontWeight: FontWeight.bold,
+                                              color: Colors.black))),
+                                    ),
+                                    Align(
+                                      alignment: Alignment.centerLeft,
+                                      child: Padding(padding: const EdgeInsets.only(top:2), child :
+                                      Row(
+                                        children: [
+                                          Opacity(
+                                            opacity: 0.8,
+                                            child :   Text(snapshot.data[i]["b"], style: GoogleFonts.varelaRound(fontSize: 12,color:Colors.black),),
+                                          )
+
+                                        ],
+                                      )
+
+                                      ),
+                                    )
+                                  ],
+                                ),
+                              ),
+                            )
+                          )
+                          :
+                      ListTile(
+                        leading: SizedBox(
+                            width: 45,
+                            height: 45,
                             child: ClipRRect(
                               borderRadius: BorderRadius.circular(6.0),
                               child : CachedNetworkImage(
@@ -431,72 +553,58 @@ class _ProdukState extends State<Produk> {
                                     downloadProgress) =>
                                     CircularProgressIndicator(value:
                                     downloadProgress.progress),
-                                errorWidget: (context, url, error) => Icon(Icons.error),
+                                errorWidget: (context, url, error) =>
+                                    Icon(Icons.error),
                               ),
                             )),
+                        title: Align(alignment: Alignment.centerLeft,
+                          child: Opacity(
+                              opacity: 0.8,
+                              child : Text("#"+snapshot.data[i]["g"],
+                                  style: GoogleFonts.varelaRound(fontSize: 12))
+                          ),
+                        ),
+                        subtitle: Align(
+                          alignment: Alignment.centerLeft,
+                          child: Column(
+                            children: [
+                              Align(
+                                alignment: Alignment.centerLeft,
+                                child: Padding(padding: const EdgeInsets.only(top:2), child :
+                                Text(snapshot.data[i]["a"].toString(),
+                                    style: GoogleFonts.varelaRound(fontSize: 14,fontWeight: FontWeight.bold,
+                                        color: Colors.black))),
+                              ),
+                              Align(
+                                alignment: Alignment.centerLeft,
+                                child: Padding(padding: const EdgeInsets.only(top:2), child :
+                                Row(
+                                  children: [
+                                    Opacity(
+                                      opacity: 0.8,
+                                      child :   Text(snapshot.data[i]["b"], style: GoogleFonts.varelaRound(fontSize: 12,color:Colors.black),),
+                                    )
+
+                                  ],
+                                )
+
+                                ),
+                              )
+                            ],
+                          ),
+                        ),
                       )
-                          :
-                      SizedBox(
-                          width: 60,
-                          height: 100,
-                          child: ClipRRect(
-                            borderRadius: BorderRadius.circular(6.0),
-                            child : CachedNetworkImage(
-                              fit: BoxFit.cover,
-                              imageUrl:
-                              snapshot.data[i]["d"] == '' ?
-                              applink+"photo/nomage.jpg"
-                                  :
-                              applink+"photo/"+widget.getLegalCode+"/"+snapshot.data[i]["d"],
-                              progressIndicatorBuilder: (context, url,
-                                  downloadProgress) =>
-                                  CircularProgressIndicator(value:
-                                  downloadProgress.progress),
-                              errorWidget: (context, url, error) => Icon(Icons.error),
-                            ),
-                          )),
-                      title: Align(alignment: Alignment.centerLeft,
-                        child: Text(snapshot.data[i]["a"],
-                            style: TextStyle(fontFamily: "VarelaRound",
-                                fontSize: 13,fontWeight: FontWeight.bold)),),
-                      subtitle: Align(alignment: Alignment.centerLeft,
-                          child:
-                          snapshot.data[i]["e"] != 0 ?
-                          ResponsiveContainer(
-                            widthPercent: 45,
-                            heightPercent: 2,
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.start,
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text("Rp "+
-                                    NumberFormat.currency(
-                                        locale: 'id', decimalDigits: 0, symbol: '').
-                                    format(
-                                        snapshot.data[i]["c"]), style: new TextStyle(
-                                    decoration: TextDecoration.lineThrough,
-                                    fontFamily: 'VarelaRound',fontSize: 12),),
-                                Padding(padding: const EdgeInsets.only(left: 5),child:
-                                Text("Rp "+
-                                    NumberFormat.currency(
-                                        locale: 'id', decimalDigits: 0, symbol: '').
-                                    format(
-                                        snapshot.data[i]["c"] - double.parse(snapshot.data[i]["f"])),
-                                  style: new TextStyle(
-                                      fontFamily: 'VarelaRound',fontSize: 12),),)
-                              ],
-                            ),
-                          )
-                              :
-                          Text("Rp "+
-                              NumberFormat.currency(
-                                  locale: 'id', decimalDigits: 0, symbol: '').format(
-                                  snapshot.data[i]["c"]), style: new TextStyle(
-                              fontFamily: 'VarelaRound',fontSize: 12),)
-                      ),
-                    ),
                   ),
-                  // Padding(padding: const EdgeInsets.only(top :10 ))
+
+
+                  Container(
+                    width: double.infinity,
+                    height: 13,
+                    child :Divider(
+                      height: 5,
+                    ),
+                    padding: const EdgeInsets.only(left:15,right:15),
+                  )
                 ],
               );
             },

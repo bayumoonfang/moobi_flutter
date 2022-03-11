@@ -383,7 +383,7 @@ class _ProdukState extends State<Produk> {
                                                         InkWell(
                                                           onLongPress: (){alertHapus(data[i]["i"].toString());},
                                                           onTap: () {
-                                                            Navigator.push(context, ExitPage(page: ProdukDetail(data[i]["i"].toString())));
+                                                            //Navigator.push(context, ExitPage(page: ProdukDetail(data[i]["i"].toString())));
                                                           },
                                                           child: ListTile(
                                                             leading:

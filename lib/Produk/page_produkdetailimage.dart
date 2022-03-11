@@ -5,6 +5,7 @@
 
 import 'dart:convert';
 
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:moobi_flutter/Helper/check_connection.dart';
@@ -17,48 +18,18 @@ import 'package:toast/toast.dart';
 import 'package:http/http.dart' as http;
 class ProdukDetailImage extends StatefulWidget {
   final String ImgFile;
-  final String Branchq;
-  const ProdukDetailImage(this.ImgFile,this.Branchq);
+  final String getLegalCode;
+  const ProdukDetailImage(this.ImgFile,this.getLegalCode);
   @override
-  _ProdukDetailImageState createState() => new _ProdukDetailImageState(
-      getImgFile: this.ImgFile, getBranchq: this.Branchq);
+  _ProdukDetailImageState createState() => new _ProdukDetailImageState();
 }
 
 
 
 class _ProdukDetailImageState extends State<ProdukDetailImage> {
-  String getImgFile;
-  String getBranchq;
-  _ProdukDetailImageState({this.getImgFile, this.getBranchq});
+
   void showToast(String msg, {int duration, int gravity}) {
     Toast.show(msg, context, duration: duration, gravity: gravity);
-  }
-  String getEmail = '...';
-  _session() async {
-    int value = await Session.getValue();
-    getEmail = await Session.getEmail();
-    if (value != 1) {Navigator.pushReplacement(context, ExitPage(page: Login()));}
-  }
-
-  _connect() async {
-    Checkconnection().check().then((internet){
-      if (internet != null && internet) {} else {
-        showToast("Koneksi terputus..", gravity: Toast.CENTER, duration: Toast.LENGTH_LONG);
-      }
-    });
-  }
-
-
-  _prepare() async {
-    await _connect();
-    await _session();
-  }
-
-
-  @override
-  void initState() {
-    super.initState();
-    _prepare();
   }
 
 
@@ -70,9 +41,8 @@ class _ProdukDetailImageState extends State<ProdukDetailImage> {
         child: Center(
           child: Hero(
               tag: 'imagehero',
-              child:
-              PhotoView(
-                imageProvider: NetworkImage(applink+"photo/"+widget.Branchq+"/"+widget.ImgFile),
+              child:   PhotoView(
+                imageProvider: CachedNetworkImageProvider(applink+"photo/"+widget.getLegalCode+"/"+widget.ImgFile),
               )
           ),
         ),

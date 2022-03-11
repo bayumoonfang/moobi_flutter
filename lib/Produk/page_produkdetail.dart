@@ -6,6 +6,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:flushbar/flushbar.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
@@ -14,9 +15,6 @@ import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
 import 'package:moobi_flutter/Helper/app_helper.dart';
 import 'package:moobi_flutter/Produk/page_produkdetailimage.dart';
-import 'package:moobi_flutter/Produk/page_produkpenjualanpro.dart';
-import 'package:moobi_flutter/Produk/page_produkstok.dart';
-import 'package:moobi_flutter/Produk/page_produktransaksipro.dart';
 import 'package:moobi_flutter/Produk/page_produkedit.dart';
 import 'package:moobi_flutter/helper/api_link.dart';
 import 'package:moobi_flutter/helper/check_connection.dart';
@@ -26,11 +24,15 @@ import 'package:moobi_flutter/page_login.dart';
 import 'package:toast/toast.dart';
 import 'package:http/http.dart' as http;
 
+import '../page_intoduction.dart';
+
 
 class ProdukDetail extends StatefulWidget {
-  final String idItem;
+  final String getEmail;
+  final String getLegalCode;
+  final String getItemNumber;
 
-  const ProdukDetail(this.idItem);
+  const ProdukDetail(this.getEmail,this.getLegalCode,this.getItemNumber);
   @override
   _ProdukDetailState createState() => _ProdukDetailState();
 }
@@ -43,32 +45,54 @@ class _ProdukDetailState extends State<ProdukDetail> {
   File galleryFile;
   String Base64;
   final _produksetdiskon = TextEditingController();
+
   void showToast(String msg, {int duration, int gravity}) {
-    Toast.show(msg, context, duration: duration, gravity: gravity);
+    Toast.show(msg, context, duration: duration, gravity: gravity);}
+
+  _cekLegalandUser() async {
+    final response = await http.post(applink+"api_model.php?act=cek_legalanduser",
+        body: {"username": widget.getEmail.toString()},
+        headers: {"Accept":"application/json"});
+    Map data = jsonDecode(response.body);
+    setState(() {
+      if (data["message"].toString() == '2' || data["message"].toString() == '3') {
+        Navigator.pushReplacement(context, ExitPage(page: Introduction()));
+      }
+    });
   }
 
-  bool isVisible = false;
-
-
-  String getEmail = "...";
-  String getBranch = "...";
+  //=============================================================================
   _startingVariable() async {
     await AppHelper().getConnect().then((value){if(value == 'ConnInterupted'){
       showToast("Koneksi terputus..", gravity: Toast.CENTER,duration:
       Toast.LENGTH_LONG);}});
-    await AppHelper().getSession().then((value){if(value[0] != 1) {
-      Navigator.pushReplacement(context, ExitPage(page: Login()));}else{setState(() {getEmail = value[1];});}});
-    await AppHelper().getDetailUser(getEmail.toString()).then((value){
-      setState(() {
-        getBranch = value[1];
-      });
+    await AppHelper().getSession().then((value){
+      if(value[0] != 1) {
+        Navigator.pushReplacement(context, ExitPage(page: Login()));
+      }
     });
+    await _cekLegalandUser();
+
+  }
+
+  showFlushBarsuccess(BuildContext context, String stringme) => Flushbar(
+    // title:  "Hey Ninja",
+    message:  stringme,
+    shouldIconPulse: false,
+    duration:  Duration(seconds: 3),
+    backgroundColor: Colors.black,
+    flushbarPosition: FlushbarPosition.BOTTOM ,
+  )..show(context);
+
+  void showsuccess(String txtError){
+    showFlushBarsuccess(context, txtError);
+    return;
   }
 
   String getCountJual = '0';
   String getSatuan = "...";
   _getCountTerjual() async {
-    final response = await http.get(applink+"api_model.php?act=count_terjual&itemn="+widget.idItem+"&branch="+getBranch);
+    final response = await http.get(applink+"api_model.php?act=count_terjual&itemn="+widget.getItemNumber+"&branch="+widget.getLegalCode);
     Map data = jsonDecode(response.body);
     setState(() {
       getCountJual = data["a"].toString();
@@ -79,42 +103,45 @@ class _ProdukDetailState extends State<ProdukDetail> {
 
   String getName = '...';
   String getPhoto = '...';
-  String getDiscount = '0';
-  String getDiscountVal = '0';
-  String getHarga = '0';
   String getItemNumb = '0';
   String getKategori = "...";
   String getStatusProduk = "...";
   String getDateCreated = "...";
+  String getTipe = "...";
   _getDetail() async {
-    final response = await http.get(applink+"api_model.php?act=item_detail&id="+widget.idItem);
+    final response = await http.get(applink+"api_model.php?act=item_detail&id="+widget.getItemNumber);
     Map data = jsonDecode(response.body);
     setState(() {
       getName = data["a"].toString();
       getPhoto = data["g"].toString();
-      getDiscount = data["b"].toString();
-      getDiscountVal = data["k"].toString();
-      getHarga = data["d"].toString();
       getItemNumb = data["l"].toString();
       getKategori = data["i"].toString();
       getStatusProduk = data["f"].toString();
       getDateCreated = data["h"].toString();
       getSatuan = data["c"].toString();
+      getTipe = data["e"].toString();
     });
   }
 
 
 
-  void _nonaktifproduk() {
-    var url = applink+"api_model.php?act=action_nonaktifproduk";
-    http.post(url,
-        body: {
-          "id": widget.idItem
-        });
-    showToast("Status produk berhasil dirubah", gravity: Toast.BOTTOM,
-        duration: Toast.LENGTH_LONG);
+  void _nonaktifproduk() async {
+    final response = await http.post(applink+"api_model.php?act=action_nonaktifproduk", body: {
+      "id": widget.getItemNumber,
+      "branch" : widget.getLegalCode
+    });
+    Map data = jsonDecode(response.body);
     setState(() {
-       _getDetail();
+      if (data["message"].toString() == '1') {
+        showsuccess("Status produk berhasil dirubah");
+        setState(() {
+          _getDetail();
+        });
+        return false;
+      } else {
+        showsuccess("Status gagal dirubah");
+        return false;
+      }
     });
   }
 
@@ -125,17 +152,24 @@ class _ProdukDetailState extends State<ProdukDetail> {
   }
 
 
-  void doHapusImage() {
+  void doHapusImage() async {
     var url = applink+"api_model.php?act=hapus_photoproduk";
-    http.post(url,
+    final response = await http.post(url,
         body: {
-          "produk_id" : widget.idItem
+          "produk_id" : widget.getItemNumber,
+          "branch" : widget.getLegalCode
         });
-    showToast("Photo produk berhasil dihapus.. Silahkan refresh halaman ini", gravity: Toast.BOTTOM, duration: Toast.LENGTH_LONG);
+    Map data = jsonDecode(response.body);
     setState(() {
-      _getDetail();
+      if (data["message"].toString() == '1') {
+        showsuccess("Photo produk berhasil dihapus.. Silahkan refresh halaman ini");
+        setState(() {
+          _getDetail();
+        });
+        return false;
+      }
     });
-    return;
+
   }
 
 
@@ -228,103 +262,18 @@ class _ProdukDetailState extends State<ProdukDetail> {
 
 
   doHapus() async {
-      http.post(applink+"api_model.php?act=hapus_produk", body: {
-        "produk_id" : widget.idItem
+    final response = await http.post(applink+"api_model.php?act=hapus_produk", body: {
+        "produk_id" : widget.getItemNumber
       });
-      Navigator.pop(context);
-      return false;
-  }
-
-
-  doSimpandiskon() async {
-    if (_produksetdiskon.text == '') {
-      showToast("Diskon tidak boleh kosong", gravity: Toast.BOTTOM,
-          duration: Toast.LENGTH_LONG);
-      return false;
-    } else {
-      final response = await http.post(applink+"api_model.php?act=set_diskonproduk", body: {
-        "diskon_val": _produksetdiskon.text,
-        "produk_id" : widget.idItem
-      });
-      Map dataqq = jsonDecode(response.body);
-      setState(() {
-        if (dataqq['message'] == '0') {
-          showToast("Diskon tidak boleh kurang dari 0", gravity: Toast.BOTTOM,
-              duration: Toast.LENGTH_LONG);
-          return false;
-        } else {
-          setState(() {
-            _getDetail();
-          });
-          Navigator.pop(context);
-          showToast("Diskon berhasil dirubah", gravity: Toast.BOTTOM,
-              duration: Toast.LENGTH_LONG);
-          return false;
-        }
-      });
-    }
-  }
-
-  dialogDiskon() {
-    showDialog(
-        context: context,
-        builder: (BuildContext context) {
-          return AlertDialog(
-            //title: Text(),
-            content: Container(
-                width: double.infinity,
-                height: 188,
-                child: Column(
-                  children: [
-                    Align(alignment: Alignment.center, child:
-                    Text("Setting", style: TextStyle(fontFamily: 'VarelaRound', fontSize: 20,
-                        fontWeight: FontWeight.bold)),),
-                    Padding(padding: const EdgeInsets.only(top: 15), child:
-                    Align(alignment: Alignment.center, child:
-                    Text("Masukkan diskon untuk produk ini ",
-                        style: TextStyle(fontFamily: 'VarelaRound', fontSize: 12))
-                    ),),
-                    Padding(padding: const EdgeInsets.only(top: 15), child:
-                    Align(alignment: Alignment.center, child:
-                    TextFormField(
-                        controller: _produksetdiskon,
-                        style: TextStyle(fontFamily: "VarelaRound",fontSize: 15),
-                        keyboardType: TextInputType.number,
-                        decoration: new InputDecoration(
-                          contentPadding: const EdgeInsets.only(top: 1,left: 10,bottom: 1),
-                          focusedBorder: OutlineInputBorder(
-                            borderSide: BorderSide(color: HexColor("#DDDDDD"), width: 1.0),
-                          ),
-                          enabledBorder: OutlineInputBorder(
-                            borderSide: BorderSide(color: HexColor("#DDDDDD"), width: 1.0),
-                          ),
-                          hintText: 'Contoh : 5, 25, dll',
-                          floatingLabelBehavior: FloatingLabelBehavior.always,
-                          hintStyle: TextStyle(fontFamily: "VarelaRound", color: HexColor("#c4c4c4")),
-                        ),
-                      ),
-                    )),
-                    Padding(padding: const EdgeInsets.only(top: 25), child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                      children: <Widget>[
-                        Expanded(child: OutlineButton(
-                          onPressed: () {Navigator.pop(context);}, child: Text("Tutup"),)),
-                        Expanded(child: OutlineButton(
-                          borderSide: BorderSide(width: 1.0, color: Colors.redAccent),
-                          onPressed: () {
-                            doSimpandiskon();
-                            //Navigator.pop(context);
-                          }, child: Text("Simpan", style: TextStyle(color: Colors.red),),)),
-                      ],),)
-                  ],
-                )
-            ),
-          );
-        });
-
+    Map data = jsonDecode(response.body);
+    setState(() {
+      if (data["message"].toString() == '1') {
+        Navigator.pop(context);
+        return false;
+      }
+    });
 
   }
-
 
 
   @override
@@ -343,12 +292,17 @@ class _ProdukDetailState extends State<ProdukDetail> {
     );
     String fileName = galleryFile.path.split('/').last;
     Base64 = base64Encode((galleryFile.readAsBytesSync()));
-    http.post(applink+"api_model.php?act=edit_produkphoto", body: {
+    final response = await http.post(applink+"api_model.php?act=edit_produkphoto", body: {
       "produk_image": Base64,
-      "produk_id": widget.idItem
+      "produk_id": widget.getItemNumber
     });
-    showToast("Photo produk berhasil dirubah.. Silahkan refresh halaman ini", gravity: Toast.BOTTOM, duration: Toast.LENGTH_LONG);
-    return false;
+    Map data = jsonDecode(response.body);
+    setState(() {
+      if (data["message"].toString() == '1') {
+        showsuccess("Photo produk berhasil dirubah.. Silahkan refresh halaman ini");
+        return false;
+      }
+    });
   }
 
   void _imgDialog() {
@@ -367,25 +321,11 @@ class _ProdukDetailState extends State<ProdukDetail> {
                         getPhoto != '' ?
                         Column(
                           children: [
-                            InkWell(
-                              onTap: (){
-                                Navigator.push(context, ExitPage(page: ProdukDetailImage(getPhoto.toString(), getBranch.toString())));
-                              },
-                              child: Align(alignment: Alignment.centerLeft,
-                                child:    Text(
-                                  "Lihat Photo",
-                                  textAlign: TextAlign.left,
-                                  style: TextStyle(
-                                      fontFamily: 'VarelaRound',
-                                      fontSize: 15),
-                                ),),
-                            ),
-                            Padding(padding: const EdgeInsets.only(top:15,bottom: 15,left: 4,right: 4),
-                              child: Divider(height: 5,),),
+                            Padding(padding: const EdgeInsets.only(top:5,bottom: 15,left: 4,right: 4)),
                             InkWell(
                               onTap: (){
                                 alertHapusImage();
-                                Navigator.pop(context);
+
                               },
                               child: Align(alignment: Alignment.centerLeft,
                                 child:    Text(
@@ -486,16 +426,11 @@ class _ProdukDetailState extends State<ProdukDetail> {
                   }),
             ),
             actions: [
-              Padding(padding: const EdgeInsets.only(top: 18,right: 45),child:
+              Padding(padding: const EdgeInsets.only(top: 18,right: 35),child:
               InkWell(
                 onTap: (){alertHapus();},
                 child: FaIcon(FontAwesomeIcons.trashAlt,color: Colors.white,size: 18,),
               ),),
-              Padding(padding: const EdgeInsets.only(top: 20,right: 30),child:
-              InkWell(
-                onTap: (){dialogDiskon();},
-                child: FaIcon(FontAwesomeIcons.percent,color: Colors.white,size: 16,),
-              ),)
             ],
             title: Text(
               "Detail Produk",
@@ -513,23 +448,30 @@ class _ProdukDetailState extends State<ProdukDetail> {
                 children: [
                   Padding(padding: const EdgeInsets.only(top: 20),
                     child: ListTile(
-                      leading:  InkWell(
-                        onLongPress: (){_imgDialog();},
-                        child: CircleAvatar(
+                      leading:  CircleAvatar(
                           radius: 30,
                           backgroundColor: HexColor("#602d98"),
                           child: CircleAvatar(
+                            child : InkWell(
+                              onLongPress: (){_imgDialog();},
+                              onTap: (){
+                                getPhoto.toString() != '' ?
+                                    Navigator.push(context, ExitPage(page: ProdukDetailImage(getPhoto.toString(), widget.getLegalCode.toString())))
+                                :
+                               "";
+
+                                },
+                            ),
                             backgroundColor: Colors.white,
                             radius: 27,
                             backgroundImage:
                             getPhoto == '' ?
                             CachedNetworkImageProvider(applink+"photo/nomage.jpg")
                                 :
-                            CachedNetworkImageProvider(applink+"photo/"+getBranch+"/"+getPhoto,
+                            CachedNetworkImageProvider(applink+"photo/"+widget.getLegalCode+"/"+getPhoto.toString(),
                             ),
                           ),
                         ),
-                      ),
                       title: Align(
                         alignment: Alignment.centerLeft,
                         child: Text(getName.toString(),style: TextStyle(
@@ -540,32 +482,10 @@ class _ProdukDetailState extends State<ProdukDetail> {
                         height: 30,
                         width: 100,
                         child :
-                        getDiscount != '0' ?
-                                      Row(
-                                        children: [
-                                          Text("Rp "+
-                                              NumberFormat.currency(
-                                                  locale: 'id', decimalDigits: 0, symbol: '').format(
-                                                  double.parse(getHarga.toString())), style: new TextStyle(
-                                              decoration: TextDecoration.lineThrough,
-                                              fontFamily: 'VarelaRound',fontSize: 13),),
-                                          Padding(padding: const EdgeInsets.only(left: 5),child:
-                                          Text("Rp "+
-                                              NumberFormat.currency(
-                                                  locale: 'id', decimalDigits: 0, symbol: '').format(
-                                                  double.parse(getHarga.toString())- double.parse(getDiscountVal.toString())), style: new TextStyle(
-                                              fontFamily: 'VarelaRound',fontSize: 13, color: Colors.black,
-                                              fontWeight: FontWeight.bold),),)
-                                        ],
-                                      )
-                                          :
                                       Padding (
                                       padding : const EdgeInsets.only(top: 5)
-                              ,child :Text("Rp "+
-                              NumberFormat.currency(
-                                  locale: 'id', decimalDigits: 0, symbol: '').format(
-                                  double.parse(getHarga.toString())), style: new TextStyle(
-                              fontFamily: 'VarelaRound',fontSize: 13,fontWeight: FontWeight.bold),)
+                              ,child :Text(getKategori.toString(), style: new TextStyle(
+                              fontFamily: 'VarelaRound',fontSize: 13),)
                           )))
                     ),
                   Padding(padding: const EdgeInsets.only(left: 15,right: 15,top: 10),
@@ -615,7 +535,7 @@ class _ProdukDetailState extends State<ProdukDetail> {
                                 .spaceBetween,
                             children: [
                               Text(
-                                "ID Produk",
+                                "Item Number",
                                 textAlign: TextAlign.left,
                                 style: TextStyle(
                                     fontFamily: 'VarelaRound',
@@ -628,31 +548,6 @@ class _ProdukDetailState extends State<ProdukDetail> {
                             ],
                           ),),
 
-                        Padding(padding: const EdgeInsets.only(top: 10,right: 25),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment
-                                .spaceBetween,
-                            children: [
-                              Text(
-                                "Diskon",
-                                textAlign: TextAlign.left,
-                                style: TextStyle(
-                                    fontFamily: 'VarelaRound',
-                                    fontSize: 13),
-                              ),
-                                  Container (
-                                    width: 50,
-                                    height: 13,
-                                    child :
-                                    Align(alignment: Alignment.centerRight,
-                                        child: Text(getDiscount.toString()+" %",
-                                            style: TextStyle(
-                                                fontFamily: 'VarelaRound',
-                                                fontSize: 14)
-                                        ))
-                                  ),
-                            ],
-                          ),),
 
                         Padding(padding: const EdgeInsets.only(top: 10,right: 25),
                           child: Row(
@@ -673,7 +568,24 @@ class _ProdukDetailState extends State<ProdukDetail> {
                             ],
                           ),),
 
-
+                        Padding(padding: const EdgeInsets.only(top: 10,right: 25),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment
+                                .spaceBetween,
+                            children: [
+                              Text(
+                                "Tipe",
+                                textAlign: TextAlign.left,
+                                style: TextStyle(
+                                    fontFamily: 'VarelaRound',
+                                    fontSize: 13),
+                              ),
+                              Text(getTipe.toString(),
+                                  style: TextStyle(
+                                      fontFamily: 'VarelaRound',
+                                      fontSize: 14)),
+                            ],
+                          ),),
                         Padding(padding: const EdgeInsets.only(top: 10,right: 25),
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment
@@ -707,56 +619,6 @@ class _ProdukDetailState extends State<ProdukDetail> {
                   Padding(padding: const EdgeInsets.only(top: 10,left: 10,right: 25),
                     child: Column(
                       children: [
-
-                        Padding(padding: const EdgeInsets.only(top: 5),
-                            child: InkWell(
-                              child: ListTile(
-                                onTap: (){
-                                  Navigator.push(context, ExitPage(page: ProdukStok(getItemNumb.toString(),
-                                      getName.toString())));
-                                },
-                                title: Text("Stok Produk",style: TextStyle(
-                                    color: Colors.black, fontFamily: 'VarelaRound',fontSize: 15,
-                                    fontWeight: FontWeight.bold)),
-                                trailing: FaIcon(FontAwesomeIcons.angleRight,color: HexColor("#594d75"),size: 15,),
-                              ),
-                            )
-                        ),
-                        Padding(padding: const EdgeInsets.only(top: 0,left: 15),
-                          child: Divider(height: 3,),),
-                        Padding(padding: const EdgeInsets.only(top: 5),
-                            child: InkWell(
-                              child: ListTile(
-                                onTap: (){
-                                  Navigator.push(context, ExitPage(page: ProdukTransaksi(getItemNumb.toString())));
-                                },
-                                title: Text("Transaksi Produk",style: TextStyle(
-                                    color: Colors.black, fontFamily: 'VarelaRound',fontSize: 15,
-                                    fontWeight: FontWeight.bold)),
-                                trailing: FaIcon(FontAwesomeIcons.angleRight,color: HexColor("#594d75"),size: 15,),
-                              ),
-                            )
-                        ),
-
-                        Padding(padding: const EdgeInsets.only(top: 0,left: 15),
-                          child: Divider(height: 3,),),
-                        Padding(padding: const EdgeInsets.only(top: 5),
-                            child: InkWell(
-                              child: ListTile(
-                                onTap: (){
-                                  Navigator.push(context, ExitPage(page: ProdukPenjualan(getItemNumb.toString())));
-                                },
-                                title: Text("Transaksi Penjualan",style: TextStyle(
-                                    color: Colors.black, fontFamily: 'VarelaRound',fontSize: 15,
-                                    fontWeight: FontWeight.bold)),
-                                trailing: FaIcon(FontAwesomeIcons.angleRight,color: HexColor("#594d75"),size: 15,),
-                              ),
-                            )
-                        ),
-
-
-                        Padding(padding: const EdgeInsets.only(top: 0,left: 15),
-                          child: Divider(height: 3,),),
 
                         Padding(padding: const EdgeInsets.only(top: 5),
                             child: InkWell(
@@ -816,7 +678,7 @@ class _ProdukDetailState extends State<ProdukDetail> {
                       child: RaisedButton(
                         elevation: 0,
                         onPressed: (){
-                          Navigator.pushReplacement(context, ExitPage(page: ProdukEdit(widget.idItem)));
+                          Navigator.pushReplacement(context, ExitPage(page: ProdukEdit(widget.getItemNumber)));
                         },
                         color: HexColor("#dbd0ea"),
                         shape: RoundedRectangleBorder(side: BorderSide(
