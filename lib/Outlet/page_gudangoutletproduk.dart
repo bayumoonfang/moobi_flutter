@@ -746,9 +746,9 @@ class _GudangOutletProduk extends State<GudangOutletProduk> {
                                          children: [
                                            Align(
                                              alignment: Alignment.centerLeft,
-                                             child: Padding(padding: const EdgeInsets.only(top:2), child :
+                                             child: Padding(padding: const EdgeInsets.only(top:1), child :
                                              Text(snapshot.data[i]["b"].toString(),
-                                                 style: GoogleFonts.varelaRound(fontSize: 14,fontWeight: FontWeight.bold,
+                                                 style: GoogleFonts.varelaRound(fontSize: 13,fontWeight: FontWeight.bold,
                                                      color: Colors.black))),
                                            ),
                                            Align(
@@ -863,7 +863,7 @@ class _GudangOutletProduk extends State<GudangOutletProduk> {
                                                   alignment: Alignment.centerLeft,
                                                   child: Padding(padding: const EdgeInsets.only(top:2), child :
                                                   Text(snapshot.data[i]["b"],
-                                                      style: GoogleFonts.varelaRound(fontSize: 14,fontWeight: FontWeight.bold,
+                                                      style: GoogleFonts.varelaRound(fontSize: 13,fontWeight: FontWeight.bold,
                                                           color: Colors.black))),
                                                 ),
                                                 Align(

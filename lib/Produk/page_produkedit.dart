@@ -3,6 +3,7 @@
 
 import 'dart:convert';
 
+import 'package:flushbar/flushbar.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
@@ -17,9 +18,14 @@ import 'package:moobi_flutter/page_login.dart';
 import 'package:toast/toast.dart';
 import 'package:http/http.dart' as http;
 
+import '../page_intoduction.dart';
+
 class ProdukEdit extends StatefulWidget {
-  final String idItem;
-  const ProdukEdit(this.idItem);
+  final String getEmail;
+  final String getLegalCode;
+  final String getItemNumber;
+  final String getNamaUser;
+  const ProdukEdit(this.getEmail,this.getLegalCode,this.getItemNumber,this.getNamaUser);
   @override
   _ProdukEdit createState() => _ProdukEdit();
 }
@@ -38,76 +44,29 @@ class _ProdukEdit extends State<ProdukEdit> {
   final _namaproduk = TextEditingController();
   final _hargaproduk = TextEditingController();
   final _stockawalproduk = TextEditingController();
+
   void showToast(String msg, {int duration, int gravity}) {
-    Toast.show(msg, context, duration: duration, gravity: gravity);
-  }
+    Toast.show(msg, context, duration: duration, gravity: gravity);}
 
-
-
-  String getEmail = "...";
-  String getBranch = "...";
-  _startingVariable() async {
-    await AppHelper().getConnect().then((value){if(value == 'ConnInterupted'){
-      showToast("Koneksi terputus..", gravity: Toast.CENTER,duration:
-      Toast.LENGTH_LONG);}});
-    await AppHelper().getSession().then((value){if(value[0] != 1) {
-      Navigator.pushReplacement(context, ExitPage(page: Login()));}else{setState(() {getEmail = value[1];});}});
-    await AppHelper().getDetailUser(getEmail.toString()).then((value){
-      setState(() {
-        getBranch = value[1];
-      });
-    });
-  }
-
-
-  String getName = '...';
-  String getPhoto = '...';
-  String getDiscount = '0';
-  String getDiscountVal = '0';
-  String getHarga = '0';
-  String getItemNumb = '0';
-  String getKategori = "...";
-  String getStatusProduk = "...";
-  String getDateCreated = "...";
-  String getSatuan = "...";
-  String getType = "...";
-  _getDetail() async {
-    final response = await http.get(applink+"api_model.php?act=item_detail&id="+widget.idItem);
+  _cekLegalandUser() async {
+    final response = await http.post(applink+"api_model.php?act=cek_legalanduser",
+        body: {"username": widget.getEmail.toString()},
+        headers: {"Accept":"application/json"});
     Map data = jsonDecode(response.body);
     setState(() {
-      getName = data["a"].toString();
-      _namaproduk.text = getName;
-      getPhoto = data["g"].toString();
-      //getDiscount = data["b"].toString();
-      //getDiscountVal = data["k"].toString();
-      getHarga = data["d"].toString();
-      _hargaproduk.text = getHarga;
-      getItemNumb = data["l"].toString();
-      getKategori = data["i"].toString();
-      getStatusProduk = data["f"].toString();
-      getDateCreated = data["h"].toString();
-      getSatuan = data["c"].toString();
-      getType = data["e"].toString();
-
+      if (data["message"].toString() == '2' || data["message"].toString() == '3') {
+        Navigator.pushReplacement(context, ExitPage(page: Introduction()));
+      }
     });
   }
 
 
-  _prepare() async {
-    await _startingVariable();
-    await  _getDetail();
-    await getAllItem();
-    await getAllCategory();
-    setState(() {
-      showsave = true;
-    });
-  }
 
 
   Future getAllItem() async {
     //var url = applink+"api_model.php?act=getdata_unit&id="+getBranchVal;
     var response = await http.get(
-        Uri.encodeFull(applink+"api_model.php?act=getdata_unit&id="+getBranch));
+        Uri.encodeFull(applink+"api_model.php?act=getdata_unit&id="+widget.getLegalCode));
     if (response.statusCode == 200) {
       var jsonData = json.decode(response.body);
       setState(() {
@@ -119,7 +78,7 @@ class _ProdukEdit extends State<ProdukEdit> {
 
   Future getAllCategory() async {
     var response = await http.get(
-        Uri.encodeFull(applink+"api_model.php?act=getdata_category&id="+getBranch));
+        Uri.encodeFull(applink+"api_model.php?act=getdata_category&id="+widget.getLegalCode));
     if (response.statusCode == 200) {
       var jsonData = json.decode(response.body);
       setState(() {
@@ -127,6 +86,67 @@ class _ProdukEdit extends State<ProdukEdit> {
       });
     }
     print(categoryList);
+  }
+
+
+  //=============================================================================
+  _startingVariable() async {
+    await AppHelper().getConnect().then((value){if(value == 'ConnInterupted'){
+      showToast("Koneksi terputus..", gravity: Toast.CENTER,duration:
+      Toast.LENGTH_LONG);}});
+    await AppHelper().getSession().then((value){
+      if(value[0] != 1) {
+        Navigator.pushReplacement(context, ExitPage(page: Login()));
+      }
+    });
+    await _cekLegalandUser();
+    await getAllItem();
+    await getAllCategory();
+    await  _getDetail();
+
+  }
+
+  showFlushBarsuccess(BuildContext context, String stringme) => Flushbar(
+    // title:  "Hey Ninja",
+    message:  stringme,
+    shouldIconPulse: false,
+    duration:  Duration(seconds: 3),
+    backgroundColor: Colors.black,
+    flushbarPosition: FlushbarPosition.BOTTOM ,
+  )..show(context);
+
+  void showsuccess(String txtError){
+    showFlushBarsuccess(context, txtError);
+    return;
+  }
+
+
+
+  String getName = '...';
+  String getPhoto = '...';
+  String getKategori = "...";
+  String getSatuan = "...";
+
+  _getDetail() async {
+    final response = await http.get(applink+"api_model.php?act=item_detail&id="+widget.getItemNumber);
+    Map data = jsonDecode(response.body);
+    setState(() {
+      getName = data["a"].toString();
+      _namaproduk.text = getName;
+      getPhoto = data["g"].toString();
+      getKategori = data["i"].toString();
+      getSatuan = data["c"].toString();
+
+
+    });
+  }
+
+
+  _prepare() async {
+    await _startingVariable();
+    setState(() {
+      showsave = true;
+    });
   }
 
 
@@ -138,7 +158,7 @@ class _ProdukEdit extends State<ProdukEdit> {
 
 
   Future<bool> _onWillPop() async {
-    //Navigator.pushReplacement(context, EnterPage(page: ProdukDetail(widget.idItem)));
+    Navigator.pop(context);
   }
 
 
@@ -148,22 +168,19 @@ class _ProdukEdit extends State<ProdukEdit> {
     final response = await http.post(applink+"api_model.php?act=edit_produk", body: {
       "produk_nama": _namaproduk.text,
       "produk_satuan" : selectedSatuan.toString(),
-      "produk_harga" : _hargaproduk.text,
-      "produk_type" : selectedType.toString(),
       "produk_kategori" : selectedCategory.toString(),
-      "produk_branch" : getBranch,
-      "produk_iditem" : widget.idItem
+      "produk_branch" : widget.getLegalCode,
+      "produk_iditem" : widget.getItemNumber,
+      "produk_namauser":widget.getNamaUser
     });
     Map data = jsonDecode(response.body);
     setState(() {
       if (data["message"].toString() == '0') {
-        showToast("Nama Produk sudah ada", gravity: Toast.BOTTOM,
-            duration: Toast.LENGTH_LONG);
+        showsuccess("Nama Produk sudah ada");
         return false;
       } else {
         Navigator.pop(context);
-        showToast("Produk berhasil diedit", gravity: Toast.BOTTOM,
-            duration: Toast.LENGTH_LONG);
+        showsuccess("Produk berhasil diedit");
         return false;
       }
     });
@@ -172,7 +189,7 @@ class _ProdukEdit extends State<ProdukEdit> {
 
 
   alertSimpan() {
-    if (_namaproduk.text == "" || _hargaproduk.text == "" ) {
+    if (_namaproduk.text == "") {
       showToast("Form tidak boleh kosong ", gravity: Toast.BOTTOM,
           duration: Toast.LENGTH_LONG);
       return false;
@@ -281,41 +298,6 @@ class _ProdukEdit extends State<ProdukEdit> {
                                     decoration: InputDecoration(
                                       contentPadding: const EdgeInsets.only(top:2),
                                       hintText: 'Contoh : Nasi Goreng, Es Jeruk',
-                                      labelText: '',
-                                      floatingLabelBehavior: FloatingLabelBehavior.always,
-                                      hintStyle: TextStyle(fontFamily: "VarelaRound", color: HexColor("#c4c4c4")),
-                                      enabledBorder: UnderlineInputBorder(
-                                        borderSide: BorderSide(color: HexColor("#DDDDDD")),
-                                      ),
-                                      focusedBorder: UnderlineInputBorder(
-                                        borderSide: BorderSide(color: HexColor("#8c8989")),
-                                      ),
-                                      border: UnderlineInputBorder(
-                                        borderSide: BorderSide(color: HexColor("#DDDDDD")),
-                                      ),
-                                    ),
-                                  ),
-                                ),),
-                              ],
-                            )
-                        ),
-
-                        Padding(padding: const EdgeInsets.only(left: 15,top: 10,right: 15),
-                            child: Column(
-                              children: [
-                                Align(alignment: Alignment.centerLeft,child: Padding(
-                                  padding: const EdgeInsets.only(left: 0,top: 15),
-                                  child: Text("Harga Produk",style: TextStyle(fontWeight: FontWeight.bold,fontFamily: "VarelaRound",
-                                      fontSize: 12,color: HexColor("#0074D9")),),
-                                ),),
-                                Align(alignment: Alignment.centerLeft,child: Padding(
-                                  padding: const EdgeInsets.only(left: 0),
-                                  child: TextFormField(
-                                    controller: _hargaproduk,
-                                    keyboardType: TextInputType.number,
-                                    decoration: InputDecoration(
-                                      contentPadding: const EdgeInsets.only(top:2),
-                                      hintText: 'Contoh : 12000, 15000',
                                       labelText: '',
                                       floatingLabelBehavior: FloatingLabelBehavior.always,
                                       hintStyle: TextStyle(fontFamily: "VarelaRound", color: HexColor("#c4c4c4")),

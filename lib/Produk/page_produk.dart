@@ -31,8 +31,9 @@ import '../page_intoduction.dart';
 class Produk extends StatefulWidget{
   final String getEmail;
   final String getLegalCode;
+  final String getNamaUser;
 
-  const Produk(this.getEmail, this.getLegalCode);
+  const Produk(this.getEmail, this.getLegalCode, this.getNamaUser);
   @override
   _ProdukState createState() => _ProdukState();
 }
@@ -415,8 +416,13 @@ class _ProdukState extends State<Produk> {
                 padding: const EdgeInsets.only(right : 10),
                 child: FloatingActionButton(
                   onPressed: (){
+
                     FocusScope.of(context).requestFocus(FocusNode());
-                      Navigator.push(context, ExitPage(page: ProdukInsert()));
+                    Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => ProdukInsert(widget.getEmail, widget.getLegalCode, widget.getNamaUser))).then(onGoBack);
+
+                    //Navigator.push(context, ExitPage(page: ProdukInsert()));
                   },
                   child: FaIcon(FontAwesomeIcons.plus),
                 ),
@@ -470,7 +476,7 @@ class _ProdukState extends State<Produk> {
                         FocusScope.of(context).requestFocus(FocusNode());
                         Navigator.push(
                             context,
-                            MaterialPageRoute(builder: (context) => ProdukDetail(widget.getEmail, widget.getLegalCode,snapshot.data[i]["g"].toString()))).then(onGoBack);
+                            MaterialPageRoute(builder: (context) => ProdukDetail(widget.getEmail, widget.getLegalCode,snapshot.data[i]["g"].toString(), widget.getNamaUser))).then(onGoBack);
                       },
                       child :
                       snapshot.data[i]['j'] == 'Tidak Aktif' ?
@@ -510,19 +516,19 @@ class _ProdukState extends State<Produk> {
                                   children: [
                                     Align(
                                       alignment: Alignment.centerLeft,
-                                      child: Padding(padding: const EdgeInsets.only(top:2), child :
+                                      child: Padding(padding: const EdgeInsets.only(top:1), child :
                                       Text(snapshot.data[i]["a"].toString(),
-                                          style: GoogleFonts.varelaRound(fontSize: 14,fontWeight: FontWeight.bold,
+                                          style: GoogleFonts.varelaRound(fontSize: 13,fontWeight: FontWeight.bold,
                                               color: Colors.black))),
                                     ),
                                     Align(
                                       alignment: Alignment.centerLeft,
-                                      child: Padding(padding: const EdgeInsets.only(top:2), child :
+                                      child: Padding(padding: const EdgeInsets.only(top:1), child :
                                       Row(
                                         children: [
                                           Opacity(
                                             opacity: 0.8,
-                                            child :   Text(snapshot.data[i]["b"], style: GoogleFonts.varelaRound(fontSize: 12,color:Colors.black),),
+                                            child :   Text(snapshot.data[i]["b"], style: GoogleFonts.varelaRound(fontSize: 11,color:Colors.black),),
                                           )
 
                                         ],
@@ -570,19 +576,19 @@ class _ProdukState extends State<Produk> {
                             children: [
                               Align(
                                 alignment: Alignment.centerLeft,
-                                child: Padding(padding: const EdgeInsets.only(top:2), child :
+                                child: Padding(padding: const EdgeInsets.only(top:1), child :
                                 Text(snapshot.data[i]["a"].toString(),
-                                    style: GoogleFonts.varelaRound(fontSize: 14,fontWeight: FontWeight.bold,
+                                    style: GoogleFonts.varelaRound(fontSize: 13,fontWeight: FontWeight.bold,
                                         color: Colors.black))),
                               ),
                               Align(
                                 alignment: Alignment.centerLeft,
-                                child: Padding(padding: const EdgeInsets.only(top:2), child :
+                                child: Padding(padding: const EdgeInsets.only(top:1), child :
                                 Row(
                                   children: [
                                     Opacity(
                                       opacity: 0.8,
-                                      child :   Text(snapshot.data[i]["b"], style: GoogleFonts.varelaRound(fontSize: 12,color:Colors.black),),
+                                      child :   Text(snapshot.data[i]["b"], style: GoogleFonts.varelaRound(fontSize: 11,color:Colors.black),),
                                     )
 
                                   ],
@@ -599,7 +605,7 @@ class _ProdukState extends State<Produk> {
 
                   Container(
                     width: double.infinity,
-                    height: 13,
+                    height: 16,
                     child :Divider(
                       height: 5,
                     ),

@@ -356,7 +356,7 @@ class _HomeState extends State<Home> {
                                         InkWell(
                                           onTap: () {
                                             //Navigator.push(context, ExitPage(page: Gudang(getEmail.toString(), getLegalCode.toString(), getLegalId.toString(), getNamaUser.toString())));
-                                            Navigator.push(context, ExitPage(page: ProdukHome(getEmail.toString(), getLegalCode.toString())));
+                                            Navigator.push(context, ExitPage(page: ProdukHome(getEmail.toString(), getLegalCode.toString(), getNamaUser.toString())));
                                           },
                                           child:
                                         Column(

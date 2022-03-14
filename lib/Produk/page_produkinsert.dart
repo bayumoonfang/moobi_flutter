@@ -1,10 +1,12 @@
 
 import 'dart:io';
 
+import 'package:flushbar/flushbar.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:hexcolor/hexcolor.dart';
 import 'package:http/http.dart' as http;
 import 'package:image_picker/image_picker.dart';
@@ -16,18 +18,27 @@ import 'dart:async';
 import 'dart:convert';
 
 import 'package:moobi_flutter/Helper/session.dart';
+import 'package:moobi_flutter/Produk/page_insert2.dart';
 import 'package:moobi_flutter/page_login.dart';
 import 'package:toast/toast.dart';
 
+import '../page_intoduction.dart';
+
 
 class ProdukInsert extends StatefulWidget {
+  final String getEmail;
+  final String getLegalCode;
+  final String getNamaUser;
+
+  const ProdukInsert(this.getEmail,this.getLegalCode,this.getNamaUser);
+
     @override
     _ProdukInsertState createState() => _ProdukInsertState();
 }
 
 class _ProdukInsertState extends State<ProdukInsert> {
   String selectedSatuan;
-  String selectedType;
+  String selectedTipe;
   String selectedCategory;
   List _listType = ["Product", "Service"];
   List itemList = List();
@@ -40,32 +51,85 @@ class _ProdukInsertState extends State<ProdukInsert> {
   FocusNode focusNama;
   FocusNode focusHarga;
   final _namaproduk = TextEditingController();
-  final _hargaproduk = TextEditingController();
+  final _kodeproduk = TextEditingController();
   final _stockawalproduk = TextEditingController();
+
   void showToast(String msg, {int duration, int gravity}) {
-    Toast.show(msg, context, duration: duration, gravity: gravity);
+    Toast.show(msg, context, duration: duration, gravity: gravity);}
+
+  _cekLegalandUser() async {
+    final response = await http.post(applink+"api_model.php?act=cek_legalanduser",
+        body: {"username": widget.getEmail.toString()},
+        headers: {"Accept":"application/json"});
+    Map data = jsonDecode(response.body);
+    setState(() {
+      if (data["message"].toString() == '2' || data["message"].toString() == '3') {
+        Navigator.pushReplacement(context, ExitPage(page: Introduction()));
+      }
+    });
   }
 
-  String getEmail = "...";
-  String getBranchVal = "...";
+  //=============================================================================
   _startingVariable() async {
     await AppHelper().getConnect().then((value){if(value == 'ConnInterupted'){
       showToast("Koneksi terputus..", gravity: Toast.CENTER,duration:
       Toast.LENGTH_LONG);}});
-    await AppHelper().getSession().then((value){if(value[0] != 1) {
-      Navigator.pushReplacement(context, ExitPage(page: Login()));}else{setState(() {getEmail = value[1];});}});
-    await AppHelper().getDetailUser(getEmail.toString()).then((value){
-      setState(() {
-        getBranchVal = value[1];
-      });
+    await AppHelper().getSession().then((value){
+      if(value[0] != 1) {
+        Navigator.pushReplacement(context, ExitPage(page: Login()));
+      }
     });
+    await _cekLegalandUser();
+    await getAllItem();
+    await getAllCategory();
   }
+
+  showFlushBarsuccess(BuildContext context, String stringme) => Flushbar(
+    // title:  "Hey Ninja",
+    message:  stringme,
+    shouldIconPulse: false,
+    duration:  Duration(seconds: 3),
+    backgroundColor: Colors.black,
+    flushbarPosition: FlushbarPosition.BOTTOM ,
+  )..show(context);
+
+  void showsuccess(String txtError){
+    showFlushBarsuccess(context, txtError);
+    return;
+  }
+
+
+
+
+  Future getAllItem() async {
+    //var url = applink+"api_model.php?act=getdata_unit&id="+getBranchVal;
+    var response = await http.get(
+        Uri.encodeFull(applink+"api_model.php?act=getdata_unit&id="+widget.getLegalCode));
+    if (response.statusCode == 200) {
+      var jsonData = json.decode(response.body);
+      setState(() {
+        itemList = jsonData;
+      });
+    }
+   // print(itemList);
+  }
+
+  Future getAllCategory() async {
+    var response = await http.get(
+        Uri.encodeFull(applink+"api_model.php?act=getdata_category&id="+widget.getLegalCode));
+    if (response.statusCode == 200) {
+      var jsonData = json.decode(response.body);
+      setState(() {
+        categoryList = jsonData;
+      });
+    }
+    //print(categoryList);
+  }
+
 
 
   _prepare() async {
     await _startingVariable();
-    await getAllItem();
-    await getAllCategory();
   }
 
   @override
@@ -76,38 +140,13 @@ class _ProdukInsertState extends State<ProdukInsert> {
   }
 
 
-  Future getAllItem() async {
-    //var url = applink+"api_model.php?act=getdata_unit&id="+getBranchVal;
-    var response = await http.get(
-        Uri.encodeFull(applink+"api_model.php?act=getdata_unit&id="+getBranchVal));
-    if (response.statusCode == 200) {
-      var jsonData = json.decode(response.body);
-      setState(() {
-        itemList = jsonData;
-      });
-    }
-    print(itemList);
-  }
-
-  Future getAllCategory() async {
-    var response = await http.get(
-        Uri.encodeFull(applink+"api_model.php?act=getdata_category&id="+getBranchVal));
-    if (response.statusCode == 200) {
-      var jsonData = json.decode(response.body);
-      setState(() {
-        categoryList = jsonData;
-      });
-    }
-    print(categoryList);
-  }
-
   imageSelectorGallery() async {
     galleryFile = await ImagePicker.pickImage(
       source: ImageSource.gallery,
     );
     String fileName = galleryFile.path.split('/').last;
     Base64 = base64Encode((galleryFile.readAsBytesSync()));
-    print("You selected gallery image : " + Base64);
+   // print("You selected gallery image : " + Base64);
     setState(() {
       Baseq = Base64;
       namaFileq = fileName;
@@ -118,61 +157,40 @@ class _ProdukInsertState extends State<ProdukInsert> {
   doSimpan() async {
     final response = await http.post(applink+"api_model.php?act=add_produk", body: {
       "produk_nama": _namaproduk.text,
+      "produk_number": _kodeproduk.text,
       "produk_satuan" : selectedSatuan,
-      "produk_harga" : _hargaproduk.text,
       "produk_kategori" : selectedCategory,
+      "produk_tipe": selectedTipe,
       "produk_image": Baseq,
-      "produk_branch" : getBranchVal,
+      "produk_branch" : widget.getLegalCode,
       "image_nama" : namaFileq,
-       "produk_stockawal" : _stockawalproduk.text
+      "user_nama" : widget.getNamaUser
     });
     Map data = jsonDecode(response.body);
     setState(() {
       if (data["message"].toString() == '0') {
-        showToast("Nama Produk sudah ada", gravity: Toast.BOTTOM,
-            duration: Toast.LENGTH_LONG);
+        showsuccess("Nama Produk sudah ada");
         return false;
       } else {
         _namaproduk.clear();
-        _hargaproduk.clear();
-        _stockawalproduk.clear();
+        _kodeproduk.clear();
         namaFileq = "";
         Base64 = "";
         Baseq = "";
         Navigator.pop(context);
-        showToast("Produk berhasil diinput", gravity: Toast.BOTTOM,
-            duration: Toast.LENGTH_LONG);
+        Navigator.push(context, ExitPage(page: ProdukInsert2(widget.getEmail, widget.getLegalCode, data["message"].toString(), selectedTipe )));
         return false;
       }
     });
   }
 
   alertSimpan() {
-    if (selectedCategory == null && selectedSatuan == null) {
+
+    if (_namaproduk.text == "") {
       showToast("Form tidak boleh kosong ", gravity: Toast.BOTTOM,
           duration: Toast.LENGTH_LONG);
       return false;
     }
-
-    if (_namaproduk.text == "" || _hargaproduk.text == "" || _stockawalproduk.text == "") {
-      showToast("Form tidak boleh kosong ", gravity: Toast.BOTTOM,
-          duration: Toast.LENGTH_LONG);
-      return false;
-    }
-
-    if (selectedCategory == "" || selectedCategory == null) {
-      showToast("Kategori tidak boleh kosong", gravity: Toast.BOTTOM,
-          duration: Toast.LENGTH_LONG);
-       return false;
-    }
-
-    if (selectedSatuan == "" || selectedSatuan == null) {
-      showToast("Satuan tidak boleh kosong", gravity: Toast.BOTTOM,
-          duration: Toast.LENGTH_LONG);
-      return false;
-    }
-
-
 
     showDialog(
         context: context,
@@ -189,7 +207,7 @@ class _ProdukInsertState extends State<ProdukInsert> {
                         fontWeight: FontWeight.bold)),),
                     Padding(padding: const EdgeInsets.only(top: 15), child:
                     Align(alignment: Alignment.center, child: FaIcon(FontAwesomeIcons.save,
-                      color: Colors.redAccent,size: 35,)),),
+                      color: HexColor("#602d98"),size: 35,)),),
                     Padding(padding: const EdgeInsets.only(top: 15), child:
                     Align(alignment: Alignment.center, child:
                     Text("Apakah anda yakin menyimpan data ini ? ",
@@ -198,13 +216,13 @@ class _ProdukInsertState extends State<ProdukInsert> {
                       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                       children: <Widget>[
                         Expanded(child: OutlineButton(
-                          onPressed: () {Navigator.pop(context);}, child: Text("Tidak"),)),
+                          onPressed: () {Navigator.pop(context);}, child: Text("Tutup"),)),
                         Expanded(child: OutlineButton(
-                          borderSide: BorderSide(width: 1.0, color: Colors.redAccent),
+                          borderSide: BorderSide(width: 1.0, color: HexColor("#602d98")),
                           onPressed: () {
                            doSimpan();
                             Navigator.pop(context);
-                          }, child: Text("Simpan", style: TextStyle(color: Colors.red),),)),
+                          }, child: Text("Simpan", style: TextStyle(color: HexColor("#602d98")),),)),
                       ],),)
                   ],
                 )
@@ -219,6 +237,10 @@ class _ProdukInsertState extends State<ProdukInsert> {
     Navigator.pop(context);
   }
 
+  var items = [
+    'Product',
+    'Service'
+  ];
 
   @override
   Widget build(BuildContext context) {
@@ -262,6 +284,43 @@ class _ProdukInsertState extends State<ProdukInsert> {
           child : SingleChildScrollView(
           child: Column(
             children: [
+
+              Padding(padding: const EdgeInsets.only(left: 15,top: 10,right: 15),
+                  child: Column(
+                    children: [
+                      Align(alignment: Alignment.centerLeft,child: Padding(
+                        padding: const EdgeInsets.only(left: 0,top: 15),
+                        child: Text("Kode Produk",style: TextStyle(fontWeight: FontWeight.bold,fontFamily: "VarelaRound",
+                            fontSize: 12,color: HexColor("#0074D9")),),
+                      ),),
+                      Align(alignment: Alignment.centerLeft,child: Padding(
+                        padding: const EdgeInsets.only(left: 0),
+                        child: TextFormField(
+                          textCapitalization: TextCapitalization.sentences,
+                          controller: _kodeproduk,
+                          decoration: InputDecoration(
+                            contentPadding: const EdgeInsets.only(top:2),
+                            hintText: 'Boleh dikosongi (generate otomatis)',
+                            labelText: '',
+                            floatingLabelBehavior: FloatingLabelBehavior.always,
+                            hintStyle: TextStyle(fontFamily: "VarelaRound", color: HexColor("#c4c4c4")),
+                            enabledBorder: UnderlineInputBorder(
+                              borderSide: BorderSide(color: HexColor("#DDDDDD")),
+                            ),
+                            focusedBorder: UnderlineInputBorder(
+                              borderSide: BorderSide(color: HexColor("#8c8989")),
+                            ),
+                            border: UnderlineInputBorder(
+                              borderSide: BorderSide(color: HexColor("#DDDDDD")),
+                            ),
+                          ),
+                        ),
+                      ),),
+                    ],
+                  )
+              ),
+
+
               Padding(padding: const EdgeInsets.only(left: 15,top: 10,right: 15),
                   child: Column(
                     children: [
@@ -308,12 +367,12 @@ class _ProdukInsertState extends State<ProdukInsert> {
                          padding: const EdgeInsets.only(top:10),
                          child: DropdownButton(
                            isExpanded: false,
-                           hint: Text("Pilih Satuan"),
+                           hint: Text("Pilih Satuan", style : GoogleFonts.varelaRound()),
                            value: selectedSatuan,
                            items: itemList.map((myitem){
                              return DropdownMenuItem(
                                value: myitem['DATA'],
-                                 child: Text(myitem['DATA']+" ("+myitem['DESCRIPTION']+")")
+                                 child: Text(myitem['DATA']+" ("+myitem['DESCRIPTION']+")", style : GoogleFonts.varelaRound())
                              );
                            }).toList(),
                            onChanged: (value) {
@@ -327,40 +386,7 @@ class _ProdukInsertState extends State<ProdukInsert> {
                     ],
                   )
               ),
-              Padding(padding: const EdgeInsets.only(left: 15,top: 10,right: 15),
-                  child: Column(
-                    children: [
-                      Align(alignment: Alignment.centerLeft,child: Padding(
-                        padding: const EdgeInsets.only(left: 0,top: 15),
-                        child: Text("Harga Produk",style: TextStyle(fontWeight: FontWeight.bold,fontFamily: "VarelaRound",
-                            fontSize: 12,color: HexColor("#0074D9")),),
-                      ),),
-                      Align(alignment: Alignment.centerLeft,child: Padding(
-                        padding: const EdgeInsets.only(left: 0),
-                        child: TextFormField(
-                          controller: _hargaproduk,
-                          keyboardType: TextInputType.number,
-                          decoration: InputDecoration(
-                            contentPadding: const EdgeInsets.only(top:2),
-                            hintText: 'Contoh : 12000, 15000',
-                            labelText: '',
-                            floatingLabelBehavior: FloatingLabelBehavior.always,
-                            hintStyle: TextStyle(fontFamily: "VarelaRound", color: HexColor("#c4c4c4")),
-                            enabledBorder: UnderlineInputBorder(
-                              borderSide: BorderSide(color: HexColor("#DDDDDD")),
-                            ),
-                            focusedBorder: UnderlineInputBorder(
-                              borderSide: BorderSide(color: HexColor("#8c8989")),
-                            ),
-                            border: UnderlineInputBorder(
-                              borderSide: BorderSide(color: HexColor("#DDDDDD")),
-                            ),
-                          ),
-                        ),
-                      ),),
-                    ],
-                  )
-              ),
+
 
 
               Padding(padding: const EdgeInsets.only(left: 15,top: 10,right: 15),
@@ -375,12 +401,12 @@ class _ProdukInsertState extends State<ProdukInsert> {
                         padding: const EdgeInsets.only(top:10),
                         child: DropdownButton(
                           isExpanded: false,
-                          hint: Text("Pilih Category"),
+                          hint: Text("Pilih Category", style : GoogleFonts.varelaRound()),
                           value: selectedCategory,
-                          items: categoryList.map((myitem){
+                          items: categoryList.map((myitem2){
                             return DropdownMenuItem(
-                                value: myitem['DATA'],
-                                child: Text(myitem['DATA'])
+                                value: myitem2['DATA'],
+                                child: Text(myitem2['DATA'], style : GoogleFonts.varelaRound())
                             );
                           }).toList(),
                           onChanged: (value) {
@@ -401,36 +427,32 @@ class _ProdukInsertState extends State<ProdukInsert> {
                     children: [
                       Align(alignment: Alignment.centerLeft,child: Padding(
                         padding: const EdgeInsets.only(left: 0,top: 15),
-                        child: Text("Stock Awal Produk",style: TextStyle(fontWeight: FontWeight.bold,fontFamily: "VarelaRound",
+                        child: Text("Tipe",style: TextStyle(fontWeight: FontWeight.bold,fontFamily: "VarelaRound",
                             fontSize: 12,color: HexColor("#0074D9")),),
                       ),),
                       Align(alignment: Alignment.centerLeft,child: Padding(
-                        padding: const EdgeInsets.only(left: 0),
-                        child: TextFormField(
-                          controller: _stockawalproduk,
-                          keyboardType: TextInputType.number,
-                          decoration: InputDecoration(
-                            contentPadding: const EdgeInsets.only(top:2),
-                            hintText: 'Contoh : 1, 50, 100, dst',
-                            labelText: '',
-                            floatingLabelBehavior: FloatingLabelBehavior.always,
-                            hintStyle: TextStyle(fontFamily: "VarelaRound", color: HexColor("#c4c4c4")),
-                            enabledBorder: UnderlineInputBorder(
-                              borderSide: BorderSide(color: HexColor("#DDDDDD")),
-                            ),
-                            focusedBorder: UnderlineInputBorder(
-                              borderSide: BorderSide(color: HexColor("#8c8989")),
-                            ),
-                            border: UnderlineInputBorder(
-                              borderSide: BorderSide(color: HexColor("#DDDDDD")),
-                            ),
-                          ),
+                        padding: const EdgeInsets.only(top:10),
+                        child: DropdownButton(
+                          isExpanded: false,
+                          hint: Text("Pilih Tipe", style : GoogleFonts.varelaRound()),
+                          value: selectedTipe,
+                          items: items.map((String items) {
+                            return DropdownMenuItem(
+                                value: items,
+                                child: Text(items, style : GoogleFonts.varelaRound())
+                            );
+                          }).toList(),
+                          onChanged: (value) {
+                            setState(() {
+                              FocusScope.of(context).requestFocus(FocusNode());
+                              selectedTipe = value;
+                            });
+                          },
                         ),
-                      ),),
+                      ))
                     ],
                   )
               ),
-
 
               Padding(padding: const EdgeInsets.only(left: 15,top: 10,right: 15),
                   child: Column(

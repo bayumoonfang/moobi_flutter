@@ -510,9 +510,9 @@ class _OutletService extends State<OutletService> {
                                          children: [
                                            Align(
                                              alignment: Alignment.centerLeft,
-                                             child: Padding(padding: const EdgeInsets.only(top:2), child :
+                                             child: Padding(padding: const EdgeInsets.only(top:1), child :
                                              Text(snapshot.data[i]["b"].toString(),
-                                                 style: GoogleFonts.varelaRound(fontSize: 14,fontWeight: FontWeight.bold,
+                                                 style: GoogleFonts.varelaRound(fontSize: 13,fontWeight: FontWeight.bold,
                                                      color: Colors.black))),
                                            ),
                                            Align(
@@ -524,7 +524,7 @@ class _OutletService extends State<OutletService> {
                                                     NumberFormat.currency(
                                                         locale: 'id', decimalDigits: 0, symbol: '').
                                                     format(
-                                                        snapshot.data[i]["e"]), style: GoogleFonts.varelaRound(fontSize: 13,color:Colors.black),),
+                                                        snapshot.data[i]["e"]), style: GoogleFonts.varelaRound(fontSize: 12,color:Colors.black),),
 
                                               ],
                                             )

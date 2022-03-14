@@ -31,8 +31,9 @@ class ProdukDetail extends StatefulWidget {
   final String getEmail;
   final String getLegalCode;
   final String getItemNumber;
+  final String getNamaUser;
 
-  const ProdukDetail(this.getEmail,this.getLegalCode,this.getItemNumber);
+  const ProdukDetail(this.getEmail,this.getLegalCode,this.getItemNumber, this.getNamaUser);
   @override
   _ProdukDetailState createState() => _ProdukDetailState();
 }
@@ -157,22 +158,28 @@ class _ProdukDetailState extends State<ProdukDetail> {
     final response = await http.post(url,
         body: {
           "produk_id" : widget.getItemNumber,
-          "branch" : widget.getLegalCode
+          "produk_branch" : widget.getLegalCode
         });
     Map data = jsonDecode(response.body);
     setState(() {
       if (data["message"].toString() == '1') {
-        showsuccess("Photo produk berhasil dihapus.. Silahkan refresh halaman ini");
+        showsuccess("Photo produk berhasil dihapus..");
         setState(() {
           _getDetail();
+          Navigator.pop(context);
         });
+
         return false;
       }
     });
 
   }
 
-
+  FutureOr onGoBack(dynamic value) {
+    setState(() {
+      _getDetail();
+    });
+  }
 
 
   alertHapusImage() {
@@ -263,7 +270,9 @@ class _ProdukDetailState extends State<ProdukDetail> {
 
   doHapus() async {
     final response = await http.post(applink+"api_model.php?act=hapus_produk", body: {
-        "produk_id" : widget.getItemNumber
+        "produk_id" : widget.getItemNumber,
+      "produk_branch" : widget.getLegalCode,
+      "nama_user" : widget.getNamaUser
       });
     Map data = jsonDecode(response.body);
     setState(() {
@@ -294,16 +303,21 @@ class _ProdukDetailState extends State<ProdukDetail> {
     Base64 = base64Encode((galleryFile.readAsBytesSync()));
     final response = await http.post(applink+"api_model.php?act=edit_produkphoto", body: {
       "produk_image": Base64,
-      "produk_id": widget.getItemNumber
+      "produk_id": widget.getItemNumber,
+      "produk_branch" : widget.getLegalCode
     });
     Map data = jsonDecode(response.body);
     setState(() {
       if (data["message"].toString() == '1') {
-        showsuccess("Photo produk berhasil dirubah.. Silahkan refresh halaman ini");
+        showsuccess("Photo produk berhasil dirubah.. ");
+        setState(() {
+          _getDetail();
+        });
         return false;
       }
     });
   }
+
 
   void _imgDialog() {
     showDialog(
@@ -325,7 +339,6 @@ class _ProdukDetailState extends State<ProdukDetail> {
                             InkWell(
                               onTap: (){
                                 alertHapusImage();
-
                               },
                               child: Align(alignment: Alignment.centerLeft,
                                 child:    Text(
@@ -358,49 +371,43 @@ class _ProdukDetailState extends State<ProdukDetail> {
                           ],
                         )
                         :
-                            Column(
-                              children: [
-                                Align(alignment: Alignment.centerLeft,
-                                  child:    Text(
+                        Column(
+                          children: [
+                            Padding(padding: const EdgeInsets.only(top:5,bottom: 15,left: 4,right: 4)),
+                            InkWell(
+                              child: Align(alignment: Alignment.centerLeft,
+                                child:   Opacity(
+                                  opacity: 0.4,
+                                  child :  Text(
                                     "Hapus Photo",
                                     textAlign: TextAlign.left,
                                     style: TextStyle(
                                         fontFamily: 'VarelaRound',
-                                        color: Colors.grey,
                                         fontSize: 15),
-                                  ),),
-                                Padding(padding: const EdgeInsets.only(top:15,bottom: 15,left: 4,right: 4),
-                                  child: Divider(height: 5,),),
-                                Align(alignment: Alignment.centerLeft,
-                                  child:    Text(
-                                    "Lihat Photo",
-                                    textAlign: TextAlign.left,
-                                    style: TextStyle(
-                                        fontFamily: 'VarelaRound',
-                                        color: Colors.grey,
-                                        fontSize: 15),
-                                  ),),
-                                Padding(padding: const EdgeInsets.only(top:15,bottom: 15,left: 4,right: 4),
-                                  child: Divider(height: 5,),),
-                                InkWell(
-                                  onTap: (){
-                                    setState(() {
-                                      FocusScope.of(context).requestFocus(FocusNode());
-                                      imageSelectorGallery();
-                                      Navigator.pop(context);
-                                    });
-                                  },
-                                  child: Align(alignment: Alignment.centerLeft,
-                                    child:    Text(
-                                      "Ganti Photo",
-                                      textAlign: TextAlign.left,
-                                      style: TextStyle(
-                                          fontFamily: 'VarelaRound',
-                                          fontSize: 15),
-                                    ),),
-                                ),
-                              ],
+                                  )
+                                ),),
+                            ),
+                            Padding(padding: const EdgeInsets.only(top:15,bottom: 15,left: 4,right: 4),
+                              child: Divider(height: 5,),),
+                            InkWell(
+                              onTap: (){
+                                setState(() {
+                                  FocusScope.of(context).requestFocus(FocusNode());
+                                  imageSelectorGallery();
+                                  Navigator.pop(context);
+                                });
+                              },
+                              child: Align(alignment: Alignment.centerLeft,
+                                child:    Text(
+                                  "Ganti Photo",
+                                  textAlign: TextAlign.left,
+                                  style: TextStyle(
+                                      fontFamily: 'VarelaRound',
+                                      fontSize: 15),
+                                ),),
                             )
+                          ],
+                        )
                       ],
                     ),
                   ))
@@ -419,7 +426,7 @@ class _ProdukDetailState extends State<ProdukDetail> {
             backgroundColor: HexColor("#602d98"),
             leading: Builder(
               builder: (context) => IconButton(
-                  icon: new Icon(Icons.arrow_back,size: 20,),
+                  icon: new FaIcon(FontAwesomeIcons.times,color: Colors.white,size: 18,),
                   color: Colors.white,
                   onPressed: () => {
                     Navigator.pop(context)
@@ -678,9 +685,9 @@ class _ProdukDetailState extends State<ProdukDetail> {
                       child: RaisedButton(
                         elevation: 0,
                         onPressed: (){
-                          Navigator.pushReplacement(context, ExitPage(page: ProdukEdit(widget.getItemNumber)));
+                          Navigator.push(context, ExitPage(page: ProdukEdit(widget.getEmail, widget.getLegalCode,widget.getItemNumber, widget.getNamaUser))).then(onGoBack);
                         },
-                        color: HexColor("#dbd0ea"),
+                        color: HexColor("#622df7"),
                         shape: RoundedRectangleBorder(side: BorderSide(
                             color: Colors.black,
                             width: 0.1,
@@ -688,11 +695,8 @@ class _ProdukDetailState extends State<ProdukDetail> {
                         ),
                           borderRadius: BorderRadius.circular(50.0),
                         ),
-                        child: Opacity(
-                          opacity: 0.7,
-                          child: Text("Edit Produk",style: TextStyle(
-                              color: Colors.black, fontFamily: 'VarelaRound')),
-                        )
+                        child: Text("Edit Produk",style: TextStyle(
+                            color: Colors.white, fontFamily: 'VarelaRound')),
                       ),
                     ),
                   )

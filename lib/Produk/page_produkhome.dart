@@ -21,8 +21,9 @@ import '../page_login.dart';
 class ProdukHome extends StatefulWidget {
   final String getEmail;
   final String getLegalCode;
+  final String getNamaUser;
 
-  const ProdukHome(this.getEmail, this.getLegalCode);
+  const ProdukHome(this.getEmail, this.getLegalCode, this.getNamaUser);
   @override
   _ProdukHomeState createState() => _ProdukHomeState();
 }
@@ -124,7 +125,7 @@ class _ProdukHomeState extends State<ProdukHome> {
               children: [
                 InkWell(
                   child: ListTile(
-                    onTap: (){Navigator.push(context, ExitPage(page: Produk(widget.getEmail, widget.getLegalCode)));},
+                    onTap: (){Navigator.push(context, ExitPage(page: Produk(widget.getEmail, widget.getLegalCode, widget.getNamaUser)));},
                     title: Text("Master Data Produk",style: TextStyle(
                         color: Colors.black, fontFamily: 'VarelaRound',fontSize: 15,
                         fontWeight: FontWeight.bold)),

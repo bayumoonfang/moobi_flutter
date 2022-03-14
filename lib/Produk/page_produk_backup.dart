@@ -356,7 +356,7 @@ class _ProdukBackup extends State<ProdukBackup> {
                 child: FloatingActionButton(
                   onPressed: (){
                     FocusScope.of(context).requestFocus(FocusNode());
-                      Navigator.push(context, ExitPage(page: ProdukInsert()));
+                     // Navigator.push(context, ExitPage(page: ProdukInsert()));
                   },
                   child: FaIcon(FontAwesomeIcons.plus),
                 ),

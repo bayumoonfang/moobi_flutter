@@ -502,7 +502,7 @@ class _OutletProduk extends State<OutletProduk> {
                                        child: Opacity(
                                            opacity: 0.8,
                                            child : Text("#"+snapshot.data[i]["a"],
-                                               style: GoogleFonts.varelaRound(fontSize: 12))
+                                               style: GoogleFonts.nunito(fontSize: 12))
                                        ),
                                      ),
                                      subtitle: Align(
@@ -511,9 +511,9 @@ class _OutletProduk extends State<OutletProduk> {
                                          children: [
                                            Align(
                                              alignment: Alignment.centerLeft,
-                                             child: Padding(padding: const EdgeInsets.only(top:2), child :
+                                             child: Padding(padding: const EdgeInsets.only(top:1), child :
                                              Text(snapshot.data[i]["b"].toString(),
-                                                 style: GoogleFonts.varelaRound(fontSize: 14,fontWeight: FontWeight.bold,
+                                                 style: GoogleFonts.varelaRound(fontSize: 13,fontWeight: FontWeight.bold,
                                                      color: Colors.black))),
                                            ),
                                            Align(
@@ -525,7 +525,7 @@ class _OutletProduk extends State<OutletProduk> {
                                                     NumberFormat.currency(
                                                         locale: 'id', decimalDigits: 0, symbol: '').
                                                     format(
-                                                        snapshot.data[i]["e"]), style: GoogleFonts.varelaRound(fontSize: 13,color:Colors.black),),
+                                                        snapshot.data[i]["e"]), style: GoogleFonts.varelaRound(fontSize: 12,color:Colors.black),),
 
                                               ],
                                             )

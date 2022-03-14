@@ -517,9 +517,9 @@ class _TambahProdukOutlet extends State<TambahProdukOutlet> {
                                               children: [
                                                 Align(
                                                   alignment: Alignment.centerLeft,
-                                                  child: Padding(padding: const EdgeInsets.only(top:2), child :
+                                                  child: Padding(padding: const EdgeInsets.only(top:1), child :
                                                   Text(snapshot.data[i]["a"].toString(),
-                                                      style: GoogleFonts.varelaRound(fontSize: 14,fontWeight: FontWeight.bold,
+                                                      style: GoogleFonts.varelaRound(fontSize: 13,fontWeight: FontWeight.bold,
                                                           color: Colors.black))),
                                                 ),
                                                 Align(
