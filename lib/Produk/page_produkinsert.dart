@@ -30,6 +30,7 @@ class ProdukInsert extends StatefulWidget {
   final String getLegalCode;
   final String getNamaUser;
 
+
   const ProdukInsert(this.getEmail,this.getLegalCode,this.getNamaUser);
 
     @override
@@ -37,6 +38,8 @@ class ProdukInsert extends StatefulWidget {
 }
 
 class _ProdukInsertState extends State<ProdukInsert> {
+  bool _isVisible = true;
+  String _isVisible_val = "true";
   String selectedSatuan;
   String selectedTipe;
   String selectedCategory;
@@ -146,9 +149,14 @@ class _ProdukInsertState extends State<ProdukInsert> {
     );
     String fileName = galleryFile.path.split('/').last;
     Base64 = base64Encode((galleryFile.readAsBytesSync()));
+    final Bytes = galleryFile.readAsBytesSync().lengthInBytes;
+    final Kb = Bytes / 1024;
+    final Mb = Kb / 1024;
    // print("You selected gallery image : " + Base64);
     setState(() {
       Baseq = Base64;
+      showsuccess(Bytes.toString());
+      print(Bytes.toString());
       namaFileq = fileName;
     });
   }
@@ -160,7 +168,7 @@ class _ProdukInsertState extends State<ProdukInsert> {
       "produk_number": _kodeproduk.text,
       "produk_satuan" : selectedSatuan,
       "produk_kategori" : selectedCategory,
-      "produk_tipe": selectedTipe,
+      "produk_tipe": "Product",
       "produk_image": Baseq,
       "produk_branch" : widget.getLegalCode,
       "image_nama" : namaFileq,
@@ -170,6 +178,8 @@ class _ProdukInsertState extends State<ProdukInsert> {
     setState(() {
       if (data["message"].toString() == '0') {
         showsuccess("Nama Produk sudah ada");
+        _isVisible = true;
+        _isVisible_val = "true";
         return false;
       } else {
         _namaproduk.clear();
@@ -178,17 +188,16 @@ class _ProdukInsertState extends State<ProdukInsert> {
         Base64 = "";
         Baseq = "";
         Navigator.pop(context);
-        Navigator.push(context, ExitPage(page: ProdukInsert2(widget.getEmail, widget.getLegalCode, data["message"].toString(), selectedTipe )));
+        Navigator.push(context, ExitPage(page: ProdukInsert2(widget.getEmail, widget.getLegalCode, data["message"].toString(), "Product",selectedSatuan, widget.getNamaUser)));
         return false;
       }
     });
   }
 
   alertSimpan() {
-
-    if (_namaproduk.text == "") {
-      showToast("Form tidak boleh kosong ", gravity: Toast.BOTTOM,
-          duration: Toast.LENGTH_LONG);
+    FocusScope.of(context).requestFocus(FocusNode());
+    if (_namaproduk.text == "" || selectedSatuan == null || selectedCategory == null ) {
+      showsuccess("Form tidak boleh kosong ");
       return false;
     }
 
@@ -220,6 +229,8 @@ class _ProdukInsertState extends State<ProdukInsert> {
                         Expanded(child: OutlineButton(
                           borderSide: BorderSide(width: 1.0, color: HexColor("#602d98")),
                           onPressed: () {
+                            _isVisible = false;
+                            _isVisible_val = "false";
                            doSimpan();
                             Navigator.pop(context);
                           }, child: Text("Simpan", style: TextStyle(color: HexColor("#602d98")),),)),
@@ -248,13 +259,16 @@ class _ProdukInsertState extends State<ProdukInsert> {
       child: Scaffold(
           appBar: new AppBar(
             backgroundColor: HexColor("#602d98"),
-            leading: Builder(
-              builder: (context) => IconButton(
-                icon: new Icon(Icons.arrow_back),
-                color: Colors.white,
-                onPressed: () {
-                  _onWillPop();
-                }
+            leading: Visibility(
+              visible : _isVisible,
+              child : Builder(
+                builder: (context) => IconButton(
+                    icon: new Icon(Icons.arrow_back),
+                    color: Colors.white,
+                    onPressed: () {
+                      _onWillPop();
+                    }
+                ),
               ),
             ),
             title: Text(
@@ -265,243 +279,225 @@ class _ProdukInsertState extends State<ProdukInsert> {
                   fontSize: 16),
             ),
             actions: [
-              InkWell(
+            Visibility(
+                visible : _isVisible,
+              child :   InkWell(
                 onTap: () {
-                  FocusScope.of(context).requestFocus(FocusNode());
                   alertSimpan();
                 },
                 child: Padding(
                   padding: const EdgeInsets.only(right: 27,top : 14),
                   child: FaIcon(
-                    FontAwesomeIcons.check
+                      FontAwesomeIcons.check
                   ),
                 ),
               )
+            )
             ],
           ),
         body: Container(
           padding: const EdgeInsets.only(left: 5,right: 5),
           child : SingleChildScrollView(
-          child: Column(
+          child:
+          _isVisible_val == 'false' ?
+          SizedBox(
+            height: MediaQuery.of(context).size.height / 1.3,
+            child: Center(
+              child: CircularProgressIndicator(),
+            ),
+          )
+              :
+          Visibility(
+            visible: _isVisible,
+              child :
+          Column(
             children: [
-
-              Padding(padding: const EdgeInsets.only(left: 15,top: 10,right: 15),
-                  child: Column(
-                    children: [
-                      Align(alignment: Alignment.centerLeft,child: Padding(
-                        padding: const EdgeInsets.only(left: 0,top: 15),
-                        child: Text("Kode Produk",style: TextStyle(fontWeight: FontWeight.bold,fontFamily: "VarelaRound",
-                            fontSize: 12,color: HexColor("#0074D9")),),
-                      ),),
-                      Align(alignment: Alignment.centerLeft,child: Padding(
-                        padding: const EdgeInsets.only(left: 0),
-                        child: TextFormField(
-                          textCapitalization: TextCapitalization.sentences,
-                          controller: _kodeproduk,
-                          decoration: InputDecoration(
-                            contentPadding: const EdgeInsets.only(top:2),
-                            hintText: 'Boleh dikosongi (generate otomatis)',
-                            labelText: '',
-                            floatingLabelBehavior: FloatingLabelBehavior.always,
-                            hintStyle: TextStyle(fontFamily: "VarelaRound", color: HexColor("#c4c4c4")),
-                            enabledBorder: UnderlineInputBorder(
-                              borderSide: BorderSide(color: HexColor("#DDDDDD")),
-                            ),
-                            focusedBorder: UnderlineInputBorder(
-                              borderSide: BorderSide(color: HexColor("#8c8989")),
-                            ),
-                            border: UnderlineInputBorder(
-                              borderSide: BorderSide(color: HexColor("#DDDDDD")),
+                Padding(padding: const EdgeInsets.only(left: 15,top: 10,right: 15),
+                    child: Column(
+                      children: [
+                        Align(alignment: Alignment.centerLeft,child: Padding(
+                          padding: const EdgeInsets.only(left: 0,top: 15),
+                          child: Text("Kode Produk",style: TextStyle(fontWeight: FontWeight.bold,fontFamily: "VarelaRound",
+                              fontSize: 12,color: HexColor("#0074D9")),),
+                        ),),
+                        Align(alignment: Alignment.centerLeft,child: Padding(
+                          padding: const EdgeInsets.only(left: 0),
+                          child: TextFormField(
+                            textCapitalization: TextCapitalization.sentences,
+                            controller: _kodeproduk,
+                            decoration: InputDecoration(
+                              contentPadding: const EdgeInsets.only(top:2),
+                              hintText: 'Boleh dikosongi (generate otomatis)',
+                              labelText: '',
+                              floatingLabelBehavior: FloatingLabelBehavior.always,
+                              hintStyle: TextStyle(fontFamily: "VarelaRound", color: HexColor("#c4c4c4")),
+                              enabledBorder: UnderlineInputBorder(
+                                borderSide: BorderSide(color: HexColor("#DDDDDD")),
+                              ),
+                              focusedBorder: UnderlineInputBorder(
+                                borderSide: BorderSide(color: HexColor("#8c8989")),
+                              ),
+                              border: UnderlineInputBorder(
+                                borderSide: BorderSide(color: HexColor("#DDDDDD")),
+                              ),
                             ),
                           ),
-                        ),
-                      ),),
-                    ],
-                  )
-              ),
+                        ),),
+                      ],
+                    )
+                ),
 
 
-              Padding(padding: const EdgeInsets.only(left: 15,top: 10,right: 15),
-                  child: Column(
-                    children: [
-                      Align(alignment: Alignment.centerLeft,child: Padding(
-                        padding: const EdgeInsets.only(left: 0,top: 15),
-                        child: Text("Nama Produk",style: TextStyle(fontWeight: FontWeight.bold,fontFamily: "VarelaRound",
-                            fontSize: 12,color: HexColor("#0074D9")),),
-                      ),),
-                      Align(alignment: Alignment.centerLeft,child: Padding(
-                        padding: const EdgeInsets.only(left: 0),
-                        child: TextFormField(
-                          textCapitalization: TextCapitalization.sentences,
-                          controller: _namaproduk,
+                Padding(padding: const EdgeInsets.only(left: 15,top: 10,right: 15),
+                    child: Column(
+                      children: [
+                        Align(alignment: Alignment.centerLeft,child: Padding(
+                          padding: const EdgeInsets.only(left: 0,top: 15),
+                          child: Text("Nama Produk",style: TextStyle(fontWeight: FontWeight.bold,fontFamily: "VarelaRound",
+                              fontSize: 12,color: HexColor("#0074D9")),),
+                        ),),
+                        Align(alignment: Alignment.centerLeft,child: Padding(
+                          padding: const EdgeInsets.only(left: 0),
+                          child: TextFormField(
+                            textCapitalization: TextCapitalization.sentences,
+                            controller: _namaproduk,
                             decoration: InputDecoration(
-                            contentPadding: const EdgeInsets.only(top:2),
+                              contentPadding: const EdgeInsets.only(top:2),
                               hintText: 'Contoh : Nasi Goreng, Es Jeruk',
                               labelText: '',
                               floatingLabelBehavior: FloatingLabelBehavior.always,
-                            hintStyle: TextStyle(fontFamily: "VarelaRound", color: HexColor("#c4c4c4")),
-                            enabledBorder: UnderlineInputBorder(
-                              borderSide: BorderSide(color: HexColor("#DDDDDD")),
-                            ),
-                            focusedBorder: UnderlineInputBorder(
-                              borderSide: BorderSide(color: HexColor("#8c8989")),
-                            ),
-                            border: UnderlineInputBorder(
-                              borderSide: BorderSide(color: HexColor("#DDDDDD")),
+                              hintStyle: TextStyle(fontFamily: "VarelaRound", color: HexColor("#c4c4c4")),
+                              enabledBorder: UnderlineInputBorder(
+                                borderSide: BorderSide(color: HexColor("#DDDDDD")),
+                              ),
+                              focusedBorder: UnderlineInputBorder(
+                                borderSide: BorderSide(color: HexColor("#8c8989")),
+                              ),
+                              border: UnderlineInputBorder(
+                                borderSide: BorderSide(color: HexColor("#DDDDDD")),
+                              ),
                             ),
                           ),
-                        ),
-                      ),),
-                    ],
-                  )
-              ),
-              Padding(padding: const EdgeInsets.only(left: 15,top: 10,right: 15),
-                  child: Column(
-                    children: [
+                        ),),
+                      ],
+                    )
+                ),
+                Padding(padding: const EdgeInsets.only(left: 15,top: 10,right: 15),
+                    child: Column(
+                      children: [
                         Align(alignment: Alignment.centerLeft,child: Padding(
                           padding: const EdgeInsets.only(left: 0,top: 15),
                           child: Text("Satuan",style: TextStyle(fontWeight: FontWeight.bold,fontFamily: "VarelaRound",
                               fontSize: 12,color: HexColor("#0074D9")),),
                         ),),
-                  Align(alignment: Alignment.centerLeft,child: Padding(
-                         padding: const EdgeInsets.only(top:10),
-                         child: DropdownButton(
-                           isExpanded: false,
-                           hint: Text("Pilih Satuan", style : GoogleFonts.varelaRound()),
-                           value: selectedSatuan,
-                           items: itemList.map((myitem){
-                             return DropdownMenuItem(
-                               value: myitem['DATA'],
-                                 child: Text(myitem['DATA']+" ("+myitem['DESCRIPTION']+")", style : GoogleFonts.varelaRound())
-                             );
-                           }).toList(),
-                           onChanged: (value) {
-                             setState(() {
-                               FocusScope.of(context).requestFocus(FocusNode());
-                               selectedSatuan = value;
-                             });
-                           },
-                         ),
-                       ))
-                    ],
-                  )
-              ),
+                        Align(alignment: Alignment.centerLeft,child: Padding(
+                          padding: const EdgeInsets.only(top:10),
+                          child: DropdownButton(
+                            isExpanded: false,
+                            hint: Text("Pilih Satuan", style : GoogleFonts.varelaRound()),
+                            value: selectedSatuan,
+                            items: itemList.map((myitem){
+                              return DropdownMenuItem(
+                                  value: myitem['DATA'],
+                                  child: Text(myitem['DATA']+" ("+myitem['DESCRIPTION']+")", style : GoogleFonts.varelaRound())
+                              );
+                            }).toList(),
+                            onChanged: (value) {
+                              setState(() {
+                                FocusScope.of(context).requestFocus(FocusNode());
+                                selectedSatuan = value;
+                              });
+                            },
+                          ),
+                        ))
+                      ],
+                    )
+                ),
 
 
 
-              Padding(padding: const EdgeInsets.only(left: 15,top: 10,right: 15),
-                  child: Column(
-                    children: [
-                      Align(alignment: Alignment.centerLeft,child: Padding(
-                        padding: const EdgeInsets.only(left: 0,top: 15),
-                        child: Text("Category",style: TextStyle(fontWeight: FontWeight.bold,fontFamily: "VarelaRound",
-                            fontSize: 12,color: HexColor("#0074D9")),),
-                      ),),
-                  Align(alignment: Alignment.centerLeft,child: Padding(
-                        padding: const EdgeInsets.only(top:10),
-                        child: DropdownButton(
-                          isExpanded: false,
-                          hint: Text("Pilih Category", style : GoogleFonts.varelaRound()),
-                          value: selectedCategory,
-                          items: categoryList.map((myitem2){
-                            return DropdownMenuItem(
-                                value: myitem2['DATA'],
-                                child: Text(myitem2['DATA'], style : GoogleFonts.varelaRound())
-                            );
-                          }).toList(),
-                          onChanged: (value) {
-                            setState(() {
-                              FocusScope.of(context).requestFocus(FocusNode());
-                              selectedCategory = value;
-                            });
-                          },
-                        ),
-                      ))
-                    ],
-                  )
-              ),
+                Padding(padding: const EdgeInsets.only(left: 15,top: 10,right: 15),
+                    child: Column(
+                      children: [
+                        Align(alignment: Alignment.centerLeft,child: Padding(
+                          padding: const EdgeInsets.only(left: 0,top: 15),
+                          child: Text("Category",style: TextStyle(fontWeight: FontWeight.bold,fontFamily: "VarelaRound",
+                              fontSize: 12,color: HexColor("#0074D9")),),
+                        ),),
+                        Align(alignment: Alignment.centerLeft,child: Padding(
+                          padding: const EdgeInsets.only(top:10),
+                          child: DropdownButton(
+                            isExpanded: false,
+                            hint: Text("Pilih Category", style : GoogleFonts.varelaRound()),
+                            value: selectedCategory,
+                            items: categoryList.map((myitem2){
+                              return DropdownMenuItem(
+                                  value: myitem2['DATA'],
+                                  child: Text(myitem2['DATA'], style : GoogleFonts.varelaRound())
+                              );
+                            }).toList(),
+                            onChanged: (value) {
+                              setState(() {
+                                FocusScope.of(context).requestFocus(FocusNode());
+                                selectedCategory = value;
+                              });
+                            },
+                          ),
+                        ))
+                      ],
+                    )
+                ),
 
 
-              Padding(padding: const EdgeInsets.only(left: 15,top: 10,right: 15),
-                  child: Column(
-                    children: [
-                      Align(alignment: Alignment.centerLeft,child: Padding(
-                        padding: const EdgeInsets.only(left: 0,top: 15),
-                        child: Text("Tipe",style: TextStyle(fontWeight: FontWeight.bold,fontFamily: "VarelaRound",
-                            fontSize: 12,color: HexColor("#0074D9")),),
-                      ),),
-                      Align(alignment: Alignment.centerLeft,child: Padding(
-                        padding: const EdgeInsets.only(top:10),
-                        child: DropdownButton(
-                          isExpanded: false,
-                          hint: Text("Pilih Tipe", style : GoogleFonts.varelaRound()),
-                          value: selectedTipe,
-                          items: items.map((String items) {
-                            return DropdownMenuItem(
-                                value: items,
-                                child: Text(items, style : GoogleFonts.varelaRound())
-                            );
-                          }).toList(),
-                          onChanged: (value) {
-                            setState(() {
-                              FocusScope.of(context).requestFocus(FocusNode());
-                              selectedTipe = value;
-                            });
-                          },
-                        ),
-                      ))
-                    ],
-                  )
-              ),
 
-              Padding(padding: const EdgeInsets.only(left: 15,top: 10,right: 15),
-                  child: Column(
-                    children: [
-                      Align(alignment: Alignment.centerLeft,child: Padding(
-                        padding: const EdgeInsets.only(left: 0,top: 15),
-                        child: Text("Photo Produk",style: TextStyle(fontWeight: FontWeight.bold,fontFamily: "VarelaRound",
-                            fontSize: 12,color: HexColor("#0074D9")),),
-                      ),),
-                      Align(alignment: Alignment.centerLeft,child: Padding(
-                        padding: const EdgeInsets.only(left: 0),
-                        child: Padding(
-                          padding: const EdgeInsets.only(top:18),
-                          child: Row(
-                            children: [
-                              OutlineButton(
-                                child: Opacity(
-                                  opacity: 0.9,
-                                  child: Text("Browse Photo"),
-                                ),
-                                borderSide: BorderSide(
-                                  color: HexColor("#602d98"), //Color of the border
-                                  style: BorderStyle.solid, //Style of the border
-                                  width: 0.8, //width of the border
-                                ),
-                                onPressed: () {
-                                  FocusScope.of(context).requestFocus(FocusNode());
-                                  imageSelectorGallery();
-                                },
-                              ),
-                              Padding(
-                                padding: const EdgeInsets.only(left: 10),
-                                child: Container(
-                                  width: 100,
-                                  child: Text(namaFileq.toString(),overflow: TextOverflow.ellipsis,)
-                                  ,)
-                              )
-                            ],
-                          )
-                        )
-                      ),),
-                    ],
-                  )
-              ),
-
-
+                Padding(padding: const EdgeInsets.only(left: 15,top: 10,right: 15),
+                    child: Column(
+                      children: [
+                        Align(alignment: Alignment.centerLeft,child: Padding(
+                          padding: const EdgeInsets.only(left: 0,top: 15),
+                          child: Text("Photo Produk",style: TextStyle(fontWeight: FontWeight.bold,fontFamily: "VarelaRound",
+                              fontSize: 12,color: HexColor("#0074D9")),),
+                        ),),
+                        Align(alignment: Alignment.centerLeft,child: Padding(
+                            padding: const EdgeInsets.only(left: 0),
+                            child: Padding(
+                                padding: const EdgeInsets.only(top:18),
+                                child: Row(
+                                  children: [
+                                    OutlineButton(
+                                      child: Opacity(
+                                        opacity: 0.9,
+                                        child: Text("Browse Photo"),
+                                      ),
+                                      borderSide: BorderSide(
+                                        color: HexColor("#602d98"), //Color of the border
+                                        style: BorderStyle.solid, //Style of the border
+                                        width: 0.8, //width of the border
+                                      ),
+                                      onPressed: () {
+                                        FocusScope.of(context).requestFocus(FocusNode());
+                                        imageSelectorGallery();
+                                      },
+                                    ),
+                                    Padding(
+                                        padding: const EdgeInsets.only(left: 10),
+                                        child: Container(
+                                          width: 100,
+                                          child: Text(namaFileq.toString(),overflow: TextOverflow.ellipsis,)
+                                          ,)
+                                    )
+                                  ],
+                                )
+                            )
+                        ),),
+                      ],
+                    )
+                ),
 
             ],
-          )),
+          ))
+
+          ),
         ),
       ),
     );
