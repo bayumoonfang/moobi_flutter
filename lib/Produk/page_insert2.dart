@@ -145,12 +145,13 @@ class _ProdukInsertState2 extends State<ProdukInsert2> {
 
 
   doSimpan() async {
+
     final response = await http.post(applink+"api_model.php?act=add_produkinfo", body: {
       "produk_number": widget.getProdukNumber,
       "produk_branch" : widget.getLegalCode,
       "produk_tipe" : widget.getProdukTipe,
-      "produk_store" : selectedStore,
-      "produk_warehouse": selectedWarehouse,
+      "produk_store" : selectedStore.toString(),
+      "produk_warehouse": selectedWarehouse.toString(),
       "produk_harga": _hargaproduk.text,
       "produk_stock" : _stockawal.text,
       "show_stock" : stock_val,
@@ -159,6 +160,8 @@ class _ProdukInsertState2 extends State<ProdukInsert2> {
     });
     Map data = jsonDecode(response.body);
     setState(() {
+      //showsuccess(data["message"].toString());
+
       if (data["message"].toString() == '1') {
         _stockawal.clear();
         _hargaproduk.clear();
@@ -170,13 +173,14 @@ class _ProdukInsertState2 extends State<ProdukInsert2> {
 
 
   alertSimpan() {
+    //showsuccess(stock_val);
     if(stock_val == 'true') {
       if(selectedWarehouse == '' || _stockawal.text == '' || selectedStore == "" || _hargaproduk.text == '') {
         showToast("Form tidak boleh kosong ", gravity: Toast.BOTTOM,
             duration: Toast.LENGTH_LONG);
         return false;
       }
-    } else {
+    } else if (stock_val == 'false'){
       if(selectedStore == "" || _hargaproduk.text == '') {
         showToast("Form tidak boleh kosong ", gravity: Toast.BOTTOM,
             duration: Toast.LENGTH_LONG);
@@ -212,7 +216,8 @@ class _ProdukInsertState2 extends State<ProdukInsert2> {
                         Expanded(child: OutlineButton(
                           borderSide: BorderSide(width: 1.0, color: HexColor("#602d98")),
                           onPressed: () {
-                            doSimpan();
+
+                           doSimpan();
                             Navigator.pop(context);
                           }, child: Text("Simpan", style: TextStyle(color: HexColor("#602d98")),),)),
                       ],),)

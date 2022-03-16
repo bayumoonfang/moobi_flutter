@@ -28,18 +28,18 @@ import 'package:toast/toast.dart';
 import '../page_intoduction.dart';
 
 
-class Produk extends StatefulWidget{
+class ProdukService extends StatefulWidget{
   final String getEmail;
   final String getLegalCode;
   final String getNamaUser;
 
-  const Produk(this.getEmail, this.getLegalCode, this.getNamaUser);
+  const ProdukService(this.getEmail, this.getLegalCode, this.getNamaUser);
   @override
-  _ProdukState createState() => _ProdukState();
+  _ProdukService createState() => _ProdukService();
 }
 
 
-class _ProdukState extends State<Produk> {
+class _ProdukService extends State<ProdukService> {
   List data;
   String getFilter = '';
   FocusNode focusNode;
@@ -105,7 +105,7 @@ class _ProdukState extends State<Produk> {
     http.Response response = await http.get(
         Uri.parse(applink+"api_model.php?act=getdata_produk_all&branch="
             +widget.getLegalCode+""
-            "&filter="+filter+"&filterq="+filterq+"&tipe=Product"),
+            "&filter="+filter+"&filterq="+filterq+"&tipe=Service"),
         headers: {
           "Accept":"application/json",
           "Content-Type": "application/json"}
@@ -323,7 +323,7 @@ class _ProdukState extends State<Produk> {
                   ),
                 ),
                 title: Text(
-                  "Master Data Produk",
+                  "Master Data Service",
                   style: TextStyle(
                       color: Colors.white,
                       fontFamily: 'VarelaRound',
@@ -425,7 +425,7 @@ class _ProdukState extends State<Produk> {
                     FocusScope.of(context).requestFocus(FocusNode());
                     Navigator.push(
                         context,
-                        MaterialPageRoute(builder: (context) => ProdukInsert(widget.getEmail, widget.getLegalCode, widget.getNamaUser,"Product"))).then(onGoBack);
+                        MaterialPageRoute(builder: (context) => ProdukInsert(widget.getEmail, widget.getLegalCode, widget.getNamaUser,"Service"))).then(onGoBack);
 
                     //Navigator.push(context, ExitPage(page: ProdukInsert()));
                   },
@@ -485,7 +485,7 @@ class _ProdukState extends State<Produk> {
                         FocusScope.of(context).requestFocus(FocusNode());
                         Navigator.push(
                             context,
-                            MaterialPageRoute(builder: (context) => ProdukDetail(widget.getEmail, widget.getLegalCode,snapshot.data[i]["g"].toString(), widget.getNamaUser,"Produk"))).then(onGoBack);
+                            MaterialPageRoute(builder: (context) => ProdukDetail(widget.getEmail, widget.getLegalCode,snapshot.data[i]["g"].toString(), widget.getNamaUser,"Service"))).then(onGoBack);
                       },
                       onLongPress: (){
                         FocusScope.of(context).requestFocus(FocusNode());

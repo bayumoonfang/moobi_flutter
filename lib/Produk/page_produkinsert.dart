@@ -29,9 +29,10 @@ class ProdukInsert extends StatefulWidget {
   final String getEmail;
   final String getLegalCode;
   final String getNamaUser;
+  final String getTipe;
 
 
-  const ProdukInsert(this.getEmail,this.getLegalCode,this.getNamaUser);
+  const ProdukInsert(this.getEmail,this.getLegalCode,this.getNamaUser, this.getTipe);
 
     @override
     _ProdukInsertState createState() => _ProdukInsertState();
@@ -154,10 +155,17 @@ class _ProdukInsertState extends State<ProdukInsert> {
     final Mb = Kb / 1024;
    // print("You selected gallery image : " + Base64);
     setState(() {
-      Baseq = Base64;
-      showsuccess(Bytes.toString());
-      print(Bytes.toString());
-      namaFileq = fileName;
+      if(Kb > 5000) {
+        showsuccess("Mohon maaf , ukuran gambar maksimal 5Mb");
+        namaFileq = "";
+        Base64 = "";
+        Baseq = "";
+        return;
+      } else {
+        Baseq = Base64;
+        namaFileq = fileName;
+      }
+
     });
   }
 
@@ -168,7 +176,7 @@ class _ProdukInsertState extends State<ProdukInsert> {
       "produk_number": _kodeproduk.text,
       "produk_satuan" : selectedSatuan,
       "produk_kategori" : selectedCategory,
-      "produk_tipe": "Product",
+      "produk_tipe": widget.getTipe,
       "produk_image": Baseq,
       "produk_branch" : widget.getLegalCode,
       "image_nama" : namaFileq,
@@ -188,7 +196,7 @@ class _ProdukInsertState extends State<ProdukInsert> {
         Base64 = "";
         Baseq = "";
         Navigator.pop(context);
-        Navigator.push(context, ExitPage(page: ProdukInsert2(widget.getEmail, widget.getLegalCode, data["message"].toString(), "Product",selectedSatuan, widget.getNamaUser)));
+        Navigator.push(context, ExitPage(page: ProdukInsert2(widget.getEmail, widget.getLegalCode, data["message"].toString(), widget.getTipe,selectedSatuan, widget.getNamaUser)));
         return false;
       }
     });
@@ -272,7 +280,7 @@ class _ProdukInsertState extends State<ProdukInsert> {
               ),
             ),
             title: Text(
-             "Input Produk Baru",
+             "Input "+widget.getTipe+" Baru",
               style: TextStyle(
                   color: Colors.white,
                   fontFamily: 'VarelaRound',
@@ -317,7 +325,7 @@ class _ProdukInsertState extends State<ProdukInsert> {
                       children: [
                         Align(alignment: Alignment.centerLeft,child: Padding(
                           padding: const EdgeInsets.only(left: 0,top: 15),
-                          child: Text("Kode Produk",style: TextStyle(fontWeight: FontWeight.bold,fontFamily: "VarelaRound",
+                          child: Text("Kode "+widget.getTipe,style: TextStyle(fontWeight: FontWeight.bold,fontFamily: "VarelaRound",
                               fontSize: 12,color: HexColor("#0074D9")),),
                         ),),
                         Align(alignment: Alignment.centerLeft,child: Padding(
@@ -353,7 +361,7 @@ class _ProdukInsertState extends State<ProdukInsert> {
                       children: [
                         Align(alignment: Alignment.centerLeft,child: Padding(
                           padding: const EdgeInsets.only(left: 0,top: 15),
-                          child: Text("Nama Produk",style: TextStyle(fontWeight: FontWeight.bold,fontFamily: "VarelaRound",
+                          child: Text("Nama "+widget.getTipe,style: TextStyle(fontWeight: FontWeight.bold,fontFamily: "VarelaRound",
                               fontSize: 12,color: HexColor("#0074D9")),),
                         ),),
                         Align(alignment: Alignment.centerLeft,child: Padding(
@@ -363,7 +371,7 @@ class _ProdukInsertState extends State<ProdukInsert> {
                             controller: _namaproduk,
                             decoration: InputDecoration(
                               contentPadding: const EdgeInsets.only(top:2),
-                              hintText: 'Contoh : Nasi Goreng, Es Jeruk',
+                              hintText: 'Contoh : Nasi Goreng, Es Jeruk, Jasa Photo',
                               labelText: '',
                               floatingLabelBehavior: FloatingLabelBehavior.always,
                               hintStyle: TextStyle(fontFamily: "VarelaRound", color: HexColor("#c4c4c4")),
@@ -421,14 +429,14 @@ class _ProdukInsertState extends State<ProdukInsert> {
                       children: [
                         Align(alignment: Alignment.centerLeft,child: Padding(
                           padding: const EdgeInsets.only(left: 0,top: 15),
-                          child: Text("Category",style: TextStyle(fontWeight: FontWeight.bold,fontFamily: "VarelaRound",
+                          child: Text("Kategori",style: TextStyle(fontWeight: FontWeight.bold,fontFamily: "VarelaRound",
                               fontSize: 12,color: HexColor("#0074D9")),),
                         ),),
                         Align(alignment: Alignment.centerLeft,child: Padding(
                           padding: const EdgeInsets.only(top:10),
                           child: DropdownButton(
                             isExpanded: false,
-                            hint: Text("Pilih Category", style : GoogleFonts.varelaRound()),
+                            hint: Text("Pilih Kategori", style : GoogleFonts.varelaRound()),
                             value: selectedCategory,
                             items: categoryList.map((myitem2){
                               return DropdownMenuItem(
@@ -455,7 +463,7 @@ class _ProdukInsertState extends State<ProdukInsert> {
                       children: [
                         Align(alignment: Alignment.centerLeft,child: Padding(
                           padding: const EdgeInsets.only(left: 0,top: 15),
-                          child: Text("Photo Produk",style: TextStyle(fontWeight: FontWeight.bold,fontFamily: "VarelaRound",
+                          child: Text("Photo "+widget.getTipe,style: TextStyle(fontWeight: FontWeight.bold,fontFamily: "VarelaRound",
                               fontSize: 12,color: HexColor("#0074D9")),),
                         ),),
                         Align(alignment: Alignment.centerLeft,child: Padding(

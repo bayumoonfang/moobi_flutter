@@ -363,7 +363,7 @@ class _HomeState extends State<Home> {
                                           children: [
                                             FaIcon(FontAwesomeIcons.box,color: HexColor(second_color)),
                                             Padding(padding: const EdgeInsets.only(top:8),
-                                              child: Text("Produk", style: TextStyle(fontFamily: 'VarelaRound',
+                                              child: Text("Master Data", style: TextStyle(fontFamily: 'VarelaRound',
                                                   fontSize: 12,color: HexColor(second_color))),)
                                           ],
                                         )),

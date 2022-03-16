@@ -606,7 +606,7 @@ class _DetailOutlet extends State<DetailOutlet> {
                 ],
               ),),
 
-             /* Padding(padding: const EdgeInsets.only(top: 10,left: 9,right: 25),
+              Padding(padding: const EdgeInsets.only(top: 10,left: 9,right: 25),
                   child: InkWell(
                     child: ListTile(
                       onTap: (){
@@ -648,7 +648,7 @@ class _DetailOutlet extends State<DetailOutlet> {
                   )
               ),
               Padding(padding: const EdgeInsets.only(top: 5,left: 25,right: 25),
-                child: Divider(height: 3,),),*/
+                child: Divider(height: 3,),),
 
 
 

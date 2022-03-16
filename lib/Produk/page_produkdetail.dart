@@ -32,8 +32,9 @@ class ProdukDetail extends StatefulWidget {
   final String getLegalCode;
   final String getItemNumber;
   final String getNamaUser;
+  final String getTipe;
 
-  const ProdukDetail(this.getEmail,this.getLegalCode,this.getItemNumber, this.getNamaUser);
+  const ProdukDetail(this.getEmail,this.getLegalCode,this.getItemNumber, this.getNamaUser, this.getTipe);
   @override
   _ProdukDetailState createState() => _ProdukDetailState();
 }
@@ -440,7 +441,7 @@ class _ProdukDetailState extends State<ProdukDetail> {
               ),),
             ],
             title: Text(
-              "Detail Produk",
+              "Detail "+widget.getTipe,
               style: TextStyle(
                   color: Colors.white,
                   fontFamily: 'VarelaRound',
@@ -503,7 +504,7 @@ class _ProdukDetailState extends State<ProdukDetail> {
                           opacity: 0.6,
                           child: Align(
                             alignment: Alignment.centerLeft,
-                            child: Text("Produk Terjual",style: TextStyle(fontWeight: FontWeight.bold
+                            child: Text(widget.getTipe+" Terjual",style: TextStyle(fontWeight: FontWeight.bold
                                 , fontFamily: 'VarelaRound',fontSize: 13)),),
                         ),
                         trailing: Container(
@@ -532,7 +533,7 @@ class _ProdukDetailState extends State<ProdukDetail> {
                   Padding(padding: const EdgeInsets.only(top: 20,left: 25),
                     child: Column(
                       children: [
-                        Align(alignment: Alignment.centerLeft,child: Text("Informasi Produk",style: TextStyle(
+                        Align(alignment: Alignment.centerLeft,child: Text("Informasi "+widget.getTipe,style: TextStyle(
                             color: Colors.black, fontFamily: 'VarelaRound',fontSize: 15,
                             fontWeight: FontWeight.bold)),),
 
@@ -695,7 +696,7 @@ class _ProdukDetailState extends State<ProdukDetail> {
                         ),
                           borderRadius: BorderRadius.circular(50.0),
                         ),
-                        child: Text("Edit Produk",style: TextStyle(
+                        child: Text("Edit "+widget.getTipe,style: TextStyle(
                             color: Colors.white, fontFamily: 'VarelaRound')),
                       ),
                     ),

@@ -91,8 +91,8 @@ class _JualanUbahWarehouse extends State<JualanUbahWarehouse> {
   var client = http.Client();
   Future<dynamic> getDataStore() async {
     http.Response response = await client.get(
-        Uri.parse(applink+"api_model.php?act=getdata_warehousesett_sales&username="
-            +widget.getEmail+"&branch="
+        Uri.parse(applink+"api_model.php?act=getdata_warehousesett_sales&storeid="
+            +widget.getStoreId+"&branch="
             +widget.getLegalCode),
         headers: {
           "Accept":"application/json",
@@ -166,7 +166,7 @@ class _JualanUbahWarehouse extends State<JualanUbahWarehouse> {
                     child: CircularProgressIndicator()
                 );
               } else {
-                return snapshot.data == 0 ?
+                return snapshot.data == 0  || snapshot.data.length == 0 ?
                 Container(
                     height: double.infinity, width : double.infinity,
                     child: new
@@ -195,10 +195,10 @@ class _JualanUbahWarehouse extends State<JualanUbahWarehouse> {
                   itemBuilder: (context, i) {
                     return Padding(padding: const EdgeInsets.only(left: 10,right: 10,top: 5),
                       child:
+                          snapshot.data[i]['c'].toString() == '0' ?
                       InkWell(
                           onTap: () {
                             changeWarehouse(snapshot.data[i]["a"].toString());
-
                           },
                           child :
                           Card(
@@ -208,7 +208,18 @@ class _JualanUbahWarehouse extends State<JualanUbahWarehouse> {
                                   color: Colors.black, fontFamily: 'VarelaRound',fontSize: 15)),
                             ),
                           ))
-                      ,);
+                    :
+                       Opacity(
+                         opacity : 0.4,
+                         child : Card(
+                           child: ListTile(
+                             leading: FaIcon(FontAwesomeIcons.warehouse, size: 18,),
+                             title: Text(snapshot.data[i]["b"],style: TextStyle(
+                                 color: Colors.black, fontFamily: 'VarelaRound',fontSize: 15)),
+                           ),
+                         )
+                       )
+                    );
                   },
                 );
               }

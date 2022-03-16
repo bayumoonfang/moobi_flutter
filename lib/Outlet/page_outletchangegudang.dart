@@ -169,7 +169,7 @@ class _OutletChangeGudang extends State<OutletChangeGudang> {
                     child: CircularProgressIndicator()
                 );
               } else {
-                return snapshot.data == 0 ?
+                return snapshot.data == 0  || snapshot.data.length == 0 ?
                 Container(
                     height: double.infinity, width : double.infinity,
                     child: new
@@ -198,7 +198,7 @@ class _OutletChangeGudang extends State<OutletChangeGudang> {
                   itemBuilder: (context, i) {
                     return Padding(padding: const EdgeInsets.only(left: 10,right: 10,top: 5),
                       child:
-                      snapshot.data[i]["d"] == '0' ?
+                      snapshot.data[i]["e"].toString() == '0' ?
                       InkWell(
                           onTap: () {
                             changeGudang(snapshot.data[i]["a"].toString(), snapshot.data[i]["b"].toString(), widget.idOutlet);

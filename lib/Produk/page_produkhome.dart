@@ -13,6 +13,7 @@ import 'package:moobi_flutter/Helper/app_helper.dart';
 import 'package:moobi_flutter/Helper/page_route.dart';
 import 'package:moobi_flutter/Produk/page_produk.dart';
 import 'package:moobi_flutter/Produk/page_kategori.dart';
+import 'package:moobi_flutter/Produk/page_produkservice.dart';
 import 'package:moobi_flutter/Produk/page_satuan.dart';
 import 'package:toast/toast.dart';
 import 'package:http/http.dart' as http;
@@ -130,6 +131,19 @@ class _ProdukHomeState extends State<ProdukHome> {
                         color: Colors.black, fontFamily: 'VarelaRound',fontSize: 15,
                         fontWeight: FontWeight.bold)),
                     subtitle: Text("Kelola produk toko anda dengan mudah disini",style: TextStyle(
+                        color: Colors.black, fontFamily: 'VarelaRound',fontSize: 12)),
+                    trailing: FaIcon(FontAwesomeIcons.angleRight,color: HexColor("#594d75"),size: 15,),
+                  ),
+                ),
+                Padding(padding: const EdgeInsets.only(top: 5,left: 15),
+                  child: Divider(height: 3,),),
+                InkWell(
+                  child: ListTile(
+                    onTap: (){Navigator.push(context, ExitPage(page: ProdukService(widget.getEmail, widget.getLegalCode, widget.getNamaUser)));},
+                    title: Text("Master Data Service",style: TextStyle(
+                        color: Colors.black, fontFamily: 'VarelaRound',fontSize: 15,
+                        fontWeight: FontWeight.bold)),
+                    subtitle: Text("Kelola jasa di toko anda dengan mudah disini",style: TextStyle(
                         color: Colors.black, fontFamily: 'VarelaRound',fontSize: 12)),
                     trailing: FaIcon(FontAwesomeIcons.angleRight,color: HexColor("#594d75"),size: 15,),
                   ),

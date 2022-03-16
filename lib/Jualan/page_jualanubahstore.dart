@@ -166,7 +166,7 @@ class _JualanUbahStore extends State<JualanUbahStore> {
                     child: CircularProgressIndicator()
                 );
               } else {
-                return snapshot.data == 0 ?
+                return snapshot.data == 0  || snapshot.data.length == 0 ?
                 Container(
                     height: double.infinity, width : double.infinity,
                     child: new

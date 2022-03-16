@@ -200,7 +200,7 @@ class _TambahProdukOutlet extends State<TambahProdukOutlet> {
                 child: Column(
                   children: [
                     Align(alignment: Alignment.center, child:
-                    Text("Tambah Ke Outlet", style: TextStyle(fontFamily: 'VarelaRound', fontSize: 20,
+                    Text("Jual Ke Outlet", style: TextStyle(fontFamily: 'VarelaRound', fontSize: 20,
                         fontWeight: FontWeight.bold)),),
                     Padding(padding: const EdgeInsets.only(top: 15), child:
                     Align(alignment: Alignment.center, child:
@@ -286,17 +286,16 @@ class _TambahProdukOutlet extends State<TambahProdukOutlet> {
             //title: Text(),
             content: Container(
                 width: double.infinity,
-                height: 150,
+                height: 140,
                 child: Column(
                   children: [
                     Align(alignment: Alignment.center, child:
-                    Text("Tambah Ke Outlet", style: TextStyle(fontFamily: 'VarelaRound', fontSize: 20,
+                    Text("Jual Ke Outlet", style: TextStyle(fontFamily: 'VarelaRound', fontSize: 20,
                         fontWeight: FontWeight.bold)),),
                     Padding(padding: const EdgeInsets.only(top: 15), child:
                     Align(alignment: Alignment.center, child:
                     Text("Menambah semua produk baru ke outlet ",
                       style: TextStyle(fontFamily: 'VarelaRound', fontSize: 12),textAlign: TextAlign.center,),)),
-                    Padding(padding: const EdgeInsets.only(top: 15)),
                     Padding(padding: const EdgeInsets.only(top: 25), child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                       children: <Widget>[
