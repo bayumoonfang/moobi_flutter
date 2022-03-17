@@ -91,8 +91,7 @@ class _JualanUbahStore extends State<JualanUbahStore> {
   var client = http.Client();
   Future<dynamic> getDataStore() async {
     http.Response response = await client.get(
-        Uri.parse(applink+"api_model.php?act=getdata_storesett_sales&username="
-            +widget.getEmail+"&branch="
+        Uri.parse(applink+"api_model.php?act=getdata_storesett_sales&branch="
             +widget.getLegalCode),
         headers: {
           "Accept":"application/json",
@@ -197,14 +196,13 @@ class _JualanUbahStore extends State<JualanUbahStore> {
                       child:
                       InkWell(
                           onTap: () {
-                            changeStore(snapshot.data[i]["c"].toString());
-
+                            changeStore(snapshot.data[i]["b"].toString());
                           },
                           child :
                           Card(
                             child: ListTile(
                               leading: FaIcon(FontAwesomeIcons.warehouse, size: 18,),
-                              title: Text(snapshot.data[i]["b"],style: TextStyle(
+                              title: Text(snapshot.data[i]["a"],style: TextStyle(
                                   color: Colors.black, fontFamily: 'VarelaRound',fontSize: 15)),
                             ),
                           ))

@@ -93,7 +93,7 @@ class _OutletChangeGudang extends State<OutletChangeGudang> {
   Future<dynamic> getDataGudang() async {
     http.Response response = await client.get(
         Uri.parse(applink+"api_model.php?act=getdata_gudangall&id="
-            +widget.getLegalCode),
+            +widget.getLegalCode+"&idstore="+widget.idOutlet),
         headers: {
           "Accept":"application/json",
           "Content-Type": "application/json"}

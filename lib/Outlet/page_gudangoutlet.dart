@@ -124,13 +124,15 @@ class _GudangOutlet extends State<GudangOutlet> {
 
 
   FutureOr onGoBack(dynamic value) {
-    getData();
-    setState(() {});
+    setState(() {
+      getData();
+    });
   }
 
   _doHapus (String valueParse2) async {
     Navigator.pop(context);
-    final response = await http.get(applink+"api_model.php?act=action_hapusgudang&id="+valueParse2.toString()
+    final response = await http.get(applink+"api_model.php?act=action_hapusgudang&"
+        "id="+valueParse2.toString()
         +"&branch="+widget.getLegalCode);
     Map data = jsonDecode(response.body);
     setState(() {
@@ -303,9 +305,9 @@ class _GudangOutlet extends State<GudangOutlet> {
                                         Padding(padding: const EdgeInsets.only(top: 5),
                                           child: FaIcon(FontAwesomeIcons.warehouse,color: HexColor("#602d98"),),),
                                         title: Text(snapshot.data[i]["a"], style: TextStyle(fontFamily: 'VarelaRound')),
-                                        subtitle: Text(snapshot.data[i]["b"], style: TextStyle(fontFamily: 'VarelaRound',fontSize: 13)),
+                                        subtitle: Text(snapshot.data[i]["b"] == '99' ? 'G-'+widget.getLegalCode+'' : snapshot.data[i]["b"], style: TextStyle(fontFamily: 'VarelaRound',fontSize: 13)),
                                         trailing:
-                                        snapshot.data[i]["a"] != 'Gudang Besar' ?
+                                        snapshot.data[i]["a"] != 'Gudang Besar' &&  snapshot.data[i]["b"] != '99' ?
                                         Padding(
                                           padding: const EdgeInsets.only(right: 10),
                                           child: InkWell(

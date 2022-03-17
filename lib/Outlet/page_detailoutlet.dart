@@ -146,7 +146,9 @@ class _DetailOutlet extends State<DetailOutlet> {
     Navigator.pop(context);
     final response = await http.post(applink+"api_model.php?act=hapus_outlet", body: {
       "id" : widget.idOutlet,
-      "legal_id" : widget.getLegalId
+      //"legal_id" : widget.getLegalId,
+      "branch" : widget.getLegalCode,
+      "nama_user" : widget.NamaUser
     });
     Map data = jsonDecode(response.body);
     setState(() {

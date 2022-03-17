@@ -333,7 +333,7 @@ class _ProdukState extends State<Produk> {
                   Padding(padding: const EdgeInsets.only(top:0,right: 18), child:
                   Builder(
                     builder: (context) => IconButton(
-                      icon: new FaIcon(FontAwesomeIcons.sortAmountDown,size: 18,),
+                      icon: new FaIcon(FontAwesomeIcons.list,size: 18,),
                       color: Colors.white,
                       onPressed: ()  {
                         FocusScope.of(context).requestFocus(FocusNode());

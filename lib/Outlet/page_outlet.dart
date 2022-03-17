@@ -126,11 +126,11 @@ class _Outlet extends State<Outlet> {
 
   String getMessage = "...";
   _doHapus (String valueParse2) async {
-    final response = await http.get(applink+"api_model.php?act=action_hapusoutlet&id="+valueParse2.toString()
-        +""
-            "&branch="+widget.getLegalCode+""
-            "&legalid="+widget.getLegalId+""
-            "&username="+widget.getEmail);
+    final response = await http.post(applink+"api_model.php?act=hapus_outlet", body: {
+      "id" : valueParse2.toString(),
+      "branch" : widget.getLegalCode,
+      "nama_user" : widget.getNamaUser
+    });
     Map data = jsonDecode(response.body);
     setState(() {
       if (data["message"].toString() == '1') {

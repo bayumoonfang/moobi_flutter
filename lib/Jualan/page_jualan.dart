@@ -35,7 +35,10 @@ class Jualan extends StatefulWidget{
   final String getStoreId;
   final String getWarehouseKode;
   final String getUserNama;
-  const Jualan(this.getEmail, this.getLegalCode,this.getLegalId,this.getStoreId,this.getWarehouseKode, this.getUserNama);
+  final String getWarehouseId;
+  final String getTipe;
+  const Jualan(this.getEmail, this.getLegalCode,this.getLegalId,this.getStoreId,this.getWarehouseKode, this.getUserNama,
+      this.getWarehouseId, this.getTipe);
   @override
   JualanState createState() => JualanState();
 }
@@ -58,6 +61,17 @@ class JualanState extends State<Jualan> {
 
   TextEditingController _tambahanNama = TextEditingController();
   TextEditingController _tambahanBiaya = TextEditingController();
+
+  bool _isVisible = true;
+  startSCreen() async {
+    Timer.periodic(Duration(milliseconds: 600), (timer) {
+      setState(() {
+        _isVisible = true;
+      });
+    });
+  }
+
+
 
   _cekLegalandUser() async {
     final response = await http.post(applink+"api_model.php?act=cek_legalanduser",
@@ -100,8 +114,8 @@ class JualanState extends State<Jualan> {
     return;
   }
 
-  String filter = "Semua";
-  String sortby = '0';
+  String filter = "";
+  String sortby = '';
   Future<List> getData() async {
     http.Response response = await http.get(
         Uri.encodeFull(applink+"api_model.php?act=getdata_produk_jual&"
@@ -109,8 +123,11 @@ class JualanState extends State<Jualan> {
             "&warehouse_kode="+widget.getWarehouseKode+""
             "&store_id="+widget.getStoreId+""
             "&filter="+filter+""
-            "&sort="+sortby),
-        headers: {"Accept":"application/json"}
+            "&sortby="+sortby+""
+            "&getTipe="+widget.getTipe),
+        headers: {
+          "Accept":"application/json",
+          "Content-Type": "application/json"}
     );
     return json.decode(response.body);
 
@@ -123,7 +140,7 @@ class JualanState extends State<Jualan> {
     if (response.statusCode == 200) {
       var jsonData = json.decode(response.body);
       setState(() {
-        customerList = jsonData;
+        //customerList = jsonData;
       });
     }
     //print(bankUserList);
@@ -535,30 +552,9 @@ class JualanState extends State<Jualan> {
                             InkWell(
                               onTap: (){
                                 setState(() {
-                                  sortby = '0';
-                                  //_isvisible = false;
-                                  //startSCreen();
-                                  Navigator.pop(context);
-                                });
-                              },
-                              child: Align(alignment: Alignment.centerLeft,
-                                child:    Text(
-                                  "Semua",
-                                  textAlign: TextAlign.left,
-                                  style: TextStyle(
-                                      fontFamily: 'VarelaRound',
-                                      fontSize: 15),
-                                ),),
-                            ),
-                            Padding(padding: const EdgeInsets.only(top:15,
-                                bottom: 15,left: 4,right: 4),
-                              child: Divider(height: 5,),),
-                            InkWell(
-                              onTap: (){
-                                setState(() {
                                   sortby = '1';
-                                  //_isvisible = false;
-                                  //startSCreen();
+                                  _isVisible = false;
+                                  startSCreen();
                                   Navigator.pop(context);
                                 });
                               },
@@ -578,8 +574,8 @@ class JualanState extends State<Jualan> {
                               onTap: (){
                                 setState(() {
                                   sortby = '2';
-                                  //_isvisible = false;
-                                 //startSCreen();
+                                  _isVisible = false;
+                                  startSCreen();
                                   Navigator.pop(context);
                                 });
                               },
@@ -599,8 +595,8 @@ class JualanState extends State<Jualan> {
                               onTap: (){
                                 setState(() {
                                   sortby = '3';
-                                  //_isvisible = false;
-                                 // startSCreen();
+                                  _isVisible = false;
+                                  startSCreen();
                                   Navigator.pop(context);
                                 });
                               },
@@ -733,8 +729,8 @@ class JualanState extends State<Jualan> {
                         enableInteractiveSelection: false,
                         onChanged: (text) {
                           setState(() {
-                           // filter = text;
-                            //_isvisible = false;
+                            filter = text;
+                           // _isVisible = false;
                             //startSCreen();
                           });
                         },
@@ -765,6 +761,38 @@ class JualanState extends State<Jualan> {
                 ),
 
                 Padding(padding: const EdgeInsets.only(top: 10),),
+                sortby != '' ?
+                Padding(padding: const EdgeInsets.only(left: 20,top: 2,right: 15, bottom : 15),
+                    child :
+                    Align(
+                        alignment: Alignment.centerLeft,
+                        child :  FittedBox(
+                            fit: BoxFit.none,
+                            child :
+                            RaisedButton(child :
+                            Row(
+                              children: [
+                                Text(sortby == '1' ? 'Harga Terendah' : sortby == '2' ? 'Harga Tertinggi' : 'Produk Diskon', style: GoogleFonts.varelaRound(fontSize: 13),),
+                                Padding(padding : const EdgeInsets.only(left  :10),
+                                    child : FaIcon(FontAwesomeIcons.times,size: 12,))
+                              ],
+                            ),
+                              elevation: 0,
+                              onPressed: (){
+                                setState(() {
+                                  sortby = "";
+                                  _isVisible = false;
+                                  startSCreen();
+                                });
+                              },
+                            ))
+                    )
+
+                )
+                    :Container(),
+          Visibility(
+            visible: _isVisible,
+                child :
                 Expanded(
                   child: FutureBuilder(
                     future: getData(),
@@ -774,7 +802,7 @@ class JualanState extends State<Jualan> {
                             child: CircularProgressIndicator()
                         );
                       } else {
-                        return snapshot.data == 0 ?
+                        return snapshot.data == 0  || snapshot.data.length == 0 ?
                         Container(
                             height: double.infinity, width : double.infinity,
                             child: new
@@ -928,7 +956,7 @@ class JualanState extends State<Jualan> {
                     }
 
                   ),
-                )
+                ))
               ],
             ),
           ),

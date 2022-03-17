@@ -158,13 +158,11 @@ class _GudangOutletDetail extends State<GudangOutletDetail> {
 
 
 
-  doHapus(String IDq) async {
+  doHapus() async {
     Navigator.pop(context);
-    final response = await http.post(applink+"api_model.php?act=hapus_gudang", body: {
-      "id" : widget.idGudang,
-      "legal_id" : widget.getLegalId,
-      "kodeGudang" : widget.kodeGudang
-    });
+    final response = await http.get(applink+"api_model.php?act=action_hapusgudang&"
+        "id="+widget.idGudang
+        +"&branch="+widget.getLegalCode);
     Map data = jsonDecode(response.body);
     setState(() {
       if (data["message"].toString() == '1') {
@@ -178,7 +176,7 @@ class _GudangOutletDetail extends State<GudangOutletDetail> {
 
 
 
-  alertHapus(String IDProduk) {
+  alertHapus() {
     showDialog(
         context: context,
         builder: (BuildContext context) {
@@ -207,7 +205,7 @@ class _GudangOutletDetail extends State<GudangOutletDetail> {
                         Expanded(child: OutlineButton(
                           borderSide: BorderSide(width: 1.0, color: Colors.redAccent),
                           onPressed: () {
-                           doHapus(IDProduk);
+                           doHapus();
                           }, child: Text("Hapus", style: TextStyle(color: Colors.red),),)),
                       ],),)
                   ],
@@ -239,11 +237,11 @@ class _GudangOutletDetail extends State<GudangOutletDetail> {
                 }),
           ),
           actions: [
-            getWarehouseName != 'Gudang Besar' ?
+            getWarehouseName != 'Gudang Besar' && widget.kodeGudang != '99' ?
             InkWell(
               onTap: () {
                 FocusScope.of(context).requestFocus(FocusNode());
-                alertHapus(widget.idGudang);
+                alertHapus();
               },
               child: Padding(
                 padding: const EdgeInsets.only(right: 30,top : 19),
@@ -303,6 +301,7 @@ class _GudangOutletDetail extends State<GudangOutletDetail> {
 
               Column(
                 children: [
+                  widget.kodeGudang != '99' ?
                   Padding(padding: const EdgeInsets.only(left: 25,right: 25,top: 20),
                       child :
                       Row(
@@ -334,8 +333,10 @@ class _GudangOutletDetail extends State<GudangOutletDetail> {
                                     fontSize: 13)),
                           )
                         ],
-                      )),
+                      ))
+                  : Container(),
 
+                  widget.kodeGudang != '99' ?
                   Padding(padding: const EdgeInsets.only(top: 10,left: 9),
                       child: InkWell(
                         child: ListTile(
@@ -357,12 +358,14 @@ class _GudangOutletDetail extends State<GudangOutletDetail> {
                           ),
                         ),
                       )
-                  ),
+                  ) : Container()
                 ],
               ),
-
+              widget.kodeGudang != '99' ?
               Padding(padding: const EdgeInsets.only(top: 5,left: 25,right: 25),
-                child: Divider(height: 5,),),
+                child: Divider(height: 5,),)
+                : Container(),
+
 
                 Padding(padding: const EdgeInsets.only(top:35,left: 25,right: 25),
                 child:  Row(
@@ -381,6 +384,7 @@ class _GudangOutletDetail extends State<GudangOutletDetail> {
                   ],
                 ),),
 
+              widget.kodeGudang != '99' ?
               Padding(padding: const EdgeInsets.only(top: 5,left: 9,right: 25),
                   child: InkWell(
                     child: ListTile(
@@ -403,8 +407,28 @@ class _GudangOutletDetail extends State<GudangOutletDetail> {
                       trailing: FaIcon(FontAwesomeIcons.angleRight,color: HexColor(third_color),),
                     ),
                   )
+              )
+              :
+              Opacity(
+                opacity : 0.4,
+                child : Padding(padding: const EdgeInsets.only(top: 5,left: 9,right: 25),
+                    child: ListTile(
+                        title: Padding(padding: const EdgeInsets.only(top: 10),
+                          child: Column(
+                            children: [
+                              Align(alignment: Alignment.centerLeft,child:
+                              Text("Daftar Produk", style: TextStyle(
+                                fontFamily: 'VarelaRound',fontSize: 15,)),),
+                              Padding(padding: const EdgeInsets.only(top: 5),
+                                child: Align(alignment: Alignment.centerLeft,child:
+                                Text("Atur produk yang masuk dalam gudang",
+                                    style: TextStyle(fontFamily: 'VarelaRound',fontSize: 13,color: HexColor("#72757a"),)),),)
+                            ],
+                          ),),
+                        trailing: FaIcon(FontAwesomeIcons.angleRight,color: HexColor(third_color),),
+                      ),
+                )
               ),
-
 
               Padding(padding: const EdgeInsets.only(top: 5,left: 25,right: 25),
                 child: Divider(height: 3,),),
@@ -412,7 +436,7 @@ class _GudangOutletDetail extends State<GudangOutletDetail> {
 
               Padding(padding: const EdgeInsets.only(top: 5,left: 9,right: 25),
                   child:
-                  getWarehouseName != 'Gudang Besar' ?
+                  getWarehouseName != 'Gudang Besar' && widget.kodeGudang != '99' ?
                   InkWell(
                     onTap: (){
                       Navigator.push(context, ExitPage(page: GudangOutletUbahNama(

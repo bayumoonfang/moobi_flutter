@@ -8,6 +8,7 @@ import 'dart:convert';
 import 'package:flushbar/flushbar.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/painting.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:hexcolor/hexcolor.dart';
@@ -37,7 +38,7 @@ class JualanHome extends StatefulWidget{
 
 class _JualanHome extends State<JualanHome>{
 
-
+  String selectedValue = "Product";
   void showToast(String msg, {int duration, int gravity}) {
     Toast.show(msg, context, duration: duration, gravity: gravity);
   }
@@ -124,7 +125,13 @@ class _JualanHome extends State<JualanHome>{
     setState(() {});
   }
 
-
+  List<DropdownMenuItem<String>> get dropdownItems{
+    List<DropdownMenuItem<String>> menuItems = [
+      DropdownMenuItem(child: Text("Transaksi Produk", style : GoogleFonts.varelaRound(fontWeight: FontWeight.bold)),value: "Product"),
+      DropdownMenuItem(child: Text("Transaksi Jasa", style : GoogleFonts.varelaRound(fontWeight: FontWeight.bold)),value: "Service")
+    ];
+    return menuItems;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -231,6 +238,48 @@ class _JualanHome extends State<JualanHome>{
                         ),
                       )
                   ),
+
+
+                  Padding(padding: const EdgeInsets.only(top: 5,left: 25,right: 25),
+                    child: Divider(height: 3,),),
+
+                  Padding(padding: const EdgeInsets.only(top: 15,left: 9,right: 25),
+                    child : ListTile(
+                          title: Column(
+                            children: [
+                              Align(alignment: Alignment.centerLeft,
+                                child: Text("Sales Origine", style: TextStyle(color: HexColor("#72757a"),
+                                  fontFamily: 'VarelaRound',fontSize: 11,)),),
+                              Align(
+                                alignment: Alignment.centerLeft,
+                                child: Container(
+                                    padding: const EdgeInsets.only(top:5 ),
+                                    height: 55,
+                                    child: Align(alignment: Alignment.centerLeft,
+                                        child: DropdownButton(
+                                          isExpanded: false,
+                                          value: selectedValue,
+                                          items: dropdownItems,
+                                          onChanged: (value) {
+                                            setState(() {
+                                              FocusScope.of(context).requestFocus(FocusNode());
+                                              selectedValue = value;
+                                            });
+                                          },
+                                        ),
+
+                                    )
+                                ),
+                              )
+                            ],
+                          ),
+                          //trailing: FaIcon(FontAwesomeIcons.angleRight,color: HexColor(third_color),size: 23,),
+                        ),
+                      )
+
+
+
+
                 ],
               ),
             ),
@@ -248,10 +297,8 @@ class _JualanHome extends State<JualanHome>{
                 color: HexColor(main_color),
                 child :Text("Lanjut Jualan",style: GoogleFonts.varelaRound(color:Colors.white),),
                 onPressed: (){
-                  Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (context) => Jualan(widget.getEmail,widget.getLegalCode, widget.getLegalId,
-                      getStoreId, getWarehouseKode, widget.getNamaUser )));
+                  Navigator.push(context, ExitPage(page: Jualan(widget.getEmail,widget.getLegalCode, widget.getLegalId,
+                      getStoreId, getWarehouseKode, widget.getNamaUser, getWarehouseId, selectedValue )));
                 },
               ),
             ),
