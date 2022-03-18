@@ -49,29 +49,20 @@ class _ProfileState extends State<Profile> {
   String val_registerdate = "0";
   String val_legalcode = "0";
   String val_pictuser = "";
-  _cekLegalandUser() async {
-    final response = await http.post(applink+"api_model.php?act=cek_legalanduser",
-        body: {"username": widget.getEmail.toString()},
-        headers: {"Accept":"application/json"});
-    Map data = jsonDecode(response.body);
-    setState(() {
-      if (data["message"].toString() == '2' || data["message"].toString() == '3') {
-        Navigator.pushReplacement(context, ExitPage(page: Introduction()));
-      }
-    });
-  }
+  String serverName = '';
+  String serverCode = '';
   //=============================================================================
   _startingVariable() async {
     await AppHelper().getConnect().then((value){if(value == 'ConnInterupted'){
       showToast("Koneksi terputus..", gravity: Toast.CENTER,duration:
       Toast.LENGTH_LONG);}});
     await AppHelper().getSession().then((value){
-      if(value[0] != 1) {
-        Navigator.pushReplacement(context, ExitPage(page: Login()));
-      }
-    });
-    await _cekLegalandUser();
-    AppHelper().getDetailUser(widget.getEmail.toString()).then((value){
+      setState(() {serverName = value[11];serverCode = value[12];});});
+    await AppHelper().cekServer(widget.getEmail).then((value){
+      if(value[0] == '0') {Navigator.pushReplacement(context, ExitPage(page: Introduction()));}});
+    await AppHelper().cekLegalUser(widget.getEmail.toString(), serverCode.toString()).then((value){
+      if(value[0] == '0') {Navigator.pushReplacement(context, ExitPage(page: Introduction()));}});
+    AppHelper().getDetailUser(widget.getEmail.toString(), serverCode.toString()).then((value){
       setState(() {
         val_namauser = value[8];
         val_subscription = value[13];
@@ -99,6 +90,9 @@ class _ProfileState extends State<Profile> {
       preferences.setString("namaUser", null);
       preferences.setString("legalPhone", null);
       preferences.setString("userId", null);
+      preferences.setString("legalIdCode", null);
+      preferences.setString("serverName", null);
+      preferences.setString("serverCode", null);
       preferences.commit();
       Navigator.pushReplacement(context, ExitPage(page: Login()));
     });
@@ -119,15 +113,7 @@ class _ProfileState extends State<Profile> {
 
 
   FutureOr onGoBack(dynamic value) {
-     AppHelper().getDetailUser(widget.getEmail.toString()).then((value){
-      setState(() {
-        val_namauser = value[8];
-        val_subscription = value[13];
-        val_userno = value[14];
-        val_registerdate = value[11];
-      });
-    });
-    setState(() {});
+    setState(() { _startingVariable();});
   }
 
   alertLogOut() {
@@ -303,6 +289,21 @@ class _ProfileState extends State<Profile> {
                                   style: GoogleFonts.varelaRound()),
                             ],
                           ),),
+                        Padding(padding: const EdgeInsets.only(top: 10,right: 25),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment
+                                .spaceBetween,
+                            children: [
+                              Text(
+                                "App Server",
+                                textAlign: TextAlign.left,
+                                style: GoogleFonts.varelaRound(),
+                              ),
+                              Text(serverName.toString(),
+                                  style: GoogleFonts.varelaRound()),
+                            ],
+                          ),),
+
 
                         Padding(padding: const EdgeInsets.only(top: 10,right: 25),
                           child: Row(
@@ -320,6 +321,8 @@ class _ProfileState extends State<Profile> {
                           ),),
                       ],
                     ),),
+
+
 
                     Padding(padding: const EdgeInsets.only(top :20),
                       child: Container(

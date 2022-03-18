@@ -87,35 +87,23 @@ class SubscribeVerificationState extends State<SubscribeVerification> {
   }
 
 
-  String val_legalcode = "0";
-  _cekLegalandUser() async {
-    final response = await http.post(applink+"api_model.php?act=cek_legalanduser",
-        body: {"username": widget.getEmail.toString()},
-        headers: {"Accept":"application/json"});
-    Map data = jsonDecode(response.body);
-    setState(() {
-      if (data["message"].toString() == '2' || data["message"].toString() == '3') {
-        Navigator.pushReplacement(context, ExitPage(page: Introduction()));
-      }
-    });
-  }
+  String val_legalcode = "";
   //=============================================================================
+  String serverName = '';
+  String serverCode = '';
   _startingVariable() async {
     await AppHelper().getConnect().then((value){if(value == 'ConnInterupted'){
       showToast("Koneksi terputus..", gravity: Toast.CENTER,duration:
       Toast.LENGTH_LONG);}});
     await AppHelper().getSession().then((value){
-      if(value[0] != 1) {
-        Navigator.pushReplacement(context, ExitPage(page: Login()));
-      }
-    });
-    await _cekLegalandUser();
-    AppHelper().getDetailUser(widget.getEmail.toString()).then((value){
-      setState(() {
-        val_legalcode = value[15];
-        valUserid.text = val_legalcode;
-      });
-    });
+      setState(() {serverName = value[11];serverCode = value[12];});});
+    await AppHelper().cekServer(widget.getEmail).then((value){
+      if(value[0] == '0') {Navigator.pushReplacement(context, ExitPage(page: Introduction()));}});
+    await AppHelper().cekLegalUser(widget.getEmail.toString(), serverCode.toString()).then((value){
+      if(value[0] == '0') {Navigator.pushReplacement(context, ExitPage(page: Introduction()));}});
+    AppHelper().getDetailUser(widget.getEmail.toString(), serverCode.toString()).then((value){
+      setState(() {val_legalcode = value[15]; });});
+
   }
 
 
@@ -133,7 +121,7 @@ class SubscribeVerificationState extends State<SubscribeVerification> {
 
   Future getBankUser() async {
     var response = await http.get(
-        Uri.encodeFull(applink+"api_model.php?act=getdata_bankuser&legalid="+widget.getLegalcode));
+        Uri.encodeFull(applink+"api_model.php?act=getdata_bankuser&legalid="+widget.getLegalcode+"&getserver="+serverCode.toString()));
     if (response.statusCode == 200) {
       var jsonData = json.decode(response.body);
       setState(() {
@@ -151,6 +139,9 @@ class SubscribeVerificationState extends State<SubscribeVerification> {
     await _startingVariable();
     await getAllItem();
     await getBankUser();
+    setState(() {
+      valUserid.text = val_legalcode;
+    });
   }
 
   @override
@@ -172,7 +163,8 @@ class SubscribeVerificationState extends State<SubscribeVerification> {
       "pembayaran_status": "Unverified",
       "pembayaran_paymentvendor" : selectedTransferKe,
       "pembayaran_bankuser" : selectedBankUser,
-      "pembayaran_tglbayar" : valTanggalFix
+      "pembayaran_tglbayar" : valTanggalFix,
+      "getserver" : serverCode
       //"pembayaran_an" : valNamaUserPembayaran.text
     });
     Map data = jsonDecode(response.body);
@@ -273,7 +265,7 @@ class SubscribeVerificationState extends State<SubscribeVerification> {
                 }),
           ),
           actions: [
-            val_legalcode != '0' ?
+            val_legalcode != '' ?
             InkWell(
               onTap: () {
                 FocusScope.of(context).requestFocus(FocusNode());

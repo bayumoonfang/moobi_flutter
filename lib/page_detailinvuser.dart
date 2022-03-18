@@ -44,28 +44,19 @@ class DetailNotifikasiTransaksiState extends State<DetailNotifikasiTransaksi> {
   }
 
 
-  _cekLegalandUser() async {
-    final response = await http.post(applink+"api_model.php?act=cek_legalanduser",
-        body: {"username": widget.getEmail.toString()},
-        headers: {"Accept":"application/json"});
-    Map data = jsonDecode(response.body);
-    setState(() {
-      if (data["message"].toString() == '2' || data["message"].toString() == '3') {
-        Navigator.pushReplacement(context, ExitPage(page: Introduction()));
-      }
-    });
-  }
   //=============================================================================
+  String serverName = '';
+  String serverCode = '';
   _startingVariable() async {
     await AppHelper().getConnect().then((value){if(value == 'ConnInterupted'){
       showToast("Koneksi terputus..", gravity: Toast.CENTER,duration:
       Toast.LENGTH_LONG);}});
     await AppHelper().getSession().then((value){
-      if(value[0] != 1) {
-        Navigator.pushReplacement(context, ExitPage(page: Login()));
-      }
-    });
-    await _cekLegalandUser();
+      setState(() {serverName = value[11];serverCode = value[12];});});
+    await AppHelper().cekServer(widget.getEmail).then((value){
+      if(value[0] == '0') {Navigator.pushReplacement(context, ExitPage(page: Introduction()));}});
+    await AppHelper().cekLegalUser(widget.getEmail.toString(), serverCode.toString()).then((value){
+      if(value[0] == '0') {Navigator.pushReplacement(context, ExitPage(page: Introduction()));}});
   }
 
 
@@ -77,7 +68,7 @@ class DetailNotifikasiTransaksiState extends State<DetailNotifikasiTransaksi> {
   String getTanggal = "2021-04-20 15:55:01";
   String getType = "...";
   _getDetail() async {
-    final response = await http.get(applink+"api_model.php?act=getdetail_notifikasi&id="+widget.idNotif);
+    final response = await http.get(applink+"api_model.php?act=getdetail_notifikasi&id="+widget.idNotif+"&getserver="+serverCode.toString());
     Map data = jsonDecode(response.body);
     setState(() {
       noNoTrans = data["d"].toString();
@@ -100,7 +91,7 @@ class DetailNotifikasiTransaksiState extends State<DetailNotifikasiTransaksi> {
   String getDeskripsi = "...";
   //String getBayarkeNorek = "...";
   _getDetailInvoice() async {
-    final response = await http.get(applink+"api_model.php?act=getdetail_notifikasitransaksi&id="+noNoTrans.toString());
+    final response = await http.get(applink+"api_model.php?act=getdetail_notifikasitransaksi&id="+noNoTrans.toString()+"&getserver="+serverCode.toString());
     Map data2 = jsonDecode(response.body);
     setState(() {
         getAmount = data2["b"].toString();
@@ -124,7 +115,8 @@ class DetailNotifikasiTransaksiState extends State<DetailNotifikasiTransaksi> {
   void _nonaktifproduk() {
     var url = applink+"api_model.php?act=action_readnotif";
     http.post(url, body: {
-      "id": widget.idNotif
+      "id": widget.idNotif,
+      "getserver" : serverCode
     });
   }
 
@@ -165,7 +157,8 @@ class DetailNotifikasiTransaksiState extends State<DetailNotifikasiTransaksi> {
     //showsuccess("Mohon menunggu sebentar , dan tidak keluar dari aplikasi");
     final response = await http.post(applink+"api_model.php?act=batal_pembayaranreg",
         body: {
-      "batalinv_noinv": noNoTrans
+      "batalinv_noinv": noNoTrans,
+          "getserver" : serverCode
     });
     Map data = jsonDecode(response.body);
     setState(() {
@@ -363,11 +356,11 @@ class DetailNotifikasiTransaksiState extends State<DetailNotifikasiTransaksi> {
         bottomNavigationBar: Visibility(
           visible: getStatusInv == 'Unverified' ? true : false,
           child: Container(
-            color: HexColor("#fe5c83"),
+            color: HexColor("#fe6e66"),
             width: double.infinity,
             height: 45,
             child: RaisedButton(
-              color: HexColor("#fe5c83"),
+              color: HexColor("#fe6e66"),
               child: Text("Batalkan Invoice",style: GoogleFonts.varelaRound(color:Colors.white),),
               onPressed: (){
                 //Navigator.pop(context);

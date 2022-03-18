@@ -36,32 +36,19 @@ class SettingServChargeState extends State<SettingServCharge> {
   }
 
 
-  _cekLegalandUser() async {
-    final response = await http.post(applink+"api_model.php?act=cek_legalanduser",
-        body: {"username": widget.getEmail.toString()},
-        headers: {"Accept":"application/json"});
-    Map data = jsonDecode(response.body);
-    setState(() {
-      if (data["message"].toString() == '2' || data["message"].toString() == '3') {
-        Navigator.pushReplacement(context, ExitPage(page: Introduction()));
-      }
-    });
-  }
-
-
-
   //=============================================================================
+  String serverName = '';
+  String serverCode = '';
   _startingVariable() async {
     await AppHelper().getConnect().then((value){if(value == 'ConnInterupted'){
       showToast("Koneksi terputus..", gravity: Toast.CENTER,duration:
       Toast.LENGTH_LONG);}});
     await AppHelper().getSession().then((value){
-      if(value[0] != 1) {
-        Navigator.pushReplacement(context, ExitPage(page: Login()));
-      }
-    });
-    await _cekLegalandUser();
-
+      setState(() {serverName = value[11];serverCode = value[12];});});
+    await AppHelper().cekServer(widget.getEmail).then((value){
+      if(value[0] == '0') {Navigator.pushReplacement(context, ExitPage(page: Introduction()));}});
+    await AppHelper().cekLegalUser(widget.getEmail.toString(), serverCode.toString()).then((value){
+      if(value[0] == '0') {Navigator.pushReplacement(context, ExitPage(page: Introduction()));}});
   }
 
   showFlushBarsuccess(BuildContext context, String stringme) => Flushbar(
@@ -81,7 +68,7 @@ class SettingServChargeState extends State<SettingServCharge> {
 
   String getVal = '...';
   _getDetail() async {
-    final response = await http.get(applink+"api_model.php?act=getdata_servcharge&id="+widget.getLegalCode);
+    final response = await http.get(applink+"api_model.php?act=getdata_servcharge&id="+widget.getLegalCode+"&getserver="+serverCode.toString());
     Map data = jsonDecode(response.body);
     setState(() {
       getVal = data["a"].toString();
@@ -107,7 +94,8 @@ class SettingServChargeState extends State<SettingServCharge> {
     Navigator.pop(context);
     final response = await http.post(applink+"api_model.php?act=edit_servcharge", body: {
       "val_edit": valInput.text,
-      "branch" : widget.getLegalCode
+      "branch" : widget.getLegalCode,
+      "getserver" : serverCode
     });
     Map data = jsonDecode(response.body);
     setState(() {

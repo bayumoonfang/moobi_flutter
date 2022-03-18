@@ -32,6 +32,7 @@ class _LoginState extends State<Login> {
     GoogleSignIn _googleSignIn = GoogleSignIn(scopes: ['email']);
     String _email = '';
     String authEmail = '';
+    String login_proses = '0';
     void showToast(String msg, {int duration, int gravity}) {
       Toast.show(msg, context, duration: duration, gravity: gravity);
     }
@@ -41,12 +42,17 @@ class _LoginState extends State<Login> {
   }
 
   _loginGoogle() async {
+
       try {
           await _googleSignIn.signIn();
           setState(() {
             authEmail = _googleSignIn.currentUser.email;
             if (authEmail != '') {
               _actloginGoogle(authEmail.toString());
+            }else {
+              showToast("Invalid email", gravity: Toast.CENTER, duration: Toast.LENGTH_LONG);
+              login_proses = '0';
+              return;
             }
           });
       }
@@ -57,38 +63,50 @@ class _LoginState extends State<Login> {
 
 
     _actloginGoogle(String parEmail) async {
+      setState(() {
+        login_proses = '1';
+      });
       final response = await http.post(applink+"api_model.php?act=login_google",
           body: {"email": parEmail},
           headers: {"Accept":"application/json"});
       Map data = jsonDecode(response.body);
       setState(() {
-        String getEmail = data["email"];
-        String getNamaUser = data["nama_user"];
-        String getLevel = data["level"];
-        String getUserId = data["user_id"];
-        String getLegalCode = data["legal_kode"];
-        String getLegalName = data["legal_name"];
-        String getLegalId = data["legal_id"];
-        String getLegalPhone = data["legal_phone"];
-        String getRole = data["legal_role"];
-        String getLegalIdCode =  data["legal_idcode"];
-
         if (data["message"].toString() == '1') {
+          String getEmail = data["email"];
+          String getNamaUser = data["nama_user"];
+          String getLevel = data["level"];
+          String getUserId = data["user_id"];
+          String getLegalCode = data["legal_kode"];
+          String getLegalName = data["legal_name"];
+          String getLegalId = data["legal_id"];
+          String getLegalPhone = data["legal_phone"];
+          String getRole = data["legal_role"];
+          String getLegalIdCode =  data["legal_idcode"];
+          String getServerName =  data["server_name"];
+          String getServerCode =  data["server_code"];
           savePref(1, getEmail, getRole, getLevel, getLegalCode, getLegalName, getLegalId,
-              getNamaUser, getLegalPhone, getUserId, getLegalIdCode);
+              getNamaUser, getLegalPhone, getUserId, getLegalIdCode, getServerName, getServerCode);
+          login_proses = '0';
           Navigator.pushReplacement(context, EnterPage(page: Home()));
           _googleSignIn.signOut();
         }  else if (data["message"].toString() == '3') {
           showToast("Mohon maaf status toko anda sudah non aktif, silahkan hubungi admin untuk info"
               "lebih lanjut", gravity: Toast.CENTER, duration: Toast.LENGTH_LONG);
+          login_proses = '0';
           return;
         }  else if (data["message"].toString() == '4') {
           showToast("Mohon maaf status subscription akun anda sudah kadaluarsa, silahkan lakukan pembaharuan lisensi atau hubungi adminuntuk informasi lebih lanjut"
               "lebih lanjut", gravity: Toast.CENTER, duration: Toast.LENGTH_LONG);
+          login_proses = '0';
+          return;
+        } else if (data["message"].toString() == '5') {
+          showToast("Mohon maaf server yang anda gunakan sedang offline", gravity: Toast.CENTER, duration: Toast.LENGTH_LONG);
+          login_proses = '0';
           return;
         } else {
           _googleSignIn.signOut();
-          showToast("Gagal Login", gravity: Toast.CENTER, duration: Toast.LENGTH_LONG);
+          showToast(data["message"].toString(), gravity: Toast.CENTER, duration: Toast.LENGTH_LONG);
+          login_proses = '0';
           return;
         }
       });
@@ -112,37 +130,50 @@ class _LoginState extends State<Login> {
         showToast("Form tidak boleh kosong", gravity: Toast.BOTTOM, duration: Toast.LENGTH_LONG);
         return;
       } else {
+        setState(() {
+          login_proses = '1';
+        });
         final response = await http.post(applink+"api_model.php?act=login",
             body: {"username": _username.text, "password": _password.text},
             headers: {"Accept":"application/json"});
         Map data = jsonDecode(response.body);
         setState(() {
-          String getEmail = data["email"];
-          String getNamaUser = data["nama_user"];
-          String getLevel = data["level"];
-          String getUserId = data["user_id"];
-          String getLegalCode = data["legal_kode"];
-          String getLegalName = data["legal_name"];
-          String getLegalId = data["legal_id"];
-          String getLegalPhone = data["legal_phone"];
-          String getRole = data["legal_role"];
-          String getLegalIdCode =  data["legal_idcode"];
 
           if (data["message"].toString() == '1') {
+            String getEmail = data["email"];
+            String getNamaUser = data["nama_user"];
+            String getLevel = data["level"];
+            String getUserId = data["user_id"];
+            String getLegalCode = data["legal_kode"];
+            String getLegalName = data["legal_name"];
+            String getLegalId = data["legal_id"];
+            String getLegalPhone = data["legal_phone"];
+            String getRole = data["legal_role"];
+            String getLegalIdCode = data["legal_idcode"];
+            String getServerName = data["server_name"];
+            String getServerCode = data["server_code"];
             savePref(1, getEmail, getRole, getLevel, getLegalCode, getLegalName, getLegalId,
-                getNamaUser, getLegalPhone, getUserId, getLegalIdCode);
+                getNamaUser, getLegalPhone, getUserId, getLegalIdCode, getServerName, getServerCode);
+            login_proses = '0';
             Navigator.pushReplacement(context, EnterPage(page: Home()));
             _googleSignIn.signOut();
           }  else if (data["message"].toString() == '3') {
             showToast("Mohon maaf status toko anda sudah non aktif, silahkan hubungi admin untuk info"
                 "lebih lanjut", gravity: Toast.CENTER, duration: Toast.LENGTH_LONG);
+            login_proses = '0';
             return;
           } else if (data["message"].toString() == '4') {
             showToast("Mohon maaf status subscription akun anda sudah kadaluarsa, silahkan lakukan pembaharuan lisensi atau hubungi adminuntuk informasi lebih lanjut"
                 "lebih lanjut", gravity: Toast.CENTER, duration: Toast.LENGTH_LONG);
+            login_proses = '0';
+            return;
+          } else if (data["message"].toString() == '5') {
+            showToast("Mohon maaf server yang anda gunakan sedang offline", gravity: Toast.CENTER, duration: Toast.LENGTH_LONG);
+            login_proses = '0';
             return;
           } else {
             showToast("Gagal Login", gravity: Toast.CENTER, duration: Toast.LENGTH_LONG);
+            login_proses = '0';
             return;
           }
         });
@@ -153,7 +184,8 @@ class _LoginState extends State<Login> {
 
 
     savePref(int value, String emailval, String roleVal, String levelVal, String legalCodeVal
-        , String legalNameVal, String legalIdVal, String namaUserVal, String legalPhoneVal, String userId, String legalIdCode) async {
+        , String legalNameVal, String legalIdVal, String namaUserVal, String legalPhoneVal, String userId, String legalIdCode,
+        String serverName, String serverCode) async {
       SharedPreferences preferences = await SharedPreferences.getInstance();
       setState(() {
         preferences.setInt("value", value);
@@ -167,6 +199,8 @@ class _LoginState extends State<Login> {
         preferences.setString("legalPhone", legalPhoneVal);
         preferences.setString("userId", userId);
         preferences.setString("legalIdCode", legalIdCode);
+        preferences.setString("serverName", serverName);
+        preferences.setString("serverCode", serverCode);
         preferences.commit();
       });
     }
@@ -269,6 +303,8 @@ class _LoginState extends State<Login> {
                                   height: 50,
                                   width: double.infinity,
                                   child :
+
+                     login_proses != '1' ?
                       RaisedButton(
                           shape: RoundedRectangleBorder(side: BorderSide(
                               color: Colors.black,
@@ -289,8 +325,32 @@ class _LoginState extends State<Login> {
                                     ),
                                     onPressed: () {
                                       _loginact();
+
                                     }
                                 )
+                         :
+                    Opacity(
+                      opacity: 0.4,
+                      child : RaisedButton(
+                        shape: RoundedRectangleBorder(side: BorderSide(
+                            color: Colors.black,
+                            width: 0.1,
+                            style: BorderStyle.solid
+                        ),
+                          borderRadius: BorderRadius.circular(50.0),
+                        ),
+                        color: HexColor(main_color),
+                        child: Text(
+                          "Sign In",
+                          style: TextStyle(
+                              fontFamily: 'VarelaRound',
+                              fontSize: 14,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.white
+                          ),
+                        ),
+                      )
+                    )
                           )
                         ),
 
@@ -302,6 +362,7 @@ class _LoginState extends State<Login> {
                       height: 50,
                       width: double.infinity,
                       child :
+                      login_proses != '1' ?
                       RaisedButton(
                           shape: RoundedRectangleBorder(side: BorderSide(
                               color: Colors.black,
@@ -330,6 +391,35 @@ class _LoginState extends State<Login> {
                             _loginGoogle();
                           }
                       )
+                          :
+                          Opacity(
+                            opacity : 0.4,
+                            child : RaisedButton(
+                                shape: RoundedRectangleBorder(side: BorderSide(
+                                    color: Colors.black,
+                                    width: 0.1,
+                                    style: BorderStyle.solid
+                                ),
+                                  borderRadius: BorderRadius.circular(50.0),
+                                ),
+                                color: Colors.white,
+                                child:
+                                Wrap(
+                                  crossAxisAlignment: WrapCrossAlignment.center,
+                                  children: [
+                                    Image.asset("assets/logo_google.png",height: 30,width: 30,),// <-- Use 'Image.asset(...)' here
+                                    SizedBox(width: 18),
+                                    Text('Sign in with Google',
+                                        style: TextStyle(
+                                            fontFamily: 'VarelaRound',
+                                            fontSize: 14,
+                                            fontWeight: FontWeight.bold,
+                                            color: Colors.black
+                                        )),
+                                  ],
+                                ),
+                            )
+                          )
                   )
                   ),
 

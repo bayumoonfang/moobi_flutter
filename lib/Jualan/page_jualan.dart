@@ -615,7 +615,17 @@ class JualanState extends State<Jualan> {
           );
         });
   }
+  void SelectedItem(BuildContext context, item) {
+    switch (item) {
+      case 0:
+        hapus_trans();
+        break;
+      case 1:
+        TambahBiayaAdd();
+        break;
 
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -664,23 +674,7 @@ class JualanState extends State<Jualan> {
                   ),
                 ),
               ),
-              InkWell(
-                hoverColor: Colors.transparent,
-                splashColor: Colors.transparent,
-                focusColor: Colors.transparent,
-                highlightColor: Colors.transparent,
-                onTap: () {
-                 TambahBiayaAdd();
-                },
-                child: Padding(
-                  padding: const EdgeInsets.only(right: 35,top : 16),
-                  child: FaIcon(
-                    FontAwesomeIcons.plus,
-                    color: HexColor("#6b727c"),
-                    size: 18,
-                  ),
-                ),
-              ),
+
               InkWell(
                 hoverColor: Colors.transparent,
                 splashColor: Colors.transparent,
@@ -698,20 +692,65 @@ class JualanState extends State<Jualan> {
                   ),
                 ),
               ),
+
               InkWell(
                 hoverColor: Colors.transparent,
                 splashColor: Colors.transparent,
                 focusColor: Colors.transparent,
                 highlightColor: Colors.transparent,
                 onTap: () {
-                  hapus_trans();
+                  _filterMe();
                 },
                 child: Padding(
-                  padding: const EdgeInsets.only(right: 35,top : 16),
+                  padding: const EdgeInsets.only(right: 22,top : 16),
                   child: FaIcon(
-                    FontAwesomeIcons.trashAlt,
+                    FontAwesomeIcons.list,
                     color: HexColor("#6b727c"),
                     size: 18,
+                  ),
+                ),
+              ),
+
+
+              Padding(
+                padding : const EdgeInsets.only(right: 10),
+                child :
+                Theme(
+                  data: Theme.of(context).copyWith(
+                      textTheme: TextTheme().apply(bodyColor: Colors.white),
+                      dividerColor: HexColor("#6b727c"),
+                      iconTheme: IconThemeData(color: HexColor("#6b727c"),)),
+                  child: PopupMenuButton<int>(
+                    color: Colors.white,
+                    padding: const EdgeInsets.only(top: 1),
+                    itemBuilder: (context) => [
+                      PopupMenuItem<int>(
+                          value: 0,
+                          child: Row(
+                            children: [
+                              FaIcon(FontAwesomeIcons.trashAlt,color: HexColor("#6b727c"),size: 16,
+                              ),
+                              const SizedBox(
+                                width: 12,
+                              ),
+                              Text("Clear Order", style : GoogleFonts.nunito(color: Colors.black))
+                            ],
+                          )),
+                      PopupMenuItem<int>(
+                          value: 0,
+                          child: Row(
+                            children: [
+                              FaIcon(FontAwesomeIcons.plus,color: HexColor("#6b727c"),size: 16,
+                              ),
+                              const SizedBox(
+                                width: 12,
+                              ),
+                              Text("Tambah Biaya", style : GoogleFonts.nunito(color: Colors.black))
+                            ],
+                          )),
+                      //PopupMenuDivider(),
+                    ],
+                    onSelected: (item) => SelectedItem(context, item),
                   ),
                 ),
               )
@@ -997,5 +1036,4 @@ class JualanState extends State<Jualan> {
         )
      );
   }
-
 }

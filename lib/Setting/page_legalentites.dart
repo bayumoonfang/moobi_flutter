@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:hexcolor/hexcolor.dart';
 import 'package:moobi_flutter/Helper/app_helper.dart';
+import 'package:moobi_flutter/Helper/color_based.dart';
 import 'package:moobi_flutter/Setting/page_editlegalentites.dart';
 import 'package:moobi_flutter/helper/api_link.dart';
 import 'package:moobi_flutter/helper/page_route.dart';
@@ -44,29 +45,20 @@ class _LegalEntities extends State<LegalEntities> {
   String getStatusToko = '-';
   String getWebsiteToko = '-';
 
-  _cekLegalandUser() async {
-    final response = await http.post(applink+"api_model.php?act=cek_legalanduser",
-        body: {"username": widget.getEmail.toString()},
-        headers: {"Accept":"application/json"});
-    Map data = jsonDecode(response.body);
-    setState(() {
-      if (data["message"].toString() == '2' || data["message"].toString() == '3') {
-        Navigator.pushReplacement(context, ExitPage(page: Introduction()));
-      }
-    });
-  }
   //=============================================================================
+  String serverName = '';
+  String serverCode = '';
   _startingVariable() async {
     await AppHelper().getConnect().then((value){if(value == 'ConnInterupted'){
       showToast("Koneksi terputus..", gravity: Toast.CENTER,duration:
       Toast.LENGTH_LONG);}});
     await AppHelper().getSession().then((value){
-      if(value[0] != 1) {
-        Navigator.pushReplacement(context, ExitPage(page: Login()));
-      }
-    });
-    await _cekLegalandUser();
-    AppHelper().getDetailUser(widget.getEmail.toString()).then((value){
+      setState(() {serverName = value[11];serverCode = value[12];});});
+    await AppHelper().cekServer(widget.getEmail).then((value){
+      if(value[0] == '0') {Navigator.pushReplacement(context, ExitPage(page: Introduction()));}});
+    await AppHelper().cekLegalUser(widget.getEmail.toString(), serverCode.toString()).then((value){
+      if(value[0] == '0') {Navigator.pushReplacement(context, ExitPage(page: Introduction()));}});
+    AppHelper().getDetailUser(widget.getEmail.toString(), serverCode.toString()).then((value){
       setState(() {
         getStorename = value[0];
         getStoreAddress = value[3];
@@ -80,7 +72,7 @@ class _LegalEntities extends State<LegalEntities> {
   }
 
   FutureOr onGoBack(dynamic value) {
-    AppHelper().getDetailUser(widget.getEmail.toString()).then((value){
+    AppHelper().getDetailUser(widget.getEmail.toString(), serverCode.toString()).then((value){
       setState(() {
         getStorename = value[0];
         getStoreAddress = value[3];
@@ -316,14 +308,28 @@ class _LegalEntities extends State<LegalEntities> {
                         Padding(padding: const EdgeInsets.only(top: 10),
                             child: InkWell(
                               child: ListTile(
-                                onTap: (){
-                                  Navigator.push(context, ExitPage(page: UbahKeteranganToko(widget.getEmail, widget.getLegalCode))).then(onGoBack);
-                                },
-                                leading: FaIcon(FontAwesomeIcons.edit,color: HexColor("#594d75"),),
-                                title: Text("Ubah Keterangan",style: TextStyle(
-                                    color: Colors.black, fontFamily: 'VarelaRound',fontSize: 16,
-                                    fontWeight: FontWeight.bold)),
-                                trailing: FaIcon(FontAwesomeIcons.angleRight,color: HexColor("#594d75"),),
+                                  dense: true,
+                                  minLeadingWidth: 20,
+                                  horizontalTitleGap: 20,
+                                  contentPadding: EdgeInsets.all(1),
+                                  onTap: (){
+
+                                    Navigator.push(context, ExitPage(page: UbahKeteranganToko(widget.getEmail, widget.getLegalCode))).then(onGoBack);
+
+                                  },
+                                  leading: FaIcon(FontAwesomeIcons.edit,color: HexColor("#ffa427"),size: 19,),
+                                  title: Align(
+                                    alignment: Alignment.centerLeft,
+                                    child: Padding(
+                                      padding: const EdgeInsets.only(left: 1,top: 4),
+                                      child: Text("Ubah Keterangan",style: TextStyle(
+                                          color: Colors.black, fontFamily: 'VarelaRound',fontSize: 14)),
+                                    ),
+                                  ),
+                                  trailing: Opacity(
+                                    opacity : 0.5,
+                                    child : FaIcon(FontAwesomeIcons.angleRight,color: HexColor(third_color),),
+                                  )
                               ),
                             )
                         ),

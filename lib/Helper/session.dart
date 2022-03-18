@@ -61,4 +61,14 @@ class Session {
     return preferences.getString("legalIdCode");
   }
 
+  static Future<String> serverName() async {
+    final SharedPreferences preferences = await _prefs;
+    return preferences.getString("serverName");
+  }
+
+  static Future<String> serverCode() async {
+    final SharedPreferences preferences = await _prefs;
+    return preferences.getString("serverCode");
+  }
+
 }

@@ -50,29 +50,20 @@ class UbahKeteranganTokoState extends State<UbahKeteranganToko> {
   String getStatusToko = '-';
   String getWebsiteToko = '-';
 
-  _cekLegalandUser() async {
-    final response = await http.post(applink+"api_model.php?act=cek_legalanduser",
-        body: {"username": widget.getEmail.toString()},
-        headers: {"Accept":"application/json"});
-    Map data = jsonDecode(response.body);
-    setState(() {
-      if (data["message"].toString() == '2' || data["message"].toString() == '3') {
-        Navigator.pushReplacement(context, ExitPage(page: Introduction()));
-      }
-    });
-  }
   //=============================================================================
+  String serverName = '';
+  String serverCode = '';
   _startingVariable() async {
     await AppHelper().getConnect().then((value){if(value == 'ConnInterupted'){
       showToast("Koneksi terputus..", gravity: Toast.CENTER,duration:
       Toast.LENGTH_LONG);}});
     await AppHelper().getSession().then((value){
-      if(value[0] != 1) {
-        Navigator.pushReplacement(context, ExitPage(page: Login()));
-      }
-    });
-    await _cekLegalandUser();
-    AppHelper().getDetailUser(widget.getEmail.toString()).then((value){
+      setState(() {serverName = value[11];serverCode = value[12];});});
+    await AppHelper().cekServer(widget.getEmail).then((value){
+      if(value[0] == '0') {Navigator.pushReplacement(context, ExitPage(page: Introduction()));}});
+    await AppHelper().cekLegalUser(widget.getEmail.toString(), serverCode.toString()).then((value){
+      if(value[0] == '0') {Navigator.pushReplacement(context, ExitPage(page: Introduction()));}});
+    AppHelper().getDetailUser(widget.getEmail.toString(), serverCode.toString()).then((value){
       setState(() {
         getStorename = value[0];
         getStoreAddress = value[3];
@@ -83,7 +74,6 @@ class UbahKeteranganTokoState extends State<UbahKeteranganToko> {
         valAlamat.text = getStoreAddress.toString();
         valWebsite.text = getWebsiteToko.toString();
         valKota.text = getCityToko.toString();
-
       });
     });
   }
@@ -123,7 +113,8 @@ class UbahKeteranganTokoState extends State<UbahKeteranganToko> {
       "valalamat_edit": valAlamat.text,
       "valwebsite_edit": valWebsite.text,
       "valkota_edit": valKota.text,
-      "valID_edit" : widget.getLegalCode
+      "valID_edit" : widget.getLegalCode,
+      "getserver" : serverCode
     });
     Map data = jsonDecode(response.body);
     setState(() {

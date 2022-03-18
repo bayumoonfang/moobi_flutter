@@ -83,46 +83,35 @@ class _HomeState extends State<Home> {
   String getStorename = '...';
   String getNamaUser = '...';
   String getSubscription = "0";
+  String serverName = '';
+  String serverCode = '';
   _startingVariable() async {
     await AppHelper().getConnect().then((value){if(value == 'ConnInterupted'){
       showToast("Koneksi terputus..", gravity: Toast.CENTER,duration:
       Toast.LENGTH_LONG);}});
     await AppHelper().getSession().then((value){
-      if(value[0] != 1) {
-        Navigator.pushReplacement(context, ExitPage(page: Login()));
-      }else {
-        setState(() {
-          getEmail = value[1];
-          getLegalCode = value[4];
-          getLegalId = value[10];
-          getStorename = value[5];
-          getNamaUser = value[7];
-          getUserID = value[9];
-          getRole = value[2];
-        });
-      }
+      setState(() {serverName = value[11];serverCode = value[12]; getEmail = value[1];});});
+    await AppHelper().cekServer(getEmail).then((value){
+      if(value[0] == '0') {Navigator.pushReplacement(context, ExitPage(page: Introduction()));}});
+    await AppHelper().cekLegalUser(getEmail.toString(), serverCode.toString()).then((value){
+      if(value[0] == '0') {Navigator.pushReplacement(context, ExitPage(page: Introduction()));}
+      else {getSubscription = value[1];}});
+    AppHelper().getDetailUser(getEmail.toString(), serverCode.toString()).then((value){
+      setState(() {
+        getLegalCode = value[15];
+        getLegalId = value[4];
+        getStorename = value[0];
+        getNamaUser = value[8];
+        getUserID = value[10];
+        getRole = value[2];
+      });
     });
-  }
 
-
-  _cekLegalandUser() async {
-    final response = await http.post(applink+"api_model.php?act=cek_legalanduser",
-        body: {"username": getEmail},
-        headers: {"Accept":"application/json"});
-    Map data = jsonDecode(response.body);
-    setState(() {
-      if (data["message"].toString() == '2' || data["message"].toString() == '3') {
-        Navigator.pushReplacement(context, ExitPage(page: Introduction()));
-      } else {
-        getSubscription = data["legalsubs"].toString();
-      }
-    });
   }
 
 
   void _loaddata() async {
-    await _startingVariable();
-    await _cekLegalandUser();
+   await _startingVariable();
   }
 
 
@@ -134,7 +123,7 @@ class _HomeState extends State<Home> {
 
   Future<List> getDataTotal() async {
     http.Response response = await http.get(
-        Uri.encodeFull(applink+"api_model.php?act=getdata_monthsalestotal&legalId="+getLegalId),
+        Uri.encodeFull(applink+"api_model.php?act=getdata_monthsalestotal&legalId="+getLegalId+"&getServer="+serverCode.toString()),
         headers: {"Accept":"application/json"}
     );
       return json.decode(response.body);
@@ -144,7 +133,7 @@ class _HomeState extends State<Home> {
 
   Future<List> getDataTotalNotif() async {
     http.Response response = await http.get(
-        Uri.encodeFull(applink+"api_model.php?act=getdata_totalnotif&userid="+getUserID.toString()+"&legalid="+getLegalId),
+        Uri.encodeFull(applink+"api_model.php?act=getdata_totalnotif&userid="+getUserID.toString()+"&legalid="+getLegalId+"&getServer="+serverCode.toString()),
         headers: {"Accept":"application/json"}
     );
    return json.decode(response.body);
@@ -212,7 +201,7 @@ class _HomeState extends State<Home> {
               title:
               Padding(
                   padding: const EdgeInsets.only(left: 10),
-                  child:   Text(getSubscription.toString() == '0' ? "Moobi" : "Moobi Premier", style: TextStyle(color: Colors.white,
+                  child:   Text(getSubscription.toString() == '0' ? 'Moobie' : "Moobi Premier", style: TextStyle(color: Colors.white,
                       fontFamily: 'VarelaRound', fontSize: 24,
                       fontWeight: FontWeight.bold),)
               ),

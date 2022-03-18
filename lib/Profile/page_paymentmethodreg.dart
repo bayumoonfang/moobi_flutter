@@ -35,26 +35,7 @@ class _PaymentMethodRegistrationState extends State<PaymentMethodRegistration>{
     Toast.show(msg, context, duration: duration, gravity: gravity);
   }
 
-  String getEmail = "...";
-  String getNama = "...";
-  _startingVariable() async {
-    await AppHelper().getConnect().then((value){if(value == 'ConnInterupted'){
-      showToast("Koneksi terputus..", gravity: Toast.CENTER,duration:
-      Toast.LENGTH_LONG);}});
-    await AppHelper().getSession().then((value){if(value[0] != 1) {
-      Navigator.pushReplacement(context, ExitPage(page: Login()));}else{setState(() {getEmail = value[1];});}});
-    await AppHelper().getDetailUser(getEmail.toString()).then((value){});
-  }
 
-  _prepare() async {
-    await _startingVariable();
-  }
-
-  @override
-  void initState() {
-    super.initState();
-    _prepare();
-  }
 
 
   Future<List> getData() async {

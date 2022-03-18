@@ -79,6 +79,10 @@ class _RegisterState extends State<Register> {
         _googleSignIn.signOut();
         showToast("Mohon maaf email sudah terdaftar", gravity: Toast.CENTER, duration: Toast.LENGTH_LONG);
         return;
+      } else if (showdata["message"].toString() == '2') {
+        _googleSignIn.signOut();
+        showToast("Mohon maaf server penuh , mohon ulangi sekali lagi", gravity: Toast.CENTER, duration: Toast.LENGTH_LONG);
+        return;
       } else {
         Navigator.pushReplacement(context, EnterPage(page: RegisterGoogle(authEmail,autUsername)));
         _googleSignIn.signOut();
@@ -116,6 +120,15 @@ class _RegisterState extends State<Register> {
                 return;
               } else if (getMessage == '2') {
                 Navigator.push(context, ExitPage(page: SuksesRegister(_email.text)));
+              } else if (getMessage == '4') {
+                showToast("Mohon maaf server penuh , mohon ulangi sekali lagi", gravity: Toast.CENTER, duration: Toast.LENGTH_LONG);
+                return;
+              } else if (getMessage == '5') {
+                showToast("Mohon maaf anda sudah terdaftar di server moobie", gravity: Toast.CENTER, duration: Toast.LENGTH_LONG);
+                return;
+              } else if (getMessage == '6') {
+                showToast("Mohon maaf server offline , mohon coba lagi", gravity: Toast.CENTER, duration: Toast.LENGTH_LONG);
+                return;
               }
           });
     }

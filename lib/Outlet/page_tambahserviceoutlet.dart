@@ -41,30 +41,19 @@ class _TambahSerivceOutlet extends State<TambahSerivceOutlet> {
 
 
 
-  _cekLegalandUser() async {
-    final response = await http.post(applink+"api_model.php?act=cek_legalanduser",
-        body: {"username": widget.getEmail.toString()},
-        headers: {"Accept":"application/json"});
-    Map data = jsonDecode(response.body);
-    setState(() {
-      if (data["message"].toString() == '2' || data["message"].toString() == '3') {
-        Navigator.pushReplacement(context, ExitPage(page: Introduction()));
-      }
-    });
-  }
-
   //=============================================================================
+  String serverName = '';
+  String serverCode = '';
   _startingVariable() async {
     await AppHelper().getConnect().then((value){if(value == 'ConnInterupted'){
       showToast("Koneksi terputus..", gravity: Toast.CENTER,duration:
       Toast.LENGTH_LONG);}});
     await AppHelper().getSession().then((value){
-      if(value[0] != 1) {
-        Navigator.pushReplacement(context, ExitPage(page: Login()));
-      }
-    });
-    await _cekLegalandUser();
-
+      setState(() {serverName = value[11];serverCode = value[12];});});
+    await AppHelper().cekServer(widget.getEmail).then((value){
+      if(value[0] == '0') {Navigator.pushReplacement(context, ExitPage(page: Introduction()));}});
+    await AppHelper().cekLegalUser(widget.getEmail.toString(), serverCode.toString()).then((value){
+      if(value[0] == '0') {Navigator.pushReplacement(context, ExitPage(page: Introduction()));}});
   }
 
   void showToast(String msg, {int duration, int gravity}) {
@@ -107,7 +96,7 @@ class _TambahSerivceOutlet extends State<TambahSerivceOutlet> {
         Uri.encodeFull(applink+"api_model.php?act=getdata_produkadd_outlet&"
             "filter="+filter+
             "&filtermedude=Service"
-            "&id="+widget.getLegalCode),
+            "&id="+widget.getLegalCode+"&getserver="+serverCode.toString()),
         headers: {"Accept":"application/json"});
     return json.decode(response.body);
   }
@@ -151,7 +140,8 @@ class _TambahSerivceOutlet extends State<TambahSerivceOutlet> {
           "idOutlet" : widget.idOutlet,
           "branch" : widget.getLegalCode,
           "namaUser" : widget.getNamaUser,
-          "tipe" : "Service"},
+          "tipe" : "Service",
+          "getserver" : serverCode},
         headers: {"Accept":"application/json"});
     Map data = jsonDecode(response.body);
     setState(() {
@@ -173,7 +163,8 @@ class _TambahSerivceOutlet extends State<TambahSerivceOutlet> {
           "idOutlet" : widget.idOutlet,
           "branch" : widget.getLegalCode,
           "namaUser" : widget.getNamaUser,
-          "tipe" : "Service"},
+          "tipe" : "Service",
+          "getserver" : serverCode},
         headers: {"Accept":"application/json"});
     Map data = jsonDecode(response.body);
     setState(() {
@@ -190,7 +181,8 @@ class _TambahSerivceOutlet extends State<TambahSerivceOutlet> {
     final response = await http.post(applink+"api_model.php?act=action_cekaddprodukoutlet",
         body: {
           "id": valueParse2,
-          "kodeOutlet" : widget.idOutlet
+          "kodeOutlet" : widget.idOutlet,
+          "getserver" : serverCode
         },
         headers: {"Accept":"application/json"});
     Map data = jsonDecode(response.body);

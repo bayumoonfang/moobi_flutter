@@ -248,13 +248,13 @@ class _JualanHome extends State<JualanHome>{
                           title: Column(
                             children: [
                               Align(alignment: Alignment.centerLeft,
-                                child: Text("Sales Origine", style: TextStyle(color: HexColor("#72757a"),
+                                child: Text("Sales Pool", style: TextStyle(color: HexColor("#72757a"),
                                   fontFamily: 'VarelaRound',fontSize: 11,)),),
                               Align(
                                 alignment: Alignment.centerLeft,
                                 child: Container(
                                     padding: const EdgeInsets.only(top:5 ),
-                                    height: 55,
+                                    height: 50,
                                     child: Align(alignment: Alignment.centerLeft,
                                         child: DropdownButton(
                                           isExpanded: false,

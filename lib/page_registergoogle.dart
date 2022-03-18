@@ -96,13 +96,19 @@ class _RegisterGoogleState extends State<RegisterGoogle> {
           showToast("Email sudah terdaftar", gravity: Toast.CENTER, duration: Toast.LENGTH_LONG);
           return;
         } else if (getMessage == '2') {
-          savePref(1, widget.parEmail);
-          Navigator.pushReplacement(context, EnterPage(page: Home()));
+          //savePref(1, widget.parEmail);
+          Navigator.push(context, ExitPage(page: SuksesRegister(widget.parEmail.toString())));
         } else if (getMessage == '3') {
           showToast("Nomor anda sudah terdaftar", gravity: Toast.CENTER, duration: Toast.LENGTH_LONG);
           return;
-        } else {
-          showToast(getMessage, gravity: Toast.CENTER, duration: Toast.LENGTH_LONG);
+        } else if (getMessage == '4') {
+        showToast("Mohon maaf server penuh , mohon ulangi sekali lagi", gravity: Toast.CENTER, duration: Toast.LENGTH_LONG);
+        return;
+        } else if (getMessage == '5') {
+          showToast("Mohon maaf anda sudah terdaftar di server moobie", gravity: Toast.CENTER, duration: Toast.LENGTH_LONG);
+          return;
+        } else if (getMessage == '6') {
+          showToast("Mohon maaf server offline , mohon coba lagi", gravity: Toast.CENTER, duration: Toast.LENGTH_LONG);
           return;
         }
         setState(() {

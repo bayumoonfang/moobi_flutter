@@ -6,6 +6,7 @@ import 'package:flushbar/flushbar.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:hexcolor/hexcolor.dart';
 import 'package:moobi_flutter/Helper/api_link.dart';
 import 'package:moobi_flutter/Helper/app_helper.dart';
@@ -40,28 +41,19 @@ class _MetodeBayarInsert extends State<MetodeBayarInsert> {
   String selectedType;
   List typeList = List();
 
-  _cekLegalandUser() async {
-    final response = await http.post(applink+"api_model.php?act=cek_legalanduser",
-        body: {"username": widget.getEmail.toString()},
-        headers: {"Accept":"application/json"});
-    Map data = jsonDecode(response.body);
-    setState(() {
-      if (data["message"].toString() == '2' || data["message"].toString() == '3') {
-        Navigator.pushReplacement(context, ExitPage(page: Introduction()));
-      }
-    });
-  }
   //=============================================================================
+  String serverName = '';
+  String serverCode = '';
   _startingVariable() async {
     await AppHelper().getConnect().then((value){if(value == 'ConnInterupted'){
       showToast("Koneksi terputus..", gravity: Toast.CENTER,duration:
       Toast.LENGTH_LONG);}});
     await AppHelper().getSession().then((value){
-      if(value[0] != 1) {
-        Navigator.pushReplacement(context, ExitPage(page: Login()));
-      }
-    });
-    await _cekLegalandUser();
+      setState(() {serverName = value[11];serverCode = value[12];});});
+    await AppHelper().cekServer(widget.getEmail).then((value){
+      if(value[0] == '0') {Navigator.pushReplacement(context, ExitPage(page: Introduction()));}});
+    await AppHelper().cekLegalUser(widget.getEmail.toString(), serverCode.toString()).then((value){
+      if(value[0] == '0') {Navigator.pushReplacement(context, ExitPage(page: Introduction()));}});
   }
 
   Future getTypeBayar() async {
@@ -111,7 +103,8 @@ class _MetodeBayarInsert extends State<MetodeBayarInsert> {
       "paymentmethod_type" : selectedType,
       "paymentmethod_detail" : _valDetail.text,
       "paymentmethod_an" : _valNamaPemilik.text,
-      "paymentmethod_branch" : widget.getLegalCode
+      "paymentmethod_branch" : widget.getLegalCode,
+      "getserver" : serverCode
     });
     Map data = jsonDecode(response.body);
     setState(() {
@@ -121,6 +114,7 @@ class _MetodeBayarInsert extends State<MetodeBayarInsert> {
       } else {
         _valNama.clear();
         _valDetail.clear();
+        _valNamaPemilik.clear();
         showsuccess("Metode Bayar berhasil ditambah");
         return false;
       }
@@ -306,7 +300,7 @@ class _MetodeBayarInsert extends State<MetodeBayarInsert> {
                                 items: typeList.map((myitem){
                                   return DropdownMenuItem(
                                       value: myitem['DATA'],
-                                      child: Text(myitem['DATA'])
+                                      child: Text(myitem['DATA'],style: GoogleFonts.nunito(fontSize: 16))
                                   );
                                 }).toList(),
                                 onChanged: (value) {

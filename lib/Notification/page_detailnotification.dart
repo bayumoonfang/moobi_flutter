@@ -39,28 +39,19 @@ class DetailNotificationState extends State<DetailNotification> {
   }
 
 
-  _cekLegalandUser() async {
-    final response = await http.post(applink+"api_model.php?act=cek_legalanduser",
-        body: {"username": widget.getEmail.toString()},
-        headers: {"Accept":"application/json"});
-    Map data = jsonDecode(response.body);
-    setState(() {
-      if (data["message"].toString() == '2' || data["message"].toString() == '3') {
-        Navigator.pushReplacement(context, ExitPage(page: Introduction()));
-      }
-    });
-  }
   //=============================================================================
+  String serverName = '';
+  String serverCode = '';
   _startingVariable() async {
     await AppHelper().getConnect().then((value){if(value == 'ConnInterupted'){
       showToast("Koneksi terputus..", gravity: Toast.CENTER,duration:
       Toast.LENGTH_LONG);}});
     await AppHelper().getSession().then((value){
-      if(value[0] != 1) {
-        Navigator.pushReplacement(context, ExitPage(page: Login()));
-      }
-    });
-    await _cekLegalandUser();
+      setState(() {serverName = value[11];serverCode = value[12];});});
+    await AppHelper().cekServer(widget.getEmail).then((value){
+      if(value[0] == '0') {Navigator.pushReplacement(context, ExitPage(page: Introduction()));}});
+    await AppHelper().cekLegalUser(widget.getEmail.toString(), serverCode.toString()).then((value){
+      if(value[0] == '0') {Navigator.pushReplacement(context, ExitPage(page: Introduction()));}});
   }
 
 
@@ -69,7 +60,7 @@ class DetailNotificationState extends State<DetailNotification> {
   String getTanggal = "2021-04-20 15:55:01";
   String getIsi = "...";
   _getDetail() async {
-    final response = await http.get(applink+"api_model.php?act=getdetail_notifikasi&id="+widget.idNotif);
+    final response = await http.get(applink+"api_model.php?act=getdetail_notifikasi&id="+widget.idNotif+"&getserver="+serverCode.toString());
     Map data = jsonDecode(response.body);
     setState(() {
       getType = data["a"].toString();
@@ -82,7 +73,8 @@ class DetailNotificationState extends State<DetailNotification> {
   void _nonaktifproduk() {
     var url = applink+"api_model.php?act=action_readnotif";
     http.post(url, body: {
-          "id": widget.idNotif
+          "id": widget.idNotif,
+      "getserver" : serverCode
         });
   }
 

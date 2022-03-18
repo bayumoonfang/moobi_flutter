@@ -46,30 +46,19 @@ class _DetailOutlet extends State<DetailOutlet> {
   void showToast(String msg, {int duration, int gravity}) {
     Toast.show(msg, context, duration: duration, gravity: gravity);}
 
-  _cekLegalandUser() async {
-    final response = await http.post(applink+"api_model.php?act=cek_legalanduser",
-        body: {"username": widget.getEmail.toString()},
-        headers: {"Accept":"application/json"});
-    Map data = jsonDecode(response.body);
-    setState(() {
-      if (data["message"].toString() == '2' || data["message"].toString() == '3') {
-        Navigator.pushReplacement(context, ExitPage(page: Introduction()));
-      }
-    });
-  }
-
   //=============================================================================
+  String serverName = '';
+  String serverCode = '';
   _startingVariable() async {
     await AppHelper().getConnect().then((value){if(value == 'ConnInterupted'){
       showToast("Koneksi terputus..", gravity: Toast.CENTER,duration:
       Toast.LENGTH_LONG);}});
     await AppHelper().getSession().then((value){
-      if(value[0] != 1) {
-        Navigator.pushReplacement(context, ExitPage(page: Login()));
-      }
-    });
-    await _cekLegalandUser();
-
+      setState(() {serverName = value[11];serverCode = value[12];});});
+    await AppHelper().cekServer(widget.getEmail).then((value){
+      if(value[0] == '0') {Navigator.pushReplacement(context, ExitPage(page: Introduction()));}});
+    await AppHelper().cekLegalUser(widget.getEmail.toString(), serverCode.toString()).then((value){
+      if(value[0] == '0') {Navigator.pushReplacement(context, ExitPage(page: Introduction()));}});
   }
 
   showFlushBarsuccess(BuildContext context, String stringme) => Flushbar(
@@ -99,7 +88,7 @@ class _DetailOutlet extends State<DetailOutlet> {
   String getStoreDefault = '...';
   _outletDetail() async {
     final response = await http.get(
-        applink+"api_model.php?act=outletdetail&id="+widget.idOutlet);
+        applink+"api_model.php?act=outletdetail&id="+widget.idOutlet+"&getserver="+serverCode.toString());
     Map data = jsonDecode(response.body);
     setState(() {
       getOutletName = data["a"].toString();
@@ -123,7 +112,7 @@ class _DetailOutlet extends State<DetailOutlet> {
   String getStoreSales = '0';
   _outletSalesTotal() async {
     final response = await http.get(
-        applink+"api_model.php?act=outletsalestotal&id="+widget.idOutlet+"&legal_id="+widget.getLegalId);
+        applink+"api_model.php?act=outletsalestotal&id="+widget.idOutlet+"&legal_id="+widget.getLegalId+"&getserver="+serverCode.toString());
     Map data = jsonDecode(response.body);
     setState(() {
       getStoreSales = data["a"].toString();
@@ -134,7 +123,7 @@ class _DetailOutlet extends State<DetailOutlet> {
   String getStoreSalesProduct = '0';
   _outletSalesProduct() async {
     final response = await http.get(
-        applink+"api_model.php?act=outletsalesproduct&id="+widget.idOutlet+"&legal_id="+widget.getLegalId);
+        applink+"api_model.php?act=outletsalesproduct&id="+widget.idOutlet+"&legal_id="+widget.getLegalId+"&getserver="+serverCode.toString());
     Map data = jsonDecode(response.body);
     setState(() {
       getStoreSalesProduct = data["a"].toString();
@@ -148,7 +137,8 @@ class _DetailOutlet extends State<DetailOutlet> {
       "id" : widget.idOutlet,
       //"legal_id" : widget.getLegalId,
       "branch" : widget.getLegalCode,
-      "nama_user" : widget.NamaUser
+      "nama_user" : widget.NamaUser,
+      "getserver" : serverCode
     });
     Map data = jsonDecode(response.body);
     setState(() {
@@ -237,7 +227,7 @@ class _DetailOutlet extends State<DetailOutlet> {
   Future<dynamic> getDataGudangDefault() async {
     http.Response response = await client.get(
         Uri.parse(applink+"api_model.php?act=getdata_gudangdefault&id="
-            +widget.idOutlet),
+            +widget.idOutlet+"&getserver="+serverCode.toString()),
         headers: {
           "Accept":"application/json",
           "Content-Type": "application/json"}
@@ -249,7 +239,7 @@ class _DetailOutlet extends State<DetailOutlet> {
   Future<dynamic> getDataStatusToko() async {
     http.Response response = await client.get(
         Uri.parse(applink+"api_model.php?act=getdata_storestatus&id="
-            +widget.idOutlet),
+            +widget.idOutlet+serverCode.toString()),
         headers: {
           "Accept":"application/json",
           "Content-Type": "application/json"}
@@ -263,7 +253,8 @@ class _DetailOutlet extends State<DetailOutlet> {
     var url = applink+"api_model.php?act=action_changestatustoko";
     http.post(url,
         body: {
-          "id": widget.idOutlet
+          "id": widget.idOutlet,
+          "getserver" : serverCode
         });
     showsuccess("Status Toko berhasil dirubah");
      setState(() {
