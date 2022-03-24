@@ -45,32 +45,20 @@ class _RiwayatMutasiOutletGudang extends State<RiwayatMutasiOutletGudang> {
 
 
 
-  _cekLegalandUser() async {
-    final response = await http.post(applink+"api_model.php?act=cek_legalanduser",
-        body: {"username": widget.getEmail.toString()},
-        headers: {"Accept":"application/json"});
-    Map data = jsonDecode(response.body);
-    setState(() {
-      if (data["message"].toString() == '2' || data["message"].toString() == '3') {
-        Navigator.pushReplacement(context, ExitPage(page: Introduction()));
-      }
-    });
-  }
-
   //=============================================================================
+  String serverName = '';
+  String serverCode = '';
   _startingVariable() async {
     await AppHelper().getConnect().then((value){if(value == 'ConnInterupted'){
       showToast("Koneksi terputus..", gravity: Toast.CENTER,duration:
       Toast.LENGTH_LONG);}});
     await AppHelper().getSession().then((value){
-      if(value[0] != 1) {
-        Navigator.pushReplacement(context, ExitPage(page: Login()));
-      }
-    });
-    await _cekLegalandUser();
-
+      setState(() {serverName = value[11];serverCode = value[12];});});
+    await AppHelper().cekServer(widget.getEmail).then((value){
+      if(value[0] == '0') {Navigator.pushReplacement(context, ExitPage(page: Introduction()));}});
+    await AppHelper().cekLegalUser(widget.getEmail.toString(), serverCode.toString()).then((value){
+      if(value[0] == '0') {Navigator.pushReplacement(context, ExitPage(page: Introduction()));}});
   }
-
 
 
   String limit = "30";
@@ -180,7 +168,7 @@ class _RiwayatMutasiOutletGudang extends State<RiwayatMutasiOutletGudang> {
     http.Response response = await http.get(
         Uri.parse(applink+"api_model.php?act=getdata_gudangmutasi&kodeGudang="+widget.kodeGudang+""
             "&filter2="+filter2+"&tglFrom="+dateFromval+"&tglTo="
-            ""+dateToval+"&filter="+filter+"&branch="+widget.getLegalId+"&idoutlet="+widget.idOutlet),
+            ""+dateToval+"&filter="+filter+"&branch="+widget.getLegalId+"&idoutlet="+widget.idOutlet+"&getserver="+serverCode.toString()),
         headers: {
           "Accept":"application/json",
           "Content-Type": "application/json"}

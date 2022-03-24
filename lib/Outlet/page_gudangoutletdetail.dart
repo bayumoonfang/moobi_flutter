@@ -37,8 +37,10 @@ class GudangOutletDetail extends StatefulWidget {
   final String kodeGudang;
   final String getNamaUser;
   final String getIdOulet;
+  final String getNamaGudang;
+  final String getDeskripsiGudang;
   const GudangOutletDetail(this.getEmail, this.getLegalCode, this.getLegalId, this.idGudang, this.kodeGudang, this.getNamaUser,
-      this.getIdOulet);
+      this.getIdOulet, this.getNamaGudang, this.getDeskripsiGudang);
 
   /*final String idGudang;
   final String valNamaUser;
@@ -55,30 +57,35 @@ class _GudangOutletDetail extends State<GudangOutletDetail> {
   void showToast(String msg, {int duration, int gravity}) {
     Toast.show(msg, context, duration: duration, gravity: gravity);}
 
-  _cekLegalandUser() async {
-    final response = await http.post(applink+"api_model.php?act=cek_legalanduser",
-        body: {"username": widget.getEmail.toString()},
-        headers: {"Accept":"application/json"});
+
+  String getWarehouseNama = '...';
+  String getWarehouseDeskripsi = '...';
+  _warehouseDetail() async {
+    final response = await http.get(
+        applink+"api_model.php?act=warehouse_detail&id="+widget.idGudang+"&getserver="+serverCode.toString());
     Map data = jsonDecode(response.body);
     setState(() {
-      if (data["message"].toString() == '2' || data["message"].toString() == '3') {
-        Navigator.pushReplacement(context, ExitPage(page: Introduction()));
-      }
+      getWarehouseNama = data["warehouse_nama"].toString();
+      getWarehouseDeskripsi = data["warehouse_deskripsi"].toString();
     });
+
   }
 
+
   //=============================================================================
+  String serverName = '';
+  String serverCode = '';
   _startingVariable() async {
     await AppHelper().getConnect().then((value){if(value == 'ConnInterupted'){
       showToast("Koneksi terputus..", gravity: Toast.CENTER,duration:
       Toast.LENGTH_LONG);}});
     await AppHelper().getSession().then((value){
-      if(value[0] != 1) {
-        Navigator.pushReplacement(context, ExitPage(page: Login()));
-      }
-    });
-    await _cekLegalandUser();
-
+      setState(() {serverName = value[11];serverCode = value[12];});});
+    await AppHelper().cekServer(widget.getEmail).then((value){
+      if(value[0] == '0') {Navigator.pushReplacement(context, ExitPage(page: Introduction()));}});
+    await AppHelper().cekLegalUser(widget.getEmail.toString(), serverCode.toString()).then((value){
+      if(value[0] == '0') {Navigator.pushReplacement(context, ExitPage(page: Introduction()));}});
+    await _warehouseDetail();
   }
 
   showFlushBarsuccess(BuildContext context, String stringme) => Flushbar(
@@ -97,37 +104,16 @@ class _GudangOutletDetail extends State<GudangOutletDetail> {
 
 
 
-  String getWarehouseName = "...";
-  String getOutletName = "...";
-  String getCodeWarehouse = "...";
-  String getOutletCode = "...";
-  String getDescription = "...";
-  _outletDetail() async {
-    final response = await http.get(
-        applink+"api_model.php?act=gudangdetail&id="+widget.idGudang);
-    Map data = jsonDecode(response.body);
-    setState(() {
-      getWarehouseName = data["a"].toString();
-      //getOutletName = data["b"].toString();
-      getCodeWarehouse = data["c"].toString();
-      getOutletCode = data["d"].toString();
-      getDescription = data["e"].toString();
-    });
-
-
-  }
-
 
   String getWarehouseTrans = '0';
   _warehouseTrans() async {
     final response = await http.get(
-        applink+"api_model.php?act=warehouse_trans&id="+widget.kodeGudang+"&idstore="+widget.getIdOulet);
+        applink+"api_model.php?act=warehouse_trans&id="+widget.kodeGudang+"&idstore="+widget.getIdOulet+"&getserver="+serverCode.toString());
     Map data = jsonDecode(response.body);
     setState(() {
       getWarehouseTrans = data["a"].toString();
     });
   }
-
 
 
 
@@ -137,15 +123,17 @@ class _GudangOutletDetail extends State<GudangOutletDetail> {
 
   _prepare() async {
     await _startingVariable();
-    await _outletDetail();
     await _warehouseTrans();
+
   }
 
 
 
   FutureOr onGoBack(dynamic value) {
     _prepare();
-    setState(() {});
+    setState(() {
+
+    });
   }
 
 
@@ -162,7 +150,7 @@ class _GudangOutletDetail extends State<GudangOutletDetail> {
     Navigator.pop(context);
     final response = await http.get(applink+"api_model.php?act=action_hapusgudang&"
         "id="+widget.idGudang
-        +"&branch="+widget.getLegalCode);
+        +"&branch="+widget.getLegalCode+"&getserver="+serverCode.toString());
     Map data = jsonDecode(response.body);
     setState(() {
       if (data["message"].toString() == '1') {
@@ -237,7 +225,7 @@ class _GudangOutletDetail extends State<GudangOutletDetail> {
                 }),
           ),
           actions: [
-            getWarehouseName != 'Gudang Besar' && widget.kodeGudang != '99' ?
+            getWarehouseNama != 'Gudang Besar' && widget.kodeGudang != '99' ?
             InkWell(
               onTap: () {
                 FocusScope.of(context).requestFocus(FocusNode());
@@ -258,7 +246,7 @@ class _GudangOutletDetail extends State<GudangOutletDetail> {
           child: Column(
             children: [
               Padding(padding: const EdgeInsets.only(left: 15,top: 20),
-                child: Align(alignment: Alignment.centerLeft,child: Text(getWarehouseName,style: TextStyle(
+                child: Align(alignment: Alignment.centerLeft,child: Text(getWarehouseNama,style: TextStyle(
                     color: Colors.black, fontFamily: 'VarelaRound',fontWeight: FontWeight.bold,fontSize: 20)),),),
               Padding(padding: const EdgeInsets.only(left: 17,top: 5),
                 child: Align(alignment: Alignment.centerLeft,
@@ -266,7 +254,7 @@ class _GudangOutletDetail extends State<GudangOutletDetail> {
 
                   Row(
                     children: [
-                      Text(getDescription.toString(),style: TextStyle(
+                      Text(getWarehouseDeskripsi.toString(),style: TextStyle(
                           color: Colors.black, fontFamily: 'VarelaRound',fontSize: 12)),
                     /*  Padding(padding: const EdgeInsets.only(right: 10)),
                       Container(
@@ -350,7 +338,7 @@ class _GudangOutletDetail extends State<GudangOutletDetail> {
                                   fontFamily: 'VarelaRound',fontSize: 11,)),),
                               Padding(padding: const EdgeInsets.only(top:5),
                                 child: Align(alignment: Alignment.centerLeft,
-                                  child:      Text(getWarehouseTrans
+                                  child:      Text(getWarehouseTrans == null ? "0" : getWarehouseTrans
                                       , style: TextStyle(
                                           fontFamily: 'VarelaRound',fontSize: 18,
                                           fontWeight: FontWeight.bold)),),)
@@ -436,12 +424,12 @@ class _GudangOutletDetail extends State<GudangOutletDetail> {
 
               Padding(padding: const EdgeInsets.only(top: 5,left: 9,right: 25),
                   child:
-                  getWarehouseName != 'Gudang Besar' && widget.kodeGudang != '99' ?
+                  getWarehouseNama != 'Gudang Besar' && widget.kodeGudang != '99' ?
                   InkWell(
                     onTap: (){
                       Navigator.push(context, ExitPage(page: GudangOutletUbahNama(
-                          widget.getEmail, widget.getLegalCode,widget.idGudang, getWarehouseName.toString(),
-                          getDescription.toString()))).then(onGoBack);
+                          widget.getEmail, widget.getLegalCode,widget.idGudang, getWarehouseNama.toString(),
+                          getWarehouseDeskripsi.toString()))).then(onGoBack);
                     },
                     child: ListTile(
                       title: Text("Ubah Gudang",style: TextStyle(

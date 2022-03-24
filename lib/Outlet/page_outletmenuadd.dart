@@ -23,18 +23,19 @@ import '../page_login.dart';
 
 
 
-class TambahSerivceOutlet extends StatefulWidget {
+class OutletMenuAdd extends StatefulWidget {
   final String idOutlet;
   final String getEmail;
   final String getLegalCode;
   final String getNamaUser;
-  const TambahSerivceOutlet(this.idOutlet, this.getEmail, this.getLegalCode, this.getNamaUser);
+  final String getTipeMenu;
+  const OutletMenuAdd(this.idOutlet, this.getEmail, this.getLegalCode, this.getNamaUser, this.getTipeMenu);
   @override
-  _TambahSerivceOutlet createState() => _TambahSerivceOutlet();
+  _OutletMenuAdd createState() => _OutletMenuAdd();
 }
 
 
-class _TambahSerivceOutlet extends State<TambahSerivceOutlet> {
+class _OutletMenuAdd extends State<OutletMenuAdd> {
 
   List data;
   bool _isvisible = true;
@@ -95,7 +96,7 @@ class _TambahSerivceOutlet extends State<TambahSerivceOutlet> {
     http.Response response = await http.get(
         Uri.encodeFull(applink+"api_model.php?act=getdata_produkadd_outlet&"
             "filter="+filter+
-            "&filtermedude=Service"
+            "&filtermedude="+widget.getTipeMenu+
             "&id="+widget.getLegalCode+"&getserver="+serverCode.toString()),
         headers: {"Accept":"application/json"});
     return json.decode(response.body);
@@ -140,41 +141,21 @@ class _TambahSerivceOutlet extends State<TambahSerivceOutlet> {
           "idOutlet" : widget.idOutlet,
           "branch" : widget.getLegalCode,
           "namaUser" : widget.getNamaUser,
-          "tipe" : "Service",
+          "tipe" : widget.getTipeMenu,
           "getserver" : serverCode},
         headers: {"Accept":"application/json"});
     Map data = jsonDecode(response.body);
     setState(() {
       if (data["message"].toString() == '1') {
-        showsuccess("Service berhasil ditambahkan ke outlet ");
+        showsuccess("Product berhasil ditambahkan ke outlet ");
+        //Navigator.pop(context);
       } else {
-        showerror("Service sudah ada di outlet ini, silahkan cari produk yang lain");
+        showerror("Product sudah ada di outlet ini, silahkan cari produk yang lain");
       }
     });
   }
 
 
-  _doAddHarga2 () async {
-    Navigator.pop(context);
-    final response = await http.post(applink+"api_model.php?act=action_addprodukoutlet",
-        body: {
-          "id": "",
-          "addHarga" : addHarga.text,
-          "idOutlet" : widget.idOutlet,
-          "branch" : widget.getLegalCode,
-          "namaUser" : widget.getNamaUser,
-          "tipe" : "Service",
-          "getserver" : serverCode},
-        headers: {"Accept":"application/json"});
-    Map data = jsonDecode(response.body);
-    setState(() {
-      if (data["message"].toString() == '1') {
-        showsuccess("Service berhasil ditambahkan ke outlet ");
-      } else {
-        showerror("Service sudah ada di outlet ini, silahkan cari produk yang lain");
-      }
-    });
-  }
 
 
   _cekProduk (String valueParse2) async {
@@ -190,7 +171,7 @@ class _TambahSerivceOutlet extends State<TambahSerivceOutlet> {
       if (data["message"].toString() == '2') {
         _showadd(valueParse2);
       } else {
-        showerror("Service sudah ada di outlet ini, silahkan cari produk yang lain");
+        showerror("Produk sudah ada di outlet ini, silahkan cari produk yang lain");
       }
     });
   }
@@ -211,11 +192,11 @@ class _TambahSerivceOutlet extends State<TambahSerivceOutlet> {
                 child: Column(
                   children: [
                     Align(alignment: Alignment.center, child:
-                    Text("Tambah Ke Outlet", style: TextStyle(fontFamily: 'VarelaRound', fontSize: 20,
+                    Text("Jual Ke Outlet", style: TextStyle(fontFamily: 'VarelaRound', fontSize: 20,
                         fontWeight: FontWeight.bold)),),
                     Padding(padding: const EdgeInsets.only(top: 15), child:
                     Align(alignment: Alignment.center, child:
-                    Text("Menambah service baru ke outlet ",
+                    Text("Menambah produk baru ke outlet ",
                       style: TextStyle(fontFamily: 'VarelaRound', fontSize: 12),textAlign: TextAlign.center,),)),
                     Padding(padding: const EdgeInsets.only(top: 15), child:
                     Align(alignment: Alignment.center, child:
@@ -267,6 +248,29 @@ class _TambahSerivceOutlet extends State<TambahSerivceOutlet> {
 
 
 
+  _doAddHarga2 () async {
+    Navigator.pop(context);
+    final response = await http.post(applink+"api_model.php?act=action_addprodukoutlet",
+        body: {
+          "id": "",
+          "addHarga" : addHarga.text,
+          "idOutlet" : widget.idOutlet,
+          "branch" : widget.getLegalCode,
+          "namaUser" : widget.getNamaUser,
+          "tipe" : widget.getTipeMenu,
+          "getserver" : serverCode},
+        headers: {"Accept":"application/json"});
+    Map data = jsonDecode(response.body);
+    setState(() {
+      if (data["message"].toString() == '1') {
+        showsuccess("Product berhasil ditambahkan ke outlet ");
+      } else {
+        showerror("Product sudah ada di outlet ini, silahkan cari produk yang lain");
+      }
+    });
+  }
+
+
   _showadd2() {
     showDialog(
         context: context,
@@ -275,17 +279,16 @@ class _TambahSerivceOutlet extends State<TambahSerivceOutlet> {
             //title: Text(),
             content: Container(
                 width: double.infinity,
-                height: 150,
+                height: 140,
                 child: Column(
                   children: [
                     Align(alignment: Alignment.center, child:
-                    Text("Tambah Ke Outlet", style: TextStyle(fontFamily: 'VarelaRound', fontSize: 20,
+                    Text("Jual Ke Outlet", style: TextStyle(fontFamily: 'VarelaRound', fontSize: 20,
                         fontWeight: FontWeight.bold)),),
                     Padding(padding: const EdgeInsets.only(top: 15), child:
                     Align(alignment: Alignment.center, child:
-                    Text("Menambah semua service baru ke outlet ",
+                    Text("Menambah semua produk baru ke outlet ",
                       style: TextStyle(fontFamily: 'VarelaRound', fontSize: 12),textAlign: TextAlign.center,),)),
-                    Padding(padding: const EdgeInsets.only(top: 15)),
                     Padding(padding: const EdgeInsets.only(top: 25), child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                       children: <Widget>[
@@ -312,7 +315,7 @@ class _TambahSerivceOutlet extends State<TambahSerivceOutlet> {
             appBar: new AppBar(
               backgroundColor: HexColor("#602d98"),
               title: Text(
-                "Tambah service ke outlet",
+                "Tambah "+widget.getTipeMenu+" ke outlet",
                 style: TextStyle(
                     color: Colors.white, fontFamily: 'VarelaRound', fontSize: 16),
               ),
@@ -375,7 +378,7 @@ class _TambahSerivceOutlet extends State<TambahSerivceOutlet> {
                                   width: 1.0),
                               borderRadius: BorderRadius.circular(5.0),
                             ),
-                            hintText: 'Cari Service...',
+                            hintText: 'Cari Produk '+widget.getTipeMenu+'...',
                           ),
                         ),
                       )
@@ -385,7 +388,7 @@ class _TambahSerivceOutlet extends State<TambahSerivceOutlet> {
                       child: FutureBuilder(
                         future: getData(),
                         builder: (context, snapshot){
-                          if (snapshot.data == null ) {
+                          if (snapshot.data == null) {
                             return Center(
                                 child: CircularProgressIndicator()
                             );

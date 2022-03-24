@@ -8,6 +8,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:hexcolor/hexcolor.dart';
+import 'package:sizer/sizer.dart';
 import 'package:intl/intl.dart';
 import 'package:moobi_flutter/Helper/api_link.dart';
 import 'package:moobi_flutter/Helper/app_helper.dart';
@@ -15,8 +16,7 @@ import 'package:moobi_flutter/Helper/color_based.dart';
 import 'package:moobi_flutter/Helper/page_route.dart';
 import 'package:moobi_flutter/Outlet/page_gudangoutlet.dart';
 import 'package:moobi_flutter/Outlet/page_outletchangegudang.dart';
-import 'package:moobi_flutter/Outlet/page_outletproduk.dart';
-import 'package:moobi_flutter/Outlet/page_outletservice.dart';
+import 'package:moobi_flutter/Outlet/page_outletmenulist.dart';
 import 'package:moobi_flutter/Outlet/page_riwayatjualproduk.dart';
 import 'package:moobi_flutter/Outlet/page_riwayattransaksi.dart';
 import 'package:moobi_flutter/Outlet/page_ubahoutlet.dart';
@@ -151,7 +151,16 @@ class _DetailOutlet extends State<DetailOutlet> {
 
   }
 
-
+  Future<dynamic> getTipeJual() async {
+    http.Response response = await http.get(
+        Uri.parse(applink+"api_model.php?act=getdata_tipejual&getserver="+serverCode.toString()),
+        headers: {
+          "Accept":"application/json",
+          "Content-Type": "application/json"}
+    );
+    //print(applink+"api_model.php?act=getdata_tipejual&getserver="+serverCode.toString());
+    return json.decode(response.body);
+  }
 
 
   alertHapus(String IDProduk) {
@@ -478,7 +487,7 @@ class _DetailOutlet extends State<DetailOutlet> {
                       .spaceBetween,
                   children: [
                     Text(
-                      "PERSEDIAAN",
+                      "MENU OUTLET",
                       textAlign: TextAlign.left,
                       style: TextStyle(
                           fontFamily: 'VarelaRound',
@@ -490,61 +499,115 @@ class _DetailOutlet extends State<DetailOutlet> {
                 ),),
 
 
-              Padding(padding: const EdgeInsets.only(top: 15,left: 9,right: 25),
-                  child: InkWell(
-                    child: ListTile(
-                      onTap: (){
-                        Navigator.push(
-                            context,
-                            MaterialPageRoute(builder: (context) => OutletProduk(widget.getEmail,widget.getLegalCode,widget.NamaUser,widget.idOutlet))).then(onGoBack);
-                        //Navigator.push(context, ExitPage(page: UbahOutlet(getStoreID))).then(onGoBack);
-                      },
-                      title: Column(
-                        children: [
-                          Align(alignment: Alignment.centerLeft,child:
-                          Text("Daftar Produk", style: TextStyle(
-                            fontFamily: 'VarelaRound',fontSize: 15,)),),
-                          Padding(padding: const EdgeInsets.only(top: 5),
-                            child:    Align(alignment: Alignment.centerLeft,child:
-                            Text("Daftar produk yang dijual di outlet ini",
-                                style: TextStyle(fontFamily: 'VarelaRound',fontSize: 13,color: HexColor("#72757a"),)),),)
-                        ],
-                      ),
-                      trailing: FaIcon(FontAwesomeIcons.angleRight,color: HexColor(third_color),),
+            Container(
+                width : double.infinity,
+                height : 250,
+              child :
+            FutureBuilder(
+              future: getTipeJual(),
+              builder : (context, snapshot) {
+                    if (snapshot.data == null) {
+                      return Center(
+                          child: CircularProgressIndicator()
+                      );
+                    } else {
+                      return snapshot.data == 0 || snapshot.data.length == 0 ?
+                      Container(
+                          height: double.infinity, width : double.infinity,
+                          child: new
+                          Center(
+                              child :
+                              Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                crossAxisAlignment: CrossAxisAlignment.center,
+                                children: <Widget>[
+                                  new Text(
+                                    "Tidak ada data",
+                                    style: new TextStyle(
+                                        fontFamily: 'VarelaRound', fontSize: 18),
+                                  )
+                                ],
+                              )))
+                          :
+                            /*
+                            SIZER PLUGIN :
+                            .h  - for widget height
+                            .w  - for widget width
+                            .sp - for font size
+                            example :
+                              Container(
+                                  height: 10.0.h,  //10% of screen height
+                                  width: 80.0.w,   //80% of screen width
+                                  child: Text('Sizer', style: TextStyle(fontSize: 12.0.sp)),
+                              );
+                             */
+                            ListView.builder(
+                              itemCount: snapshot.data == null ? 0 : snapshot.data.length,
+                              itemBuilder: (context, i) {
+                                return Column(
+                                  children: [
+                                    Padding(padding: const EdgeInsets.only(top: 15,left: 9,right: 25),
+                                        child: InkWell(
+                                          child: ListTile(
+                                            onTap: (){
+                                              Navigator.push(context,
+                                                  MaterialPageRoute(builder: (context) => OutletMenuList(widget.getEmail,widget.getLegalCode,widget.NamaUser,widget.idOutlet, snapshot.data[i]['b'].toString()))).then(onGoBack);
+                                              //Navigator.push(context, ExitPage(page: UbahOutlet(getStoreID))).then(onGoBack);
+                                            },
+                                            title: Column(
+                                              children: [
+                                                Align(alignment: Alignment.centerLeft,child:
+                                                Text("Daftar "+snapshot.data[i]['b'].toString(), style: TextStyle(
+                                                  fontFamily: 'VarelaRound',fontSize: 15,)),),
+                                                Padding(padding: const EdgeInsets.only(top: 5),
+                                                  child:    Align(alignment: Alignment.centerLeft,child:
+                                                  Text(snapshot.data[i]['c'].toString(),
+                                                      style: TextStyle(fontFamily: 'VarelaRound',fontSize: 13,color: HexColor("#72757a"),)),),)
+                                              ],
+                                            ),
+                                            trailing: FaIcon(FontAwesomeIcons.angleRight,color: HexColor(third_color),),
+                                          ),
+                                        )
+                                    ),
+                                    Padding(padding: const EdgeInsets.only(top: 5,left: 25,right: 25),
+                                      child: Divider(height: 5,),),
+                                  ],
+                                );
+                              },
+                          );
+                    }
+                }
+            )),
+
+
+
+
+
+              Padding(padding: const EdgeInsets.only(top: 20),
+                  child: Container(
+                    height: 8,
+                    width: double.infinity,
+                    color: HexColor("#f0f3f8"),
+                  )),
+
+
+              Padding(padding: const EdgeInsets.only(top:35,left: 25,right: 25),
+                child:  Row(
+                  mainAxisAlignment: MainAxisAlignment
+                      .spaceBetween,
+                  children: [
+                    Text(
+                      "PERSEDIAAN",
+                      textAlign: TextAlign.left,
+                      style: TextStyle(
+                          fontFamily: 'VarelaRound',
+                          color: HexColor("#73767d"),
+                          fontWeight: FontWeight.bold,
+                          fontSize: 13),
                     ),
-                  )
-              ),
-              Padding(padding: const EdgeInsets.only(top: 5,left: 25,right: 25),
-                child: Divider(height: 5,),),
+                  ],
+                ),),
 
-
-              Padding(padding: const EdgeInsets.only(top: 5,left: 9,right: 25),
-                  child: InkWell(
-                    child: ListTile(
-                      onTap: (){
-                        Navigator.push(
-                            context,
-                            MaterialPageRoute(builder: (context) => OutletService(widget.getEmail,widget.getLegalCode,widget.NamaUser,widget.idOutlet))).then(onGoBack);
-                        //Navigator.push(context, ExitPage(page: UbahOutlet(getStoreID))).then(onGoBack);
-                      },
-                      title: Column(
-                        children: [
-                          Align(alignment: Alignment.centerLeft,child:
-                          Text("Daftar Jasa", style: TextStyle(
-                            fontFamily: 'VarelaRound',fontSize: 15,)),),
-                          Padding(padding: const EdgeInsets.only(top: 5),
-                            child:    Align(alignment: Alignment.centerLeft,child:
-                            Text("Daftar jasa yang dijual di outlet ini",
-                                style: TextStyle(fontFamily: 'VarelaRound',fontSize: 13,color: HexColor("#72757a"),)),),)
-                        ],
-                      ),
-                      trailing: FaIcon(FontAwesomeIcons.angleRight,color: HexColor(third_color),),
-                    ),
-                  )
-              ),
-
-              Padding(padding: const EdgeInsets.only(top: 5,left: 25,right: 25),
-                child: Divider(height: 5,),),
 
 
               Padding(padding: const EdgeInsets.only(top: 5,left: 9,right: 25),
@@ -598,6 +661,9 @@ class _DetailOutlet extends State<DetailOutlet> {
 
                 ],
               ),),
+
+
+
 
               Padding(padding: const EdgeInsets.only(top: 10,left: 9,right: 25),
                   child: InkWell(

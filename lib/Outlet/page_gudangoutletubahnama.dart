@@ -45,30 +45,19 @@ class GudangOutletUbahNamaState extends State<GudangOutletUbahNama> {
   }
 
 
-  _cekLegalandUser() async {
-    final response = await http.post(applink+"api_model.php?act=cek_legalanduser",
-        body: {"username": widget.getEmail.toString()},
-        headers: {"Accept":"application/json"});
-    Map data = jsonDecode(response.body);
-    setState(() {
-      if (data["message"].toString() == '2' || data["message"].toString() == '3') {
-        Navigator.pushReplacement(context, ExitPage(page: Introduction()));
-      }
-    });
-  }
-
   //=============================================================================
+  String serverName = '';
+  String serverCode = '';
   _startingVariable() async {
     await AppHelper().getConnect().then((value){if(value == 'ConnInterupted'){
       showToast("Koneksi terputus..", gravity: Toast.CENTER,duration:
       Toast.LENGTH_LONG);}});
     await AppHelper().getSession().then((value){
-      if(value[0] != 1) {
-        Navigator.pushReplacement(context, ExitPage(page: Login()));
-      }
-    });
-    await _cekLegalandUser();
-
+      setState(() {serverName = value[11];serverCode = value[12];});});
+    await AppHelper().cekServer(widget.getEmail).then((value){
+      if(value[0] == '0') {Navigator.pushReplacement(context, ExitPage(page: Introduction()));}});
+    await AppHelper().cekLegalUser(widget.getEmail.toString(), serverCode.toString()).then((value){
+      if(value[0] == '0') {Navigator.pushReplacement(context, ExitPage(page: Introduction()));}});
   }
 
   showFlushBarsuccess(BuildContext context, String stringme) => Flushbar(
@@ -102,7 +91,8 @@ class GudangOutletUbahNamaState extends State<GudangOutletUbahNama> {
     final response = await http.post(applink+"api_model.php?act=edit_namagudang", body: {
       "valNama_edit": valNama.text,
       "valID_edit" : widget.idGudang,
-      "valdeskripsi" : valDeskripsi.text
+      "valdeskripsi" : valDeskripsi.text,
+      "getserver" : serverCode
     });
     Map data = jsonDecode(response.body);
     setState(() {
@@ -169,7 +159,7 @@ class GudangOutletUbahNamaState extends State<GudangOutletUbahNama> {
         appBar: new AppBar(
           backgroundColor: HexColor(main_color),
           title: Text(
-            "Ubah Nama Gudang",
+            "Ubah Gudang",
             style: TextStyle(
                 color: Colors.white, fontFamily: 'VarelaRound', fontSize: 16),
           ),

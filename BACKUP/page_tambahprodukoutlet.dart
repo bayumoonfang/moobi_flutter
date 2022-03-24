@@ -18,8 +18,8 @@ import 'package:moobi_flutter/Helper/color_based.dart';
 import 'package:moobi_flutter/Helper/page_route.dart';
 import 'package:toast/toast.dart';
 
-import '../page_intoduction.dart';
-import '../page_login.dart';
+import '../lib/page_intoduction.dart';
+import '../lib/page_login.dart';
 
 
 
