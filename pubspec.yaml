@@ -52,6 +52,9 @@ dependencies:
   google_fonts: ^1.1.2
   flushbar: ^1.10.4
   sizer: ^2.0.15
+  fluttericon: ^2.0.0
+  flutter_speed_dial: ^5.0.0+1
+  unicorndial: ^1.1.5
 
 
 dev_dependencies:

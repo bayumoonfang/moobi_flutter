@@ -13,6 +13,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/painting.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
+import 'package:flutter_speed_dial/flutter_speed_dial.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:hexcolor/hexcolor.dart';
@@ -34,6 +35,7 @@ import 'package:moobi_flutter/page_login.dart';
 
 import 'package:toast/toast.dart';
 import 'package:http/http.dart' as http;
+import 'package:unicorndial/unicorndial.dart';
 
 import '../page_intoduction.dart';
 
@@ -126,7 +128,15 @@ class _OutletMenuList extends State<OutletMenuList> {
 
 
   Future<bool> _onWillPop() async {
-    Navigator.pop(context);}
+    if(isDialOpen.value){
+      isDialOpen.value = false;
+      return false;
+    }else{
+      return true;
+    }
+    Navigator.pop(context);
+
+  }
 
 
 
@@ -163,6 +173,7 @@ class _OutletMenuList extends State<OutletMenuList> {
     Map data = jsonDecode(response.body);
     setState(() {
       if (data["message"].toString() == '1') {
+
         setState(() {
           getData();
         });
@@ -173,6 +184,23 @@ class _OutletMenuList extends State<OutletMenuList> {
   }
 
 
+  String valStatus = "false";
+  _gantiStatus (String valueParse2) async {
+    final response = await http.get(applink+"api_model.php?act=action_gantistatusprice&id="+valueParse2.toString()
+        +"&branch="+widget.getLegalCode+"&getserver="+serverCode.toString());
+    Map data = jsonDecode(response.body);
+    setState(() {
+      if (data["message"].toString() == '1') {
+
+        setState(() {
+          getData();
+          showsuccess("Status produk di outlet berhasil diubah");
+        });
+      } else {
+        showerror("Gagal");
+      }
+    });
+  }
 
 
 
@@ -181,7 +209,7 @@ class _OutletMenuList extends State<OutletMenuList> {
     setState(() {});
   }
 
-
+  ValueNotifier<bool> isDialOpen = ValueNotifier(false);
   _showDelete(String valueParse, String valueParse2) {
     showDialog(
         context: context,
@@ -201,7 +229,7 @@ class _OutletMenuList extends State<OutletMenuList> {
                       color: Colors.redAccent,size: 35,)),),
                     Padding(padding: const EdgeInsets.only(top: 15), child:
                     Align(alignment: Alignment.center, child:
-                    Text("Apakah anda yakin menonaktifkan produk '"+valueParse2+"'  di outlet ini ? ",
+                    Text("Apakah anda yakin menghapus produk  '"+valueParse2+"'  di outlet ini ? ",
                       style: TextStyle(fontFamily: 'VarelaRound', fontSize: 12),textAlign: TextAlign.center,),)),
                     Padding(padding: const EdgeInsets.only(top: 25), child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -318,8 +346,7 @@ class _OutletMenuList extends State<OutletMenuList> {
             backgroundColor: HexColor("#602d98"),
             title: Text(
               "Daftar Produk "+widget.gettipeMenu,
-              style: TextStyle(
-                  color: Colors.white, fontFamily: 'VarelaRound', fontSize: 16),
+              style: GoogleFonts.varelaRound(fontSize: 15),
             ),
             leading: Builder(
               builder: (context) => IconButton(
@@ -406,19 +433,18 @@ class _OutletMenuList extends State<OutletMenuList> {
                               :
                           new ListView.builder(
                             itemCount: snapshot.data == null ? 0 : snapshot.data.length,
-                            padding: const EdgeInsets.only(top: 2,bottom: 80,left: 5,right: 5),
+                            padding: const EdgeInsets.only(top: 10,bottom: 80,left: 5,right: 5),
                             itemBuilder: (context, i) {
                               return Column(
                                 children: [
-
                                  InkWell(
                                    onTap: () {
-                                     FocusScope.of(context).requestFocus(FocusNode());
+                                    /* FocusScope.of(context).requestFocus(FocusNode());
                                      _editpriceDialog(snapshot.data[i]["g"].toString(), snapshot.data[i]["b"].toString());
                                      setState(() {
                                        hargaVal.text = snapshot.data[i]["e"].toString();
-                                     });
-                                    /* showModalBottomSheet(
+                                     });*/
+                                     showModalBottomSheet(
                                          shape: RoundedRectangleBorder(
                                            borderRadius: BorderRadius.only(
                                                topLeft: Radius.circular(15),
@@ -432,120 +458,129 @@ class _OutletMenuList extends State<OutletMenuList> {
                                              child :  Column(
                                                mainAxisSize: MainAxisSize.min,
                                                children: <Widget>[
-                                                 Padding(padding: const EdgeInsets.only(top: 10,right: 25,left: 15),
-                                                   child: Row(
-                                                     mainAxisAlignment: MainAxisAlignment
-                                                         .spaceBetween,
-                                                     children: [
-                                                       Text("Category", style: GoogleFonts.varelaRound(
-                                                           fontSize: 14, fontWeight: FontWeight.bold)
-                                                       ),
-                                                   Text(snapshot.data[i]["i"], style: GoogleFonts.varelaRound(
-                                                       fontSize: 14),textAlign: TextAlign.right,)
-                                                     ],
-                                                   ),),
-                                                 Padding(padding: const EdgeInsets.only(top: 10,right: 15,left: 15),
-                                                   child: Row(
-                                                     mainAxisAlignment: MainAxisAlignment
-                                                         .spaceBetween,
-                                                     children: [
-                                                       Text("Date Created", style: GoogleFonts.varelaRound(
-                                                           fontSize: 14, fontWeight: FontWeight.bold)
-                                                       ),
-                                                       Text(snapshot.data[i]["j"], style: GoogleFonts.varelaRound(
-                                                           fontSize: 14),textAlign: TextAlign.right,)
-                                                     ],
-                                                   ),),
-
-                                                 Padding(
-                                                   padding: const EdgeInsets.only(left: 15,right: 15,top: 10),
-                                                   child : Divider(height:5)
+                                                 Padding(padding: const EdgeInsets.only(top: 5,right: 25,left: 15),
+                                                 child : Align(
+                                                   alignment : Alignment.centerLeft,
+                                                   child : Text(snapshot.data[i]["b"].toString(), style : GoogleFonts.varelaRound(fontSize: 18,
+                                                       fontWeight: FontWeight.bold))
+                                                 )
                                                  ),
+                                                 Padding(padding: const EdgeInsets.only(top: 15,right: 25,left: 15),
+                                                     child: InkWell(
+                                                       child: ListTile(
+                                                         dense: true,
+                                                         minLeadingWidth: 20,
+                                                         horizontalTitleGap: 15,
+                                                         contentPadding: EdgeInsets.all(1),
+                                                         onTap: (){
+                                                           //Navigator.push(context, ExitPage(page: ProfileUbahNama(widget.getEmail, val_namauser.toString(), widget.getUserId))).then(onGoBack);
+                                                         },
+                                                         leading: FaIcon(FontAwesomeIcons.tags,color: HexColor("#73767d"),size: 18,),
+                                                         title: Text("Ubah Harga",style: TextStyle(
+                                                             color: Colors.black, fontFamily: 'VarelaRound',fontSize: 13)),
+                                                           trailing: Opacity(
+                                                             opacity : 0.5,
+                                                             child : FaIcon(FontAwesomeIcons.angleRight,color: HexColor(third_color),),
+                                                           )
+                                                       ),
+                                                     )
+                                                 ),
+                                                  Padding(padding: const EdgeInsets.only(top: 2,right: 15,left: 15),
+                                                  child : Divider(height: 3,)),
+                                                 Padding(padding: const EdgeInsets.only(top: 5,right: 25,left: 15),
+                                                   child: InkWell(
+                                                         child: ListTile(
+                                                           dense: true,
+                                                           minLeadingWidth: 20,
+                                                           horizontalTitleGap: 20,
+                                                           contentPadding: EdgeInsets.all(1),
+                                                           onTap: (){
+                                                             //Navigator.push(context, ExitPage(page: ProfileUbahNama(widget.getEmail, val_namauser.toString(), widget.getUserId))).then(onGoBack);
+                                                           },
+                                                           leading: FaIcon(FontAwesomeIcons.trash,color: HexColor("#73767d"),size: 18,),
+                                                           title: Text("Hapus Produk dari Outlet",style: TextStyle(
+                                                               color: Colors.black, fontFamily: 'VarelaRound',fontSize: 13)),
+                                                         ),
+                                                       )
+                                                   ),
+                                                 Padding(padding: const EdgeInsets.only(top: 2,right: 15,left: 15),
+                                                     child : Divider(height: 3,)),
 
 
                                                ],
                                              )
                                            );
-                                         });*/
+                                         });
                                    },
-                                   child : ListTile(
-                                     leading: SizedBox(
-                                         width: 45,
-                                         height: 45,
-                                         child: ClipRRect(
-                                           borderRadius: BorderRadius.circular(6.0),
-                                           child : CachedNetworkImage(
-                                             fit: BoxFit.cover,
-                                             imageUrl:
-                                             snapshot.data[i]["c"] == '' ?
-                                             applink+"photo/nomage.jpg"
-                                                 :
-                                             applink+"photo/"+snapshot.data[i]["f"]+"/"+snapshot.data[i]["c"],
-                                             progressIndicatorBuilder: (context, url,
-                                                 downloadProgress) =>
-                                                 CircularProgressIndicator(value:
-                                                 downloadProgress.progress),
-                                             errorWidget: (context, url, error) =>
-                                                 Icon(Icons.error),
-                                           ),
-                                         )),
-                                     title: Align(alignment: Alignment.centerLeft,
-                                       child: Opacity(
-                                           opacity: 0.8,
-                                           child : Text("#"+snapshot.data[i]["a"],
-                                               style: GoogleFonts.nunito(fontSize: 12))
+                                   child : Opacity(
+                                     opacity : snapshot.data[i]["d"].toString() == 'Aktif' ? 1 : 0.4,
+                                     child : ListTile(
+                                         leading: SizedBox(
+                                             width: 45,
+                                             height: 45,
+                                             child: ClipRRect(
+                                               borderRadius: BorderRadius.circular(6.0),
+                                               child : CachedNetworkImage(
+                                                 fit: BoxFit.cover,
+                                                 imageUrl:
+                                                 snapshot.data[i]["c"] == '' ?
+                                                 applink+"photo/nomage.jpg"
+                                                     :
+                                                 applink+"photo/"+snapshot.data[i]["f"]+"/"+snapshot.data[i]["c"],
+                                                 progressIndicatorBuilder: (context, url,
+                                                     downloadProgress) =>
+                                                     CircularProgressIndicator(value:
+                                                     downloadProgress.progress),
+                                                 errorWidget: (context, url, error) =>
+                                                     Icon(Icons.error),
+                                               ),
+                                             )),
+                                       title: Align(alignment: Alignment.centerLeft,
+                                         child: Opacity(
+                                             opacity: 0.8,
+                                             child : Text("#"+snapshot.data[i]["a"],
+                                                 style: GoogleFonts.varelaRound(fontSize: 11))
+                                         ),
                                        ),
-                                     ),
-                                     subtitle: Align(
-                                       alignment: Alignment.centerLeft,
-                                       child: Column(
-                                         children: [
-                                           Align(
-                                             alignment: Alignment.centerLeft,
-                                             child: Padding(padding: const EdgeInsets.only(top:1), child :
-                                             Text(snapshot.data[i]["b"].toString(),
-                                                 style: GoogleFonts.varelaRound(fontSize: 13,fontWeight: FontWeight.bold,
-                                                     color: Colors.black))),
-                                           ),
-                                           Align(
-                                             alignment: Alignment.centerLeft,
-                                             child: Padding(padding: const EdgeInsets.only(top:2), child :
-                                            Row(
-                                              children: [
-                                                Text("Rp "+
-                                                    NumberFormat.currency(
-                                                        locale: 'id', decimalDigits: 0, symbol: '').
-                                                    format(
-                                                        snapshot.data[i]["e"]), style: GoogleFonts.varelaRound(fontSize: 12,color:Colors.black),),
+                                         subtitle: Align(
+                                           alignment: Alignment.centerLeft,
+                                           child: Column(
+                                             children: [
+                                               Align(
+                                                 alignment: Alignment.centerLeft,
+                                                 child: Padding(padding: const EdgeInsets.only(top:1), child :
+                                                 Text(snapshot.data[i]["b"].toString(),
+                                                     style: GoogleFonts.varelaRound(fontSize: 13,fontWeight: FontWeight.bold,
+                                                         color: Colors.black))),
+                                               ),
+                                               Align(
+                                                 alignment: Alignment.centerLeft,
+                                                 child: Padding(padding: const EdgeInsets.only(top:2), child :
+                                                 Row(
+                                                   children: [
+                                                     Opacity(
+                                                       opacity : 0.8,
+                                                       child : Text(snapshot.data[i]["i"], style: GoogleFonts.varelaRound(fontSize: 12,color:Colors.black),),
+                                                     )
+                                                   ],
+                                                 )
 
-                                              ],
-                                            )
-
-                                             ),
-                                           )
-                                         ],
-                                       ),
-                                     ),
-                                     trailing: InkWell(
-                                       child: Padding(
-                                         padding: const EdgeInsets.only(right: 10),
-                                         child: FaIcon(FontAwesomeIcons.times,size: 20,color: Colors.redAccent,),
-                                       ),
-                                       onTap: (){
-                                         FocusScope.of(context).requestFocus(FocusNode());
-                                         _showDelete(snapshot.data[i]["g"].toString(), snapshot.data[i]["b"].toString());
-                                       },
-                                     ),
+                                                 ),
+                                               )
+                                             ],
+                                           ),
+                                         ),
+                                         trailing: Text("Rp "+
+                                             NumberFormat.currency(locale: 'id', decimalDigits: 0, symbol: '').
+                                             format(snapshot.data[i]["e"]), style: GoogleFonts.varelaRound(fontSize: 13,color:Colors.black),),
+                                     )
                                    )
                                  ),
 
 
                                   Container(
                                     width: double.infinity,
-                                    height: 8,
-                                    child :Divider(
-                                      height: 5,
-                                    ),
+                                    height: 18,
                                     padding: const EdgeInsets.only(left:15,right:15),
                                   )
                                 ],
@@ -559,17 +594,34 @@ class _OutletMenuList extends State<OutletMenuList> {
               ],
             ),
           ),
-          floatingActionButton: Padding(
-            padding: const EdgeInsets.only(right : 10),
-            child: FloatingActionButton(
-              onPressed: (){
-                FocusScope.of(context).requestFocus(FocusNode());
-               Navigator.push(context, MaterialPageRoute(builder: (context) => OutletMenuAdd(widget.getidOutlet, widget.getEmail,  widget.getLegalCode, widget.getNamaUser, widget.gettipeMenu)));
-
-              },
-              child: FaIcon(FontAwesomeIcons.plus),
-            ),
-          ),
+          floatingActionButton: UnicornDialer(
+              backgroundColor: Color.fromRGBO(255, 255, 255, 0.6),
+              parentButtonBackground: HexColor("#2196f3"),
+              orientation: UnicornOrientation.VERTICAL,
+              parentButton: Icon(Icons.add),
+              //finalButtonIcon: Icon(Icons.edit),
+              childButtons: [
+                UnicornButton(
+                   // hasLabel: true,
+                   // labelText: "Tambahkan Produk",
+                   // labelFontSize: 12,
+                    currentButton: FloatingActionButton(
+                        onPressed: () {
+                          FocusScope.of(context).requestFocus(FocusNode());
+                          Navigator.push(context, MaterialPageRoute(builder: (context) => OutletMenuAdd(widget.getidOutlet, widget.getEmail,  widget.getLegalCode, widget.getNamaUser, widget.gettipeMenu)));
+                        },
+                        //heroTag: "airplane",
+                        backgroundColor: HexColor(main_color),
+                        mini: true,
+                        child: FaIcon(FontAwesomeIcons.plus,size: 20,),)),
+               UnicornButton(
+                   //hasLabel: true,
+                   //labelText: "Copy dari outlet",
+                    currentButton: FloatingActionButton(
+                        backgroundColor: HexColor(main_color),
+                        mini: true,
+                        child: FaIcon(FontAwesomeIcons.copy,size: 20,),))
+              ]),
       ),
     );
 

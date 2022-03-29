@@ -7,6 +7,7 @@ import 'package:flushbar/flushbar.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:hexcolor/hexcolor.dart';
 import 'package:sizer/sizer.dart';
 import 'package:intl/intl.dart';
@@ -283,7 +284,7 @@ class _DetailOutlet extends State<DetailOutlet> {
           title: Text(
             "Detail Store",
             style: TextStyle(
-                color: Colors.white, fontFamily: 'VarelaRound', fontSize: 16),
+                color: Colors.white, fontFamily: 'VarelaRound', fontSize: 15),
           ),
           leading: Builder(
             builder: (context) => IconButton(
@@ -489,11 +490,9 @@ class _DetailOutlet extends State<DetailOutlet> {
                     Text(
                       "MENU OUTLET",
                       textAlign: TextAlign.left,
-                      style: TextStyle(
-                          fontFamily: 'VarelaRound',
-                          color: HexColor("#73767d"),
+                      style: GoogleFonts.varelaRound(color: HexColor("#73767d"),
                           fontWeight: FontWeight.bold,
-                          fontSize: 13),
+                          fontSize: 13)
                     ),
                   ],
                 ),),

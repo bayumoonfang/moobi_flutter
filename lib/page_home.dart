@@ -7,6 +7,7 @@ import 'package:flushbar/flushbar.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:hexcolor/hexcolor.dart';
 import 'package:intl/intl.dart';
@@ -323,7 +324,8 @@ class _HomeState extends State<Home> {
                                               FaIcon(FontAwesomeIcons.user,color: HexColor(second_color)),
                                               Padding(padding: const EdgeInsets.only(top:8),
                                                 child: Text("Profile", style: TextStyle(fontFamily: 'VarelaRound',
-                                                    fontSize: 12,color: HexColor(second_color))),)
+                                                    fontSize: 12,color: HexColor(second_color))
+                                                ),)
                                             ],
                                           ),
                                         ),
@@ -336,7 +338,7 @@ class _HomeState extends State<Home> {
                                           children: [
                                             FaIcon(FontAwesomeIcons.store,color: HexColor(second_color)),
                                             Padding(padding: const EdgeInsets.only(top:8),
-                                              child: Text("Outlet Saya", style: TextStyle(fontFamily: 'VarelaRound',
+                                              child: Text("Outlet", style: TextStyle(fontFamily: 'VarelaRound',
                                                   fontSize: 12,color: HexColor(second_color)
                                                   )),)
                                           ],
@@ -352,7 +354,7 @@ class _HomeState extends State<Home> {
                                           children: [
                                             FaIcon(FontAwesomeIcons.box,color: HexColor(second_color)),
                                             Padding(padding: const EdgeInsets.only(top:8),
-                                              child: Text("Master Data", style: TextStyle(fontFamily: 'VarelaRound',
+                                              child: Text("Master", style: TextStyle(fontFamily: 'VarelaRound',
                                                   fontSize: 12,color: HexColor(second_color))),)
                                           ],
                                         )),
