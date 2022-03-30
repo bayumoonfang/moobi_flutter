@@ -9,11 +9,14 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flushbar/flushbar.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:hexcolor/hexcolor.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
 import 'package:moobi_flutter/Helper/app_helper.dart';
+import 'package:moobi_flutter/Helper/color_based.dart';
+import 'package:moobi_flutter/Helper/setting_apps.dart';
 import 'package:moobi_flutter/Produk/page_produkdetailimage.dart';
 import 'package:moobi_flutter/Produk/page_produkedit.dart';
 import 'package:moobi_flutter/helper/api_link.dart';
@@ -40,7 +43,7 @@ class ProdukDetail extends StatefulWidget {
 }
 
 
-class _ProdukDetailState extends State<ProdukDetail> {
+class _ProdukDetailState extends State<ProdukDetail>  {
   List data;
   List data2;
   List data3;
@@ -51,30 +54,19 @@ class _ProdukDetailState extends State<ProdukDetail> {
   void showToast(String msg, {int duration, int gravity}) {
     Toast.show(msg, context, duration: duration, gravity: gravity);}
 
-  _cekLegalandUser() async {
-    final response = await http.post(applink+"api_model.php?act=cek_legalanduser",
-        body: {"username": widget.getEmail.toString()},
-        headers: {"Accept":"application/json"});
-    Map data = jsonDecode(response.body);
-    setState(() {
-      if (data["message"].toString() == '2' || data["message"].toString() == '3') {
-        Navigator.pushReplacement(context, ExitPage(page: Introduction()));
-      }
-    });
-  }
-
   //=============================================================================
+  String serverName = '';
+  String serverCode = '';
   _startingVariable() async {
     await AppHelper().getConnect().then((value){if(value == 'ConnInterupted'){
       showToast("Koneksi terputus..", gravity: Toast.CENTER,duration:
       Toast.LENGTH_LONG);}});
     await AppHelper().getSession().then((value){
-      if(value[0] != 1) {
-        Navigator.pushReplacement(context, ExitPage(page: Login()));
-      }
-    });
-    await _cekLegalandUser();
-
+      setState(() {serverName = value[11];serverCode = value[12];});});
+    await AppHelper().cekServer(widget.getEmail).then((value){
+      if(value[0] == '0') {Navigator.pushReplacement(context, ExitPage(page: Introduction()));}});
+    await AppHelper().cekLegalUser(widget.getEmail.toString(), serverCode.toString()).then((value){
+      if(value[0] == '0') {Navigator.pushReplacement(context, ExitPage(page: Introduction()));}});
   }
 
   showFlushBarsuccess(BuildContext context, String stringme) => Flushbar(
@@ -94,7 +86,8 @@ class _ProdukDetailState extends State<ProdukDetail> {
   String getCountJual = '0';
   String getSatuan = "...";
   _getCountTerjual() async {
-    final response = await http.get(applink+"api_model.php?act=count_terjual&itemn="+widget.getItemNumber+"&branch="+widget.getLegalCode);
+    final response = await http.get(applink+"api_model.php?act=count_terjual&itemn="+widget.getItemNumber+"&branch="
+        +widget.getLegalCode+"&getserver="+serverCode.toString());
     Map data = jsonDecode(response.body);
     setState(() {
       getCountJual = data["a"].toString();
@@ -111,7 +104,7 @@ class _ProdukDetailState extends State<ProdukDetail> {
   String getDateCreated = "...";
   String getTipe = "...";
   _getDetail() async {
-    final response = await http.get(applink+"api_model.php?act=item_detail&id="+widget.getItemNumber);
+    final response = await http.get(applink+"api_model.php?act=item_detail&id="+widget.getItemNumber+"&getserver="+serverCode.toString());
     Map data = jsonDecode(response.body);
     setState(() {
       getName = data["a"].toString();
@@ -128,12 +121,15 @@ class _ProdukDetailState extends State<ProdukDetail> {
 
 
   void _nonaktifproduk() async {
+    EasyLoading.show(status: easyloading_text);
     final response = await http.post(applink+"api_model.php?act=action_nonaktifproduk", body: {
       "id": widget.getItemNumber,
-      "branch" : widget.getLegalCode
+      "branch" : widget.getLegalCode,
+      "getserver" : serverCode
     });
     Map data = jsonDecode(response.body);
     setState(() {
+      EasyLoading.dismiss();
       if (data["message"].toString() == '1') {
         showsuccess("Status produk berhasil dirubah");
         setState(() {
@@ -151,19 +147,23 @@ class _ProdukDetailState extends State<ProdukDetail> {
     await _startingVariable();
     await _getCountTerjual();
     await _getDetail();
+    EasyLoading.dismiss();
   }
 
 
   void doHapusImage() async {
+    EasyLoading.show(status: easyloading_text);
     var url = applink+"api_model.php?act=hapus_photoproduk";
     final response = await http.post(url,
         body: {
           "produk_id" : widget.getItemNumber,
-          "produk_branch" : widget.getLegalCode
+          "produk_branch" : widget.getLegalCode,
+          "getserver" : serverCode
         });
     Map data = jsonDecode(response.body);
     setState(() {
       if (data["message"].toString() == '1') {
+        EasyLoading.dismiss();
         showsuccess("Photo produk berhasil dihapus..");
         setState(() {
           _getDetail();
@@ -270,14 +270,17 @@ class _ProdukDetailState extends State<ProdukDetail> {
 
 
   doHapus() async {
+    EasyLoading.show(status: easyloading_text);
     final response = await http.post(applink+"api_model.php?act=hapus_produk", body: {
         "produk_id" : widget.getItemNumber,
       "produk_branch" : widget.getLegalCode,
-      "nama_user" : widget.getNamaUser
+      "nama_user" : widget.getNamaUser,
+      "getserver" : serverCode
       });
     Map data = jsonDecode(response.body);
     setState(() {
       if (data["message"].toString() == '1') {
+        EasyLoading.dismiss();
         Navigator.pop(context);
         return false;
       }
@@ -297,6 +300,7 @@ class _ProdukDetailState extends State<ProdukDetail> {
   }
 
   imageSelectorGallery() async {
+    EasyLoading.show(status: easyloading_text);
     galleryFile = await ImagePicker.pickImage(
       source: ImageSource.gallery,
     );
@@ -305,10 +309,12 @@ class _ProdukDetailState extends State<ProdukDetail> {
     final response = await http.post(applink+"api_model.php?act=edit_produkphoto", body: {
       "produk_image": Base64,
       "produk_id": widget.getItemNumber,
-      "produk_branch" : widget.getLegalCode
+      "produk_branch" : widget.getLegalCode,
+      "getserver" : serverCode
     });
     Map data = jsonDecode(response.body);
     setState(() {
+      EasyLoading.dismiss();
       if (data["message"].toString() == '1') {
         showsuccess("Photo produk berhasil dirubah.. ");
         setState(() {
@@ -485,16 +491,7 @@ class _ProdukDetailState extends State<ProdukDetail> {
                         child: Text(getName.toString(),style: TextStyle(
                             fontFamily: 'VarelaRound', fontSize: 18,
                             fontWeight: FontWeight.bold)),),
-                      subtitle:
-                      Container (
-                        height: 30,
-                        width: 100,
-                        child :
-                                      Padding (
-                                      padding : const EdgeInsets.only(top: 5)
-                              ,child :Text(getKategori.toString(), style: new TextStyle(
-                              fontFamily: 'VarelaRound',fontSize: 13),)
-                          )))
+                    )
                     ),
                   Padding(padding: const EdgeInsets.only(left: 15,right: 15,top: 10),
                     child: Divider(height: 3,),),
@@ -556,7 +553,24 @@ class _ProdukDetailState extends State<ProdukDetail> {
                             ],
                           ),),
 
-
+                        Padding(padding: const EdgeInsets.only(top: 10,right: 25),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment
+                                .spaceBetween,
+                            children: [
+                              Text(
+                                "Kategori",
+                                textAlign: TextAlign.left,
+                                style: TextStyle(
+                                    fontFamily: 'VarelaRound',
+                                    fontSize: 13),
+                              ),
+                              Text(getKategori.toString(),
+                                  style: TextStyle(
+                                      fontFamily: 'VarelaRound',
+                                      fontSize: 14)),
+                            ],
+                          ),),
                         Padding(padding: const EdgeInsets.only(top: 10,right: 25),
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment
@@ -686,9 +700,12 @@ class _ProdukDetailState extends State<ProdukDetail> {
                       child: RaisedButton(
                         elevation: 0,
                         onPressed: (){
+                          EasyLoading.show(status: easyloading_text);
                           Navigator.push(context, ExitPage(page: ProdukEdit(widget.getEmail, widget.getLegalCode,widget.getItemNumber, widget.getNamaUser))).then(onGoBack);
                         },
-                        color: HexColor("#622df7"),
+                        color:
+                        //HexColor("#622df7")
+                         HexColor(main_color),
                         shape: RoundedRectangleBorder(side: BorderSide(
                             color: Colors.black,
                             width: 0.1,
@@ -696,7 +713,7 @@ class _ProdukDetailState extends State<ProdukDetail> {
                         ),
                           borderRadius: BorderRadius.circular(50.0),
                         ),
-                        child: Text("Edit "+widget.getTipe,style: TextStyle(
+                        child: Text("Edit Produk",style: TextStyle(
                             color: Colors.white, fontFamily: 'VarelaRound')),
                       ),
                     ),

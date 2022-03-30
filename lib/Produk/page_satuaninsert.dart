@@ -5,6 +5,7 @@ import 'dart:convert';
 import 'package:flushbar/flushbar.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:hexcolor/hexcolor.dart';
 import 'package:moobi_flutter/Helper/api_link.dart';
@@ -12,6 +13,7 @@ import 'package:moobi_flutter/Helper/app_helper.dart';
 import 'package:moobi_flutter/Helper/check_connection.dart';
 import 'package:moobi_flutter/Helper/page_route.dart';
 import 'package:moobi_flutter/Helper/session.dart';
+import 'package:moobi_flutter/Helper/setting_apps.dart';
 import 'package:moobi_flutter/page_login.dart';
 import 'package:toast/toast.dart';
 import 'package:http/http.dart' as http;
@@ -38,30 +40,19 @@ class _ProdukSatuanInsertState extends State<ProdukSatuanInsert> {
   void showToast(String msg, {int duration, int gravity}) {
     Toast.show(msg, context, duration: duration, gravity: gravity);}
 
-  _cekLegalandUser() async {
-    final response = await http.post(applink+"api_model.php?act=cek_legalanduser",
-        body: {"username": widget.getEmail.toString()},
-        headers: {"Accept":"application/json"});
-    Map data = jsonDecode(response.body);
-    setState(() {
-      if (data["message"].toString() == '2' || data["message"].toString() == '3') {
-        Navigator.pushReplacement(context, ExitPage(page: Introduction()));
-      }
-    });
-  }
-
   //=============================================================================
+  String serverName = '';
+  String serverCode = '';
   _startingVariable() async {
     await AppHelper().getConnect().then((value){if(value == 'ConnInterupted'){
       showToast("Koneksi terputus..", gravity: Toast.CENTER,duration:
       Toast.LENGTH_LONG);}});
     await AppHelper().getSession().then((value){
-      if(value[0] != 1) {
-        Navigator.pushReplacement(context, ExitPage(page: Login()));
-      }
-    });
-    await _cekLegalandUser();
-
+      setState(() {serverName = value[11];serverCode = value[12];});});
+    await AppHelper().cekServer(widget.getEmail).then((value){
+      if(value[0] == '0') {Navigator.pushReplacement(context, ExitPage(page: Introduction()));}});
+    await AppHelper().cekLegalUser(widget.getEmail.toString(), serverCode.toString()).then((value){
+      if(value[0] == '0') {Navigator.pushReplacement(context, ExitPage(page: Introduction()));}});
   }
 
   showFlushBarsuccess(BuildContext context, String stringme) => Flushbar(
@@ -91,17 +82,19 @@ class _ProdukSatuanInsertState extends State<ProdukSatuanInsert> {
   }
 
   doSimpan() async {
+    EasyLoading.show(status: easyloading_text);
     FocusScope.of(context).requestFocus(FocusNode());
     final response = await http.post(applink+"api_model.php?act=add_satuan", body: {
       "satuan_deskripsi": _deskripsisatuan.text,
       "satuan" : _satuan.text,
-      "satuan_branch" : widget.getLegalCode
+      "satuan_branch" : widget.getLegalCode,
+      "getserver" : serverCode
     });
     Map data = jsonDecode(response.body);
     setState(() {
+      EasyLoading.dismiss();
       if (data["message"].toString() == '0') {
         showsuccess("Satuan sudah ada");
-
         return false;
       } else {
         _deskripsisatuan.clear();
@@ -221,7 +214,7 @@ class _ProdukSatuanInsertState extends State<ProdukSatuanInsert> {
                               hintText: 'Contoh : Kilogram, Gram',
                               labelText: '',
                               floatingLabelBehavior: FloatingLabelBehavior.always,
-                              hintStyle: TextStyle(fontFamily: "VarelaRound", color: HexColor("#c4c4c4")),
+                              hintStyle: TextStyle(fontFamily: "VarelaRound", color: HexColor("#c4c4c4"), fontSize: 13),
                               enabledBorder: UnderlineInputBorder(
                                 borderSide: BorderSide(color: HexColor("#DDDDDD")),
                               ),
@@ -256,7 +249,7 @@ class _ProdukSatuanInsertState extends State<ProdukSatuanInsert> {
                               hintText: 'Contoh : Kg, gr',
                               labelText: '',
                               floatingLabelBehavior: FloatingLabelBehavior.always,
-                              hintStyle: TextStyle(fontFamily: "VarelaRound", color: HexColor("#c4c4c4")),
+                              hintStyle: TextStyle(fontFamily: "VarelaRound", color: HexColor("#c4c4c4"), fontSize: 13),
                               enabledBorder: UnderlineInputBorder(
                                 borderSide: BorderSide(color: HexColor("#DDDDDD")),
                               ),

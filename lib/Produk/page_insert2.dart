@@ -8,12 +8,14 @@ import 'package:flushbar/flushbar.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/painting.dart';
+import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:hexcolor/hexcolor.dart';
 import 'package:moobi_flutter/Helper/api_link.dart';
 import 'package:moobi_flutter/Helper/app_helper.dart';
 import 'package:moobi_flutter/Helper/page_route.dart';
+import 'package:moobi_flutter/Helper/setting_apps.dart';
 import 'package:toast/toast.dart';
 import 'package:http/http.dart' as http;
 import '../page_intoduction.dart';
@@ -51,22 +53,11 @@ class _ProdukInsertState2 extends State<ProdukInsert2> {
   void showToast(String msg, {int duration, int gravity}) {
     Toast.show(msg, context, duration: duration, gravity: gravity);}
 
-  _cekLegalandUser() async {
-    final response = await http.post(applink+"api_model.php?act=cek_legalanduser",
-        body: {"username": widget.getEmail.toString()},
-        headers: {"Accept":"application/json"});
-    Map data = jsonDecode(response.body);
-    setState(() {
-      if (data["message"].toString() == '2' || data["message"].toString() == '3') {
-        Navigator.pushReplacement(context, ExitPage(page: Introduction()));
-      }
-    });
-  }
 
 
   Future getAllStore() async {
     var response = await http.get(
-        Uri.encodeFull(applink+"api_model.php?act=getdata_store&id="+widget.getLegalCode));
+        Uri.encodeFull(applink+"api_model.php?act=getdata_store&id="+widget.getLegalCode+"&getserver="+serverCode.toString()));
     if (response.statusCode == 200) {
       var jsonData = json.decode(response.body);
       setState(() {
@@ -77,7 +68,7 @@ class _ProdukInsertState2 extends State<ProdukInsert2> {
 
   Future getAllWarehouse() async {
     var response = await http.get(
-        Uri.encodeFull(applink+"api_model.php?act=getdata_warehouse2&id="+widget.getLegalCode));
+        Uri.encodeFull(applink+"api_model.php?act=getdata_warehouse2&id="+widget.getLegalCode+"&getserver="+serverCode.toString()));
     if (response.statusCode == 200) {
       var jsonData = json.decode(response.body);
       //print (applink+"api_model.php?act=getdata_warehouse&id="+widget.getLegalCode);
@@ -88,16 +79,19 @@ class _ProdukInsertState2 extends State<ProdukInsert2> {
   }
 
   //=============================================================================
+  String serverName = '';
+  String serverCode = '';
   _startingVariable() async {
     await AppHelper().getConnect().then((value){if(value == 'ConnInterupted'){
       showToast("Koneksi terputus..", gravity: Toast.CENTER,duration:
       Toast.LENGTH_LONG);}});
     await AppHelper().getSession().then((value){
-      if(value[0] != 1) {
-        Navigator.pushReplacement(context, ExitPage(page: Login()));
-      }
-    });
-    await _cekLegalandUser();
+      setState(() {serverName = value[11];serverCode = value[12];});});
+    await AppHelper().cekServer(widget.getEmail).then((value){
+      if(value[0] == '0') {Navigator.pushReplacement(context, ExitPage(page: Introduction()));}});
+    await AppHelper().cekLegalUser(widget.getEmail.toString(), serverCode.toString()).then((value){
+      if(value[0] == '0') {Navigator.pushReplacement(context, ExitPage(page: Introduction()));}});
+
     await getAllStore();
     await getAllWarehouse();
   }
@@ -145,7 +139,7 @@ class _ProdukInsertState2 extends State<ProdukInsert2> {
 
 
   doSimpan() async {
-
+    EasyLoading.show(status: easyloading_text);
     final response = await http.post(applink+"api_model.php?act=add_produkinfo", body: {
       "produk_number": widget.getProdukNumber,
       "produk_branch" : widget.getLegalCode,
@@ -156,12 +150,13 @@ class _ProdukInsertState2 extends State<ProdukInsert2> {
       "produk_stock" : _stockawal.text,
       "show_stock" : stock_val,
       "produk_satuan" : widget.getSatuan,
-      "nama_user" : widget.getNamaUser
+      "nama_user" : widget.getNamaUser,
+      "getserver" : serverCode
     });
     Map data = jsonDecode(response.body);
     setState(() {
       //showsuccess(data["message"].toString());
-
+      EasyLoading.dismiss();
       if (data["message"].toString() == '1') {
         _stockawal.clear();
         _hargaproduk.clear();
@@ -275,7 +270,7 @@ class _ProdukInsertState2 extends State<ProdukInsert2> {
                              padding: const EdgeInsets.only(top:10),
                              child: DropdownButton(
                                isExpanded: false,
-                               hint: Text("Pilih Store", style : GoogleFonts.varelaRound()),
+                               hint: Text("Pilih Store", style : GoogleFonts.varelaRound(fontSize: 13)),
                                value: selectedStore,
                                items: itemList.map((myitem){
                                  return DropdownMenuItem(
@@ -335,7 +330,7 @@ class _ProdukInsertState2 extends State<ProdukInsert2> {
                        )
                    ),
 
-                   widget.getProdukTipe == 'Product' ?
+                   widget.getProdukTipe == 'Retail' ?
                    Padding(padding: const EdgeInsets.only(left: 15,top: 10,right:15),
                        child: Column(
                          children: [
@@ -398,7 +393,7 @@ class _ProdukInsertState2 extends State<ProdukInsert2> {
                                     padding: const EdgeInsets.only(top:10),
                                     child: DropdownButton(
                                       isExpanded: false,
-                                      hint: Text("Pilih Warehouse", style : GoogleFonts.varelaRound()),
+                                      hint: Text("Pilih Warehouse", style : GoogleFonts.varelaRound(fontSize: 13)),
                                       value: selectedWarehouse,
                                       items: itemList2.map((myitem2){
                                         return DropdownMenuItem(

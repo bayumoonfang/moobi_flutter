@@ -8,6 +8,7 @@ import 'dart:convert';
 import 'package:flushbar/flushbar.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:hexcolor/hexcolor.dart';
 import 'package:moobi_flutter/Helper/api_link.dart';
@@ -15,6 +16,7 @@ import 'package:moobi_flutter/Helper/app_helper.dart';
 import 'package:moobi_flutter/Helper/check_connection.dart';
 import 'package:moobi_flutter/Helper/page_route.dart';
 import 'package:moobi_flutter/Helper/session.dart';
+import 'package:moobi_flutter/Helper/setting_apps.dart';
 import 'package:moobi_flutter/Produk/page_kategoriinsert.dart';
 import 'package:moobi_flutter/page_home.dart';
 import 'package:moobi_flutter/page_login.dart';
@@ -42,30 +44,19 @@ class _ProdukKategoriState extends State<ProdukKategori> {
   void showToast(String msg, {int duration, int gravity}) {
     Toast.show(msg, context, duration: duration, gravity: gravity);}
 
-  _cekLegalandUser() async {
-    final response = await http.post(applink+"api_model.php?act=cek_legalanduser",
-        body: {"username": widget.getEmail.toString()},
-        headers: {"Accept":"application/json"});
-    Map data = jsonDecode(response.body);
-    setState(() {
-      if (data["message"].toString() == '2' || data["message"].toString() == '3') {
-        Navigator.pushReplacement(context, ExitPage(page: Introduction()));
-      }
-    });
-  }
-
   //=============================================================================
+  String serverName = '';
+  String serverCode = '';
   _startingVariable() async {
     await AppHelper().getConnect().then((value){if(value == 'ConnInterupted'){
       showToast("Koneksi terputus..", gravity: Toast.CENTER,duration:
       Toast.LENGTH_LONG);}});
     await AppHelper().getSession().then((value){
-      if(value[0] != 1) {
-        Navigator.pushReplacement(context, ExitPage(page: Login()));
-      }
-    });
-    await _cekLegalandUser();
-
+      setState(() {serverName = value[11];serverCode = value[12];});});
+    await AppHelper().cekServer(widget.getEmail).then((value){
+      if(value[0] == '0') {Navigator.pushReplacement(context, ExitPage(page: Introduction()));}});
+    await AppHelper().cekLegalUser(widget.getEmail.toString(), serverCode.toString()).then((value){
+      if(value[0] == '0') {Navigator.pushReplacement(context, ExitPage(page: Introduction()));}});
   }
 
   showFlushBarsuccess(BuildContext context, String stringme) => Flushbar(
@@ -114,16 +105,18 @@ class _ProdukKategoriState extends State<ProdukKategori> {
     http.Response response = await http.get(
         Uri.encodeFull(applink+"api_model.php?act=getdata_kategori&"
             "branch="+widget.getLegalCode+
-            "&filter="+filter),headers: {"Accept":"application/json"});
+            "&filter="+filter+"&getserver="+serverCode.toString()),headers: {"Accept":"application/json"});
         return json.decode(response.body);
   }
 
   String getMessage = "...";
   _doHapus (String valueParse2) async {
-    final response = await http.get(applink+"api_model.php?act=action_hapuskategori&id="+valueParse2.toString()
+    EasyLoading.show(status: easyloading_text);
+    final response = await http.get(applink+"api_model.php?act=action_hapuskategori&id="+valueParse2.toString()+"&getserver="+serverCode.toString()
         +"&branch="+widget.getLegalCode);
     Map data = jsonDecode(response.body);
     setState(() {
+      EasyLoading.dismiss();
       if (data["message"].toString() == '1') {
         showsuccess("Kategori berhasil dihapus");
         setState(() {

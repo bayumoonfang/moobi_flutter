@@ -329,6 +329,23 @@ class _HomeState extends State<Home> {
                                             ],
                                           ),
                                         ),
+
+                                        InkWell(
+                                            onTap: () {
+                                              //Navigator.push(context, ExitPage(page: Gudang(getEmail.toString(), getLegalCode.toString(), getLegalId.toString(), getNamaUser.toString())));
+                                              Navigator.push(context, ExitPage(page: ProdukHome(getEmail.toString(), getLegalCode.toString(), getNamaUser.toString())));
+                                            },
+                                            child:
+                                            Column(
+                                              children: [
+                                                FaIcon(FontAwesomeIcons.box,color: HexColor(second_color)),
+                                                Padding(padding: const EdgeInsets.only(top:8),
+                                                  child: Text("Master Data", style: TextStyle(fontFamily: 'VarelaRound',
+                                                      fontSize: 12,color: HexColor(second_color))),)
+                                              ],
+                                            )),
+
+
                                         InkWell(
                                           onTap: () {
                                             Navigator.push(context, ExitPage(page: Outlet(getEmail.toString(), getLegalCode.toString(), getLegalId.toString(),getNamaUser.toString())));
@@ -344,20 +361,7 @@ class _HomeState extends State<Home> {
                                           ],
                                         )),
 
-                                        InkWell(
-                                          onTap: () {
-                                            //Navigator.push(context, ExitPage(page: Gudang(getEmail.toString(), getLegalCode.toString(), getLegalId.toString(), getNamaUser.toString())));
-                                            Navigator.push(context, ExitPage(page: ProdukHome(getEmail.toString(), getLegalCode.toString(), getNamaUser.toString())));
-                                          },
-                                          child:
-                                        Column(
-                                          children: [
-                                            FaIcon(FontAwesomeIcons.box,color: HexColor(second_color)),
-                                            Padding(padding: const EdgeInsets.only(top:8),
-                                              child: Text("Master", style: TextStyle(fontFamily: 'VarelaRound',
-                                                  fontSize: 12,color: HexColor(second_color))),)
-                                          ],
-                                        )),
+
                                       ],
                                     ),
                                   )

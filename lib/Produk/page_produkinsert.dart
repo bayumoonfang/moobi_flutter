@@ -5,6 +5,7 @@ import 'package:flushbar/flushbar.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:hexcolor/hexcolor.dart';
@@ -18,6 +19,7 @@ import 'dart:async';
 import 'dart:convert';
 
 import 'package:moobi_flutter/Helper/session.dart';
+import 'package:moobi_flutter/Helper/setting_apps.dart';
 import 'package:moobi_flutter/Produk/page_insert2.dart';
 import 'package:moobi_flutter/page_login.dart';
 import 'package:toast/toast.dart';
@@ -47,6 +49,7 @@ class _ProdukInsertState extends State<ProdukInsert> {
   List _listType = ["Product", "Service"];
   List itemList = List();
   List categoryList = List();
+  List tipeList = List();
   File galleryFile;
   String Base64;
   String Baseq = "";
@@ -61,31 +64,59 @@ class _ProdukInsertState extends State<ProdukInsert> {
   void showToast(String msg, {int duration, int gravity}) {
     Toast.show(msg, context, duration: duration, gravity: gravity);}
 
-  _cekLegalandUser() async {
-    final response = await http.post(applink+"api_model.php?act=cek_legalanduser",
-        body: {"username": widget.getEmail.toString()},
-        headers: {"Accept":"application/json"});
-    Map data = jsonDecode(response.body);
-    setState(() {
-      if (data["message"].toString() == '2' || data["message"].toString() == '3') {
-        Navigator.pushReplacement(context, ExitPage(page: Introduction()));
-      }
-    });
+
+
+  Future getAllItem() async {
+    //var url = applink+"api_model.php?act=getdata_unit&id="+getBranchVal;
+    var response = await http.get(
+        Uri.encodeFull(applink+"api_model.php?act=getdata_unit&id="+widget.getLegalCode+"&getserver="+serverCode.toString()));
+    if (response.statusCode == 200) {
+      var jsonData = json.decode(response.body);
+      setState(() {
+        itemList = jsonData;
+      });
+    }
+  }
+
+  Future getAllCategory() async {
+    var response = await http.get(
+        Uri.encodeFull(applink+"api_model.php?act=getdata_category&id="+widget.getLegalCode+"&getserver="+serverCode.toString()));
+    if (response.statusCode == 200) {
+      var jsonData = json.decode(response.body);
+      setState(() {
+        categoryList = jsonData;
+      });
+    }
+  }
+
+  Future getAllTipe() async {
+    var response = await http.get(
+        Uri.encodeFull(applink+"api_model.php?act=getdata_tipelist&getserver="+serverCode.toString()));
+    if (response.statusCode == 200) {
+      var jsonData = json.decode(response.body);
+      setState(() {
+        tipeList = jsonData;
+      });
+    }
   }
 
   //=============================================================================
+  String serverName = '';
+  String serverCode = '';
   _startingVariable() async {
     await AppHelper().getConnect().then((value){if(value == 'ConnInterupted'){
       showToast("Koneksi terputus..", gravity: Toast.CENTER,duration:
       Toast.LENGTH_LONG);}});
     await AppHelper().getSession().then((value){
-      if(value[0] != 1) {
-        Navigator.pushReplacement(context, ExitPage(page: Login()));
-      }
-    });
-    await _cekLegalandUser();
-    await getAllItem();
+      setState(() {serverName = value[11];serverCode = value[12];});});
+    await AppHelper().cekServer(widget.getEmail).then((value){
+      if(value[0] == '0') {Navigator.pushReplacement(context, ExitPage(page: Introduction()));}});
+    await AppHelper().cekLegalUser(widget.getEmail.toString(), serverCode.toString()).then((value){
+      if(value[0] == '0') {Navigator.pushReplacement(context, ExitPage(page: Introduction()));}});
+
     await getAllCategory();
+    await getAllItem();
+    await getAllTipe();
   }
 
   showFlushBarsuccess(BuildContext context, String stringme) => Flushbar(
@@ -101,35 +132,6 @@ class _ProdukInsertState extends State<ProdukInsert> {
     showFlushBarsuccess(context, txtError);
     return;
   }
-
-
-
-
-  Future getAllItem() async {
-    //var url = applink+"api_model.php?act=getdata_unit&id="+getBranchVal;
-    var response = await http.get(
-        Uri.encodeFull(applink+"api_model.php?act=getdata_unit&id="+widget.getLegalCode));
-    if (response.statusCode == 200) {
-      var jsonData = json.decode(response.body);
-      setState(() {
-        itemList = jsonData;
-      });
-    }
-   // print(itemList);
-  }
-
-  Future getAllCategory() async {
-    var response = await http.get(
-        Uri.encodeFull(applink+"api_model.php?act=getdata_category&id="+widget.getLegalCode));
-    if (response.statusCode == 200) {
-      var jsonData = json.decode(response.body);
-      setState(() {
-        categoryList = jsonData;
-      });
-    }
-    //print(categoryList);
-  }
-
 
 
   _prepare() async {
@@ -171,19 +173,22 @@ class _ProdukInsertState extends State<ProdukInsert> {
 
 
   doSimpan() async {
+    EasyLoading.show(status: easyloading_text);
     final response = await http.post(applink+"api_model.php?act=add_produk", body: {
       "produk_nama": _namaproduk.text,
       "produk_number": _kodeproduk.text,
       "produk_satuan" : selectedSatuan,
       "produk_kategori" : selectedCategory,
-      "produk_tipe": widget.getTipe,
+      "produk_tipe": selectedTipe,
       "produk_image": Baseq,
       "produk_branch" : widget.getLegalCode,
       "image_nama" : namaFileq,
-      "user_nama" : widget.getNamaUser
+      "user_nama" : widget.getNamaUser,
+      "getserver" : serverCode
     });
     Map data = jsonDecode(response.body);
     setState(() {
+      EasyLoading.dismiss();
       if (data["message"].toString() == '0') {
         showsuccess("Nama Produk sudah ada");
         _isVisible = true;
@@ -196,9 +201,10 @@ class _ProdukInsertState extends State<ProdukInsert> {
         Base64 = "";
         Baseq = "";
         Navigator.pop(context);
-        Navigator.push(context, ExitPage(page: ProdukInsert2(widget.getEmail, widget.getLegalCode, data["message"].toString(), widget.getTipe,selectedSatuan, widget.getNamaUser)));
+        Navigator.push(context, ExitPage(page: ProdukInsert2(widget.getEmail, widget.getLegalCode, data["message"].toString(), selectedTipe,selectedSatuan, widget.getNamaUser)));
         return false;
       }
+
     });
   }
 
@@ -280,7 +286,7 @@ class _ProdukInsertState extends State<ProdukInsert> {
               ),
             ),
             title: Text(
-             "Input "+widget.getTipe+" Baru",
+             "Input Produk Baru",
               style: TextStyle(
                   color: Colors.white,
                   fontFamily: 'VarelaRound',
@@ -325,7 +331,7 @@ class _ProdukInsertState extends State<ProdukInsert> {
                       children: [
                         Align(alignment: Alignment.centerLeft,child: Padding(
                           padding: const EdgeInsets.only(left: 0,top: 15),
-                          child: Text("Kode "+widget.getTipe,style: TextStyle(fontWeight: FontWeight.bold,fontFamily: "VarelaRound",
+                          child: Text("Kode ",style: TextStyle(fontWeight: FontWeight.bold,fontFamily: "VarelaRound",
                               fontSize: 12,color: HexColor("#0074D9")),),
                         ),),
                         Align(alignment: Alignment.centerLeft,child: Padding(
@@ -338,7 +344,7 @@ class _ProdukInsertState extends State<ProdukInsert> {
                               hintText: 'Boleh dikosongi (generate otomatis)',
                               labelText: '',
                               floatingLabelBehavior: FloatingLabelBehavior.always,
-                              hintStyle: TextStyle(fontFamily: "VarelaRound", color: HexColor("#c4c4c4")),
+                              hintStyle: TextStyle(fontFamily: "VarelaRound", color: HexColor("#c4c4c4"), fontSize: 13),
                               enabledBorder: UnderlineInputBorder(
                                 borderSide: BorderSide(color: HexColor("#DDDDDD")),
                               ),
@@ -361,7 +367,7 @@ class _ProdukInsertState extends State<ProdukInsert> {
                       children: [
                         Align(alignment: Alignment.centerLeft,child: Padding(
                           padding: const EdgeInsets.only(left: 0,top: 15),
-                          child: Text("Nama "+widget.getTipe,style: TextStyle(fontWeight: FontWeight.bold,fontFamily: "VarelaRound",
+                          child: Text("Nama  ",style: TextStyle(fontWeight: FontWeight.bold,fontFamily: "VarelaRound",
                               fontSize: 12,color: HexColor("#0074D9")),),
                         ),),
                         Align(alignment: Alignment.centerLeft,child: Padding(
@@ -374,7 +380,7 @@ class _ProdukInsertState extends State<ProdukInsert> {
                               hintText: 'Contoh : Nasi Goreng, Es Jeruk, Jasa Photo',
                               labelText: '',
                               floatingLabelBehavior: FloatingLabelBehavior.always,
-                              hintStyle: TextStyle(fontFamily: "VarelaRound", color: HexColor("#c4c4c4")),
+                              hintStyle: TextStyle(fontFamily: "VarelaRound", color: HexColor("#c4c4c4"), fontSize: 13),
                               enabledBorder: UnderlineInputBorder(
                                 borderSide: BorderSide(color: HexColor("#DDDDDD")),
                               ),
@@ -390,6 +396,41 @@ class _ProdukInsertState extends State<ProdukInsert> {
                       ],
                     )
                 ),
+
+              Padding(padding: const EdgeInsets.only(left: 15,top: 10,right: 15),
+                  child: Column(
+                    children: [
+                      Align(alignment: Alignment.centerLeft,child: Padding(
+                        padding: const EdgeInsets.only(left: 0,top: 15),
+                        child: Text("Tipe",style: TextStyle(fontWeight: FontWeight.bold,fontFamily: "VarelaRound",
+                            fontSize: 12,color: HexColor("#0074D9")),),
+                      ),),
+                      Align(alignment: Alignment.centerLeft,child: Padding(
+                        padding: const EdgeInsets.only(top:10),
+                        child: DropdownButton(
+                          isExpanded: false,
+                          hint: Text("Pilih Tipe Produk", style : GoogleFonts.varelaRound(fontSize: 13)),
+                          value: selectedTipe,
+                          items: tipeList.map((myitem){
+                            return DropdownMenuItem(
+                                value: myitem['b'],
+                                child: Text(myitem['b'], style : GoogleFonts.varelaRound(fontSize: 15))
+                            );
+                          }).toList(),
+                          onChanged: (value) {
+                            setState(() {
+                              FocusScope.of(context).requestFocus(FocusNode());
+                              selectedTipe = value;
+                            });
+                          },
+                        ),
+                      ))
+                    ],
+                  )
+              ),
+
+
+
                 Padding(padding: const EdgeInsets.only(left: 15,top: 10,right: 15),
                     child: Column(
                       children: [
@@ -402,12 +443,12 @@ class _ProdukInsertState extends State<ProdukInsert> {
                           padding: const EdgeInsets.only(top:10),
                           child: DropdownButton(
                             isExpanded: false,
-                            hint: Text("Pilih Satuan", style : GoogleFonts.varelaRound()),
+                            hint: Text("Pilih Satuan", style : GoogleFonts.varelaRound(fontSize: 13)),
                             value: selectedSatuan,
                             items: itemList.map((myitem){
                               return DropdownMenuItem(
                                   value: myitem['DATA'],
-                                  child: Text(myitem['DATA']+" ("+myitem['DESCRIPTION']+")", style : GoogleFonts.varelaRound())
+                                  child: Text(myitem['DATA']+" ("+myitem['DESCRIPTION']+")", style : GoogleFonts.varelaRound(fontSize: 15))
                               );
                             }).toList(),
                             onChanged: (value) {
@@ -436,12 +477,12 @@ class _ProdukInsertState extends State<ProdukInsert> {
                           padding: const EdgeInsets.only(top:10),
                           child: DropdownButton(
                             isExpanded: false,
-                            hint: Text("Pilih Kategori", style : GoogleFonts.varelaRound()),
+                            hint: Text("Pilih Kategori", style : GoogleFonts.varelaRound(fontSize: 13)),
                             value: selectedCategory,
                             items: categoryList.map((myitem2){
                               return DropdownMenuItem(
                                   value: myitem2['DATA'],
-                                  child: Text(myitem2['DATA'], style : GoogleFonts.varelaRound())
+                                  child: Text(myitem2['DATA'], style : GoogleFonts.varelaRound(fontSize: 15))
                               );
                             }).toList(),
                             onChanged: (value) {

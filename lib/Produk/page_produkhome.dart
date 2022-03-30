@@ -6,6 +6,7 @@ import 'dart:convert';
 import 'package:flushbar/flushbar.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:hexcolor/hexcolor.dart';
 import 'package:moobi_flutter/Helper/api_link.dart';
@@ -87,6 +88,7 @@ class _ProdukHomeState extends State<ProdukHome> {
   void initState() {
     super.initState();
     _prepare();
+    EasyLoading.dismiss();
   }
 
 
@@ -112,7 +114,7 @@ class _ProdukHomeState extends State<ProdukHome> {
             ),
           ),
           title: Text(
-            "Kelola Produk",
+            "Master Data",
             style: TextStyle(
                 color: Colors.white,
                 fontFamily: 'VarelaRound',
@@ -130,27 +132,13 @@ class _ProdukHomeState extends State<ProdukHome> {
                     title: Text("Master Data Produk",style: TextStyle(
                         color: Colors.black, fontFamily: 'VarelaRound',fontSize: 15,
                         fontWeight: FontWeight.bold)),
-                    subtitle: Text("Kelola produk toko anda dengan mudah disini",style: TextStyle(
+                    subtitle: Text("Kelola produk, jasa, dan food menu anda disini",style: TextStyle(
                         color: Colors.black, fontFamily: 'VarelaRound',fontSize: 12)),
                     trailing: FaIcon(FontAwesomeIcons.angleRight,color: HexColor("#594d75"),size: 15,),
                   ),
                 ),
                 Padding(padding: const EdgeInsets.only(top: 5,left: 15),
                   child: Divider(height: 3,),),
-                InkWell(
-                  child: ListTile(
-                    onTap: (){Navigator.push(context, ExitPage(page: ProdukService(widget.getEmail, widget.getLegalCode, widget.getNamaUser)));},
-                    title: Text("Master Data Service",style: TextStyle(
-                        color: Colors.black, fontFamily: 'VarelaRound',fontSize: 15,
-                        fontWeight: FontWeight.bold)),
-                    subtitle: Text("Kelola jasa di toko anda dengan mudah disini",style: TextStyle(
-                        color: Colors.black, fontFamily: 'VarelaRound',fontSize: 12)),
-                    trailing: FaIcon(FontAwesomeIcons.angleRight,color: HexColor("#594d75"),size: 15,),
-                  ),
-                ),
-                Padding(padding: const EdgeInsets.only(top: 5,left: 15),
-                  child: Divider(height: 3,),),
-
                 InkWell(
                   child: ListTile(
                     onTap: (){Navigator.push(context, ExitPage(page: ProdukSatuan(widget.getEmail, widget.getLegalCode)));},

@@ -5,11 +5,13 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flushbar/flushbar.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:hexcolor/hexcolor.dart';
 import 'package:moobi_flutter/Helper/app_helper.dart';
 import 'package:moobi_flutter/Helper/page_route.dart';
+import 'package:moobi_flutter/Helper/setting_apps.dart';
 import 'package:moobi_flutter/Produk/page_produkdetail.dart';
 import 'package:moobi_flutter/Produk/page_produkhome.dart';
 import 'package:moobi_flutter/Produk/page_produkinsert.dart';
@@ -36,10 +38,12 @@ class Produk extends StatefulWidget{
   const Produk(this.getEmail, this.getLegalCode, this.getNamaUser);
   @override
   _ProdukState createState() => _ProdukState();
+
+
 }
 
 
-class _ProdukState extends State<Produk> {
+class _ProdukState extends State<Produk>  {
   List data;
   String getFilter = '';
   FocusNode focusNode;
@@ -49,30 +53,19 @@ class _ProdukState extends State<Produk> {
   void showToast(String msg, {int duration, int gravity}) {
     Toast.show(msg, context, duration: duration, gravity: gravity);}
 
-  _cekLegalandUser() async {
-    final response = await http.post(applink+"api_model.php?act=cek_legalanduser",
-        body: {"username": widget.getEmail.toString()},
-        headers: {"Accept":"application/json"});
-    Map data = jsonDecode(response.body);
-    setState(() {
-      if (data["message"].toString() == '2' || data["message"].toString() == '3') {
-        Navigator.pushReplacement(context, ExitPage(page: Introduction()));
-      }
-    });
-  }
-
   //=============================================================================
+  String serverName = '';
+  String serverCode = '';
   _startingVariable() async {
     await AppHelper().getConnect().then((value){if(value == 'ConnInterupted'){
       showToast("Koneksi terputus..", gravity: Toast.CENTER,duration:
       Toast.LENGTH_LONG);}});
     await AppHelper().getSession().then((value){
-      if(value[0] != 1) {
-        Navigator.pushReplacement(context, ExitPage(page: Login()));
-      }
-    });
-    await _cekLegalandUser();
-
+      setState(() {serverName = value[11];serverCode = value[12];});});
+    await AppHelper().cekServer(widget.getEmail).then((value){
+      if(value[0] == '0') {Navigator.pushReplacement(context, ExitPage(page: Introduction()));}});
+    await AppHelper().cekLegalUser(widget.getEmail.toString(), serverCode.toString()).then((value){
+      if(value[0] == '0') {Navigator.pushReplacement(context, ExitPage(page: Introduction()));}});
   }
 
   showFlushBarsuccess(BuildContext context, String stringme) => Flushbar(
@@ -100,17 +93,17 @@ class _ProdukState extends State<Produk> {
 
 
   String filter = "";
+  String filter2 = "";
   String filterq = "";
   Future<dynamic> getDataProduk() async {
     http.Response response = await http.get(
         Uri.parse(applink+"api_model.php?act=getdata_produk_all&branch="
             +widget.getLegalCode+""
-            "&filter="+filter+"&filterq="+filterq+"&tipe=Product"),
+            "&filter="+filter+"&filterq="+filterq+"&getserver="+serverCode.toString()+"&filter2="+filter2),
         headers: {
           "Accept":"application/json",
           "Content-Type": "application/json"}
     );
-
     return json.decode(response.body);
   }
 
@@ -118,17 +111,18 @@ class _ProdukState extends State<Produk> {
   Future<dynamic> getKategori() async {
     http.Response response = await http.get(
         Uri.parse(applink+"api_model.php?act=getdata_kategori&branch="
-            +widget.getLegalCode),
+            +widget.getLegalCode+"&getserver="+serverCode.toString()),
         headers: {
           "Accept":"application/json",
           "Content-Type": "application/json"}
     );
     return json.decode(response.body);
+
   }
 
 
-
   _prepare() async {
+    EasyLoading.dismiss();
       await _startingVariable();
   }
 
@@ -155,7 +149,7 @@ class _ProdukState extends State<Produk> {
           return AlertDialog(
             content:
             Container(
-              height: 160,
+              height: 205,
               width: double.infinity,
               child:
               FutureBuilder(
@@ -187,6 +181,13 @@ class _ProdukState extends State<Produk> {
                   Column(
                        crossAxisAlignment: CrossAxisAlignment.stretch,
                        children: [
+                         Padding(padding : const EdgeInsets.only(top : 5,bottom:12),
+                             child : Align(
+                                 alignment : Alignment.centerLeft,
+                                 child : Text("Kategori", style : GoogleFonts.varelaRound(
+                                     fontWeight: FontWeight.bold, fontSize: 20
+                                 ))
+                             )),
                          Container(
                              width: 100,
                              height: 160,
@@ -243,6 +244,124 @@ class _ProdukState extends State<Produk> {
           );
         });
   }
+
+
+  Future<dynamic> getTipeJual() async {
+    http.Response response = await http.get(
+        Uri.parse(applink+"api_model.php?act=getdata_tipejual&getserver="+serverCode.toString()),
+        headers: {
+          "Accept":"application/json",
+          "Content-Type": "application/json"}
+    );
+    //print(applink+"api_model.php?act=getdata_tipejual&getserver="+serverCode.toString());
+    return json.decode(response.body);
+  }
+
+
+  void _filterMe2() {
+    showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+              content:
+              Container(
+                  height: 205,
+                  width: double.infinity,
+                  child:
+                  FutureBuilder(
+                    future : getTipeJual(),
+                    builder: (context, snapshot) {
+                      if (snapshot.data == null) {
+                        return Center(
+                            child: CircularProgressIndicator()
+                        );
+                      } else {
+                        return snapshot.data == 0 || snapshot.data.length == 0 ?
+                        Container(
+                            height: double.infinity, width : double.infinity,
+                            child: new
+                            Center(
+                                child :
+                                Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  crossAxisAlignment: CrossAxisAlignment.center,
+                                  children: <Widget>[
+                                    new Text(
+                                      "Tidak ada data",
+                                      style: new TextStyle(
+                                          fontFamily: 'VarelaRound', fontSize: 18),
+                                    )
+                                  ],
+                                )))
+                            :
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [
+                            Padding(padding : const EdgeInsets.only(top : 5,bottom:12),
+                            child : Align(
+                              alignment : Alignment.centerLeft,
+                              child : Text("Tipe", style : GoogleFonts.varelaRound(
+                                      fontWeight: FontWeight.bold, fontSize: 20
+                                  ))
+                            )),
+                            Container(
+                                width: 100,
+                                height: 160,
+                                child : ListView.builder(
+                                    itemCount: snapshot.data == null ? 0 : snapshot.data.length,
+                                    itemBuilder: (context, i) {
+                                      return SingleChildScrollView(
+                                          child : Column(
+                                            children: [
+                                              Align(
+                                                alignment : Alignment.centerLeft,
+                                                child : Padding(padding: const EdgeInsets.only(top:15),
+                                                  child : InkWell(
+                                                      onTap: (){
+                                                        setState(() {
+                                                          filter2 = snapshot.data[i]["b"].toString();
+                                                          Navigator.pop(context);
+                                                          _isVisible = false;
+                                                          startSCreen();
+                                                        });
+                                                      },
+                                                      child : Row(
+                                                        children: [
+                                                          FaIcon(FontAwesomeIcons.circle,size: 8,color: Colors.black,),
+                                                          Padding(
+                                                              padding: const EdgeInsets.only(left : 10),
+                                                              child : Text(snapshot.data[i]["b"].toString(),
+                                                                  style : GoogleFonts.varelaRound(
+
+                                                                  ))
+                                                          )
+                                                        ],
+                                                      )
+                                                  ),
+                                                ),
+                                              ),
+                                              Padding(padding: const EdgeInsets.only(top:15),
+                                                  child : Divider(height : 5)),
+
+                                            ],
+                                          )
+                                      );
+                                    }
+                                )
+                            )
+                          ],
+
+                        );
+                      }
+                    },
+
+                  )
+              )
+          );
+        });
+  }
+
+
 
   Future<bool> _onWillPop() async {
     Navigator.pop(context);
@@ -330,10 +449,10 @@ class _ProdukState extends State<Produk> {
                       fontSize: 16),
                 ),
                 actions: [
-                  Padding(padding: const EdgeInsets.only(top:0,right: 18), child:
+                  Padding(padding: const EdgeInsets.only(top:0,right: 12), child:
                   Builder(
                     builder: (context) => IconButton(
-                      icon: new FaIcon(FontAwesomeIcons.list,size: 18,),
+                      icon: new FaIcon(FontAwesomeIcons.filter,size: 17,),
                       color: Colors.white,
                       onPressed: ()  {
                         FocusScope.of(context).requestFocus(FocusNode());
@@ -341,92 +460,192 @@ class _ProdukState extends State<Produk> {
                       }
                     ),
                   )),
+                  Padding(padding: const EdgeInsets.only(top:0,right: 18), child:
+                  Builder(
+                    builder: (context) => IconButton(
+                        icon: new FaIcon(FontAwesomeIcons.list,size: 18,),
+                        color: Colors.white,
+                        onPressed: ()  {
+                          FocusScope.of(context).requestFocus(FocusNode());
+                          _filterMe2();
+                        }
+                    ),
+                  )),
+
+
 
                 ],
               ),
               body: RefreshIndicator(
-                onRefresh: getDataProduk,
-                child: Container(
-                  child: Column(
-                    children: [
-                      Padding(padding: const EdgeInsets.only(left: 15,top: 10,right: 15),
-                          child: Container(
-                            height: 50,
-                            child: TextFormField(
-                              enableInteractiveSelection: false,
-                              onChanged: (text) {
-                                setState(() {
-                                  filterq = text;
-                                });
-                              },
-                              style: TextStyle(fontFamily: "VarelaRound",fontSize: 14),
-                              decoration: new InputDecoration(
-                                contentPadding: const EdgeInsets.all(10),
-                                fillColor: HexColor("#f4f4f4"),
-                                filled: true,
-                                prefixIcon: Padding(
-                                  padding: const EdgeInsets.only(bottom: 4),
-                                  child: Icon(Icons.search,size: 18,color: HexColor("#6c767f"),),
-                                ),
-                                focusedBorder: OutlineInputBorder(
-                                  borderSide: BorderSide(color: Colors.white, width: 1.0,),
-                                  borderRadius: BorderRadius.circular(5.0),
-                                ),
-                                enabledBorder: OutlineInputBorder(
-                                  borderSide: BorderSide(color: HexColor("#f4f4f4"), width: 1.0),
-                                  borderRadius: BorderRadius.circular(5.0),
-                                ),
-                                hintText: 'Cari Produk...',
-                              ),
+                    onRefresh: getDataProduk,
+                    child: Container(
+                        child: Column(
+                          children: [
+                            Padding(padding: const EdgeInsets.only(left: 15,top: 10,right: 15),
+                                child: Container(
+                                  height: 50,
+                                  child: TextFormField(
+                                    enableInteractiveSelection: false,
+                                    onChanged: (text) {
+                                      setState(() {
+                                        filterq = text;
+                                      });
+                                    },
+                                    style: TextStyle(fontFamily: "VarelaRound",fontSize: 14),
+                                    decoration: new InputDecoration(
+                                      contentPadding: const EdgeInsets.all(10),
+                                      fillColor: HexColor("#f4f4f4"),
+                                      filled: true,
+                                      prefixIcon: Padding(
+                                        padding: const EdgeInsets.only(bottom: 4),
+                                        child: Icon(Icons.search,size: 18,color: HexColor("#6c767f"),),
+                                      ),
+                                      focusedBorder: OutlineInputBorder(
+                                        borderSide: BorderSide(color: Colors.white, width: 1.0,),
+                                        borderRadius: BorderRadius.circular(5.0),
+                                      ),
+                                      enabledBorder: OutlineInputBorder(
+                                        borderSide: BorderSide(color: HexColor("#f4f4f4"), width: 1.0),
+                                        borderRadius: BorderRadius.circular(5.0),
+                                      ),
+                                      hintText: 'Cari Produk...',
+                                    ),
+                                  ),
+                                )
                             ),
-                          )
-                      ),
-                      Padding(padding: const EdgeInsets.only(top: 10),),
-                      filter != '' ?
+                            Padding(padding: const EdgeInsets.only(top: 10),),
+                            filter != '' && filter2 != '' ?
+                            Row(
+                              children: [
+                                Padding(padding: const EdgeInsets.only(left: 20,top: 2,right: 15, bottom : 15),
+                                    child :
+                                    Align(
+                                        alignment: Alignment.centerLeft,
+                                        child :  FittedBox(
+                                            fit: BoxFit.none,
+                                            child :
+                                            RaisedButton(child :
+                                            Row(
+                                              children: [
+                                                Text(filter.toString(), style: GoogleFonts.varelaRound(fontSize: 13),),
+                                                Padding(padding : const EdgeInsets.only(left  :10),
+                                                    child : FaIcon(FontAwesomeIcons.times,size: 12,))
+                                              ],
+                                            ),
+                                              elevation: 0,
+                                              onPressed: (){
+                                                setState(() {
+                                                  filter = "";
+                                                  _isVisible = false;
+                                                  startSCreen();
+                                                });
+                                              },
+                                            ))
+                                    )
+                                ),
+
+                                Padding(padding: const EdgeInsets.only(left: 7,top: 2,right: 15, bottom : 15),
+                                    child :
+                                    Align(
+                                        alignment: Alignment.centerLeft,
+                                        child :  FittedBox(
+                                            fit: BoxFit.none,
+                                            child :
+                                            RaisedButton(child :
+                                            Row(
+                                              children: [
+                                                Text(filter2.toString(), style: GoogleFonts.varelaRound(fontSize: 13),),
+                                                Padding(padding : const EdgeInsets.only(left  :10),
+                                                    child : FaIcon(FontAwesomeIcons.times,size: 12,))
+                                              ],
+                                            ),
+                                              elevation: 0,
+                                              onPressed: (){
+                                                setState(() {
+                                                  filter2 = "";
+                                                  _isVisible = false;
+                                                  startSCreen();
+                                                });
+                                              },
+                                            ))
+                                    )
+                                )
+
+                              ],
+                            ) :
+
+                  filter != '' ?
+                  Padding(padding: const EdgeInsets.only(left: 20,top: 2,right: 15, bottom : 15),
+                      child :
+                      Align(
+                          alignment: Alignment.centerLeft,
+                          child :  FittedBox(
+                              fit: BoxFit.none,
+                              child :
+                              RaisedButton(child :
+                              Row(
+                                children: [
+                                  Text(filter.toString(), style: GoogleFonts.varelaRound(fontSize: 13),),
+                                  Padding(padding : const EdgeInsets.only(left  :10),
+                                      child : FaIcon(FontAwesomeIcons.times,size: 12,))
+                                ],
+                              ),
+                                elevation: 0,
+                                onPressed: (){
+                                  setState(() {
+                                    filter = "";
+                                    _isVisible = false;
+                                    startSCreen();
+                                  });
+                                },
+                              ))
+                      )
+                  )
+                      : filter2 != '' ?
                       Padding(padding: const EdgeInsets.only(left: 20,top: 2,right: 15, bottom : 15),
                       child :
-                            Align(
-                              alignment: Alignment.centerLeft,
-                              child :  FittedBox(
-                                  fit: BoxFit.none,
-                                  child :
-                                RaisedButton(child :
-                                  Row(
-                                    children: [
-                                      Text(filter.toString(), style: GoogleFonts.varelaRound(fontSize: 13),),
-                                      Padding(padding : const EdgeInsets.only(left  :10),
+                      Align(
+                          alignment: Alignment.centerLeft,
+                          child :  FittedBox(
+                              fit: BoxFit.none,
+                              child :
+                              RaisedButton(child :
+                              Row(
+                                children: [
+                                  Text(filter2.toString(), style: GoogleFonts.varelaRound(fontSize: 13),),
+                                  Padding(padding : const EdgeInsets.only(left  :10),
                                       child : FaIcon(FontAwesomeIcons.times,size: 12,))
-                                    ],
-                                  ),
-                                  elevation: 0,
-                                  onPressed: (){
-                                      setState(() {
-                                         filter = "";
-                                         _isVisible = false;
-                                         startSCreen();
-                                      });
-                                  },
+                                ],
+                              ),
+                                elevation: 0,
+                                onPressed: (){
+                                  setState(() {
+                                    filter2 = "";
+                                    _isVisible = false;
+                                    startSCreen();
+                                  });
+                                },
                               ))
-                            )
-
                       )
-                      :Container(),
-                      Visibility(
-                          visible: _isVisible,
-                          child: Expanded(child: _dataField()))//
-                    ],
                   )
-              )),
+
+                                :Container(),
+                            Visibility(
+                                visible: _isVisible,
+                                child: Expanded(child: _dataField()))//
+                          ],
+                        )
+                    ),
+              ),
               floatingActionButton: Padding(
                 padding: const EdgeInsets.only(right : 10),
                 child: FloatingActionButton(
                   onPressed: (){
-
-                    FocusScope.of(context).requestFocus(FocusNode());
+                   // EasyLoading.show(status: 'loading...');
+                   FocusScope.of(context).requestFocus(FocusNode());
                     Navigator.push(
                         context,
                         MaterialPageRoute(builder: (context) => ProdukInsert(widget.getEmail, widget.getLegalCode, widget.getNamaUser,"Product"))).then(onGoBack);
-
                     //Navigator.push(context, ExitPage(page: ProdukInsert()));
                   },
                   child: FaIcon(FontAwesomeIcons.plus),
@@ -483,6 +702,7 @@ class _ProdukState extends State<Produk> {
                   InkWell(
                       onTap: () {
                         FocusScope.of(context).requestFocus(FocusNode());
+                        EasyLoading.show(status: easyloading_text);
                         Navigator.push(
                             context,
                             MaterialPageRoute(builder: (context) => ProdukDetail(widget.getEmail, widget.getLegalCode,snapshot.data[i]["g"].toString(), widget.getNamaUser,"Produk"))).then(onGoBack);
@@ -496,26 +716,32 @@ class _ProdukState extends State<Produk> {
                           Opacity(
                             opacity : 0.4,
                             child : ListTile(
-                              leading: SizedBox(
-                                  width: 45,
-                                  height: 45,
-                                  child: ClipRRect(
-                                    borderRadius: BorderRadius.circular(6.0),
-                                    child : CachedNetworkImage(
-                                      fit: BoxFit.cover,
-                                      imageUrl:
-                                      snapshot.data[i]["d"] == '' ?
-                                      applink+"photo/nomage.jpg"
-                                          :
-                                      applink+"photo/"+widget.getLegalCode+"/"+snapshot.data[i]["d"],
-                                      progressIndicatorBuilder: (context, url,
-                                          downloadProgress) =>
-                                          CircularProgressIndicator(value:
-                                          downloadProgress.progress),
-                                      errorWidget: (context, url, error) =>
-                                          Icon(Icons.error),
-                                    ),
-                                  )),
+                              leading: Badge(
+                                    badgeColor:  snapshot.data[i]["k"].toString() == 'Retail' ? HexColor("#fe5c83") :
+                                    snapshot.data[i]["k"].toString() == 'Service' ? HexColor("#1c6bea") :
+                                    snapshot.data[i]["k"].toString() == 'Food Menu' ? HexColor("#00c160") : HexColor("#ffa528"),
+                                position: BadgePosition.topStart(top: -3, start : -3),
+                                    child : SizedBox(
+                                        width: 45,
+                                        height: 45,
+                                        child: ClipRRect(
+                                          borderRadius: BorderRadius.circular(6.0),
+                                          child : CachedNetworkImage(
+                                            fit: BoxFit.cover,
+                                            imageUrl:
+                                            snapshot.data[i]["d"] == '' ?
+                                            applink+"photo/nomage.jpg"
+                                                :
+                                            applink+"photo/"+widget.getLegalCode+"/"+snapshot.data[i]["d"],
+                                            progressIndicatorBuilder: (context, url,
+                                                downloadProgress) =>
+                                                CircularProgressIndicator(value:
+                                                downloadProgress.progress),
+                                            errorWidget: (context, url, error) =>
+                                                Icon(Icons.error),
+                                          ),
+                                        )),
+                              ),
                               title: Align(alignment: Alignment.centerLeft,
                                 child: Opacity(
                                     opacity: 0.8,
@@ -536,13 +762,12 @@ class _ProdukState extends State<Produk> {
                                     ),
                                     Align(
                                       alignment: Alignment.centerLeft,
-                                      child: Padding(padding: const EdgeInsets.only(top:1), child :
+                                      child: Padding(padding: const EdgeInsets.only(top:3), child :
                                       Row(
                                         children: [
                                           Opacity(
                                             opacity: 0.8,
-                                            child :   Text(snapshot.data[i]["b"], style: GoogleFonts.varelaRound(fontSize: 11,color:Colors.black),),
-                                          )
+                                            child :   Text(snapshot.data[i]["k"].toString()+ " - " +snapshot.data[i]["b"], style: GoogleFonts.varelaRound(fontSize: 11,color:Colors.black),), )
 
                                         ],
                                       )
@@ -556,7 +781,14 @@ class _ProdukState extends State<Produk> {
                           )
                           :
                       ListTile(
-                        leading: SizedBox(
+                        leading:
+                        Badge(
+                            badgeColor:  snapshot.data[i]["k"].toString() == 'Retail' ? HexColor("#fe5c83") :
+                            snapshot.data[i]["k"].toString() == 'Service' ? HexColor("#1c6bea") :
+                            snapshot.data[i]["k"].toString() == 'Food Menu' ? HexColor("#00c160") : HexColor("#ffa528"),
+                            position: BadgePosition.topStart(top: -3, start : -3),
+                        child :
+                        SizedBox(
                             width: 45,
                             height: 45,
                             child: ClipRRect(
@@ -575,7 +807,7 @@ class _ProdukState extends State<Produk> {
                                 errorWidget: (context, url, error) =>
                                     Icon(Icons.error),
                               ),
-                            )),
+                            ))),
                         title: Align(alignment: Alignment.centerLeft,
                           child: Opacity(
                               opacity: 0.8,
@@ -596,12 +828,12 @@ class _ProdukState extends State<Produk> {
                               ),
                               Align(
                                 alignment: Alignment.centerLeft,
-                                child: Padding(padding: const EdgeInsets.only(top:1), child :
+                                child: Padding(padding: const EdgeInsets.only(top:3), child :
                                 Row(
                                   children: [
                                     Opacity(
                                       opacity: 0.8,
-                                      child :   Text(snapshot.data[i]["b"], style: GoogleFonts.varelaRound(fontSize: 11,color:Colors.black),),
+                                      child :   Text(snapshot.data[i]["k"].toString()+ " - " +snapshot.data[i]["b"], style: GoogleFonts.varelaRound(fontSize: 11,color:Colors.black),),
                                     )
 
                                   ],
@@ -616,12 +848,12 @@ class _ProdukState extends State<Produk> {
                   ),
 
 
-                  Container(
+                 Container(
                     width: double.infinity,
                     height: 16,
-                    child :Divider(
+                   /* child :Divider(
                       height: 5,
-                    ),
+                    ),*/
                     padding: const EdgeInsets.only(left:15,right:15),
                   )
                 ],
