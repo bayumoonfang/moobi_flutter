@@ -27,7 +27,7 @@ import 'package:moobi_flutter/Outlet/page_detailoutlet.dart';
 import 'package:moobi_flutter/Outlet/page_outletinsert.dart';
 import 'package:moobi_flutter/Outlet/page_tambahprodukgudangoutlet.dart';
 import 'package:moobi_flutter/Produk/page_kategoriinsert.dart';
-import 'package:moobi_flutter/Setting/page_metodebayarinsert.dart';
+import 'package:moobi_flutter/Produk/page_metodebayarinsert.dart';
 import 'package:moobi_flutter/page_home.dart';
 import 'package:moobi_flutter/page_login.dart';
 

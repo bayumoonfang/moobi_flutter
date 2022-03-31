@@ -442,7 +442,7 @@ class _ProdukState extends State<Produk>  {
                   ),
                 ),
                 title: Text(
-                  "Master Data Produk",
+                  "Produk Produk",
                   style: TextStyle(
                       color: Colors.white,
                       fontFamily: 'VarelaRound',

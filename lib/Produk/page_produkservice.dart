@@ -323,7 +323,7 @@ class _ProdukService extends State<ProdukService> {
                   ),
                 ),
                 title: Text(
-                  "Master Data Service",
+                  "Produk Service",
                   style: TextStyle(
                       color: Colors.white,
                       fontFamily: 'VarelaRound',

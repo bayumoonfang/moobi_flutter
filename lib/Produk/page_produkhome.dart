@@ -12,6 +12,7 @@ import 'package:hexcolor/hexcolor.dart';
 import 'package:moobi_flutter/Helper/api_link.dart';
 import 'package:moobi_flutter/Helper/app_helper.dart';
 import 'package:moobi_flutter/Helper/page_route.dart';
+import 'package:moobi_flutter/Produk/page_metodebayar.dart';
 import 'package:moobi_flutter/Produk/page_produk.dart';
 import 'package:moobi_flutter/Produk/page_kategori.dart';
 import 'package:moobi_flutter/Produk/page_produkservice.dart';
@@ -114,7 +115,7 @@ class _ProdukHomeState extends State<ProdukHome> {
             ),
           ),
           title: Text(
-            "Master Data",
+            "Produk",
             style: TextStyle(
                 color: Colors.white,
                 fontFamily: 'VarelaRound',
@@ -129,7 +130,7 @@ class _ProdukHomeState extends State<ProdukHome> {
                 InkWell(
                   child: ListTile(
                     onTap: (){Navigator.push(context, ExitPage(page: Produk(widget.getEmail, widget.getLegalCode, widget.getNamaUser)));},
-                    title: Text("Master Data Produk",style: TextStyle(
+                    title: Text("Produk Produk",style: TextStyle(
                         color: Colors.black, fontFamily: 'VarelaRound',fontSize: 15,
                         fontWeight: FontWeight.bold)),
                     subtitle: Text("Kelola produk, jasa, dan food menu anda disini",style: TextStyle(
@@ -167,7 +168,19 @@ class _ProdukHomeState extends State<ProdukHome> {
                 Padding(padding: const EdgeInsets.only(top: 5,left: 15),
                   child: Divider(height: 3,),),
 
-
+                InkWell(
+                  child: ListTile(
+                    onTap: (){Navigator.push(context, ExitPage(page: MetodeBayar(widget.getEmail, widget.getLegalCode)));},
+                    title: Text("Cara Bayar",style: TextStyle(
+                        color: Colors.black, fontFamily: 'VarelaRound',fontSize: 15,
+                        fontWeight: FontWeight.bold)),
+                    subtitle: Text("Lihat dan atur metode pembayaran kamu",style: TextStyle(
+                        color: Colors.black, fontFamily: 'VarelaRound',fontSize: 12)),
+                    trailing: FaIcon(FontAwesomeIcons.angleRight,color: HexColor("#594d75"),size: 15,),
+                  ),
+                ),
+                Padding(padding: const EdgeInsets.only(top: 5,left: 15),
+                  child: Divider(height: 3,),),
               ],
             ),
           ),

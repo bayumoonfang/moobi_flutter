@@ -5,7 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:hexcolor/hexcolor.dart';
 import 'package:moobi_flutter/Helper/page_route.dart';
-import 'package:moobi_flutter/Setting/page_metodebayar.dart';
+import 'package:moobi_flutter/Produk/page_metodebayar.dart';
 import 'package:moobi_flutter/Setting/page_ppn.dart';
 import 'package:moobi_flutter/Setting/page_servcharge.dart';
 import 'package:moobi_flutter/Setting/page_legalentites.dart';
@@ -66,19 +66,6 @@ class SettingHomeState extends State<SettingHome> {
                 Padding(padding: const EdgeInsets.only(top: 5,left: 15),
                   child: Divider(height: 3,),),
 
-                InkWell(
-                  child: ListTile(
-                    onTap: (){Navigator.push(context, ExitPage(page: MetodeBayar(widget.getEmail, widget.getLegalCode)));},
-                    title: Text("Metode Pembayaran",style: TextStyle(
-                        color: Colors.black, fontFamily: 'VarelaRound',fontSize: 15,
-                        fontWeight: FontWeight.bold)),
-                    subtitle: Text("Lihat dan atur metode pembayaran kamu",style: TextStyle(
-                        color: Colors.black, fontFamily: 'VarelaRound',fontSize: 12)),
-                    trailing: FaIcon(FontAwesomeIcons.angleRight,color: HexColor("#594d75"),size: 15,),
-                  ),
-                ),
-                Padding(padding: const EdgeInsets.only(top: 5,left: 15),
-                  child: Divider(height: 3,),),
 
 
 

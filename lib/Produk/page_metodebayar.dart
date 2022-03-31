@@ -7,6 +7,7 @@ import 'dart:convert';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:hexcolor/hexcolor.dart';
@@ -15,8 +16,10 @@ import 'package:moobi_flutter/Helper/app_helper.dart';
 import 'package:moobi_flutter/Helper/check_connection.dart';
 import 'package:moobi_flutter/Helper/page_route.dart';
 import 'package:moobi_flutter/Helper/session.dart';
+import 'package:moobi_flutter/Helper/setting_apps.dart';
 import 'package:moobi_flutter/Produk/page_kategoriinsert.dart';
-import 'package:moobi_flutter/Setting/page_metodebayarinsert.dart';
+import 'package:moobi_flutter/Produk/page_metodebayar_detail.dart';
+import 'package:moobi_flutter/Produk/page_metodebayarinsert.dart';
 import 'package:moobi_flutter/page_home.dart';
 import 'package:moobi_flutter/page_login.dart';
 
@@ -64,11 +67,13 @@ class _MetodeBayar extends State<MetodeBayar> {
 
   _prepare() async {
     await _startingVariable();
+    EasyLoading.dismiss();
   }
 
   @override
   void initState() {
     super.initState();
+
     _prepare();
   }
 
@@ -95,11 +100,21 @@ class _MetodeBayar extends State<MetodeBayar> {
     return json.decode(response.body);
   }
 
+
+  FutureOr onGoBack(dynamic value) {
+    setState(() {
+      getData();
+    });
+  }
+
+
   String getMessage = "...";
   _doHapus (String valueParse2) async {
+    EasyLoading.show(status: easyloading_text);
     final response = await http.post(applink+"api_model.php?act=action_hapusmetodebayar&id="+valueParse2.toString()+"&getserver="+serverCode.toString());
     Map data = jsonDecode(response.body);
     setState(() {
+      EasyLoading.dismiss();
       if (data["message"].toString() == '1') {
         setState(() {
           getData();
@@ -242,36 +257,55 @@ class _MetodeBayar extends State<MetodeBayar> {
                                         itemCount: snapshot.data == null ? 0 : snapshot.data.length,
                                         padding: const EdgeInsets.only(left: 10,right: 15),
                                         itemBuilder: (context, i) {
-                                          return Card(
-                                              child: Column(
-                                                children: [
-                                                  Padding(padding: const EdgeInsets.only(top: 10)),
-                                                  ListTile(
-                                                    title: Text(snapshot.data[i]["c"].toString(), style: new TextStyle(
-                                                        fontFamily: 'VarelaRound', fontSize: 16,fontWeight: FontWeight.bold),),
-                                                    trailing: InkWell(
-                                                        onTap: (){
-                                                          FocusScope.of(context).requestFocus(FocusNode());
-                                                          _showDelete(snapshot.data[i]["a"].toString());
-                                                        },
-                                                        child: Padding(padding: const EdgeInsets.only(right: 10),
-                                                          child: FaIcon(FontAwesomeIcons.trashAlt,size: 17,color: Colors.redAccent,),)
+                                          return InkWell(
+                                            onTap: (){
+                                              EasyLoading.show(status: easyloading_text);
+                                              Navigator.push(
+                                                  context,
+                                                  MaterialPageRoute(builder: (context) => MetodeBayarDetail(
+                                                      widget.getEmail,
+                                                      widget.getLegalCode,
+                                                      snapshot.data[i]["a"].toString(),
+                                                      snapshot.data[i]["c"].toString(),
+                                                      snapshot.data[i]["j"].toString(),
+                                                      snapshot.data[i]["d"].toString(),
+                                                      snapshot.data[i]["e"].toString(),
+                                                      snapshot.data[i]["k"].toString(),
+                                                    snapshot.data[i]["b"].toString(),
+                                                    snapshot.data[i]["l"].toString(),
+                                                  ))).then(onGoBack);
+                                            },
+                                            child : Card(
+                                                child: Column(
+                                                  children: [
+                                                    Padding(padding: const EdgeInsets.only(top: 10)),
+                                                    ListTile(
+                                                      title: Text(snapshot.data[i]["c"].toString(), style: new TextStyle(
+                                                          fontFamily: 'VarelaRound', fontSize: 16,fontWeight: FontWeight.bold),),
+                                                      trailing: InkWell(
+                                                          onTap: (){
+                                                            FocusScope.of(context).requestFocus(FocusNode());
+                                                            _showDelete(snapshot.data[i]["a"].toString());
+                                                          },
+                                                          child: Padding(padding: const EdgeInsets.only(right: 10),
+                                                            child: FaIcon(FontAwesomeIcons.trashAlt,size: 17,color: Colors.redAccent,),)
+                                                      ),
+                                                      subtitle: Column(
+                                                        children: [
+                                                          Padding(padding: const EdgeInsets.only(top: 5),
+                                                              child:Align(alignment: Alignment.centerLeft,
+                                                                child: Text(snapshot.data[i]["d"].toString()+" - "+snapshot.data[i]["e"].toString(), style: GoogleFonts.varelaRound(fontSize: 14,color: Colors.black)),)),
+                                                          Padding(padding: const EdgeInsets.only(top: 5),
+                                                            child: Align(alignment: Alignment.centerLeft,
+                                                              child: Text("a.n "+snapshot.data[i]["j"].toString(), style: GoogleFonts.varelaRound(fontSize: 12,color: Colors.black)),),)
+                                                        ],
+                                                      ),
                                                     ),
-                                                    subtitle: Column(
-                                                      children: [
-                                                        Padding(padding: const EdgeInsets.only(top: 5),
-                                                            child:Align(alignment: Alignment.centerLeft,
-                                                              child: Text(snapshot.data[i]["d"].toString()+" - "+snapshot.data[i]["e"].toString(), style: GoogleFonts.varelaRound(fontSize: 14,color: Colors.black)),)),
-                                                        Padding(padding: const EdgeInsets.only(top: 5),
-                                                          child: Align(alignment: Alignment.centerLeft,
-                                                            child: Text("a.n "+snapshot.data[i]["j"].toString(), style: GoogleFonts.varelaRound(fontSize: 12,color: Colors.black)),),)
-                                                      ],
-                                                    ),
-                                                  ),
-                                                  Padding(padding: const EdgeInsets.only(bottom: 10))
+                                                    Padding(padding: const EdgeInsets.only(bottom: 10))
 
-                                                ],
-                                              )
+                                                  ],
+                                                )
+                                            )
                                           );
                                         },
                                       );

@@ -341,7 +341,7 @@ class _ProdukEdit extends State<ProdukEdit> {
                                     items: itemList.map((myitem){
                                       return DropdownMenuItem(
                                           value: myitem['DATA'],
-                                          child: Text(myitem['DATA']+" ("+myitem['DESCRIPTION']+")", style : GoogleFonts.varelaRound(fontSize: 15))
+                                          child: Text(myitem['DATA']+" ("+myitem['DESCRIPTION']+")", style : GoogleFonts.nunito(fontSize: 15))
                                       );
                                     }).toList(),
                                     onChanged: (value) {
@@ -375,7 +375,7 @@ class _ProdukEdit extends State<ProdukEdit> {
                                     items: categoryList.map((myitem){
                                       return DropdownMenuItem(
                                           value: myitem['DATA'],
-                                          child: Text(myitem['DATA'], style : GoogleFonts.varelaRound(fontSize: 15))
+                                          child: Text(myitem['DATA'], style : GoogleFonts.nunito(fontSize: 15))
                                       );
                                     }).toList(),
                                     onChanged: (value) {

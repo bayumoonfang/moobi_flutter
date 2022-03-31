@@ -275,7 +275,7 @@ class _ProdukInsertState2 extends State<ProdukInsert2> {
                                items: itemList.map((myitem){
                                  return DropdownMenuItem(
                                      value: myitem['a'],
-                                     child: Text(myitem['b'], style : GoogleFonts.varelaRound(fontSize: 15))
+                                     child: Text(myitem['b'], style : GoogleFonts.nunito(fontSize: 15))
                                  );
                                },
                                ).toList(),
@@ -398,7 +398,7 @@ class _ProdukInsertState2 extends State<ProdukInsert2> {
                                       items: itemList2.map((myitem2){
                                         return DropdownMenuItem(
                                             value: myitem2['a'],
-                                            child: Text(myitem2['b'], style : GoogleFonts.varelaRound(fontSize: 15))
+                                            child: Text(myitem2['b'], style : GoogleFonts.nunito(fontSize: 15))
                                         );
                                       },
                                       ).toList(),
