@@ -130,10 +130,10 @@ class _ProdukHomeState extends State<ProdukHome> {
                 InkWell(
                   child: ListTile(
                     onTap: (){Navigator.push(context, ExitPage(page: Produk(widget.getEmail, widget.getLegalCode, widget.getNamaUser)));},
-                    title: Text("Produk Produk",style: TextStyle(
+                    title: Text("Produk",style: TextStyle(
                         color: Colors.black, fontFamily: 'VarelaRound',fontSize: 15,
                         fontWeight: FontWeight.bold)),
-                    subtitle: Text("Kelola produk, jasa, dan food menu anda disini",style: TextStyle(
+                    subtitle: Text("Kelola produk, jasa, dan menu lainnya anda disini",style: TextStyle(
                         color: Colors.black, fontFamily: 'VarelaRound',fontSize: 12)),
                     trailing: FaIcon(FontAwesomeIcons.angleRight,color: HexColor("#594d75"),size: 15,),
                   ),

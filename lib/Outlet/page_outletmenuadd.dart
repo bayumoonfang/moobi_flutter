@@ -315,7 +315,7 @@ class _OutletMenuAdd extends State<OutletMenuAdd> {
             appBar: new AppBar(
               backgroundColor: HexColor("#602d98"),
               title: Text(
-                "Tambah "+widget.getTipeMenu+" ke outlet",
+                "Tambah Menu ke outlet",
                 style: TextStyle(
                     color: Colors.white, fontFamily: 'VarelaRound', fontSize: 16),
               ),

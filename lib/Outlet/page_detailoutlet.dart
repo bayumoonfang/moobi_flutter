@@ -353,9 +353,10 @@ class _DetailOutlet extends State<DetailOutlet> {
                 )),
 
 
-             Column(
+            /* Column(
                 children: [
-                  Padding(padding: const EdgeInsets.only(left: 25,right: 25,top: 20),
+
+                Padding(padding: const EdgeInsets.only(left: 25,right: 25,top: 20),
                   child :
                   Row(
                     mainAxisAlignment: MainAxisAlignment
@@ -416,16 +417,14 @@ class _DetailOutlet extends State<DetailOutlet> {
                       )
                   ),
 
-
                 ],
               ),
 
-              Padding(padding: const EdgeInsets.only(top: 5,left: 25,right: 25),
+
+        Padding(padding: const EdgeInsets.only(top: 5,left: 25,right: 25),
                 child: Divider(height: 5,),),
 
-
-
-              Column(
+            Column(
                 children: [
                   Padding(padding: const EdgeInsets.only(left: 25,right: 25,top: 20),
                       child :
@@ -479,7 +478,7 @@ class _DetailOutlet extends State<DetailOutlet> {
                       )
                   ),
                 ],
-              ),
+              ),*/
 
 
               Padding(padding: const EdgeInsets.only(top:35,left: 25,right: 25),
@@ -556,7 +555,7 @@ class _DetailOutlet extends State<DetailOutlet> {
                                             title: Column(
                                               children: [
                                                 Align(alignment: Alignment.centerLeft,child:
-                                                Text("Daftar "+snapshot.data[i]['b'].toString(), style: TextStyle(
+                                                Text("Daftar Produk "+snapshot.data[i]['b'].toString(), style: TextStyle(
                                                   fontFamily: 'VarelaRound',fontSize: 15,)),),
                                                 Padding(padding: const EdgeInsets.only(top: 5),
                                                   child:    Align(alignment: Alignment.centerLeft,child:
@@ -568,8 +567,7 @@ class _DetailOutlet extends State<DetailOutlet> {
                                           ),
                                         )
                                     ),
-                                    Padding(padding: const EdgeInsets.only(top: 5,left: 25,right: 25),
-                                      child: Divider(height: 5,),),
+                                    Padding(padding: const EdgeInsets.only(top: 5,left: 25,right: 25)),
                                   ],
                                 );
                               },
@@ -582,7 +580,7 @@ class _DetailOutlet extends State<DetailOutlet> {
 
 
 
-              Padding(padding: const EdgeInsets.only(top: 20),
+              Padding(padding: const EdgeInsets.only(top: 10),
                   child: Container(
                     height: 8,
                     width: double.infinity,

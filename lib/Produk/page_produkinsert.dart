@@ -337,6 +337,7 @@ class _ProdukInsertState extends State<ProdukInsert> {
                         Align(alignment: Alignment.centerLeft,child: Padding(
                           padding: const EdgeInsets.only(left: 0),
                           child: TextFormField(
+                            style: GoogleFonts.nunito(fontSize: 16),
                             textCapitalization: TextCapitalization.sentences,
                             controller: _kodeproduk,
                             decoration: InputDecoration(
@@ -373,6 +374,7 @@ class _ProdukInsertState extends State<ProdukInsert> {
                         Align(alignment: Alignment.centerLeft,child: Padding(
                           padding: const EdgeInsets.only(left: 0),
                           child: TextFormField(
+                            style: GoogleFonts.nunito(fontSize: 16),
                             textCapitalization: TextCapitalization.sentences,
                             controller: _namaproduk,
                             decoration: InputDecoration(
@@ -409,12 +411,12 @@ class _ProdukInsertState extends State<ProdukInsert> {
                         padding: const EdgeInsets.only(top:10),
                         child: DropdownButton(
                           isExpanded: false,
-                          hint: Text("Pilih Tipe Produk", style : GoogleFonts.varelaRound(fontSize: 13)),
+                          hint: Text("Pilih Tipe Produk",style: GoogleFonts.nunito(fontSize: 16,color: Colors.black),),
                           value: selectedTipe,
                           items: tipeList.map((myitem){
                             return DropdownMenuItem(
                                 value: myitem['b'],
-                                child: Text(myitem['b'], style : GoogleFonts.nunito(fontSize: 15))
+                                child: Text(myitem['b'],style: GoogleFonts.nunito(fontSize: 16))
                             );
                           }).toList(),
                           onChanged: (value) {
@@ -443,12 +445,12 @@ class _ProdukInsertState extends State<ProdukInsert> {
                           padding: const EdgeInsets.only(top:10),
                           child: DropdownButton(
                             isExpanded: false,
-                            hint: Text("Pilih Satuan", style : GoogleFonts.varelaRound(fontSize: 13)),
+                            hint: Text("Pilih Satuan",style: GoogleFonts.nunito(fontSize: 16,color: Colors.black),),
                             value: selectedSatuan,
                             items: itemList.map((myitem){
                               return DropdownMenuItem(
                                   value: myitem['DATA'],
-                                  child: Text(myitem['DATA']+" ("+myitem['DESCRIPTION']+")", style : GoogleFonts.nunito(fontSize: 15))
+                                  child: Text(myitem['DATA']+" ("+myitem['DESCRIPTION']+")",style: GoogleFonts.nunito(fontSize: 16))
                               );
                             }).toList(),
                             onChanged: (value) {
@@ -477,12 +479,12 @@ class _ProdukInsertState extends State<ProdukInsert> {
                           padding: const EdgeInsets.only(top:10),
                           child: DropdownButton(
                             isExpanded: false,
-                            hint: Text("Pilih Kategori", style : GoogleFonts.varelaRound(fontSize: 13)),
+                            hint: Text("Pilih Kategori",style: GoogleFonts.nunito(fontSize: 16,color: Colors.black),),
                             value: selectedCategory,
                             items: categoryList.map((myitem2){
                               return DropdownMenuItem(
                                   value: myitem2['DATA'],
-                                  child: Text(myitem2['DATA'], style : GoogleFonts.nunito(fontSize: 15))
+                                  child: Text(myitem2['DATA'],style: GoogleFonts.nunito(fontSize: 16))
                               );
                             }).toList(),
                             onChanged: (value) {

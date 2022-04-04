@@ -442,7 +442,7 @@ class _ProdukState extends State<Produk>  {
                   ),
                 ),
                 title: Text(
-                  "Produk Produk",
+                  "Produk",
                   style: TextStyle(
                       color: Colors.white,
                       fontFamily: 'VarelaRound',
@@ -718,8 +718,8 @@ class _ProdukState extends State<Produk>  {
                             child : ListTile(
                               leading: Badge(
                                     badgeColor:  snapshot.data[i]["k"].toString() == 'Retail' ? HexColor("#fe5c83") :
-                                    snapshot.data[i]["k"].toString() == 'Service' ? HexColor("#1c6bea") :
-                                    snapshot.data[i]["k"].toString() == 'Food Menu' ? HexColor("#00c160") : HexColor("#ffa528"),
+                                    snapshot.data[i]["k"].toString() == 'Jasa' ? HexColor("#1c6bea") :
+                                    snapshot.data[i]["k"].toString() == 'Restaurant' ? HexColor("#00c160") : HexColor("#ffa528"),
                                 position: BadgePosition.topStart(top: -3, start : -3),
                                     child : SizedBox(
                                         width: 45,
@@ -784,8 +784,8 @@ class _ProdukState extends State<Produk>  {
                         leading:
                         Badge(
                             badgeColor:  snapshot.data[i]["k"].toString() == 'Retail' ? HexColor("#fe5c83") :
-                            snapshot.data[i]["k"].toString() == 'Service' ? HexColor("#1c6bea") :
-                            snapshot.data[i]["k"].toString() == 'Food Menu' ? HexColor("#00c160") : HexColor("#ffa528"),
+                            snapshot.data[i]["k"].toString() == 'Jasa' ? HexColor("#1c6bea") :
+                            snapshot.data[i]["k"].toString() == 'Restaurant' ? HexColor("#00c160") : HexColor("#ffa528"),
                             position: BadgePosition.topStart(top: -3, start : -3),
                         child :
                         SizedBox(

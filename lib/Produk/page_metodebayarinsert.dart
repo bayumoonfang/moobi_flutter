@@ -319,14 +319,12 @@ class _MetodeBayarInsert extends State<MetodeBayarInsert> {
                               padding: const EdgeInsets.only(top:10),
                               child: DropdownButton(
                                 isExpanded: false,
-                                hint: Text("Pilih Type Pembayaran",style: TextStyle(
-                                    fontFamily: "VarelaRound", fontSize: 13
-                                )),
+                                hint: Text("Pilih Type Pembayaran",style: GoogleFonts.nunito(fontSize: 16,color: Colors.black),),
                                 value: selectedType,
                                 items: typeList.map((myitem){
                                   return DropdownMenuItem(
                                       value: myitem['DATA'],
-                                      child: Text(myitem['DATA'],style: GoogleFonts.nunito(fontSize: 15))
+                                      child: Text(myitem['DATA'],style: GoogleFonts.nunito(fontSize: 16))
                                   );
                                 }).toList(),
                                 onChanged: (value) {
@@ -404,9 +402,7 @@ class _MetodeBayarInsert extends State<MetodeBayarInsert> {
                               padding: const EdgeInsets.only(top:10),
                               child: DropdownButton(
                                 isExpanded: true,
-                                hint: Text("Pilih Akun",style: TextStyle(
-                                    fontFamily: "VarelaRound", fontSize: 13
-                                )),
+                                hint: Text("Pilih Akun",style: GoogleFonts.nunito(fontSize: 16,color: Colors.black),),
                                 value: selectedAcc,
                                 items: accList.map((myitem){
                                   return DropdownMenuItem(
@@ -444,9 +440,8 @@ class _MetodeBayarInsert extends State<MetodeBayarInsert> {
                               padding: const EdgeInsets.only(top:10),
                               child: DropdownButton(
                                 isExpanded: false,
-                                hint: Text("Pilih posisi akun",style: TextStyle(
-                                    fontFamily: "VarelaRound", fontSize: 13
-                                )),value: selectedPosition,
+                                hint: Text("Pilih posisi akun",style: GoogleFonts.nunito(fontSize: 16,color: Colors.black),)
+                                ,value: selectedPosition,
                                 items: <DropdownMenuItem<String>>[
                                   new DropdownMenuItem(
                                     child: new Text('Debit',style: GoogleFonts.nunito(fontSize: 16)),

@@ -13,6 +13,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/painting.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
+import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:flutter_speed_dial/flutter_speed_dial.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -25,6 +26,7 @@ import 'package:moobi_flutter/Helper/check_connection.dart';
 import 'package:moobi_flutter/Helper/color_based.dart';
 import 'package:moobi_flutter/Helper/page_route.dart';
 import 'package:moobi_flutter/Helper/session.dart';
+import 'package:moobi_flutter/Helper/setting_apps.dart';
 import 'package:moobi_flutter/Outlet/page_detailoutlet.dart';
 import 'package:moobi_flutter/Outlet/page_outletinsert.dart';
 import 'package:moobi_flutter/Outlet/page_outletmenuadd.dart';
@@ -151,6 +153,7 @@ class _OutletMenuList extends State<OutletMenuList> {
 
 
   String filter = "";
+  String filter2 = "";
   String sortby = '0';
   Future<List> getData() async {
     http.Response response = await http.get(
@@ -158,7 +161,7 @@ class _OutletMenuList extends State<OutletMenuList> {
             "legalcode="+widget.getLegalCode+
             "&store_id="+widget.getidOutlet+
             "&filtermedude="+widget.gettipeMenu+
-            "&filter="+filter+"&getserver="+serverCode.toString()),
+            "&filter="+filter+"&filter2="+filter2+"&getserver="+serverCode.toString()),
         headers: {"Accept":"application/json"});
     return json.decode(response.body);
   }
@@ -168,12 +171,14 @@ class _OutletMenuList extends State<OutletMenuList> {
 
   String getMessage = "...";
   _doHapus (String valueParse2) async {
+    EasyLoading.show(status: easyloading_text);
     final response = await http.get(applink+"api_model.php?act=action_hapusoutletproduk&id="+valueParse2.toString()
         +"&branch="+widget.getLegalCode+"&getserver="+serverCode.toString());
     Map data = jsonDecode(response.body);
     setState(() {
+      EasyLoading.dismiss();
       if (data["message"].toString() == '1') {
-
+        Navigator.pop(context);
         setState(() {
           getData();
         });
@@ -186,12 +191,14 @@ class _OutletMenuList extends State<OutletMenuList> {
 
   String valStatus = "false";
   _gantiStatus (String valueParse2) async {
+    EasyLoading.show(status: easyloading_text);
     final response = await http.get(applink+"api_model.php?act=action_gantistatusprice&id="+valueParse2.toString()
         +"&branch="+widget.getLegalCode+"&getserver="+serverCode.toString());
     Map data = jsonDecode(response.body);
     setState(() {
+      Navigator.pop(context);
+      EasyLoading.dismiss();
       if (data["message"].toString() == '1') {
-
         setState(() {
           getData();
           showsuccess("Status produk di outlet berhasil diubah");
@@ -255,6 +262,7 @@ class _OutletMenuList extends State<OutletMenuList> {
     if (hargaVal.text == "") {
       showerror("Harga tidak boleh kosong");
     }
+    EasyLoading.show(status: easyloading_text);
     final response = await http.post(applink+"api_model.php?act=action_gantihargaoutlet",
         body: {
           "idPrice": valueParse.toString(),
@@ -263,8 +271,10 @@ class _OutletMenuList extends State<OutletMenuList> {
         headers: {"Accept":"application/json"});
     Map data = jsonDecode(response.body);
     setState(() {
+      EasyLoading.dismiss();
       if (data["message"].toString() == '1') {
         showsuccess("Harga "+valueParse2+" berhasil diganti");
+        hargaVal.clear();
       } else {
         showerror("Gagal");
       }
@@ -337,6 +347,124 @@ class _OutletMenuList extends State<OutletMenuList> {
   }
 
 
+
+  Future<dynamic> getKategori() async {
+    http.Response response = await http.get(
+        Uri.parse(applink+"api_model.php?act=getdata_kategori&branch="
+            +widget.getLegalCode+"&getserver="+serverCode.toString()),
+        headers: {
+          "Accept":"application/json",
+          "Content-Type": "application/json"}
+    );
+    return json.decode(response.body);
+
+  }
+
+
+  void _filterMe() {
+    showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+              content:
+              Container(
+                  height: 205,
+                  width: double.infinity,
+                  child:
+                  FutureBuilder(
+                      future : getKategori(),
+                    builder: (context, snapshot) {
+                      if (snapshot.data == null) {
+                        return Center(
+                            child: CircularProgressIndicator()
+                        );
+                      } else {
+                        return snapshot.data == 0 || snapshot.data.length == 0 ?
+                        Container(
+                            height: double.infinity, width : double.infinity,
+                            child: new
+                            Center(
+                                child :
+                                Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  crossAxisAlignment: CrossAxisAlignment.center,
+                                  children: <Widget>[
+                                    new Text(
+                                      "Tidak ada data",
+                                      style: new TextStyle(
+                                          fontFamily: 'VarelaRound', fontSize: 18),
+                                    )
+                                  ],
+                                )))
+                            :
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [
+                            Padding(padding : const EdgeInsets.only(top : 5,bottom:12),
+                                child : Align(
+                                    alignment : Alignment.centerLeft,
+                                    child : Text("Kategori", style : GoogleFonts.varelaRound(
+                                        fontWeight: FontWeight.bold, fontSize: 20
+                                    ))
+                                )),
+                            Container(
+                                width: 100,
+                                height: 160,
+                                child : ListView.builder(
+                                    itemCount: snapshot.data == null ? 0 : snapshot.data.length,
+                                    itemBuilder: (context, i) {
+                                      return SingleChildScrollView(
+                                          child : Column(
+                                            children: [
+                                              Align(
+                                                alignment : Alignment.centerLeft,
+                                                child : Padding(padding: const EdgeInsets.only(top:15),
+                                                  child : InkWell(
+                                                      onTap: (){
+                                                        setState(() {
+                                                          filter2 = snapshot.data[i]["b"].toString();
+                                                          Navigator.pop(context);
+                                                          //_isvisible = false;
+                                                          //startSCreen();
+                                                        });
+                                                      },
+                                                      child : Row(
+                                                        children: [
+                                                          FaIcon(FontAwesomeIcons.circle,size: 8,color: Colors.black,),
+                                                          Padding(
+                                                              padding: const EdgeInsets.only(left : 10),
+                                                              child : Text(snapshot.data[i]["b"].toString(),
+                                                                  style : GoogleFonts.varelaRound(
+
+                                                                  ))
+                                                          )
+                                                        ],
+                                                      )
+                                                  ),
+                                                ),
+                                              ),
+                                              Padding(padding: const EdgeInsets.only(top:15),
+                                                  child : Divider(height : 5)),
+
+                                            ],
+                                          )
+                                      );
+                                    }
+                                )
+                            )
+                          ],
+
+                        );
+                      }
+                    },
+
+                  )
+              )
+          );
+        });
+  }
+
+
   @override
   Widget build(BuildContext context) {
     return WillPopScope(
@@ -356,6 +484,19 @@ class _OutletMenuList extends State<OutletMenuList> {
                     Navigator.pop(context)
                   }),
             ),
+            actions: [
+              Padding(padding: const EdgeInsets.only(top:0,right: 12), child:
+              Builder(
+                builder: (context) => IconButton(
+                    icon: new FaIcon(FontAwesomeIcons.filter,size: 17,),
+                    color: Colors.white,
+                    onPressed: ()  {
+                      FocusScope.of(context).requestFocus(FocusNode());
+                      _filterMe();
+                    }
+                ),
+              )),
+            ],
           ),
           body: Container(
             child: Column(
@@ -369,8 +510,8 @@ class _OutletMenuList extends State<OutletMenuList> {
                         onChanged: (text) {
                           setState(() {
                             filter = text;
-                            _isvisible = false;
-                            startSCreen();
+                            //_isvisible = false;
+                            //startSCreen();
                           });
                         },
                         style: TextStyle(fontFamily: "ProximaNova",fontSize: 15),
@@ -399,6 +540,33 @@ class _OutletMenuList extends State<OutletMenuList> {
                     )
                 ),
                 Padding(padding: const EdgeInsets.only(top: 10),),
+                filter2 != '' ?
+                Padding(padding: const EdgeInsets.only(left: 20,top: 2,right: 15, bottom : 15),
+                    child :
+                    Align(
+                        alignment: Alignment.centerLeft,
+                        child :  FittedBox(
+                            fit: BoxFit.none,
+                            child :
+                            RaisedButton(child :
+                            Row(
+                              children: [
+                                Text(filter2.toString(), style: GoogleFonts.varelaRound(fontSize: 13),),
+                                Padding(padding : const EdgeInsets.only(left  :10),
+                                    child : FaIcon(FontAwesomeIcons.times,size: 12,))
+                              ],
+                            ),
+                              elevation: 0,
+                              onPressed: (){
+                                setState(() {
+                                  filter2 = "";
+                                  //_isvisible = false;
+                                  //startSCreen();
+                                });
+                              },
+                            ))
+                    )
+                ) : Container(),
                 Expanded(
                     child: FutureBuilder(
                       future: getData(),
@@ -458,13 +626,34 @@ class _OutletMenuList extends State<OutletMenuList> {
                                              child :  Column(
                                                mainAxisSize: MainAxisSize.min,
                                                children: <Widget>[
-                                                 Padding(padding: const EdgeInsets.only(top: 5,right: 25,left: 15),
-                                                 child : Align(
-                                                   alignment : Alignment.centerLeft,
-                                                   child : Text(snapshot.data[i]["b"].toString(), style : GoogleFonts.varelaRound(fontSize: 18,
-                                                       fontWeight: FontWeight.bold))
-                                                 )
-                                                 ),
+                                                Row(
+                                                  mainAxisAlignment: MainAxisAlignment
+                                                      .spaceBetween,
+                                                  children: [
+                                                    Padding(padding: const EdgeInsets.only(top: 5,right: 25,left: 15),
+                                                        child : Align(
+                                                            alignment : Alignment.centerLeft,
+                                                            child : Text(snapshot.data[i]["b"].toString(), style : GoogleFonts.varelaRound(fontSize: 18,
+                                                                fontWeight: FontWeight.bold))
+                                                        )
+                                                    ),
+                                                    Padding(padding: const EdgeInsets.only(top: 5,left: 15),
+                                                        child : Align(
+                                                            alignment : Alignment.centerLeft,
+                                                            child : Switch(
+                                                              value: snapshot.data[i]["d"].toString() == 'Aktif' ? true : false,
+                                                              onChanged: (value) {
+                                                                setState(() {
+                                                                    _gantiStatus(snapshot.data[i]["g"].toString());
+                                                                });
+                                                              },
+                                                              activeTrackColor: HexColor("#bbffce"),
+                                                              activeColor: Colors.green,
+                                                            ),
+                                                        )
+                                                    ),
+                                                  ],
+                                                ),
                                                  Padding(padding: const EdgeInsets.only(top: 15,right: 25,left: 15),
                                                      child: InkWell(
                                                        child: ListTile(
@@ -473,6 +662,7 @@ class _OutletMenuList extends State<OutletMenuList> {
                                                          horizontalTitleGap: 15,
                                                          contentPadding: EdgeInsets.all(1),
                                                          onTap: (){
+                                                           _editpriceDialog(snapshot.data[i]["g"].toString(), snapshot.data[i]["b"].toString());
                                                            //Navigator.push(context, ExitPage(page: ProfileUbahNama(widget.getEmail, val_namauser.toString(), widget.getUserId))).then(onGoBack);
                                                          },
                                                          leading: FaIcon(FontAwesomeIcons.tags,color: HexColor("#73767d"),size: 18,),
@@ -495,6 +685,7 @@ class _OutletMenuList extends State<OutletMenuList> {
                                                            horizontalTitleGap: 20,
                                                            contentPadding: EdgeInsets.all(1),
                                                            onTap: (){
+                                                             _showDelete(snapshot.data[i]["g"].toString(), snapshot.data[i]["b"].toString());
                                                              //Navigator.push(context, ExitPage(page: ProfileUbahNama(widget.getEmail, val_namauser.toString(), widget.getUserId))).then(onGoBack);
                                                            },
                                                            leading: FaIcon(FontAwesomeIcons.trash,color: HexColor("#73767d"),size: 18,),
@@ -539,7 +730,7 @@ class _OutletMenuList extends State<OutletMenuList> {
                                          child: Opacity(
                                              opacity: 0.8,
                                              child : Text("#"+snapshot.data[i]["a"],
-                                                 style: GoogleFonts.varelaRound(fontSize: 11))
+                                                 style: GoogleFonts.varelaRound(fontSize: 12))
                                          ),
                                        ),
                                          subtitle: Align(
@@ -560,7 +751,7 @@ class _OutletMenuList extends State<OutletMenuList> {
                                                    children: [
                                                      Opacity(
                                                        opacity : 0.8,
-                                                       child : Text(snapshot.data[i]["i"], style: GoogleFonts.varelaRound(fontSize: 12,color:Colors.black),),
+                                                       child : Text(snapshot.data[i]["i"], style: GoogleFonts.varelaRound(fontSize: 11,color:Colors.black),),
                                                      )
                                                    ],
                                                  )
@@ -580,7 +771,7 @@ class _OutletMenuList extends State<OutletMenuList> {
 
                                   Container(
                                     width: double.infinity,
-                                    height: 18,
+                                    height: 16,
                                     padding: const EdgeInsets.only(left:15,right:15),
                                   )
                                 ],
