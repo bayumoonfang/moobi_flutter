@@ -8,6 +8,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flushbar/flushbar.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:hexcolor/hexcolor.dart';
@@ -16,6 +17,7 @@ import 'package:http/http.dart' as http;
 import 'package:moobi_flutter/Helper/app_helper.dart';
 import 'package:moobi_flutter/Helper/color_based.dart';
 import 'package:moobi_flutter/Helper/page_route.dart';
+import 'package:moobi_flutter/Helper/setting_apps.dart';
 import 'package:toast/toast.dart';
 
 import '../page_intoduction.dart';
@@ -250,6 +252,7 @@ class _OutletMenuAdd extends State<OutletMenuAdd> {
 
   _doAddHarga2 () async {
     Navigator.pop(context);
+    EasyLoading.show(status: easyloading_text);
     final response = await http.post(applink+"api_model.php?act=action_addprodukoutlet",
         body: {
           "id": "",
@@ -262,10 +265,11 @@ class _OutletMenuAdd extends State<OutletMenuAdd> {
         headers: {"Accept":"application/json"});
     Map data = jsonDecode(response.body);
     setState(() {
+      EasyLoading.dismiss();
       if (data["message"].toString() == '1') {
-        showsuccess("Product berhasil ditambahkan ke outlet ");
+        showsuccess("Produk berhasil ditambahkan ke outlet ");
       } else {
-        showerror("Product sudah ada di outlet ini, silahkan cari produk yang lain");
+        showerror("Produk sudah ada di outlet ini, silahkan cari produk yang lain");
       }
     });
   }
