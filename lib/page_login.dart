@@ -3,7 +3,9 @@
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/painting.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:hexcolor/hexcolor.dart';
 import 'package:moobi_flutter/Helper/color_based.dart';
@@ -13,6 +15,7 @@ import 'package:moobi_flutter/helper/page_route.dart';
 import 'package:moobi_flutter/page_home.dart';
 import 'package:moobi_flutter/page_index.dart';
 import 'package:moobi_flutter/page_register.dart';
+import 'package:moobi_flutter/page_resetpin.dart';
 import 'package:toast/toast.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
@@ -218,126 +221,128 @@ class _LoginState extends State<Login> {
       child: Scaffold(
         body :
         Container(
-          child: Center(
-              child : Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  Image.asset("assets/logo4.png",width: 150,),
-                  Padding(padding: const EdgeInsets.only(left: 35,top: 60,right: 35),
-                    child:   TextFormField(
-                      style: TextStyle(
-                          fontFamily: 'VarelaRound', fontSize: 17),
-                      validator: (e) {
-                        if (e.isEmpty) {
-                          return "Username tidak boleh kosong";
-                        }
-                      },
-                      controller: _username,
-                      keyboardType: TextInputType.emailAddress,
-                      decoration: InputDecoration(
-                        prefixIcon: Padding(
-                          padding: const EdgeInsets.only(left: 20,top:10,right: 10),
-                          child: Opacity(
-                            opacity: 0.8,
-                            child: FaIcon(FontAwesomeIcons.envelope,color: Colors.black,size: 20,),
-                          )
-                        ),
-                        hintText: "Email",
-                        focusedBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(25.0),
-                          borderSide: BorderSide(
-                            color: HexColor("#602d98"),
-                          ),
-                        ),
-                        enabledBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(25.0),
-                          borderSide: BorderSide(
-                            color: HexColor("#dbd0ea"),
-                            width: 1.0,
-                          ),
-                        ),
-
-                      ),
-                    ),
+          height: double.infinity,
+          width: double.infinity,
+          padding: const EdgeInsets.only(left: 25,right: 35),
+          child: SingleChildScrollView(
+            child : Column(
+              children: [
+                Padding(padding: const EdgeInsets.only(top: 80,right: 35),),
+                Align(
+                  alignment: Alignment.centerLeft,
+                  child: Image.asset("assets/logo2.png",width: 180,),
+                ),
+                Padding(
+                  padding: const EdgeInsets.only(top: 40,left: 7),
+                  child : Align(
+                    alignment: Alignment.centerLeft,
+                    child: Text("Halo,",style : GoogleFonts.varelaRound(fontSize: 22,fontWeight: FontWeight.bold))
                   ),
-                  Padding(padding: const EdgeInsets.only(left: 35,top: 20,right: 35),
-                    child: TextFormField(
-                      style: TextStyle(
-                          fontFamily: 'VarelaRound', fontSize: 17),
-                      validator: (e) {
-                        if (e.isEmpty) {
-                          return "Email tidak boleh kosong";
-                        }
-                      },
-                      controller: _password,
-                      obscureText: true,
-                      decoration: InputDecoration(
-                        prefixIcon: Padding(
-                          padding: const EdgeInsets.only(left: 20,top:10,right: 10),
-                          child: Opacity(
-                            opacity: 0.8,
-                            child: FaIcon(FontAwesomeIcons.lock,color: Colors.black,size: 20,),
-                          )
-                        ),
-                        hintText: "Password",
-                        focusedBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(25.0),
-                          borderSide: BorderSide(
-                            color: HexColor("#602d98"),
-                          ),
-                        ),
-                        enabledBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(25.0),
-                          borderSide: BorderSide(
-                            color: HexColor("#dbd0ea"),
-                            width: 1.0,
-                          ),
-                        ),
-
-                      ),
-                    ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.only(top: 5,left: 7),
+                  child : Align(
+                      alignment: Alignment.centerLeft,
+                      child: Text("Selamat Datang",style : GoogleFonts.varelaRound(fontSize: 20,fontWeight: FontWeight.bold))
                   ),
-                        Padding(padding: const EdgeInsets.only(left: 35,right: 35,top: 30),child:
-                              Container(
-                                  height: 50,
-                                  width: double.infinity,
-                                  child :
+                ),
+                Padding(
+                  padding: const EdgeInsets.only(top: 5,left: 7),
+                  child : Align(
+                      alignment: Alignment.centerLeft,
+                      child: Text("Aplikasi kasir terbaik untuk kamu",style : GoogleFonts.varelaRound(fontSize: 14))
+                  ),
+                ),
 
-                     login_proses != '1' ?
-                      RaisedButton(
-                          shape: RoundedRectangleBorder(side: BorderSide(
-                              color: Colors.black,
-                              width: 0.1,
-                              style: BorderStyle.solid
-                          ),
-                            borderRadius: BorderRadius.circular(50.0),
-                          ),
-                                    color: HexColor(main_color),
-                                    child: Text(
-                                      "Sign In",
-                                      style: TextStyle(
-                                          fontFamily: 'VarelaRound',
-                                          fontSize: 14,
-                                          fontWeight: FontWeight.bold,
-                                          color: Colors.white
-                                      ),
-                                    ),
-                                    onPressed: () {
-                                      _loginact();
 
-                                    }
-                                )
-                         :
-                    Opacity(
-                      opacity: 0.4,
-                      child : RaisedButton(
+                Padding(padding: const EdgeInsets.only(left: 15,top: 50,right: 15),
+                    child: Column(
+                      children: [
+                        Align(alignment: Alignment.centerLeft,child: Padding(
+                          padding: const EdgeInsets.only(left: 0,top: 15),
+                          child: Text("Username / Email",style: TextStyle(fontWeight: FontWeight.bold,fontFamily: "VarelaRound",
+                              fontSize: 12,color: HexColor("#0074D9")),),
+                        ),),
+                        Align(alignment: Alignment.centerLeft,child: Padding(
+                          padding: const EdgeInsets.only(left: 0),
+                          child: TextFormField(
+                            //controller: valTax,
+                            textCapitalization: TextCapitalization.sentences,
+                            decoration: InputDecoration(
+                              contentPadding: const EdgeInsets.only(top:2),
+                              labelText: '',
+                              floatingLabelBehavior: FloatingLabelBehavior.always,
+                              hintStyle: TextStyle(fontFamily: "VarelaRound", color: HexColor("#c4c4c4")),
+                              enabledBorder: UnderlineInputBorder(borderSide: BorderSide(color: HexColor("#DDDDDD")),),
+                              focusedBorder: UnderlineInputBorder(borderSide: BorderSide(color: HexColor("#8c8989")),),
+                              border: UnderlineInputBorder(borderSide: BorderSide(color: HexColor("#DDDDDD")),),
+                            ),
+                          ),
+                        ),),
+                      ],
+                    )
+                ),
+
+
+
+                Padding(padding: const EdgeInsets.only(left: 15,top: 20,right: 15),
+                    child: Column(
+                      children: [
+                        Align(alignment: Alignment.centerLeft,child: Padding(
+                          padding: const EdgeInsets.only(left: 0,top: 15),
+                          child: Text("PIN (6 Digit)",style: TextStyle(fontWeight: FontWeight.bold,fontFamily: "VarelaRound",
+                              fontSize: 12,color: HexColor("#0074D9")),),
+                        ),),
+                        Align(alignment: Alignment.centerLeft,child: Padding(
+                          padding: const EdgeInsets.only(left: 0),
+                          child: TextFormField(
+                            //controller: valTax,
+                            keyboardType: TextInputType.number,
+                            textCapitalization: TextCapitalization.sentences,
+                            decoration: InputDecoration(
+                              contentPadding: const EdgeInsets.only(top:2),
+                              labelText: '',
+                              floatingLabelBehavior: FloatingLabelBehavior.always,
+                              hintStyle: TextStyle(fontFamily: "VarelaRound", color: HexColor("#c4c4c4")),
+                              enabledBorder: UnderlineInputBorder(borderSide: BorderSide(color: HexColor("#DDDDDD")),),
+                              focusedBorder: UnderlineInputBorder(borderSide: BorderSide(color: HexColor("#8c8989")),),
+                              border: UnderlineInputBorder(borderSide: BorderSide(color: HexColor("#DDDDDD")),),
+                            ),
+                          ),
+                        ),),
+                      ],
+                    )
+                ),
+
+                Padding(
+                  padding: const EdgeInsets.only(top: 45,right: 11),
+                  child : Align(
+                      alignment: Alignment.centerRight,
+                      child: InkWell(
+                        onTap: (){
+                          FocusScope.of(context).requestFocus(FocusNode());
+                          Navigator.push(context, ExitPage(page: ResetPin()));
+                        },
+                        child : Text("Lupa Pin Anda ? ",style : GoogleFonts.varelaRound(color: Colors.red, fontSize: 14))
+                      )
+                  ),
+                ),
+
+
+                Padding(padding: const EdgeInsets.only(left: 15,right: 15,top: 60),child:
+                Container(
+                    height: 50,
+                    width: double.infinity,
+                    child :
+
+                    login_proses != '1' ?
+                    RaisedButton(
                         shape: RoundedRectangleBorder(side: BorderSide(
                             color: Colors.black,
                             width: 0.1,
                             style: BorderStyle.solid
                         ),
-                          borderRadius: BorderRadius.circular(50.0),
+                          borderRadius: BorderRadius.circular(5.0),
                         ),
                         color: HexColor(main_color),
                         child: Text(
@@ -349,102 +354,131 @@ class _LoginState extends State<Login> {
                               color: Colors.white
                           ),
                         ),
-                      )
+                        onPressed: () {
+                          _loginact();
+
+                        }
                     )
-                          )
-                        ),
-
-
-
-
-                  Padding(padding: const EdgeInsets.only(left: 35,right: 35,top: 30),child:
-                  Container(
-                      height: 50,
-                      width: double.infinity,
-                      child :
-                      login_proses != '1' ?
-                      RaisedButton(
+                        :
+                    Opacity(
+                        opacity: 0.4,
+                        child : RaisedButton(
                           shape: RoundedRectangleBorder(side: BorderSide(
                               color: Colors.black,
                               width: 0.1,
                               style: BorderStyle.solid
                           ),
-                            borderRadius: BorderRadius.circular(50.0),
+                            borderRadius: BorderRadius.circular(5.0),
                           ),
-                          color: Colors.white,
-                          child:
-                          Wrap(
-                            crossAxisAlignment: WrapCrossAlignment.center,
-                            children: [
-                             Image.asset("assets/logo_google.png",height: 30,width: 30,),// <-- Use 'Image.asset(...)' here
-                              SizedBox(width: 18),
-                              Text('Sign in with Google',
+                          color: HexColor(main_color),
+                          child: Text(
+                            "Sign In",
+                            style: TextStyle(
+                                fontFamily: 'VarelaRound',
+                                fontSize: 14,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.white
+                            ),
+                          ),
+                        )
+                    )
+                )
+                ),
+
+
+
+                Padding(padding: const EdgeInsets.only(left: 15,right: 15,top: 20),child:
+                Container(
+                    height: 50,
+                    width: double.infinity,
+                    child :
+                    login_proses != '1' ?
+                    RaisedButton(
+                        shape: RoundedRectangleBorder(side: BorderSide(
+                            color: Colors.black,
+                            width: 0.1,
+                            style: BorderStyle.solid
+                        ),
+                          borderRadius: BorderRadius.circular(5.0),
+                        ),
+                        color: Colors.white,
+                        child:
+                        Wrap(
+                          crossAxisAlignment: WrapCrossAlignment.center,
+                          children: [
+                            Image.asset("assets/logo_google.png",height: 30,width: 30,),// <-- Use 'Image.asset(...)' here
+                            SizedBox(width: 18),
+                            Text('Sign in with Google',
                                 style: TextStyle(
                                     fontFamily: 'VarelaRound',
                                     fontSize: 14,
                                     fontWeight: FontWeight.bold,
                                     color: Colors.black
                                 )),
+                          ],
+                        ),
+                        onPressed: () {
+                          _loginGoogle();
+                        }
+                    )
+                        :
+                    Opacity(
+                        opacity : 0.4,
+                        child : RaisedButton(
+                          shape: RoundedRectangleBorder(side: BorderSide(
+                              color: Colors.black,
+                              width: 0.1,
+                              style: BorderStyle.solid
+                          ),
+                            borderRadius: BorderRadius.circular(5.0),
+                          ),
+                          color: Colors.white,
+                          child:
+                          Wrap(
+                            crossAxisAlignment: WrapCrossAlignment.center,
+                            children: [
+                              Image.asset("assets/logo_google.png",height: 30,width: 30,),// <-- Use 'Image.asset(...)' here
+                              SizedBox(width: 18),
+                              Text('Sign in with Google',
+                                  style: TextStyle(
+                                      fontFamily: 'VarelaRound',
+                                      fontSize: 14,
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.black
+                                  )),
                             ],
                           ),
-                          onPressed: () {
-                            _loginGoogle();
-                          }
-                      )
-                          :
-                          Opacity(
-                            opacity : 0.4,
-                            child : RaisedButton(
-                                shape: RoundedRectangleBorder(side: BorderSide(
-                                    color: Colors.black,
-                                    width: 0.1,
-                                    style: BorderStyle.solid
-                                ),
-                                  borderRadius: BorderRadius.circular(50.0),
-                                ),
-                                color: Colors.white,
-                                child:
-                                Wrap(
-                                  crossAxisAlignment: WrapCrossAlignment.center,
-                                  children: [
-                                    Image.asset("assets/logo_google.png",height: 30,width: 30,),// <-- Use 'Image.asset(...)' here
-                                    SizedBox(width: 18),
-                                    Text('Sign in with Google',
-                                        style: TextStyle(
-                                            fontFamily: 'VarelaRound',
-                                            fontSize: 14,
-                                            fontWeight: FontWeight.bold,
-                                            color: Colors.black
-                                        )),
-                                  ],
-                                ),
-                            )
-                          )
+                        )
+                    )
+                )
+                ),
+
+
+
+                Center(
+                  child:
+                  Padding(padding: const EdgeInsets.only(left: 35,right: 35,top: 30),child:
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text("Anda tidak mempunyai akun ?",textAlign: TextAlign.center,style: TextStyle(fontFamily: 'VarelaRound'),),
+                      Padding(padding: const EdgeInsets.only(left: 10),child:
+                      InkWell(
+                        child: Text("Daftar",style: TextStyle(color: Colors.blue,fontFamily: 'VarelaRound',fontWeight: FontWeight.bold),),
+                        onTap: (){
+                          Navigator.push(context, ExitPage(page: Register()));
+                        },
+                      ),)
+                    ],
                   )
                   ),
+                )
 
 
-                  Center(
-                    child:
-                    Padding(padding: const EdgeInsets.only(left: 35,right: 35,top: 30),child:
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Text("Anda tidak mempunyai akun ?",textAlign: TextAlign.center,style: TextStyle(fontFamily: 'VarelaRound'),),
-                            Padding(padding: const EdgeInsets.only(left: 10),child:
-                            InkWell(
-                              child: Text("Daftar",style: TextStyle(color: Colors.blue,fontFamily: 'VarelaRound',fontWeight: FontWeight.bold),),
-                              onTap: (){
-                                Navigator.push(context, ExitPage(page: Register()));
-                              },
-                            ),)
-                          ],
-                        )
-                    ),
-                  )
-                ]
-              )
-          ),
+
+              ],
+            )
+          )
         ),
       )
     );

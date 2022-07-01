@@ -9,6 +9,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/painting.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
+import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:hexcolor/hexcolor.dart';
@@ -25,6 +26,7 @@ import 'package:moobi_flutter/helper/api_link.dart';
 import 'dart:convert';
 import 'dart:async';
 
+import 'Helper/setting_apps.dart';
 import 'page_intoduction.dart';
 
 
@@ -122,10 +124,12 @@ class DetailNotifikasiTransaksiState extends State<DetailNotifikasiTransaksi> {
 
 
   _prepare() async {
+    EasyLoading.show(status: easyloading_text);
     await _startingVariable();
     await _getDetail();
     _nonaktifproduk();
     await _getDetailInvoice();
+    EasyLoading.dismiss();
   }
 
 

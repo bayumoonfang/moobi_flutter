@@ -109,16 +109,7 @@ class _RegisterState extends State<Register> {
           getMessage = showdata["message"].toString();
           setState(() {
             getMessage = showdata["message"].toString();
-              if (getMessage == '0') {
-                showToast("Nama Toko atau ID Toko sudah ada... coba dengan yang lain", gravity: Toast.CENTER, duration: Toast.LENGTH_LONG);
-                return;
-              } else if (getMessage == '1') {
-                showToast("Email sudah terdaftar", gravity: Toast.CENTER, duration: Toast.LENGTH_LONG);
-                return;
-              } else if (getMessage == '3') {
-                showToast("Nomor anda sudah terdaftar", gravity: Toast.CENTER, duration: Toast.LENGTH_LONG);
-                return;
-              } else if (getMessage == '2') {
+               if (getMessage == '2') {
                 Navigator.push(context, ExitPage(page: SuksesRegister(_email.text)));
               } else if (getMessage == '4') {
                 showToast("Mohon maaf server penuh , mohon ulangi sekali lagi", gravity: Toast.CENTER, duration: Toast.LENGTH_LONG);

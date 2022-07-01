@@ -156,13 +156,18 @@ class _OutletMenuList extends State<OutletMenuList> {
   String filter2 = "";
   String sortby = '0';
   Future<List> getData() async {
-    http.Response response = await http.get(
+    http.Response response = await http.Client().get(
         Uri.encodeFull(applink+"api_model.php?act=getdata_produkoutlet&"
             "legalcode="+widget.getLegalCode+
             "&store_id="+widget.getidOutlet+
             "&filtermedude="+widget.gettipeMenu+
             "&filter="+filter+"&filter2="+filter2+"&getserver="+serverCode.toString()),
-        headers: {"Accept":"application/json"});
+        headers: {"Accept":"application/json"}).timeout(
+        Duration(seconds: 15),onTimeout: (){
+      http.Client().close();
+      showsuccess("Koneksi timeout, silahkan ulangi");
+    }
+    );
     return json.decode(response.body);
   }
 
@@ -349,12 +354,17 @@ class _OutletMenuList extends State<OutletMenuList> {
 
 
   Future<dynamic> getKategori() async {
-    http.Response response = await http.get(
+    http.Response response = await http.Client().get(
         Uri.parse(applink+"api_model.php?act=getdata_kategori&branch="
             +widget.getLegalCode+"&getserver="+serverCode.toString()),
         headers: {
           "Accept":"application/json",
           "Content-Type": "application/json"}
+    ).timeout(
+        Duration(seconds: 15),onTimeout: (){
+      http.Client().close();
+      showsuccess("Koneksi timeout, silahkan ulangi");
+    }
     );
     return json.decode(response.body);
 
@@ -707,8 +717,8 @@ class _OutletMenuList extends State<OutletMenuList> {
                                      opacity : snapshot.data[i]["d"].toString() == 'Aktif' ? 1 : 0.4,
                                      child : ListTile(
                                          leading: SizedBox(
-                                             width: 45,
-                                             height: 45,
+                                             width: 50,
+                                             height: 50,
                                              child: ClipRRect(
                                                borderRadius: BorderRadius.circular(6.0),
                                                child : CachedNetworkImage(
@@ -741,7 +751,7 @@ class _OutletMenuList extends State<OutletMenuList> {
                                                  alignment: Alignment.centerLeft,
                                                  child: Padding(padding: const EdgeInsets.only(top:1), child :
                                                  Text(snapshot.data[i]["b"].toString(),
-                                                     style: GoogleFonts.varelaRound(fontSize: 13,fontWeight: FontWeight.bold,
+                                                     style: GoogleFonts.varelaRound(fontSize: 14,fontWeight: FontWeight.bold,
                                                          color: Colors.black))),
                                                ),
                                                Align(
@@ -751,7 +761,7 @@ class _OutletMenuList extends State<OutletMenuList> {
                                                    children: [
                                                      Opacity(
                                                        opacity : 0.8,
-                                                       child : Text(snapshot.data[i]["i"], style: GoogleFonts.varelaRound(fontSize: 11,color:Colors.black),),
+                                                       child : Text(snapshot.data[i]["i"], style: GoogleFonts.varelaRound(fontSize: 12,color:Colors.black),),
                                                      )
                                                    ],
                                                  )
@@ -763,7 +773,7 @@ class _OutletMenuList extends State<OutletMenuList> {
                                          ),
                                          trailing: Text("Rp "+
                                              NumberFormat.currency(locale: 'id', decimalDigits: 0, symbol: '').
-                                             format(snapshot.data[i]["e"]), style: GoogleFonts.varelaRound(fontSize: 13,color:Colors.black),),
+                                             format(snapshot.data[i]["e"]), style: GoogleFonts.varelaRound(fontSize: 14,color:Colors.black),),
                                      )
                                    )
                                  ),

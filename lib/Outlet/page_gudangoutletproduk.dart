@@ -705,8 +705,8 @@ class _GudangOutletProduk extends State<GudangOutletProduk> {
                                    },
                                    child : ListTile(
                                      leading: SizedBox(
-                                         width: 45,
-                                         height: 45,
+                                         width: 50,
+                                         height: 50,
                                          child: ClipRRect(
                                            borderRadius: BorderRadius.circular(6.0),
                                            child : CachedNetworkImage(
@@ -739,7 +739,7 @@ class _GudangOutletProduk extends State<GudangOutletProduk> {
                                              alignment: Alignment.centerLeft,
                                              child: Padding(padding: const EdgeInsets.only(top:1), child :
                                              Text(snapshot.data[i]["b"].toString(),
-                                                 style: GoogleFonts.varelaRound(fontSize: 13,fontWeight: FontWeight.bold,
+                                                 style: GoogleFonts.varelaRound(fontSize: 14,fontWeight: FontWeight.bold,
                                                      color: Colors.black))),
                                            ),
                                            Align(
@@ -755,7 +755,7 @@ class _GudangOutletProduk extends State<GudangOutletProduk> {
                                                 child: Text("Service",
                                                     style: TextStyle(fontFamily: "VarelaRound",
                                                         color: Colors.white,
-                                                        fontSize: 11)),),
+                                                        fontSize: 12)),),
                                             )
                                                 :
                                             Row(
@@ -820,8 +820,8 @@ class _GudangOutletProduk extends State<GudangOutletProduk> {
                                         opacity: 0.3,
                                         child:  ListTile(
                                           leading: SizedBox(
-                                              width: 45,
-                                              height: 45,
+                                              width: 50,
+                                              height: 50,
                                               child: ClipRRect(
                                                 borderRadius: BorderRadius.circular(6.0),
                                                 child : CachedNetworkImage(
@@ -854,7 +854,7 @@ class _GudangOutletProduk extends State<GudangOutletProduk> {
                                                   alignment: Alignment.centerLeft,
                                                   child: Padding(padding: const EdgeInsets.only(top:2), child :
                                                   Text(snapshot.data[i]["b"],
-                                                      style: GoogleFonts.varelaRound(fontSize: 13,fontWeight: FontWeight.bold,
+                                                      style: GoogleFonts.varelaRound(fontSize: 14,fontWeight: FontWeight.bold,
                                                           color: Colors.black))),
                                                 ),
                                                 Align(

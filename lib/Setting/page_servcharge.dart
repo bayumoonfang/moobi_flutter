@@ -5,12 +5,14 @@ import 'dart:convert';
 import 'package:flushbar/flushbar.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:hexcolor/hexcolor.dart';
 import 'package:moobi_flutter/Helper/app_helper.dart';
 import 'package:moobi_flutter/Helper/check_connection.dart';
 import 'package:moobi_flutter/Helper/page_route.dart';
 import 'package:moobi_flutter/Helper/session.dart';
+import 'package:moobi_flutter/Helper/setting_apps.dart';
 import 'package:moobi_flutter/page_login.dart';
 import 'package:toast/toast.dart';
 import 'package:http/http.dart' as http;
@@ -78,8 +80,10 @@ class SettingServChargeState extends State<SettingServCharge> {
 
 
   _prepare() async {
+    EasyLoading.show(status: easyloading_text);
     await _startingVariable();
     await _getDetail();
+    EasyLoading.dismiss();
   }
 
   @override

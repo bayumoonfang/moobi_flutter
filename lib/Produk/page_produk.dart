@@ -96,25 +96,36 @@ class _ProdukState extends State<Produk>  {
   String filter2 = "";
   String filterq = "";
   Future<dynamic> getDataProduk() async {
-    http.Response response = await http.get(
+    http.Response response = await http.Client().get(
         Uri.parse(applink+"api_model.php?act=getdata_produk_all&branch="
             +widget.getLegalCode+""
             "&filter="+filter+"&filterq="+filterq+"&getserver="+serverCode.toString()+"&filter2="+filter2),
         headers: {
           "Accept":"application/json",
           "Content-Type": "application/json"}
+    ).timeout(
+        Duration(seconds: 15),onTimeout: (){
+        http.Client().close();
+        showsuccess("Koneksi timeout, silahkan ulangi");
+    }
     );
     return json.decode(response.body);
   }
 
 
   Future<dynamic> getKategori() async {
-    http.Response response = await http.get(
+    http.Response response = await http.Client().get(
         Uri.parse(applink+"api_model.php?act=getdata_kategori&branch="
             +widget.getLegalCode+"&getserver="+serverCode.toString()),
         headers: {
           "Accept":"application/json",
           "Content-Type": "application/json"}
+    ).timeout(
+        Duration(seconds: 8),onTimeout: (){
+        http.Client().close();
+        //return http.Response('Error',500);
+        showsuccess("Koneksi timeout, silahkan ulangi");
+    }
     );
     return json.decode(response.body);
 
@@ -247,11 +258,17 @@ class _ProdukState extends State<Produk>  {
 
 
   Future<dynamic> getTipeJual() async {
-    http.Response response = await http.get(
+    http.Response response = await http.Client().get(
         Uri.parse(applink+"api_model.php?act=getdata_tipejual&getserver="+serverCode.toString()),
         headers: {
           "Accept":"application/json",
           "Content-Type": "application/json"}
+    ).timeout(
+        Duration(seconds: 8),onTimeout: (){
+      http.Client().close();
+      //return http.Response('Error',500);
+      showsuccess("Koneksi timeout, silahkan ulangi");
+    }
     );
     //print(applink+"api_model.php?act=getdata_tipejual&getserver="+serverCode.toString());
     return json.decode(response.body);
@@ -719,11 +736,11 @@ class _ProdukState extends State<Produk>  {
                               leading: Badge(
                                     badgeColor:  snapshot.data[i]["k"].toString() == 'Retail' ? HexColor("#fe5c83") :
                                     snapshot.data[i]["k"].toString() == 'Jasa' ? HexColor("#1c6bea") :
-                                    snapshot.data[i]["k"].toString() == 'Restaurant' ? HexColor("#00c160") : HexColor("#ffa528"),
+                                    snapshot.data[i]["k"].toString() == 'Menu' ? HexColor("#00c160") : HexColor("#ffa528"),
                                 position: BadgePosition.topStart(top: -3, start : -3),
                                     child : SizedBox(
-                                        width: 45,
-                                        height: 45,
+                                        width: 50,
+                                        height: 50,
                                         child: ClipRRect(
                                           borderRadius: BorderRadius.circular(6.0),
                                           child : CachedNetworkImage(
@@ -789,8 +806,8 @@ class _ProdukState extends State<Produk>  {
                             position: BadgePosition.topStart(top: -3, start : -3),
                         child :
                         SizedBox(
-                            width: 45,
-                            height: 45,
+                            width: 50,
+                            height: 50,
                             child: ClipRRect(
                               borderRadius: BorderRadius.circular(6.0),
                               child : CachedNetworkImage(
@@ -823,7 +840,7 @@ class _ProdukState extends State<Produk>  {
                                 alignment: Alignment.centerLeft,
                                 child: Padding(padding: const EdgeInsets.only(top:1), child :
                                 Text(snapshot.data[i]["a"].toString(),
-                                    style: GoogleFonts.varelaRound(fontSize: 13,fontWeight: FontWeight.bold,
+                                    style: GoogleFonts.varelaRound(fontSize: 14,fontWeight: FontWeight.bold,
                                         color: Colors.black))),
                               ),
                               Align(
@@ -833,7 +850,7 @@ class _ProdukState extends State<Produk>  {
                                   children: [
                                     Opacity(
                                       opacity: 0.8,
-                                      child :   Text(snapshot.data[i]["k"].toString()+ " - " +snapshot.data[i]["b"], style: GoogleFonts.varelaRound(fontSize: 11,color:Colors.black),),
+                                      child :   Text(snapshot.data[i]["k"].toString()+ " - " +snapshot.data[i]["b"], style: GoogleFonts.varelaRound(fontSize: 12,color:Colors.black),),
                                     )
 
                                   ],

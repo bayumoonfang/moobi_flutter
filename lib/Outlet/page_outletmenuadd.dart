@@ -95,13 +95,21 @@ class _OutletMenuAdd extends State<OutletMenuAdd> {
   String filter = "";
   String sortme = "0";
   Future<List> getData() async {
-    http.Response response = await http.get(
+    http.Response response = await http.Client().get(
         Uri.encodeFull(applink+"api_model.php?act=getdata_produkadd_outlet&"
             "filter="+filter+
             "&filtermedude="+widget.getTipeMenu+
             "&id="+widget.getLegalCode+"&getserver="+serverCode.toString()),
-        headers: {"Accept":"application/json"});
+        headers: {"Accept":"application/json"}).timeout(
+        Duration(seconds: 15),onTimeout: (){
+      http.Client().close();
+      showsuccess("Koneksi timeout, silahkan ulangi");
+    }
+    );
+
     return json.decode(response.body);
+
+
   }
 
   startSCreen() async {
@@ -133,6 +141,7 @@ class _OutletMenuAdd extends State<OutletMenuAdd> {
 
   _doAddHarga (String valueParse2) async {
     Navigator.pop(context);
+    EasyLoading.show(status: easyloading_text);
     if (addHarga.text == "") {
       showerror("Harga tidak boleh kosong");
     }
@@ -148,9 +157,11 @@ class _OutletMenuAdd extends State<OutletMenuAdd> {
         headers: {"Accept":"application/json"});
     Map data = jsonDecode(response.body);
     setState(() {
+      EasyLoading.dismiss();
       if (data["message"].toString() == '1') {
-        showsuccess("Product berhasil ditambahkan ke outlet ");
         //Navigator.pop(context);
+        showsuccess("Product berhasil ditambahkan ke outlet ");
+
       } else {
         showerror("Product sudah ada di outlet ini, silahkan cari produk yang lain");
       }
@@ -212,13 +223,13 @@ class _OutletMenuAdd extends State<OutletMenuAdd> {
                           contentPadding: EdgeInsets.only(left:15,top:5,bottom:5,right: 15),
                           hintText: "Harga Jual",
                           focusedBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(15.0),
+                            borderRadius: BorderRadius.circular(5.0),
                             borderSide: BorderSide(
                               color: HexColor("#602d98"),
                             ),
                           ),
                           enabledBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(15.0),
+                            borderRadius: BorderRadius.circular(5.0),
                             borderSide: BorderSide(
                               color: HexColor("#dbd0ea"),
                               width: 1.0,

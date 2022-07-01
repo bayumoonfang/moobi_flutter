@@ -4,11 +4,15 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:hexcolor/hexcolor.dart';
 import 'package:moobi_flutter/Helper/app_helper.dart';
 import 'package:moobi_flutter/Helper/color_based.dart';
+import 'package:moobi_flutter/Helper/setting_apps.dart';
 import 'package:moobi_flutter/Setting/page_editlegalentites.dart';
+import 'package:moobi_flutter/Setting/page_renewalhistory.dart';
 import 'package:moobi_flutter/helper/api_link.dart';
 import 'package:moobi_flutter/helper/page_route.dart';
 import 'package:moobi_flutter/helper/session.dart';
@@ -44,6 +48,9 @@ class _LegalEntities extends State<LegalEntities> {
   String getCityToko = "-";
   String getStatusToko = '-';
   String getWebsiteToko = '-';
+  String getLicense = '...';
+  String getRegisterDate = '...';
+  String getEndDate = '...';
 
   //=============================================================================
   String serverName = '';
@@ -67,8 +74,12 @@ class _LegalEntities extends State<LegalEntities> {
         getWebsiteToko = value[12];
         getCityToko = value[5];
         getStatusToko = value[7];
+        getLicense = value[18];
+        getRegisterDate = value[19];
+        getEndDate = value[20];
       });
     });
+
   }
 
   FutureOr onGoBack(dynamic value) {
@@ -81,13 +92,18 @@ class _LegalEntities extends State<LegalEntities> {
         getWebsiteToko = value[12];
         getCityToko = value[5];
         getStatusToko = value[7];
+        getLicense = value[18];
+        getRegisterDate = value[19];
+        getEndDate = value[20];
       });
     });
     setState(() {});
   }
 
   loadData() async {
+    EasyLoading.show(status: easyloading_text);
     await _startingVariable();
+    EasyLoading.dismiss();
   }
 
 
@@ -131,7 +147,7 @@ class _LegalEntities extends State<LegalEntities> {
                   Align(
                       alignment: Alignment.centerLeft,
                       child: Padding(padding: const EdgeInsets.only(top: 35,left: 15),
-                          child: Text("Toko Saya", style: TextStyle(fontSize: 24,fontWeight: FontWeight.bold)))),
+                          child: Text("Legal Entities", style: GoogleFonts.varelaRound(fontWeight: FontWeight.bold, fontSize: 24)))),
 
                   Padding(padding: const EdgeInsets.only(top: 20),
                     child: ListTile(
@@ -168,24 +184,7 @@ class _LegalEntities extends State<LegalEntities> {
                         Align(alignment: Alignment.centerLeft,child: Text("Informasi",style: TextStyle(
                             color: Colors.black, fontFamily: 'VarelaRound',fontSize: 16,
                             fontWeight: FontWeight.bold)),),
-                        Padding(padding: const EdgeInsets.only(top: 10,right: 25),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment
-                                .spaceBetween,
-                            children: [
-                              Text(
-                                "ID Toko",
-                                textAlign: TextAlign.left,
-                                style: TextStyle(
-                                    fontFamily: 'VarelaRound',
-                                    fontSize: 14),
-                              ),
-                              Text(getIDToko.toString(),
-                                  style: TextStyle(
-                                      fontFamily: 'VarelaRound',
-                                      fontSize: 14)),
-                            ],
-                          ),),
+
 
                         Padding(padding: const EdgeInsets.only(top: 10,right: 25),
                           child: Row(
@@ -268,24 +267,117 @@ class _LegalEntities extends State<LegalEntities> {
                           ),),
 
 
+                      ],
+                    ),),
+
+                  Padding(padding: const EdgeInsets.only(top :25),
+                    child: Container(
+                      height: 10,
+                      width: double.infinity,
+                      color: HexColor("#f4f4f4"),
+                    ),),
+
+
+
+                  Padding(padding: const EdgeInsets.only(top: 20,left: 25),
+                    child: Column(
+                      children: [
+                        Align(alignment: Alignment.centerLeft,child: Text("License Information",style: TextStyle(
+                            color: Colors.black, fontFamily: 'VarelaRound',fontSize: 16,
+                            fontWeight: FontWeight.bold)),),
+
                         Padding(padding: const EdgeInsets.only(top: 10,right: 25),
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment
                                 .spaceBetween,
                             children: [
                               Text(
-                                "Status Toko",
+                                "Entiti ID",
                                 textAlign: TextAlign.left,
                                 style: TextStyle(
                                     fontFamily: 'VarelaRound',
                                     fontSize: 14),
                               ),
-                              Text(getStatusToko.toString(),
+                              Text(getIDToko.toString(),
                                   style: TextStyle(
                                       fontFamily: 'VarelaRound',
                                       fontSize: 14)),
                             ],
                           ),),
+
+
+
+                        Padding(padding: const EdgeInsets.only(top: 10,right: 25),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment
+                                .spaceBetween,
+                            children: [
+                              Text(
+                                "License Number",
+                                textAlign: TextAlign.left,
+                                style: TextStyle(
+                                    fontFamily: 'VarelaRound',
+                                    fontSize: 14),
+                              ),
+                              Text(getLicense.toString(),
+                                  style: TextStyle(
+                                      fontFamily: 'VarelaRound',
+                                      fontSize: 14,fontWeight: FontWeight.bold)),
+                            ],
+                          ),),
+
+                        Padding(padding: const EdgeInsets.only(top: 10,right: 25),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment
+                                .spaceBetween,
+                            children: [
+                              Text(
+                                "End Date",
+                                textAlign: TextAlign.left,
+                                style: TextStyle(
+                                    fontFamily: 'VarelaRound',
+                                    fontSize: 14),
+                              ),
+                              Text(getEndDate.toString(),
+                                  style: TextStyle(
+                                      fontFamily: 'VarelaRound',
+                                      fontSize: 14,fontWeight: FontWeight.bold)),
+                            ],
+                          ),),
+
+
+                        Padding(padding: const EdgeInsets.only(top: 10,right: 25),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment
+                                .spaceBetween,
+                            children: [
+                              Text(
+                                "Status",
+                                textAlign: TextAlign.left,
+                                style: TextStyle(
+                                    fontFamily: 'VarelaRound',
+                                    fontSize: 14),
+                              ),
+                              Container(
+                                height: 22,
+                                child : RaisedButton(
+                                  onPressed: (){},
+                                  color: HexColor("#00c160"),
+                                  elevation: 1,
+                                  shape: RoundedRectangleBorder(side: BorderSide(
+                                      color: Colors.black,
+                                      width: 0.1,
+                                      style: BorderStyle.solid
+                                  ),
+                                    borderRadius: BorderRadius.circular(50.0),
+                                  ),
+                                  child: Text(getStatusToko,style: TextStyle(
+                                      color: Colors.white, fontFamily: 'VarelaRound',fontSize: 13)),
+                                )
+                              )
+                            ],
+                          ),),
+
 
                       ],
                     ),),
@@ -298,12 +390,35 @@ class _LegalEntities extends State<LegalEntities> {
                     ),),
 
 
+
+
                   Padding(padding: const EdgeInsets.only(top: 20,left: 25,right: 25),
                     child: Column(
                       children: [
-                        Align(alignment: Alignment.centerLeft,child: Text("Legal Entities Saya",style: TextStyle(
-                            color: Colors.black, fontFamily: 'VarelaRound',fontSize: 16,
-                            fontWeight: FontWeight.bold)),),
+
+
+                        InkWell(
+                          child: ListTile(
+                            dense: true,
+                            minLeadingWidth: 20,
+                            horizontalTitleGap: 20,
+                            contentPadding: EdgeInsets.all(1),
+                            onTap: (){
+                              Navigator.push(context, ExitPage(page: RenewalHistory(widget.getEmail, widget.getLegalCode)));
+
+                            },//Navigator.push(context, ExitPage(page: SettingPPN(widget.getEmail, widget.getLegalCode)));},
+                            title: Text("Renewal History",style: TextStyle(
+                                color: Colors.black, fontFamily: 'VarelaRound',fontSize: 15,
+                                fontWeight: FontWeight.bold)),
+                            subtitle: Text("Lihat history pembayaran renewal kamu",style: TextStyle(
+                                color: Colors.black, fontFamily: 'VarelaRound',fontSize: 12)),
+                            trailing: FaIcon(FontAwesomeIcons.angleRight,color: HexColor("#594d75")),
+                          ),
+                        ),
+                        Padding(padding: const EdgeInsets.only(top: 5,left: 15),
+                          child: Divider(height: 3,),),
+
+
 
                         Padding(padding: const EdgeInsets.only(top: 10),
                             child: InkWell(
@@ -326,9 +441,7 @@ class _LegalEntities extends State<LegalEntities> {
                                           color: Colors.black, fontFamily: 'VarelaRound',fontSize: 14)),
                                     ),
                                   ),
-                                  trailing: Opacity(
-                                    opacity : 0.5,
-                                    child : FaIcon(FontAwesomeIcons.angleRight,color: HexColor(third_color),),
+                                  trailing: FaIcon(FontAwesomeIcons.angleRight,color: HexColor("#594d75"),
                                   )
                               ),
                             )

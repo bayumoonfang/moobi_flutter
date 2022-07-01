@@ -6,9 +6,11 @@ import 'dart:convert';
 import 'package:flushbar/flushbar.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:hexcolor/hexcolor.dart';
+import 'package:moobi_flutter/Helper/setting_apps.dart';
 import 'package:sizer/sizer.dart';
 import 'package:intl/intl.dart';
 import 'package:moobi_flutter/Helper/api_link.dart';
@@ -210,10 +212,12 @@ class _DetailOutlet extends State<DetailOutlet> {
 
 
   _prepare() async {
+    EasyLoading.show(status: easyloading_text);
     await _startingVariable();
     await _outletDetail();
     await _outletSalesTotal();
     await _outletSalesProduct();
+    EasyLoading.dismiss();
   }
 
 
@@ -555,8 +559,8 @@ class _DetailOutlet extends State<DetailOutlet> {
                                             title: Column(
                                               children: [
                                                 Align(alignment: Alignment.centerLeft,child:
-                                                Text("Daftar Produk "+snapshot.data[i]['b'].toString(), style: TextStyle(
-                                                  fontFamily: 'VarelaRound',fontSize: 15,)),),
+                                                Text("Daftar Produk "+snapshot.data[i]['b'].toString(), style: GoogleFonts.varela(fontSize: 16)
+                                                ),),
                                                 Padding(padding: const EdgeInsets.only(top: 5),
                                                   child:    Align(alignment: Alignment.centerLeft,child:
                                                   Text(snapshot.data[i]['c'].toString(),

@@ -3,6 +3,7 @@
 import 'package:flushbar/flushbar.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:hexcolor/hexcolor.dart';
 import 'package:moobi_flutter/Helper/api_link.dart';
@@ -11,6 +12,7 @@ import 'package:moobi_flutter/Helper/check_connection.dart';
 import 'package:moobi_flutter/Helper/color_based.dart';
 import 'package:moobi_flutter/Helper/page_route.dart';
 import 'package:moobi_flutter/Helper/session.dart';
+import 'package:moobi_flutter/Helper/setting_apps.dart';
 import 'package:moobi_flutter/Setting/page_settinghome.dart';
 import 'package:moobi_flutter/Setting/page_legalentites.dart';
 import 'package:moobi_flutter/page_login.dart';
@@ -76,6 +78,7 @@ class UbahKeteranganTokoState extends State<UbahKeteranganToko> {
         valKota.text = getCityToko.toString();
       });
     });
+    EasyLoading.dismiss();
   }
 
 
@@ -95,6 +98,7 @@ class UbahKeteranganTokoState extends State<UbahKeteranganToko> {
 
 
   _prepare() async {
+    EasyLoading.show(status: easyloading_text);
     await _startingVariable();
   }
 
@@ -229,7 +233,7 @@ class UbahKeteranganTokoState extends State<UbahKeteranganToko> {
                               hintText: 'Alamat...',
                               labelText: '',
                               floatingLabelBehavior: FloatingLabelBehavior.always,
-                              hintStyle: TextStyle(fontFamily: "VarelaRound", color: HexColor("#c4c4c4")),
+                              hintStyle: TextStyle(fontFamily: "VarelaRound", color: HexColor("#c4c4c4"), fontSize: 13),
                               enabledBorder: UnderlineInputBorder(
                                 borderSide: BorderSide(color: HexColor("#DDDDDD")),
                               ),
@@ -261,7 +265,7 @@ class UbahKeteranganTokoState extends State<UbahKeteranganToko> {
                               hintText: 'Website...',
                               labelText: '',
                               floatingLabelBehavior: FloatingLabelBehavior.always,
-                              hintStyle: TextStyle(fontFamily: "VarelaRound", color: HexColor("#c4c4c4")),
+                              hintStyle: TextStyle(fontFamily: "VarelaRound", color: HexColor("#c4c4c4"), fontSize: 13),
                               enabledBorder: UnderlineInputBorder(
                                 borderSide: BorderSide(color: HexColor("#DDDDDD")),
                               ),
@@ -290,7 +294,7 @@ class UbahKeteranganTokoState extends State<UbahKeteranganToko> {
                               hintText: 'Kota...',
                               labelText: '',
                               floatingLabelBehavior: FloatingLabelBehavior.always,
-                              hintStyle: TextStyle(fontFamily: "VarelaRound", color: HexColor("#c4c4c4")),
+                              hintStyle: TextStyle(fontFamily: "VarelaRound", color: HexColor("#c4c4c4"), fontSize: 13),
                               enabledBorder: UnderlineInputBorder(
                                 borderSide: BorderSide(color: HexColor("#DDDDDD")),
                               ),

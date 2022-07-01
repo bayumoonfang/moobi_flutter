@@ -103,7 +103,10 @@ class AppHelper {
       data["user_userno"].toString(),//14
       data["legal_code"].toString(),//15
       data["user_pict"].toString(),//16
-      data["legal_idcode"].toString()//17
+      data["legal_idcode"].toString(),//17
+      data["legal_license"].toString(),//18
+      data["legal_regdate"].toString(),//19
+      data["legal_enddate"].toString()//20
     ];
   }
 
